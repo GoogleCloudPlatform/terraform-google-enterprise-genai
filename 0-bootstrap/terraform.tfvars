@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-org_id = "REPLACE_ME" # format "000000000000"
+org_id = "852115299298" # format "000000000000"
 
-billing_account = "REPLACE_ME" # format "000000-000000-000000"
+billing_account = "01D4D8-3A48B0-4E879A" # format "000000-000000-000000"
 
 group_org_admins = "REPLACE_ME"
 
@@ -33,30 +33,30 @@ default_region = "us-central1"
 # the provided folder instead of the root organization.
 # The variable value is the numeric folder ID
 # The folder must already exist.
-# parent_folder = "01234567890"
+parent_folder = "207522952450"
 
 #  Optional - for enabling the automatic groups creation, uncoment the groups
 #  variable and update the values with the desired group names
-# groups = {
-#   create_groups = true,
-#   billing_project = "billing-project",
-#   required_groups = {
-    # group_org_admins           = "group_org_admins_local_test@example.com"
-    # group_billing_admins       = "group_billing_admins_local_test@example.com"
-    # billing_data_users         = "billing_data_users_local_test@example.com"
-    # audit_data_users           = "audit_data_users_local_test@example.com"
-    # monitoring_workspace_users = "monitoring_workspace_users_local_test@example.com"
-#   },
-#   optional_groups = {
-    # gcp_platform_viewer      = "gcp_platform_viewer_local_test@example.com"
-    # gcp_security_reviewer    = "gcp_security_reviewer_local_test@example.com"
-    # gcp_network_viewer       = "gcp_network_viewer_local_test@example.com"
-    # gcp_scc_admin            = "gcp_scc_admin_local_test@example.com"
-    # gcp_global_secrets_admin = "gcp_global_secrets_admin_local_test@example.com"
-    # gcp_audit_viewer         = "gcp_audit_viewer_local_test@example.com"
-#   }
-# }
-#
+groups = {
+  create_groups = true,
+  billing_project = "billing-project",
+  required_groups = {
+    group_org_admins           = "group_org_admins_ml_foundations_v1@example.com"
+    group_billing_admins       = "group_billing_admins_ml_foundations_v1@example.com"
+    billing_data_users         = "billing_data_users_ml_foundations_v1@example.com"
+    audit_data_users           = "audit_data_users_ml_foundations_v1@example.com"
+    monitoring_workspace_users = "monitoring_workspace_users_ml_foundations_v1@example.com"
+  },
+  optional_groups = {
+    gcp_platform_viewer      = "gcp_platform_viewer_ml_foundations_v1@example.com"
+    gcp_security_reviewer    = "gcp_security_reviewer_ml_foundations_v1@example.com"
+    gcp_network_viewer       = "gcp_network_viewer_ml_foundations_v1@example.com"
+    gcp_scc_admin            = "gcp_scc_admin_ml_foundations_v1@example.com"
+    gcp_global_secrets_admin = "gcp_global_secrets_admin_ml_foundations_v1@example.com"
+    gcp_audit_viewer         = "gcp_audit_viewer_ml_foundations_v1@example.com"
+  }
+}
+
 
 
 /* ----------------------------------------
