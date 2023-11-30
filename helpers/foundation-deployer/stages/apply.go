@@ -32,18 +32,19 @@ import (
 
 func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c CommonConf) error {
 	bootstrapTfvars := BootstrapTfvars{
-		OrgID:              tfvars.OrgID,
-		DefaultRegion:      tfvars.DefaultRegion,
-		BillingAccount:     tfvars.BillingAccount,
-		GroupOrgAdmins:     tfvars.GroupOrgAdmins,
-		GroupBillingAdmins: tfvars.GroupBillingAdmins,
-		OrgProjectCreators: tfvars.OrgProjectCreators,
-		ParentFolder:       tfvars.ParentFolder,
-		ProjectPrefix:      tfvars.ProjectPrefix,
-		FolderPrefix:       tfvars.FolderPrefix,
-		BucketForceDestroy: tfvars.BucketForceDestroy,
-		Groups:             tfvars.Groups,
-		InitialGroupConfig: tfvars.InitialGroupConfig,
+		OrgID:                        tfvars.OrgID,
+		DefaultRegion:                tfvars.DefaultRegion,
+		BillingAccount:               tfvars.BillingAccount,
+		GroupOrgAdmins:               tfvars.GroupOrgAdmins,
+		GroupBillingAdmins:           tfvars.GroupBillingAdmins,
+		OrgProjectCreators:           tfvars.OrgProjectCreators,
+		ParentFolder:                 tfvars.ParentFolder,
+		ProjectPrefix:                tfvars.ProjectPrefix,
+		FolderPrefix:                 tfvars.FolderPrefix,
+		BucketForceDestroy:           tfvars.BucketForceDestroy,
+		BucketTfstateKmsForceDestroy: tfvars.BucketTfstateKmsForceDestroy,
+		Groups:                       tfvars.Groups,
+		InitialGroupConfig:           tfvars.InitialGroupConfig,
 	}
 
 	err := utils.WriteTfvars(filepath.Join(c.FoundationPath, BootstrapStep, "terraform.tfvars"), bootstrapTfvars)
@@ -202,6 +203,7 @@ func DeployOrgStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs Bo
 		EnableHubAndSpoke:                     tfvars.EnableHubAndSpoke,
 		CreateACMAPolicy:                      createACMAPolicy,
 		CreateUniqueTagKey:                    tfvars.CreateUniqueTagKey,
+		CaiMonitoringKmsForceDestroy:          tfvars.CaiMonitoringKmsForceDestroy,
 		AuditLogsTableDeleteContentsOnDestroy: tfvars.AuditLogsTableDeleteContentsOnDestroy,
 		LogExportStorageForceDestroy:          tfvars.LogExportStorageForceDestroy,
 		LogExportStorageLocation:              tfvars.LogExportStorageLocation,

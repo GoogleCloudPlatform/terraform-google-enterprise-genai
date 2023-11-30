@@ -56,25 +56,34 @@ Usage instructions are available in the 0-bootstrap [README](./0-bootstrap/READM
 
 ### [1. org](./1-org/)
 
-The purpose of this stage is to set up the common folder used to house projects that contain shared resources such as DNS Hub, Interconnect, Security Command Center notification, org level secrets, network hub and org level logging.
+The purpose of this stage is to set up the common folder used to house projects that contain shared resources such as Security Command Center notification, Cloud Key Management Service (KMS), org level secrets, and org level logging.
+This stage also sets up the network folder used to house network related projects such as DNS Hub, Interconnect, network hub, and base and restricted projects for each environment  (`development`, `non-production` or `production`).
 This will create the following folder and project structure:
 
 ```
 example-organization
 └── fldr-common
     ├── prj-c-logging
-    ├── prj-c-base-net-hub
     ├── prj-c-billing-logs
+    ├── prj-c-scc
+    ├── prj-c-kms
+    └── prj-c-secrets
+└── fldr-network
+    ├── prj-c-base-net-hub
     ├── prj-c-dns-hub
     ├── prj-c-interconnect
     ├── prj-c-restricted-net-hub
-    ├── prj-c-scc
-    └── prj-c-secrets
+    ├── prj-d-shared-base
+    ├── prj-d-shared-restricted
+    ├── prj-n-shared-base
+    ├── prj-n-shared-restricted
+    ├── prj-p-shared-base
+    └── prj-p-shared-restricted
 ```
 
 #### Logs
 
-Among the eight projects created under the common folder, two projects (`prj-c-logging`, `prj-c-billing-logs`) are used for logging.
+Among the four projects created under the common folder, two projects (`prj-c-logging`, `prj-c-billing-logs`) are used for logging.
 The first one is for organization-wide audit logs, and the second one is for billing logs.
 In both cases, the logs are collected into BigQuery datasets which you can then use for general querying, dashboarding, and reporting. Logs are also exported to Pub/Sub, a Cloud Storage bucket, and a log bucket.
 
@@ -84,19 +93,17 @@ In both cases, the logs are collected into BigQuery datasets which you can then 
 - The various audit log types being captured in BigQuery are retained for 30 days.
 - For billing data, a BigQuery dataset is created with permissions attached, however you will need to configure a billing export [manually](https://cloud.google.com/billing/docs/how-to/export-data-bigquery), as there is no easy way to automate this at the moment.
 
-#### DNS hub
-
-Another project created under the common folder. This project will host the DNS hub for the organization.
-
-#### Interconnect
-
-Another project created under the common folder. This project will host the Dedicated Interconnect [Interconnect connection](https://cloud.google.com/network-connectivity/docs/interconnect/concepts/terminology#elements) for the organization. In case of Partner Interconnect, this project is unused and the [VLAN attachments](https://cloud.google.com/network-connectivity/docs/interconnect/concepts/terminology#for-partner-interconnect) will be placed directly into the corresponding hub projects.
-
 #### Security Command Center notification
 
 Another project created under the common folder. This project will host the Security Command Center notification resources at the organization level.
 This project will contain a Pub/Sub topic, a Pub/Sub subscription, and a [Security Command Center notification](https://cloud.google.com/security-command-center/docs/how-to-notifications) configured to send all new findings to the created topic.
 You can adjust the filter when deploying this step.
+
+#### KMS
+
+Another project created under the common folder. This project is allocated for [Cloud Key Management](https://cloud.google.com/security-key-management) for KMS resources shared by the organization.
+
+Usage instructions are available for the org step in the [README](./1-org/README.md).
 
 #### Secrets
 
@@ -104,28 +111,38 @@ Another project created under the common folder. This project is allocated for [
 
 Usage instructions are available for the org step in the [README](./1-org/README.md).
 
+#### DNS hub
+
+This project is created under the network folder. This project will host the DNS hub for the organization.
+
+#### Interconnect
+
+Another project created under the network folder. This project will host the Dedicated Interconnect [Interconnect connection](https://cloud.google.com/network-connectivity/docs/interconnect/concepts/terminology#elements) for the organization. In case of Partner Interconnect, this project is unused and the [VLAN attachments](https://cloud.google.com/network-connectivity/docs/interconnect/concepts/terminology#for-partner-interconnect) will be placed directly into the corresponding hub projects.
+
+#### Networking
+
+Under the network folder, two projects, one for base and another for restricted network, are created per environment (`development`, `non-production`, and `production`) which is intended to be used as a [Shared VPC host project](https://cloud.google.com/vpc/docs/shared-vpc) for all projects in that environment.
+This stage only creates the projects and enables the correct APIs, the following networks stages, [3-networks-dual-svpc](./3-networks-dual-svpc/) and [3-networks-hub-and-spoke](./3-networks-hub-and-spoke/), create the actual Shared VPC networks.
+
 ### [2. environments](./2-environments/)
 
-The purpose of this stage is to set up the environments folders used for projects that contain monitoring, secrets, and networking projects.
+The purpose of this stage is to set up the environments folders used for projects that contain monitoring and secrets projects.
 This will create the following folder and project structure:
 
 ```
 example-organization
 └── fldr-development
     ├── prj-d-monitoring
-    ├── prj-d-secrets
-    ├── prj-d-shared-base
-    └── prj-d-shared-restricted
+    ├── prj-d-kms
+    └── prj-d-secrets
 └── fldr-non-production
     ├── prj-n-monitoring
-    ├── prj-n-secrets
-    ├── prj-n-shared-base
-    └── prj-n-shared-restricted
+    ├── prj-n-kms
+    └── prj-n-secrets
 └── fldr-production
     ├── prj-p-monitoring
-    ├── prj-p-secrets
-    ├── prj-p-shared-base
-    └── prj-p-shared-restricted
+    ├── prj-p-kms
+    └── prj-p-secrets
 ```
 
 #### Monitoring
@@ -134,10 +151,11 @@ Under the environment folder, a project is created per environment (`development
 Please note that creating the [workspace and linking projects](https://cloud.google.com/monitoring/workspaces/create) can currently only be completed through the Cloud Console.
 If you have strong IAM requirements for these monitoring workspaces, it is worth considering creating these at a more granular level, such as per business unit or per application.
 
-#### Networking
+#### KMS
 
-Under the environment folder, two projects, one for base and another for restricted network, are created per environment (`development`, `non-production`, and `production`) which is intended to be used as a [Shared VPC host project](https://cloud.google.com/vpc/docs/shared-vpc) for all projects in that environment.
-This stage only creates the projects and enables the correct APIs, the following networks stages, [3-networks-dual-svpc](./3-networks-dual-svpc/) and [3-networks-hub-and-spoke](./3-networks-hub-and-spoke/), create the actual Shared VPC networks.
+Under the environment folder, a project is created per environment (`development`, `non-production`, and `production`), which is intended to be used by [Cloud Key Management](https://cloud.google.com/security-key-management) for KMS resources shared by the environment.
+
+Usage instructions are available for the environments step in the [README](./2-environments/README.md).
 
 #### Secrets
 
@@ -176,38 +194,44 @@ Running this code as-is should generate a structure as shown below:
 ```
 example-organization/
 └── fldr-development
-    ├── prj-bu1-d-env-secrets
-    ├── prj-bu1-d-sample-floating
-    ├── prj-bu1-d-sample-base
-    ├── prj-bu1-d-sample-restrict
-    ├── prj-bu1-d-sample-peering
-    ├── prj-bu2-d-env-secrets
-    ├── prj-bu2-d-sample-floating
-    ├── prj-bu2-d-sample-base
-    ├── prj-bu2-d-sample-restrict
-    └── prj-bu2-d-sample-peering
+    └── fldr-bu1-development
+        ├── prj-d-env-bu1kms
+        ├── prj-d-bu1sample-floating
+        ├── prj-d-bu1sample-base
+        ├── prj-d-bu1sample-restrict
+        ├── prj-d-bu1sample-peering
+    └── fldr-bu2-development
+        ├── prj-d-env-bu2kms
+        ├── prj-d-sample-bu2floating
+        ├── prj-d-sample-bu2base
+        ├── prj-d-sample-bu2restrict
+        └── prj-d-sample-bu2peering
 └── fldr-non-production
-    ├── prj-bu1-n-env-secrets
-    ├── prj-bu1-n-sample-floating
-    ├── prj-bu1-n-sample-base
-    ├── prj-bu1-n-sample-restrict
-    ├── prj-bu1-n-sample-peering
-    ├── prj-bu2-n-env-secrets
-    ├── prj-bu2-n-sample-floating
-    ├── prj-bu2-n-sample-base
-    ├── prj-bu2-n-sample-restrict
-    └── prj-bu2-n-sample-peering
+    └── fldr-bu1-non-production
+        ├── prj-n-env-bu1kms
+        ├── prj-n-bu1sample-floating
+        ├── prj-n-bu1sample-base
+        ├── prj-n-bu1sample-restrict
+        ├── prj-n-bu1sample-peering
+    └── fldr-bu2-non-production
+        ├── prj-n-env-bu2kms
+        ├── prj-n-sample-bu2floating
+        ├── prj-n-sample-bu2base
+        ├── prj-n-sample-bu2restrict
+        └── prj-n-sample-bu2peering
 └── fldr-production
-    ├── prj-bu1-p-env-secrets
-    ├── prj-bu1-p-sample-floating
-    ├── prj-bu1-p-sample-base
-    ├── prj-bu1-p-sample-restrict
-    ├── prj-bu1-p-sample-peering
-    ├── prj-bu2-p-env-secrets
-    ├── prj-bu2-p-sample-floating
-    ├── prj-bu2-p-sample-base
-    ├── prj-bu2-p-sample-restrict
-    └── prj-bu2-p-sample-peering
+    └── fldr-bu1-production
+        ├── prj-p-env-bu1kms
+        ├── prj-p-bu1sample-floating
+        ├── prj-p-bu1sample-base
+        ├── prj-p-bu1sample-restrict
+        ├── prj-p-bu1sample-peering
+    └── fldr-bu2-production
+        ├── prj-p-env-bu2kms
+        ├── prj-p-sample-bu2floating
+        ├── prj-p-sample-bu2base
+        ├── prj-p-sample-bu2restrict
+        └── prj-p-sample-bu2peering
 └── fldr-common
     ├── prj-bu1-c-infra-pipeline
     └── prj-bu2-c-infra-pipeline
@@ -233,60 +257,73 @@ After all steps above have been executed, your Google Cloud organization should 
 example-organization
 └── fldr-common
     ├── prj-c-logging
-    ├── prj-c-base-net-hub
     ├── prj-c-billing-logs
-    ├── prj-c-dns-hub
-    ├── prj-c-interconnect
-    ├── prj-c-restricted-net-hub
     ├── prj-c-scc
     ├── prj-c-secrets
     ├── prj-bu1-c-infra-pipeline
     └── prj-bu2-c-infra-pipeline
+└── fldr-network
+    ├── prj-c-base-net-hub
+    ├── prj-c-dns-hub
+    ├── prj-c-interconnect
+    ├── prj-c-restricted-net-hub
+    ├── prj-d-shared-base
+    ├── prj-d-shared-restricted
+    ├── prj-n-shared-base
+    ├── prj-n-shared-restricted
+    ├── prj-p-shared-base
+    └── prj-p-shared-restricted
 └── fldr-development
-    ├── prj-bu1-d-env-secrets
-    ├── prj-bu1-d-sample-floating
-    ├── prj-bu1-d-sample-base
-    ├── prj-bu1-d-sample-restrict
-    ├── prj-bu1-d-sample-peering
-    ├── prj-bu2-d-env-secrets
-    ├── prj-bu2-d-sample-floating
-    ├── prj-bu2-d-sample-base
-    ├── prj-bu2-d-sample-restrict
-    ├── prj-bu2-d-sample-peering
     ├── prj-d-monitoring
     ├── prj-d-secrets
     ├── prj-d-shared-base
     └── prj-d-shared-restricted
+    └── fldr-bu1-development
+        ├── prj-d-env-bu1kms
+        ├── prj-d-bu1sample-floating
+        ├── prj-d-bu1sample-base
+        ├── prj-d-bu1sample-restrict
+        ├── prj-d-bu1sample-peering
+    └── fldr-bu2-development
+        ├── prj-d-env-bu2kms
+        ├── prj-d-sample-bu2floating
+        ├── prj-d-sample-bu2base
+        ├── prj-d-sample-bu2restrict
+        └── prj-d-sample-bu2peering
 └── fldr-non-production
-    ├── prj-bu1-n-env-secrets
-    ├── prj-bu1-n-sample-floating
-    ├── prj-bu1-n-sample-base
-    ├── prj-bu1-n-sample-restrict
-    ├── prj-bu1-n-sample-peering
-    ├── prj-bu2-n-env-secrets
-    ├── prj-bu2-n-sample-floating
-    ├── prj-bu2-n-sample-base
-    ├── prj-bu2-n-sample-restrict
-    ├── prj-bu2-n-sample-peering
     ├── prj-n-monitoring
     ├── prj-n-secrets
     ├── prj-n-shared-base
     └── prj-n-shared-restricted
+    └── fldr-bu1-non-production
+        ├── prj-n-env-bu1kms
+        ├── prj-n-bu1sample-floating
+        ├── prj-n-bu1sample-base
+        ├── prj-n-bu1sample-restrict
+        ├── prj-n-bu1sample-peering
+    └── fldr-bu2-non-production
+        ├── prj-n-env-bu2kms
+        ├── prj-n-sample-bu2floating
+        ├── prj-n-sample-bu2base
+        ├── prj-n-sample-bu2restrict
+        └── prj-n-sample-bu2peering
 └── fldr-production
-    ├── prj-bu1-p-env-secrets
-    ├── prj-bu1-p-sample-floating
-    ├── prj-bu1-p-sample-base
-    ├── prj-bu1-p-sample-restrict
-    ├── prj-bu1-p-sample-peering
-    ├── prj-bu2-p-env-secrets
-    ├── prj-bu2-p-sample-floating
-    ├── prj-bu2-p-sample-base
-    ├── prj-bu2-p-sample-restrict
-    ├── prj-bu2-p-sample-peering
     ├── prj-p-monitoring
     ├── prj-p-secrets
     ├── prj-p-shared-base
     └── prj-p-shared-restricted
+    └── fldr-bu1-production
+        ├── prj-p-env-bu1kms
+        ├── prj-p-bu1sample-floating
+        ├── prj-p-bu1sample-base
+        ├── prj-p-bu1sample-restrict
+        ├── prj-p-bu1sample-peering
+    └── fldr-bu2-production
+        ├── prj-p-env-bu2kms
+        ├── prj-p-sample-bu2floating
+        ├── prj-p-sample-bu2base
+        ├── prj-p-sample-bu2restrict
+        └── prj-p-sample-bu2peering
 └── fldr-bootstrap
     ├── prj-b-cicd
     └── prj-b-seed
@@ -300,7 +337,7 @@ Development happens on feature and bug fix branches (which can be named `feature
 
 After validated in `development`, changes can be promoted to `non-production` by opening a PR or MR targeting the `non-production` branch and merging them. Similarly, changes can be promoted from `non-production` to `production`.
 
-### Terraform-validator
+### Policy validation
 
 This repo uses the [terraform-tools](https://cloud.google.com/docs/terraform/policy-validation/validate-policies) component of the `gcloud` CLI to validate the Terraform plans against a [library of Google Cloud policies](https://github.com/GoogleCloudPlatform/policy-library).
 

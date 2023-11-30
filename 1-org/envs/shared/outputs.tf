@@ -39,9 +39,14 @@ output "common_folder_name" {
   description = "The common folder name"
 }
 
+output "network_folder_name" {
+  value       = google_folder.network.name
+  description = "The network folder name."
+}
+
 output "org_audit_logs_project_id" {
   value       = module.org_audit_logs.project_id
-  description = "The org audit logs project ID"
+  description = "The org audit logs project ID."
 }
 
 output "org_billing_logs_project_id" {
@@ -52,6 +57,11 @@ output "org_billing_logs_project_id" {
 output "org_secrets_project_id" {
   value       = module.org_secrets.project_id
   description = "The org secrets project ID"
+}
+
+output "org_kms_project_id" {
+  value       = module.org_kms.project_id
+  description = "The org Cloud Key Management Service (KMS) project ID"
 }
 
 output "interconnect_project_id" {
@@ -106,15 +116,40 @@ output "logs_export_storage_bucket_name" {
 
 output "logs_export_logbucket_name" {
   value       = module.logs_export.logbucket_destination_name
-  description = "The log bucket for destination of log exports. See https://cloud.google.com/logging/docs/routing/overview#buckets"
+  description = "The log bucket for destination of log exports. See https://cloud.google.com/logging/docs/routing/overview#buckets ."
 }
 
-output "logs_export_bigquery_dataset_name" {
-  value       = module.logs_export.bigquery_destination_name
-  description = "The log bucket for destination of log exports. See https://cloud.google.com/logging/docs/routing/overview#buckets"
+output "logs_export_logbucket_linked_dataset_name" {
+  value       = module.logs_export.logbucket_linked_dataset_name
+  description = "The resource name of the Log Bucket linked BigQuery dataset created for Log Analytics. See https://cloud.google.com/logging/docs/log-analytics ."
 }
 
 output "tags" {
   value       = local.tags_output
-  description = "Tag Values to be applied on next steps"
+  description = "Tag Values to be applied on next steps."
+}
+
+output "shared_vpc_projects" {
+  value       = { for k, v in module.base_restricted_environment_network : k => v }
+  description = "Base and restricted shared VPC Projects info grouped by environment (development, non-production, production)."
+}
+
+output "cai_monitoring_artifact_registry" {
+  value       = module.cai_monitoring.artifact_registry_name
+  description = "CAI Monitoring Cloud Function Artifact Registry name."
+}
+
+output "cai_monitoring_asset_feed" {
+  value       = module.cai_monitoring.asset_feed_name
+  description = "CAI Monitoring Cloud Function Organization Asset Feed name."
+}
+
+output "cai_monitoring_bucket" {
+  value       = module.cai_monitoring.bucket_name
+  description = "CAI Monitoring Cloud Function Source Bucket name."
+}
+
+output "cai_monitoring_topic" {
+  value       = module.cai_monitoring.topic_name
+  description = "CAI Monitoring Cloud Function Pub/Sub Topic name."
 }

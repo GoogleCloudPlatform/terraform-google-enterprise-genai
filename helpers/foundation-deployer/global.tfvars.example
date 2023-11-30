@@ -39,9 +39,11 @@ group_org_admins     = "REPLACE_ME" # "gcp-organization-admins@example.com"
 group_billing_admins = "REPLACE_ME" # "gcp-billing-admins@example.com"
 org_project_creators = []
 
-bucket_force_destroy = false
-project_prefix       = "prj"
-folder_prefix        = "fldr"
+bucket_force_destroy             = false
+bucket_tfstate_kms_force_destroy = false
+
+project_prefix = "prj"
+folder_prefix  = "fldr"
 
 // Optional - for an organization with existing projects or for development/validation.
 // Uncomment this variable to place all the example foundation resources under
@@ -92,6 +94,7 @@ domains_to_allow                    = ["example.com"] # Must include the domain 
 essential_contacts_domains_to_allow = ["@example.com"]
 
 scc_notification_name                       = "scc-notify"
+cai_monitoring_kms_force_destroy            = false
 audit_logs_table_delete_contents_on_destroy = false
 log_export_storage_force_destroy            = false
 log_export_storage_location                 = "US"
