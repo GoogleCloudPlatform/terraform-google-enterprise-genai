@@ -65,7 +65,7 @@ module "restrict_tls_versions" {
   policy_for        = local.policy_for
   policy_type       = "list"
   enforce           = "false"
-  allow_list_length = 2
+  allow_list_length = length(local.allowed_tls_versions)
   allow             = [local.allowed_tls_versions]
   constraint        = "constraints/gcp.restrictTLSVersion"
 }
@@ -157,7 +157,7 @@ module "vertexai_workbench_access_mode" {
   policy_for        = local.policy_for
   policy_type       = "list"
   enforce           = "false"
-  allow_list_length = 1
+  allow_list_length = length(local.allowed_vertex_access_modes)
   allow             = [local.allowed_vertex_access_modes]
   constraint        = "constraints/ainotebooks.accessMode"
 }
