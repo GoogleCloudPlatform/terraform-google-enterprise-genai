@@ -135,6 +135,12 @@ func TestOrg(t *testing.T) {
 
 			// boolean organization policies
 			for _, booleanConstraint := range []string{
+				"constraints/ainotebooks.disableFileDownloads",
+				"constraints/ainotebooks.disableRootAccess",
+				"constraints/ainotebooks.disableTerminal",
+				"constraints/ainotebooks.restrictPublicIp",
+				"constraints/ainotebooks.requireAutoUpgradeSchedule",
+				"constraints/cloudfunctions.requireVPCConnector"
 				"constraints/compute.disableNestedVirtualization",
 				"constraints/compute.disableSerialPortAccess",
 				"constraints/compute.disableGuestAttributesAccess",
@@ -157,6 +163,33 @@ func TestOrg(t *testing.T) {
 
 			vmExternalIpAccess := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/compute.vmExternalIpAccess", parentFolder)
 			assert.Equal("DENY", vmExternalIpAccess.Get("listPolicy.allValues").String(), "org policy should deny all external IP access")
+
+			allowedIntegrations := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/cloudbuild.allowedIntegrations", parentFolder)
+			assert.Equal(1, len(allowedIntegrations.Get("listPolicy.allowedValues").Array()), "cloud build integrations should be restricted")
+
+			restrictTLS := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.restrictTLSVersion", parentFolder)
+			assert.Equal(1, len(restrictTLS.Get("listPolicy.allowedValues").Array()), "cloud build integrations should be restricted")
+
+			restrictCMEK := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.restrictCmekCryptoKeyProjects", parentFolder)
+			assert.Equal(1, len(restrictCMEK.Get("listPolicy.allowedValues").Array()), "restrict where cmek can be used from")
+
+			restrictServiceUsage := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.restrictServiceUsage", parentFolder)
+			assert.Equal(1, len(restrictServiceUsage.Get("listPolicy.allowedValues").Array()), "restricted services should be enforced")
+
+			restrictLocations := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.resourceLocations", parentFolder)
+			assert.Equal(1, len(restrictLocations.Get("listPolicy.allowedValues").Array()), "restricted locations should be enforced")
+
+			vmIpForward := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.vmCanIpForward", parentFolder)
+			assert.Equal(1, len(vmIpForward.Get("listPolicy.allowedValues").Array()), "restrict vm IP forwarding")
+
+			restrictVertexNotebookVPCNetworks := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/ainotebooks.restrictVpcNetworks", parentFolder)
+			assert.Equal(1, len(restrictVertexNotebookVPCNetworks.Get("listPolicy.allowedValues").Array()), "vertex notebook vpc networks should be restricted")
+
+			vertexWorkbenchAccessMode := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/ainotebooks.accessMode", parentFolder)
+			assert.Equal(1, len(vertexWorkbenchAccessMode.Get("listPolicy.allowedValues").Array()), "vertex workbench access mode should be restricted")
+
+			vertexAiAllowedImages := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/ainotebooks.environmentOptions", parentFolder)
+			assert.Equal(1, len(vertexAiAllowedImage.Get("listPolicy.allowedValues").Array()), "vertex allowed images should be restricted") 
 
 			// compute.requireOsLogin is neither a boolean policy nor a list policy
 			requireOsLogin := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/compute.requireOsLogin", parentFolder)
