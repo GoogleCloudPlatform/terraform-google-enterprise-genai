@@ -8,6 +8,7 @@
 | location\_kms | Case-Sensitive Location for KMS Keyring (Should be same region as the GCS Bucket) | `string` | `"us"` | no |
 | peering\_module\_depends\_on | List of modules or resources peering module depends on. | `list(any)` | `[]` | no |
 | remote\_state\_bucket | Backend bucket to load Terraform Remote State Data from previous steps. | `string` | n/a | yes |
+| tfc\_org\_name | Name of the TFC organization | `string` | `""` | no |
 
 ## Outputs
 
@@ -18,7 +19,7 @@
 | base\_shared\_vpc\_project\_sa | Project sample base project SA. |
 | base\_subnets\_self\_links | The self-links of subnets from base environment. |
 | bucket | The created storage bucket. |
-| env\_secrets\_project | Project sample peering project id. |
+| env\_kms\_project | Project sample for KMS usage project ID. |
 | floating\_project | Project sample floating project. |
 | iap\_firewall\_tags | The security tags created for IAP (SSH and RDP) firewall rules and to be used on the VM created on step 5-app-infra on the peering network project. |
 | keyring | The name of the keyring. |

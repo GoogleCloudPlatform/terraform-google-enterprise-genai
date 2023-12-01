@@ -47,6 +47,8 @@ locals {
       "roles/essentialcontacts.admin",
       "roles/resourcemanager.tagAdmin",
       "roles/resourcemanager.tagUser",
+      "roles/cloudasset.owner",
+      "roles/securitycenter.sourcesEditor",
     ], local.common_roles)),
     "env" = distinct(concat([
       "roles/resourcemanager.tagUser",
@@ -82,8 +84,7 @@ locals {
       "roles/dns.admin",
     ],
     "proj" = [
-      "roles/resourcemanager.folderViewer",
-      "roles/resourcemanager.folderIamAdmin",
+      "roles/resourcemanager.folderAdmin",
       "roles/artifactregistry.admin",
       "roles/compute.networkAdmin",
       "roles/compute.xpnAdmin",
@@ -96,6 +97,7 @@ locals {
       "roles/storage.admin",
       "roles/iam.serviceAccountAdmin",
       "roles/resourcemanager.projectDeleter",
+      "roles/cloudkms.admin",
     ],
     "org" = [
       "roles/storage.objectAdmin",

@@ -24,25 +24,16 @@ output "monitoring_project_id" {
   value       = module.monitoring_project.project_id
 }
 
-output "base_shared_vpc_project_id" {
-  description = "Project for base shared VPC network."
-  value       = module.base_shared_vpc_host_project.project_id
-}
-
-output "restricted_shared_vpc_project_id" {
-  description = "Project for restricted shared VPC network."
-  value       = module.restricted_shared_vpc_host_project.project_id
-}
-
-output "restricted_shared_vpc_project_number" {
-  description = "Project number for restricted shared VPC."
-  value       = module.restricted_shared_vpc_host_project.project_number
-}
-
 output "env_secrets_project_id" {
   description = "Project for environment secrets."
   value       = module.env_secrets.project_id
 }
+
+output "env_kms_project_id" {
+  description = "Project for environment Cloud Key Management Service (KMS)."
+  value       = module.env_kms.project_id
+}
+
 
 output "assured_workload_id" {
   description = "Assured Workload ID."

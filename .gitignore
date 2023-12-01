@@ -1,20 +1,47 @@
+# OSX leaves these everywhere on SMB shares
+._*
+
+# OSX trash
+.DS_Store
+
+# Python
+*.pyc
+
+# Emacs save files
+*~
+\#*\#
+.\#*
+
+# Vim-related files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+
+### https://raw.github.com/github/gitignore/90f149de451a5433aebd94d02d11b0e28843a1af/Terraform.gitignore
+
 # Local .terraform directories
-**/.terraform/*
+**/.terraform*
 
 # .tfstate files
 *.tfstate
 *.tfstate.*
 
+# Local tfvars terraform.tfvars
+**/*.tfvars
+
+# tf lock file
+**/.terraform.lock.hcl
+
 # Crash log files
 crash.log
-crash.*.log
 
-# Exclude all .tfvars files, which are likely to contain sensitive data, such as
-# password, private keys, and other secrets. These should not be part of version 
-# control as they are data points which are potentially sensitive and subject 
-# to change depending on the environment.
-*.tfvars
-*.tfvars.json
+# Ignore any .tfvars files that are generated automatically for each Terraform run. Most
+# .tfvars files are managed as part of configuration and so should be included in
+# version control.
+#
+# example.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
@@ -22,13 +49,28 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+.idea/
+.vscode/
+# Kitchen files
+**/inspec.lock
+**.gem
+**/.kitchen
+**/.kitchen.local.yml
+**/Gemfile.lock
+# Plan files
+**/tmp_plan
+**/.tmp
+**/tmp
 
-# Include override files you do wish to add to version control using negated pattern
-# !example_override.tf
+test/fixtures/shared/terraform.tfvars
 
-# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
-# example: *tfplan*
+test/integration/gcloud/config.sh
+test/integration/tmp
 
-# Ignore CLI configuration files
-.terraformrc
-terraform.rc
+credentials.json
+
+helpers/foundation-deployer/foundation-deployer
+helpers/foundation-deployer/.steps.json
+
+# File to populate env vars used by Docker test runs
+.envrc
