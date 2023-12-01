@@ -22,6 +22,7 @@ locals {
   restricted_services = []
   restricted_locations = []
   virtual_machines = []
+  allowed_vertex_images = []
 }
 
 module "ml_organization_policies_type_boolean" {
