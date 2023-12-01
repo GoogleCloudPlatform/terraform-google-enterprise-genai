@@ -3,11 +3,6 @@ locals {
   folder_id       = local.parent_folder != "" ? local.parent_folder : null
   policy_for      = local.parent_folder != "" ? "folder" : "organization"
 
-  essential_contacts_domains_to_allow = concat(
-    [for domain in var.essential_contacts_domains_to_allow : domain if can(regex("^@.*$", domain)) == true],
-    [for domain in var.essential_contacts_domains_to_allow : "@${domain}" if can(regex("^@.*$", domain)) == false]
-  )
-
   boolean_type_organization_policies = toset([
     "ainotebooks.disableFileDownloads",
     "ainotebooks.disableRootAccess",
@@ -18,11 +13,12 @@ locals {
   ])
 
   private_pools = [local.cloud_build_private_worker_pool_id]
-
   restricted_services = []
   restricted_locations = []
-  virtual_machines = []
+  allowed_integrations = ["github.com"]
+  allowed_tls_versions = ["TLS_VERSION_1.1", "TLS_VERSION_1.2"]
   allowed_vertex_images = []
+  allowed_vertex_access_modes = ["single-user", "service-account"]
 }
 
 module "ml_organization_policies_type_boolean" {
@@ -53,7 +49,7 @@ module "allowed_integrations" {
   policy_type       = "list"
   enforce           = "false"
   allow_list_length = 1
-  allow             = ["github.com"]
+  allow             = [local.allowed_integrations]
   constraint        = "constraints/cloudbuild.allowedIntegrations"
 }
 
@@ -71,7 +67,7 @@ module "restrict_tls_versions" {
   policy_type       = "list"
   enforce           = "false"
   allow_list_length = 2
-  allow             = ["TLS_VERSION_1.1", "TLS_VERSION_1.2"]
+  allow             = [local.allowed_tls_versions]
   constraint        = "constraints/gcp.restrictTLSVersion"
 }
 
@@ -163,7 +159,7 @@ module "vertexai_workbench_access_mode" {
   policy_type       = "list"
   enforce           = "false"
   allow_list_length = 1
-  allow             = ["single-user", "service-account"]
+  allow             = [local.allowed_vertex_access_modes]
   constraint        = "constraints/ainotebooks.accessMode"
 }
 
