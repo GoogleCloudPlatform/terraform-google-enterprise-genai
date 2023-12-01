@@ -38,7 +38,6 @@ module "ml_organization_policies_type_boolean" {
   Cloud build
 *******************************************/
 
-
 module "allowed_integrations" {
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 5.1"
