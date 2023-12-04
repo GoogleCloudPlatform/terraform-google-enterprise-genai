@@ -16,11 +16,8 @@
 
 
 locals {
-  organization_id = local.parent_folder != "" ? null : local.org_id
-  folder_id       = local.parent_folder != "" ? local.parent_folder : null
-  policy_for      = local.parent_folder != "" ? "folder" : "organization"
 
-  boolean_type_organization_policies = toset([
+  ml_boolean_type_organization_policies = toset([
     "ainotebooks.disableFileDownloads", #NIST 800-53 AC-3 AC-17 AC-20
     "ainotebooks.disableRootAccess", #NIST 800-53 AC-3 AC-17 AC-20
     "ainotebooks.disableTerminal", #NIST 800-53 AC-3 AC-17 AC-20
