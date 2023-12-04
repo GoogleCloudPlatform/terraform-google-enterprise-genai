@@ -37,7 +37,7 @@ locals {
 module "ml_organization_policies_type_boolean" {
   source   = "terraform-google-modules/org-policy/google"
   version  = "~> 5.1"
-  for_each = local.boolean_type_organization_policies
+  for_each = local.ml_boolean_type_organization_policies
 
   organization_id = local.organization_id
   folder_id       = local.folder_id
