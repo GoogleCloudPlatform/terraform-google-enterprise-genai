@@ -17,6 +17,6 @@
 terraform {
   backend "gcs" {
     bucket = "bkt-prj-b-seed-tfstate-ef26"
-    prefix = "terraform/environments/development"
+    prefix = "terraform/bootstrap/state"
   }
 }
