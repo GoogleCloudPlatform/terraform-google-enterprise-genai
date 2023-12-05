@@ -18,20 +18,21 @@
 locals {
 
   ml_boolean_type_organization_policies = toset([
-    "ainotebooks.disableFileDownloads", #NIST 800-53 AC-3 AC-17 AC-20
-    "ainotebooks.disableRootAccess", #NIST 800-53 AC-3 AC-17 AC-20
-    "ainotebooks.disableTerminal", #NIST 800-53 AC-3 AC-17 AC-20
-    "ainotebooks.restrictPublicIp", #NIST 800-53 AC-3 AC-17 AC-20
+    "ainotebooks.disableFileDownloads",       #NIST 800-53 AC-3 AC-17 AC-20
+    "ainotebooks.disableRootAccess",          #NIST 800-53 AC-3 AC-17 AC-20
+    "ainotebooks.disableTerminal",            #NIST 800-53 AC-3 AC-17 AC-20
+    "ainotebooks.restrictPublicIp",           #NIST 800-53 AC-3 AC-17 AC-20
     "ainotebooks.requireAutoUpgradeSchedule", #NIST 800-53 AC-3 AC-17 AC-20
-    "cloudfunctions.requireVPCConnector" #NIST 800-53 SC-7 SC-8
+    "cloudfunctions.requireVPCConnector"      #NIST 800-53 SC-7 SC-8
   ])
 
-  restricted_services = [""]
-  restricted_locations = [""]
-  allowed_integrations = ["github.com"]
-  allowed_tls_versions = ["TLS_VERSION_1.1", "TLS_VERSION_1.2"]
-  allowed_vertex_images = ["*"]
+  restricted_services         = [""]
+  allowed_locations           = ["us-locations"]
+  allowed_integrations        = ["github.com", "source.developers.google.com"]
+  restricted_tls_versions     = ["TLS_VERSION_1"]
+  allowed_vertex_images       = ["ainotebooks-container/gcr.io/deeplearning-platform-release/tf-gpu.1-15:latest"]
   allowed_vertex_access_modes = ["single-user", "service-account"]
+  access_scope                = local.parent_folder != "" ? ["under:folders/${local.folder_id}"] : ["under:organizations/${local.org_id}"]
 }
 
 module "ml_organization_policies_type_boolean" {
@@ -61,9 +62,8 @@ module "allowed_integrations" {
   folder_id         = local.folder_id
   policy_for        = local.policy_for
   policy_type       = "list"
-  enforce           = "true"
   allow_list_length = 1
-  allow             = [local.allowed_integrations]
+  allow             = local.allowed_integrations
   constraint        = "constraints/cloudbuild.allowedIntegrations"
 }
 
@@ -81,9 +81,8 @@ module "restrict_tls_versions" {
   folder_id         = local.folder_id
   policy_for        = local.policy_for
   policy_type       = "list"
-  enforce           = "true"
-  allow_list_length = length(local.allowed_tls_versions)
-  allow             = [local.allowed_tls_versions]
+  deny_list_length  = length(local.restricted_tls_versions)
+  deny              = local.restricted_tls_versions
   constraint        = "constraints/gcp.restrictTLSVersion"
 }
 
@@ -97,11 +96,11 @@ module "restrict_cmek_key_projects" {
   folder_id         = local.folder_id
   policy_for        = local.policy_for
   policy_type       = "list"
-  enforce           = "true"
   allow_list_length = 1
-  allow             = [local.folder_id]
+  allow             = local.access_scope
   constraint        = "constraints/gcp.restrictCmekCryptoKeyProjects"
 }
+
 
 module "restrict_service_usage" {
   #NIST 800-53
@@ -109,29 +108,29 @@ module "restrict_service_usage" {
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 5.1"
 
-  organization_id   = local.organization_id
-  folder_id         = local.folder_id
-  policy_for        = local.policy_for
-  policy_type       = "list"
-  enforce           = "true"
-  deny_list_length  = length(local.restricted_services)
-  deny              = [local.restricted_services]
-  constraint        = "constraints/gcp.restrictServiceUsage"
+  organization_id  = local.organization_id
+  folder_id        = local.folder_id
+  policy_for       = local.policy_for
+  policy_type      = "list"
+  enforce          = "false"
+  #deny_list_length = length(local.restricted_services)
+  #deny             = local.restricted_services
+  constraint       = "constraints/gcp.restrictServiceUsage"
 }
 
-module "restricted_locations" {
+
+module "allowed_locations" {
   #NIST 800-53
   #AC-3 AC-17 AC-20
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 5.1"
 
-  organization_id   = local.organization_id
-  folder_id         = local.folder_id
-  policy_for        = local.policy_for
-  policy_type       = "list"
-  enforce           = "true"
-  deny_list_length  = length(local.restricted_locations)
-  deny              = [local.restricted_locations]
+  organization_id  = local.organization_id
+  folder_id        = local.folder_id
+  policy_for       = local.policy_for
+  policy_type      = "list"
+  allow_list_length = length(local.allowed_locations)
+  allow             = local.allowed_locations
   constraint        = "constraints/gcp.resourceLocations"
 }
 
@@ -145,14 +144,13 @@ module "restrict_vm_ip_forwarding" {
   source  = "terraform-google-modules/org-policy/google"
   version = "~> 5.1"
 
-  organization_id   = local.organization_id
-  folder_id         = local.folder_id
-  policy_for        = local.policy_for
-  policy_type       = "list"
-  enforce           = "true"
-  deny_list_length  = 1
-  deny              = ["under:projects/${local.project_id}"]
-  constraint        = "constraints/compute.vmCanIpForward"
+  organization_id  = local.organization_id
+  folder_id        = local.folder_id
+  policy_for       = local.policy_for
+  policy_type      = "list"
+  deny_list_length = 1
+  deny             = local.access_scope
+  constraint       = "constraints/compute.vmCanIpForward"
 }
 
 module "restrict_vertex_notebook_vpc_networks" {
@@ -165,9 +163,8 @@ module "restrict_vertex_notebook_vpc_networks" {
   folder_id         = local.folder_id
   policy_for        = local.policy_for
   policy_type       = "list"
-  enforce           = "true"
   allow_list_length = 1
-  allow             = ["under:projects/${local.project_id}"]
+  allow             = local.access_scope
   constraint        = "constraints/ainotebooks.restrictVpcNetworks"
 }
 
@@ -185,9 +182,8 @@ module "vertexai_workbench_access_mode" {
   folder_id         = local.folder_id
   policy_for        = local.policy_for
   policy_type       = "list"
-  enforce           = "true"
   allow_list_length = length(local.allowed_vertex_access_modes)
-  allow             = [local.allowed_vertex_access_modes]
+  allow             = local.allowed_vertex_access_modes
   constraint        = "constraints/ainotebooks.accessMode"
 }
 
@@ -201,8 +197,7 @@ module "vertexai_allowed_images" {
   folder_id         = local.folder_id
   policy_for        = local.policy_for
   policy_type       = "list"
-  enforce           = "true"
   allow_list_length = length(local.allowed_vertex_images)
-  allow             = [local.allowed_vertex_images]
+  allow             = local.allowed_vertex_images
   constraint        = "constraints/ainotebooks.environmentOptions"
 }
