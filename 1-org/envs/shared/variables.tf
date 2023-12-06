@@ -150,6 +150,14 @@ variable "project_budget" {
     restricted_network_alert_spent_percents     = optional(list(number), [1.2])
     restricted_network_alert_pubsub_topic       = optional(string, null)
     restricted_network_budget_alert_spend_basis = optional(string, "FORECASTED_SPEND")
+    artifacts_budget_amount                     = optional(number, 1000)
+    artifacts_alert_spent_percents              = optional(list(number), [1.2])
+    artifacts_alert_pubsub_topic                = optional(string, null)
+    artifacts_budget_alert_spend_basis          = optional(string, "FORECASTED_SPEND")
+    service_catalog_budget_amount               = optional(number, 1000)
+    service_catalog_alert_spent_percents        = optional(list(number), [1.2])
+    service_catalog_alert_pubsub_topic          = optional(string, null)
+    service_catalog_budget_alert_spend_basis    = optional(string, "FORECASTED_SPEND")
   })
   default = {}
 }
