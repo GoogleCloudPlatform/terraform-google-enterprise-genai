@@ -79,15 +79,6 @@ output "scc_notifications_project_id" {
   description = "The SCC notifications project ID"
 }
 
-output "artifacts_project_id" {
-  value       = module.artifacts.project_id
-  description = "The artifacts project ID"
-}
-
-output "service_catalog_project_id" {
-  value = module.service_catalog.project_id
-}
-
 output "dns_hub_project_id" {
   value       = module.dns_hub.project_id
   description = "The DNS hub project ID"
