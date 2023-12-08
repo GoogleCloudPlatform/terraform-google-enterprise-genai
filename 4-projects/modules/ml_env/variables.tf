@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-variable "default_region" {
-  description = "Default region to create resources where applicable."
+variable "business_code" {
+  description = "The business code (ex. bu1)."
   type        = string
-  default     = "us-central1"
 }
 
-variable "location_gcs" {
-  description = "Case-Sensitive Location for GCS Bucket"
+variable "business_unit" {
+  description = "The business (ex. business_unit_1)."
   type        = string
-  default     = "US"
 }
 
-variable "gcs_bucket_prefix" {
-  description = "Name prefix to be used for GCS Bucket"
+variable "env" {
+  description = "The environment to prepare (ex. development)."
   type        = string
-  default     = "bkt"
 }
+
+variable "business_unit_folder" {
+  description = "The Business Unit Folder (Created in base_env)"
+  type        = string
+}
+
 variable "project_budget" {
   description = <<EOT
   Budget configuration.
@@ -48,6 +51,18 @@ variable "project_budget" {
   default = {}
 }
 
+variable "location_gcs" {
+  description = "Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring)"
+  type        = string
+  default     = "US"
+}
+
+variable "gcs_bucket_prefix" {
+  description = "Name prefix to be used for GCS Bucket"
+  type        = string
+  default     = "bkt"
+}
+
 variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string
@@ -56,5 +71,10 @@ variable "remote_state_bucket" {
 variable "tfc_org_name" {
   description = "Name of the TFC organization"
   type        = string
-  default     = ""
+}
+
+variable "folder_prefix" {
+  description = "Name prefix to use for folders created. Should be the same in all steps."
+  type        = string
+  default     = "fldr"
 }

@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-locals {
-  repo_names = ["bu3-example-app"]
-}
-
-module "app_infra_cloudbuild_project" {
+module "app_infra_service_catalog_project" {
   source = "../../modules/single_project"
   count  = local.enable_cloudbuild_deploy ? 1 : 0
 
@@ -29,34 +25,17 @@ module "app_infra_cloudbuild_project" {
   project_budget  = var.project_budget
   project_prefix  = local.project_prefix
   activate_apis = [
-    "cloudbuild.googleapis.com",
-    "sourcerepo.googleapis.com",
-    "cloudkms.googleapis.com",
-    "iam.googleapis.com",
     "artifactregistry.googleapis.com",
-    "cloudresourcemanager.googleapis.com"
+    "logging.googleapis.com",
+    "billingbudgets.googleapis.com",
   ]
   # Metadata
-  project_suffix    = "infra-pipeline"
-  application_name  = "app-infra-pipelines"
+  project_suffix    = "artifacts"
+  application_name  = "app-infra-ml"
   billing_code      = "1234"
   primary_contact   = "example@example.com"
   secondary_contact = "example2@example.com"
   business_code     = "bu3"
-}
-
-module "infra_pipelines" {
-  source = "../../modules/infra_pipelines"
-  count  = local.enable_cloudbuild_deploy ? 1 : 0
-
-  org_id                      = local.org_id
-  cloudbuild_project_id       = module.app_infra_cloudbuild_project[0].project_id
-  cloud_builder_artifact_repo = local.cloud_builder_artifact_repo
-  remote_tfstate_bucket       = local.projects_remote_bucket_tfstate
-  billing_account             = local.billing_account
-  default_region              = var.default_region
-  app_infra_repos             = local.repo_names
-  private_worker_pool_id      = local.cloud_build_private_worker_pool_id
 }
 
 /**
@@ -66,6 +45,6 @@ module "infra_pipelines" {
  * and it breaks terraform validation throwing the error below:
  * ERROR: [Terraform plan json does not contain resource_changes key]
  */
-resource "null_resource" "jenkins_cicd" {
+resource "null_resource" "jenkins_cicd_artifacts" {
   count = !local.enable_cloudbuild_deploy ? 1 : 0
 }

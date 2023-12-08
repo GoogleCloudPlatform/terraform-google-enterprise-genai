@@ -29,3 +29,17 @@ module "env" {
   subnet_region                = var.instance_region
   subnet_ip_range              = "10.5.192.0/21"
 }
+
+module "ml_env" {
+  source = "../../modules/ml_env"
+
+  env                  = "production"
+  business_code        = "bu3"
+  business_unit        = "business_unit_3"
+  remote_state_bucket  = var.remote_state_bucket
+  location_gcs         = var.location_gcs
+  tfc_org_name         = var.tfc_org_name
+  business_unit_folder = module.env.business_unit_folder
+
+  depends_on = [module.env]
+}

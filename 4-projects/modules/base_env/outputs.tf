@@ -111,3 +111,8 @@ output "iap_firewall_tags" {
     "tagKeys/${google_tags_tag_key.firewall_tag_key_rdp[0].name}" = "tagValues/${google_tags_tag_value.firewall_tag_value_rdp[0].name}"
   } : {}
 }
+
+output "business_unit_folder" {
+  description = "The name of the Business Folder created."
+  value       = google_folder.env_business_unit.name
+}

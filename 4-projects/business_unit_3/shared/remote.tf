@@ -18,6 +18,7 @@ locals {
   org_id                             = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
   parent_folder                      = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
   parent                             = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
+  location_gcs                       = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
   billing_account                    = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
   common_folder_name                 = data.terraform_remote_state.org.outputs.common_folder_name
   default_region                     = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
