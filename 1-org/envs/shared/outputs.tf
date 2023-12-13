@@ -153,3 +153,8 @@ output "cai_monitoring_topic" {
   value       = module.cai_monitoring.topic_name
   description = "CAI Monitoring Cloud Function Pub/Sub Topic name."
 }
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = values(module.kms_keyrings)[*].keyring
+}
