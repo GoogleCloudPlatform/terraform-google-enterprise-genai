@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-locals {
-  kms_sa = [
-    "serviceAccount:service-${module.machine_learning_project.project_number}@compute-system.iam.gserviceaccount.com",
-    "serviceAccount:${google_project_service_identity.secret_manager.email}"
-  ]
-  kms_key_roles = [
-    "roles/cloudkms.cryptoKeyEncrypter",
-    "roles/cloudkms.cryptoKeyDecrypter",
-  ]
-  rings_key_map = {
-    for idx, key_role in local.kms_key_roles : key_role => local.shared_kms_key_ring
-  }
+# locals {
+#   kms_sa = [
+#     "serviceAccount:service-${module.machine_learning_project.project_number}@compute-system.iam.gserviceaccount.com",
+#     "serviceAccount:${google_project_service_identity.secret_manager.email}"
+#   ]
+# kms_key_roles = [
+#   "roles/cloudkms.cryptoKeyEncrypter",
+#   "roles/cloudkms.cryptoKeyDecrypter",
+# ]
+# rings_key_map = {
+#   for idx, key_role in local.kms_key_roles : key_role => local.shared_kms_key_ring
+# }
 
-  rings_flat_map = flatten([
-    for key_role, key_rings in local.rings_key_map : [
-      for key in key_rings : {
-        key_role = key_role
-        key_ring = key
-      }
-    ]
-  ])
-}
+# rings_flat_map = flatten([
+#   for key_role, key_rings in local.rings_key_map : [
+#     for key in key_rings : {
+#       key_role = key_role
+#       key_ring = key
+#     }
+#   ]
+# ])
+# }
 
 module "machine_learning_project" {
   source = "../single_project"
@@ -87,7 +87,8 @@ module "machine_learning_project" {
     "storage-api.googleapis.com",
     "storage-component.googleapis.com",
     "storage.googleapis.com",
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "serviceusage.googleapis.com"
   ]
 
 
@@ -104,11 +105,11 @@ data "google_storage_project_service_account" "gcs_account" {
   project = module.machine_learning_project.project_id
 }
 
-resource "google_project_service_identity" "secret_manager" {
-  provider = google-beta
-  project  = module.machine_learning_project.project_id
-  service  = "secretmanager.googleapis.com"
-}
+# resource "google_project_service_identity" "secret_manager" {
+#   provider = google-beta
+#   project  = module.machine_learning_project.project_id
+#   service  = "secretmanager.googleapis.com"
+# }
 resource "google_kms_crypto_key" "ml_key" {
   for_each        = toset(local.shared_kms_key_ring)
   name            = module.machine_learning_project.project_name
@@ -119,13 +120,30 @@ resource "google_kms_crypto_key" "ml_key" {
   }
 }
 
-resource "google_kms_crypto_key_iam_binding" "encrypt" {
-  for_each      = { for idx, values in local.rings_flat_map : idx => values }
-  crypto_key_id = google_kms_crypto_key.ml_key[each.value.key_ring].id
-  role          = each.value.key_role
-  members = var.env == "development" ? concat([
-    "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
-    ],
-    local.kms_sa
-  ) : ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
+
+# // Change to iam member, give cloudbuild sa  'roles/cloudkms.admin' = just for development!
+
+resource "google_kms_crypto_key_iam_member" "dev_ml_key" {
+  for_each      = var.env == "development" ? toset(keys(google_kms_crypto_key.ml_key)) : toset([])
+  crypto_key_id = google_kms_crypto_key.ml_key[each.key].id
+  role          = "roles/cloudkms.admin"
+  member        = "serviceAccount:${module.machine_learning_project.project_number}@cloudbuild.gserviceaccount.com"
 }
+
+resource "google_kms_crypto_key_iam_member" "ml_key" {
+  for_each      = google_kms_crypto_key.ml_key
+  crypto_key_id = each.value.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
+
+# resource "google_kms_crypto_key_iam_binding" "encrypt" {
+#   for_each      = { for idx, values in local.rings_flat_map : idx => values }
+#   crypto_key_id = google_kms_crypto_key.ml_key[each.value.key_ring].id
+#   role          = each.value.key_role
+#   members = var.env == "development" ? concat([
+#     "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+#     ],
+#     local.kms_sa
+#   ) : ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
+# }
