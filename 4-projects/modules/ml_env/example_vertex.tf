@@ -16,13 +16,25 @@
 
 locals {
   kms_sa = [
-    "service-${module.learning_project.project_number}@compute-system.iam.gserviceaccount.com",
-    "service-${module.learning_project.project_number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
+    "serviceAccount:service-${module.machine_learning_project.project_number}@compute-system.iam.gserviceaccount.com",
+    "serviceAccount:${google_project_service_identity.secret_manager.email}"
   ]
   kms_key_roles = [
     "roles/cloudkms.cryptoKeyEncrypter",
     "roles/cloudkms.cryptoKeyDecrypter",
   ]
+  rings_key_map = {
+    for idx, key_role in local.kms_key_roles : key_role => local.shared_kms_key_ring
+  }
+
+  rings_flat_map = flatten([
+    for key_role, key_rings in local.rings_key_map : [
+      for key in key_rings : {
+        key_role = key_role
+        key_ring = key
+      }
+    ]
+  ])
 }
 
 module "machine_learning_project" {
@@ -92,43 +104,28 @@ data "google_storage_project_service_account" "gcs_account" {
   project = module.machine_learning_project.project_id
 }
 
+resource "google_project_service_identity" "secret_manager" {
+  provider = google-beta
+  project  = module.machine_learning_project.project_id
+  service  = "secretmanager.googleapis.com"
+}
 resource "google_kms_crypto_key" "ml_key" {
+  for_each        = toset(local.shared_kms_key_ring)
   name            = module.machine_learning_project.project_name
-  key_ring        = local.shared_kms_key_ring
+  key_ring        = each.key
   rotation_period = var.key_rotation_period
   lifecycle {
     prevent_destroy = false
   }
 }
+
 resource "google_kms_crypto_key_iam_binding" "encrypt" {
-  for_each      = toset(local.kms_key_roles)
-  crypto_key_id = google_kms_crypto_key.ml_key.id
-  role          = each.key
+  for_each      = { for idx, values in local.rings_flat_map : idx => values }
+  crypto_key_id = google_kms_crypto_key.ml_key[each.value.key_ring].id
+  role          = each.value.key_role
   members = var.env == "development" ? concat([
     "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
     ],
     local.kms_sa
   ) : ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
-}
-
-resource "random_string" "bucket_name" {
-  length  = 5
-  upper   = false
-  numeric = true
-  lower   = true
-  special = false
-}
-
-module "gcs_buckets" {
-  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-  version = "~> 4.0"
-
-  project_id         = module.machine_learning_project.project_id
-  location           = local.default_region
-  name               = "${var.gcs_bucket_prefix}-${module.machine_learning_project.project_id}-${lower(local.default_region)}-cmek-encrypted-${random_string.bucket_name.result}"
-  bucket_policy_only = true
-
-  encryption = {
-    default_kms_key_name = google_kms_crypto_key.ml_key.id
-  }
 }
