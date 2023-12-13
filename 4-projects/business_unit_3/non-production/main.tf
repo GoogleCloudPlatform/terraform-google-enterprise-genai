@@ -41,5 +41,5 @@ module "ml_env" {
   tfc_org_name         = var.tfc_org_name
   business_unit_folder = module.env.business_unit_folder
 
-  depends_on = [module.env]
+  # depends_on = [module.env]
 }

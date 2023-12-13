@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module "app_infra_service_catalog_project" {
+module "app_infra_artifacts_project" {
   source = "../../modules/single_project"
   count  = local.enable_cloudbuild_deploy ? 1 : 0
 
@@ -31,20 +31,10 @@ module "app_infra_service_catalog_project" {
   ]
   # Metadata
   project_suffix    = "artifacts"
-  application_name  = "app-infra-ml"
+  application_name  = "app-infra-artifacts"
   billing_code      = "1234"
   primary_contact   = "example@example.com"
   secondary_contact = "example2@example.com"
   business_code     = "bu3"
 }
 
-/**
- * When Jenkins CICD is used for deployment this resource
- * is created to terraform validation works.
- * Without this resource, this module creates zero resources
- * and it breaks terraform validation throwing the error below:
- * ERROR: [Terraform plan json does not contain resource_changes key]
- */
-resource "null_resource" "jenkins_cicd_artifacts" {
-  count = !local.enable_cloudbuild_deploy ? 1 : 0
-}

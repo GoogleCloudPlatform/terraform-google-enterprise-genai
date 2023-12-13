@@ -108,3 +108,18 @@ output "iap_firewall_tags" {
   description = "The security tags created for IAP (SSH and RDP) firewall rules and to be used on the VM created on step 5-app-infra on the peering network project."
   value       = module.env.iap_firewall_tags
 }
+
+output "machine_learning_project_id" {
+  description = "The project ID of the machine learning project."
+  value       = module.ml_env.machine_learning_project
+}
+
+output "machine_learning_project_number" {
+  description = "The project Number of the machine learning project."
+  value       = module.ml_env.machine_learning_project_number
+}
+
+output "machine_learning_key_id" {
+  description = "The kms key ID of the machine learning project."
+  value       = module.ml_env.machine_learning_key_id
+}

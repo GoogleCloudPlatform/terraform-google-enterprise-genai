@@ -51,7 +51,7 @@ module "app_service_catalog_project" {
 }
 
 resource "random_string" "bucket_name" {
-  length  = 5
+  length  = 4
   upper   = false
   numeric = true
   lower   = true
@@ -63,7 +63,7 @@ module "service_catalog_gcs_bucket" {
   version = "~> 4.0"
 
   location   = local.location_gcs
-  name       = "${var.gcs_bucket_prefix}-${module.app_service_catalog_project[0].project_id}-${lower(local.location_gcs)}-service-catalog-${random_string.bucket_name.result}"
+  name       = "${var.gcs_bucket_prefix}-${module.app_service_catalog_project[0].project_id}-${lower(local.location_gcs)}-svc-ctlg-${random_string.bucket_name.result}"
   project_id = module.app_service_catalog_project[0].project_id
 
   depends_on = [module.app_service_catalog_project]

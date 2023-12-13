@@ -14,17 +14,3 @@
  * limitations under the License.
  */
 
-output "machine_learning_project" {
-  description = "Project machine learning project."
-  value       = module.machine_learning_project.project_id
-}
-
-output "machine_learning_project_number" {
-  description = "Project number of machine learning project."
-  value       = module.machine_learning_project.project_number
-}
-
-output "machine_learning_key_id" {
-  description = "Key ID for the machine learning project."
-  value       = google_kms_crypto_key.ml_key.id
-}

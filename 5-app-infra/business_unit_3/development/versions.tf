@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-output "machine_learning_project" {
-  description = "Project machine learning project."
-  value       = module.machine_learning_project.project_id
-}
+terraform {
+  required_version = ">= 0.13"
 
-output "machine_learning_project_number" {
-  description = "Project number of machine learning project."
-  value       = module.machine_learning_project.project_number
-}
+  required_providers {
 
-output "machine_learning_key_id" {
-  description = "Key ID for the machine learning project."
-  value       = google_kms_crypto_key.ml_key.id
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 3.77, < 6"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 3.77, < 6"
+    }
+
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.1"
+    }
+
+  }
 }

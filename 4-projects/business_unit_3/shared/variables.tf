@@ -26,11 +26,24 @@ variable "location_gcs" {
   default     = "US"
 }
 
+variable "location_kms" {
+  description = "Case-Sensitive Location for KMS Keyring"
+  type        = string
+  default     = "us"
+}
+
+variable "keyring_name" {
+  description = "Name to be used for KMS Keyring"
+  type        = string
+  default     = "sample-keyring"
+}
+
 variable "gcs_bucket_prefix" {
   description = "Name prefix to be used for GCS Bucket"
   type        = string
   default     = "bkt"
 }
+
 variable "project_budget" {
   description = <<EOT
   Budget configuration.

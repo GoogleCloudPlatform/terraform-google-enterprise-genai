@@ -54,7 +54,7 @@ variable "project_budget" {
 variable "location_gcs" {
   description = "Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring)"
   type        = string
-  default     = "US"
+  default     = ""
 }
 
 variable "gcs_bucket_prefix" {
@@ -77,4 +77,16 @@ variable "folder_prefix" {
   description = "Name prefix to use for folders created. Should be the same in all steps."
   type        = string
   default     = "fldr"
+}
+
+# variable "kms_key_name_prefix" {
+#   description = "Name for kms key."
+#   type        = string
+#   default     = "key"
+# }
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
 }

@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-output "project_id" {
-  description = "Project sample project id."
-  value       = module.project.project_id
+locals {
+  env_project_ids = {
+    "artifacts" = data.terraform_remote_state.projects_shared.outputs.common_artifacts_project_id
+  }
 }
 
-output "sa" {
-  description = "Project SA email"
-  value       = module.project.service_account_email
+data "terraform_remote_state" "projects_env" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/projects/${var.business_unit}/${var.environment}"
+  }
 }
 
-output "project_number" {
-  description = "Project sample project number."
-  value       = module.project.project_number
-}
+data "terraform_remote_state" "projects_shared" {
+  backend = "gcs"
 
-output "enabled_apis" {
-  description = "VPC Service Control services."
-  value       = distinct(concat(var.activate_apis, ["billingbudgets.googleapis.com"]))
-}
-
-output "project_name" {
-  description = "Name of the Project."
-  value       = module.project.project_name
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/projects/${var.business_unit}/shared"
+  }
 }

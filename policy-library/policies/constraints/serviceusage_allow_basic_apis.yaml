@@ -70,3 +70,5 @@ spec:
     - "storage.googleapis.com"
     - "run.googleapis.com"
     - "eventarc.googleapis.com"
+    - "notebooks.googleapis.com"
+    - "datacatalog.googleapis.com"
