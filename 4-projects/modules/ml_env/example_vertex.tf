@@ -62,7 +62,12 @@ module "machine_learning_project" {
   // Map for the roles where the key is the repository name ("${var.business_code}-example-app")
   // and the value is the list of roles that this SA need to deploy step 5-app-infra
   sa_roles = {
-    "bu3-example-app" = [
+    "bu3-artifact-publish" = [
+      "roles/compute.instanceAdmin.v1",
+      "roles/iam.serviceAccountAdmin",
+      "roles/iam.serviceAccountUser",
+    ],
+    "bu3-service-catalog" = [
       "roles/compute.instanceAdmin.v1",
       "roles/iam.serviceAccountAdmin",
       "roles/iam.serviceAccountUser",
