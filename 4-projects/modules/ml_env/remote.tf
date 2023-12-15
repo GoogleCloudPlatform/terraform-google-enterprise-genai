@@ -29,7 +29,7 @@ locals {
   env_folder_name                     = data.terraform_remote_state.environments_env.outputs.env_folder
   app_infra_pipeline_service_accounts = data.terraform_remote_state.business_unit_shared.outputs.terraform_service_accounts
   enable_cloudbuild_deploy            = data.terraform_remote_state.business_unit_shared.outputs.enable_cloudbuild_deploy
-  shared_kms_key_ring                 = data.terraform_remote_state.environments_env.oututs.key_rings
+  shared_kms_key_ring                 = data.terraform_remote_state.environments_env.outputs.key_rings
   default_region                      = data.terraform_remote_state.business_unit_shared.outputs.default_region
 }
 
