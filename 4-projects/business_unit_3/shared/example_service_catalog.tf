@@ -35,6 +35,7 @@ module "app_service_catalog_project" {
     "logging.googleapis.com",
     "storage.googleapis.com",
     "serviceusage.googleapis.com",
+    "secretmanager.googleapis.com",
     "cloudbuild.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "cloudkms.googleapis.com",
