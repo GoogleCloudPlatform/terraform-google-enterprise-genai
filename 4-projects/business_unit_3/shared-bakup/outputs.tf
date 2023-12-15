@@ -63,6 +63,11 @@ output "enable_cloudbuild_deploy" {
   value       = local.enable_cloudbuild_deploy
 }
 
+output "service_catalog_bucket" {
+  description = "Service Catalog Bucket Name"
+  value       = module.service_catalog_gcs_bucket.bucket
+}
+
 output "service_catalog_project_id" {
   description = "Service Catalog Project ID."
   value       = try(module.app_service_catalog_project[0].project_id, "")

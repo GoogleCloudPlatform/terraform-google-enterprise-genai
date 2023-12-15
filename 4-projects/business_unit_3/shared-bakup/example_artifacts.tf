@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  artifact_tf_sa_roles = [
-    "roles/secretmanager.admin",
-    "roles/cloudbuild.builds.editor",
-    "roles/artifactregistry.admin",
-    "roles/iam.serviceAccountAdmin",
-    "roles/cloudbuild.connectionAdmin",
-  ]
-}
 module "app_infra_artifacts_project" {
   source = "../../modules/single_project"
   count  = local.enable_cloudbuild_deploy ? 1 : 0
@@ -37,10 +28,6 @@ module "app_infra_artifacts_project" {
     "artifactregistry.googleapis.com",
     "logging.googleapis.com",
     "billingbudgets.googleapis.com",
-    "serviceusage.googleapis.com",
-    "storage.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com"
   ]
   # Metadata
   project_suffix    = "artifacts"
@@ -51,25 +38,3 @@ module "app_infra_artifacts_project" {
   business_code     = "bu3"
 }
 
-resource "google_kms_crypto_key" "ml_key" {
-  for_each        = toset(local.shared_kms_key_ring)
-  name            = module.app_infra_artifacts_project[0].project_name
-  key_ring        = each.key
-  rotation_period = var.key_rotation_period
-  lifecycle {
-    prevent_destroy = false
-  }
-}
-resource "google_kms_crypto_key_iam_member" "ml_key" {
-  for_each      = google_kms_crypto_key.ml_key
-  crypto_key_id = each.value.id
-  role          = "roles/cloudkms.admin"
-  member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-artifact-publish"]}"
-}
-
-resource "google_project_iam_member" "artifact_tf_sa_roles" {
-  for_each = toset(local.artifact_tf_sa_roles)
-  project  = module.app_infra_artifacts_project[0].project_id
-  role     = each.key
-  member   = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-artifact-publish"]}"
-}
