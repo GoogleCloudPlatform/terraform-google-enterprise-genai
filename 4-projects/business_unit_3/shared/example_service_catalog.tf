@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 module "app_service_catalog_project" {
   source = "../../modules/single_project"
   count  = local.enable_cloudbuild_deploy ? 1 : 0

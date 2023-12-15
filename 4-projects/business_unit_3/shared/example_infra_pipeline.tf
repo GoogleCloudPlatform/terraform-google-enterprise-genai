@@ -15,7 +15,10 @@
  */
 
 locals {
-  repo_names = ["bu3-example-app"]
+  repo_names = [
+    "bu3-artifact-publish",
+    "bu3-service-catalog"
+  ]
 }
 
 module "app_infra_cloudbuild_project" {
@@ -34,7 +37,8 @@ module "app_infra_cloudbuild_project" {
     "cloudkms.googleapis.com",
     "iam.googleapis.com",
     "artifactregistry.googleapis.com",
-    "cloudresourcemanager.googleapis.com"
+    "cloudresourcemanager.googleapis.com",
+    "serviceusage.googleapis.com"
   ]
   # Metadata
   project_suffix    = "infra-pipeline"
@@ -57,6 +61,13 @@ module "infra_pipelines" {
   default_region              = var.default_region
   app_infra_repos             = local.repo_names
   private_worker_pool_id      = local.cloud_build_private_worker_pool_id
+}
+
+resource "google_kms_key_ring_iam_member" "key_ring" {
+  for_each    = { for k in flatten([for kms in local.shared_kms_key_ring : [for name, email in module.infra_pipelines[0].terraform_service_accounts : { key = "${kms}--${name}", kms = kms, email = email }]]) : k.key => k }
+  key_ring_id = each.value.kms
+  role        = "roles/cloudkms.admin"
+  member      = "serviceAccount:${each.value.email}"
 }
 
 /**

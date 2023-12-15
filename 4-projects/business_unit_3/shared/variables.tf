@@ -71,3 +71,10 @@ variable "tfc_org_name" {
   type        = string
   default     = ""
 }
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+

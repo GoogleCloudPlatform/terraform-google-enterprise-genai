@@ -80,5 +80,5 @@ output "service_catalog_project_id" {
 
 output "common_artifacts_project_id" {
   description = "App Infra Artifacts Project ID"
-  value       = try(module.app_infra_artifacts_project.project_id[0], "")
+  value       = try(module.app_infra_artifacts_project[0].project_id, "")
 }

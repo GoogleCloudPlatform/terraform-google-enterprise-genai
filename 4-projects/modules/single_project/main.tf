@@ -106,3 +106,4 @@ resource "google_compute_subnetwork_iam_member" "service_account_role_to_vpc_sub
   project    = var.shared_vpc_host_project_id
   member     = "serviceAccount:${each.value.sa}"
 }
+
