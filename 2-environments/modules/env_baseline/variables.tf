@@ -90,3 +90,18 @@ variable "assured_workload_configuration" {
   })
   default = {}
 }
+
+variable "keyring_name" {
+  description = "Name to be used for KMS Keyring"
+  type        = string
+  default     = "sample-keyring"
+}
+
+variable "keyring_regions" {
+  description = "Regions to create keyrings in"
+  type        = list(string)
+  default = [
+    "us-central1",
+    "us-east4"
+  ]
+}

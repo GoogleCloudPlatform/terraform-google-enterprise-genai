@@ -15,12 +15,13 @@
  */
 
 locals {
-  org_id          = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
-  parent          = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
-  billing_account = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
-  project_prefix  = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
-  folder_prefix   = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
-  tags            = data.terraform_remote_state.org.outputs.tags
+  org_id                                        = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
+  parent                                        = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
+  billing_account                               = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
+  project_prefix                                = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
+  folder_prefix                                 = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
+  projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+  tags                                          = data.terraform_remote_state.org.outputs.tags
 }
 
 data "terraform_remote_state" "bootstrap" {

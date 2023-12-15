@@ -44,3 +44,8 @@ output "assured_workload_resources" {
   description = "Resources associated with the Assured Workload."
   value       = var.assured_workload_configuration.enabled ? google_assured_workloads_workload.workload[0].resources : []
 }
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = values(module.kms_keyrings)[*].keyring
+}
