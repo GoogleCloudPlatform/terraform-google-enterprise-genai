@@ -43,3 +43,8 @@ output "assured_workload_resources" {
   description = "Resources associated with the Assured Workload."
   value       = module.env.assured_workload_resources
 }
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.env.key_rings
+}
