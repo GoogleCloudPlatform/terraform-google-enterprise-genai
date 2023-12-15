@@ -36,7 +36,8 @@ module "app_service_catalog_project" {
     "storage.googleapis.com",
     "serviceusage.googleapis.com",
     "cloudbuild.googleapis.com",
-    "cloudresourcemanager.googleapis.com"
+    "cloudresourcemanager.googleapis.com",
+    "cloudkms.googleapis.com",
   ]
   # Metadata
   project_suffix    = "service-catalog"

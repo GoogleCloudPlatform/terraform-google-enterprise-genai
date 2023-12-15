@@ -93,7 +93,8 @@ module "machine_learning_project" {
     "storage-component.googleapis.com",
     "storage.googleapis.com",
     "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com"
+    "serviceusage.googleapis.com",
+    "cloudkms.googleapis.com"
   ]
 
 

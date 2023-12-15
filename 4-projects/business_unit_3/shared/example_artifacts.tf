@@ -40,7 +40,8 @@ module "app_infra_artifacts_project" {
     "serviceusage.googleapis.com",
     "storage.googleapis.com",
     "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "cloudkms.googleapis.com",
   ]
   # Metadata
   project_suffix    = "artifacts"
