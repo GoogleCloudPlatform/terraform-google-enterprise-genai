@@ -13,3 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+output "storage_bucket_name" {
+  description = "Name of storage bucket created"
+  value       = google_storage_bucket.bucket.name
+}
+
+output "cloudbuild_trigger_id" {
+  description = "Id of Cloud Build Trigger"
+  value       = google_cloudbuild_trigger.zip_files.id
+}

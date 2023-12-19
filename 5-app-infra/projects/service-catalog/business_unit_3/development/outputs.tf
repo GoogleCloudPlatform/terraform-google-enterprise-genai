@@ -14,40 +14,27 @@
  * limitations under the License.
  */
 
-# output "instances_self_links" {
-#   description = "List of self-links for compute instances"
-#   value       = module.base_shared_gce_instance.instances_self_links
-# }
+output "trigger_sa_account_id" {
+  description = "Account id of service account cloudbuild."
+  value       = module.service_catalog_pipeline.trigger_sa_account_id
+}
 
-# output "instances_names" {
-#   description = "List of names for compute instances"
-#   value       = [for u in module.base_shared_gce_instance.instances_details : u.name]
-#   sensitive   = true
-# }
+output "cloudbuild_v2_repo_id" {
+  description = "Repository ID of cloudbuild repository"
+  value       = module.service_catalog_pipeline.cloudbuild_v2_repo_id
+}
 
-# output "instances_zones" {
-#   description = "List of zone for compute instances"
-#   value       = [for u in module.base_shared_gce_instance.instances_details : u.zone]
-#   sensitive   = true
-# }
+output "kms_key_id" {
+  description = "Projects Key ID for encrytion"
+  value       = module.service_catalog_pipeline.kms_key_id
+}
 
-# output "instances_details" {
-#   description = "List of details for compute instances"
-#   value       = module.base_shared_gce_instance.instances_details
-#   sensitive   = true
-# }
+output "storage_bucket_name" {
+  description = "Name of storage bucket created"
+  value       = module.service_catalog.storage_bucket_name
+}
 
-# output "available_zones" {
-#   description = "List of available zones in region"
-#   value       = module.base_shared_gce_instance.available_zones
-# }
-
-# output "project_id" {
-#   description = "Project where compute instance was created"
-#   value       = module.base_shared_gce_instance.project_id
-# }
-
-# output "region" {
-#   description = "Region where compute instance was created"
-#   value       = module.base_shared_gce_instance.region
-# }
+output "cloudbuild_trigger_id" {
+  description = "Id of Cloud Build Trigger"
+  value       = module.service_catalog.cloudbuild_trigger_id
+}

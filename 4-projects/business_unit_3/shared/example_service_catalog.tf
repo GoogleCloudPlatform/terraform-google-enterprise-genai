@@ -19,6 +19,8 @@ locals {
     "roles/cloudbuild.builds.editor",
     "roles/iam.serviceAccountAdmin",
     "roles/cloudbuild.connectionAdmin",
+    "roles/secretmanager.admin",
+    "roles/storage.admin",
   ]
 }
 module "app_service_catalog_project" {
@@ -37,8 +39,7 @@ module "app_service_catalog_project" {
     "serviceusage.googleapis.com",
     "secretmanager.googleapis.com",
     "cloudbuild.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudkms.googleapis.com",
+    "cloudresourcemanager.googleapis.com"
   ]
   # Metadata
   project_suffix    = "service-catalog"
@@ -58,10 +59,44 @@ resource "google_kms_crypto_key" "sc_key" {
     prevent_destroy = false
   }
 }
+
+// Create key for project
 resource "google_kms_crypto_key_iam_member" "sc_key" {
   for_each      = google_kms_crypto_key.sc_key
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
+  member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-service-catalog"]}"
+}
+
+// Grab Service Agent for Secret Manager
+resource "google_project_service_identity" "secretmanager_agent" {
+  provider = google-beta
+  project  = module.app_service_catalog_project[0].project_id
+  service  = "secretmanager.googleapis.com"
+}
+
+// Add Secret Manager Service Agent to key with encrypt/decrypt permissions 
+resource "google_kms_crypto_key_iam_member" "secretmanager_agent" {
+  for_each      = google_kms_crypto_key.sc_key
+  crypto_key_id = each.value.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_project_service_identity.secretmanager_agent.email}"
+}
+
+// Add Service Agent for Storage
+resource "google_kms_crypto_key_iam_member" "storage_agent" {
+  for_each      = google_kms_crypto_key.sc_key
+  crypto_key_id = each.value.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${module.app_service_catalog_project[0].project_number}@gs-project-accounts.iam.gserviceaccount.com"
+}
+
+
+// Add infra pipeline SA encrypt/decrypt permissions
+resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
+  for_each      = google_kms_crypto_key.sc_key
+  crypto_key_id = each.value.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-service-catalog"]}"
 }
 
@@ -72,26 +107,12 @@ resource "google_project_iam_member" "service_catalog_tf_sa_roles" {
   member   = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-service-catalog"]}"
 }
 
-
-# resource "random_string" "bucket_name" {
-#   length  = 4
-#   upper   = false
-#   numeric = true
-#   lower   = true
-#   special = false
-# }
-
-# module "service_catalog_gcs_bucket" {
-#   source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
-#   version = "~> 4.0"
-
-#   location   = local.location_gcs
-#   name       = "${var.gcs_bucket_prefix}-${module.app_service_catalog_project[0].project_id}-${lower(local.location_gcs)}-svc-ctlg-${random_string.bucket_name.result}"
-#   project_id = module.app_service_catalog_project[0].project_id
-
-#   depends_on = [module.app_service_catalog_project]
-# }
-
+// Add Service Agent for Cloud Build
+resource "google_project_iam_member" "cloudbuild_agent" {
+  project = module.app_service_catalog_project[0].project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${module.app_service_catalog_project[0].project_number}@cloudbuild.gserviceaccount.com"
+}
 
 /**
  * When Jenkins CICD is used for deployment this resource

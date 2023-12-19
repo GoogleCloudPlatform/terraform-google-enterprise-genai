@@ -13,3 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+output "artifact_registry_repository_id" {
+  value = google_artifact_registry_repository.my-repo.id
+}
+
+output "cloudbuild_trigger_id" {
+  value = google_cloudbuild_trigger.docker_build.id
+}

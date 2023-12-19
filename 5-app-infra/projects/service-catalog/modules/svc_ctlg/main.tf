@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+# resource "google_project_service_identity" "storage_agent" {
+#   provider = google-beta
+
+#   project = var.project_id
+#   service = "storage.googleapis.com"
+# }
+# resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
+#   crypto_key_id = data.google_kms_crypto_key.key.id
+#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+#   member        = "serviceAccount:${google_project_service_identity.storage_agent.email}"
+# }
+
 resource "random_string" "bucket_name" {
   length  = 4
   upper   = false
@@ -49,21 +61,35 @@ resource "google_cloudbuild_trigger" "zip_files" {
   }
   build {
     step {
+      id         = "unshallow"
+      name       = "gcr.io/cloud-builders/git"
+      secret_env = ["token"]
+      entrypoint = "/bin/bash"
+      args = [
+        "-c",
+        "git fetch --unshallow https://$token@${local.github_repository}"
+      ]
+
+    }
+    available_secrets {
+      secret_manager {
+        env          = "token"
+        version_name = var.secret_version_name
+      }
+    }
+    step {
       id         = "find-folders-affected-in-push"
       name       = "gcr.io/cloud-builders/git"
       entrypoint = "/bin/bash"
       args = [
         "-c",
         <<-EOT
-        COMMIT_SHA=$(git rev-parse HEAD)
-        LAST_COMMIT_SHA=$(git rev-parse HEAD^1)
+        changed_files=$(git diff-tree --name-only $COMMIT_SHA --no-commit-id -r)
+        changed_folders=$(echo "$changed_files" | awk -F/ '{print $1}' | sort | uniq )
 
-        CHANGED_FILES=$(git diff --name-only $LAST_COMMIT_SHA $COMMIT_SHA)
-
-        CHANGED_FOLDERS=$(echo "$CHANGED_FILES" | awk -F/ '{print $1}' | sort -u)
-
-        for folder in $CHANGED_FOLDERS; do
-          (cd $folder && zip -r "/workspace/$folder.zip" *.tf)
+        for folder in $changed_folders; do
+          echo "Found change in folder: $folder"
+          (cd $folder && find . -type f -name '*.tf' -exec tar -cvPf "/workspace/$folder.tar.gz" {} +)
         done
       EOT
       ]
@@ -71,7 +97,7 @@ resource "google_cloudbuild_trigger" "zip_files" {
     step {
       id   = "push-to-bucket"
       name = "gcr.io/cloud-builders/gsutil"
-      args = ["cp", "/workspace/*.zip", "gs://${google_storage_bucket.bucket.name}/modules/"]
+      args = ["cp", "/workspace/*.tar.gz", "gs://${google_storage_bucket.bucket.name}/modules/"]
     }
   }
 }

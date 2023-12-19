@@ -28,3 +28,8 @@ output "kms_key_id" {
   description = "Projects Key ID for encrytion"
   value       = data.google_kms_crypto_key.key.id
 }
+
+output "github_secret_version_name" {
+  description = "Secret Version Name of key"
+  value       = google_secret_manager_secret_version.github_secret_version.name
+}

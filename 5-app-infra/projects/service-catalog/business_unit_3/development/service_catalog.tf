@@ -31,10 +31,10 @@ module "service_catalog_pipeline" {
 module "service_catalog" {
   source = "../../modules/svc_ctlg"
 
-  environment        = local.environment
-  project_id         = local.service_catalog_project_id
-  region             = var.instance_region
-  cloudbuild_repo_id = module.service_catalog_pipeline.cloudbuild_v2_repo_id
-  # remote_state_bucket = var.remote_state_bucket
-
+  environment         = local.environment
+  project_id          = local.service_catalog_project_id
+  region              = var.instance_region
+  cloudbuild_repo_id  = module.service_catalog_pipeline.cloudbuild_v2_repo_id
+  secret_version_name = module.service_catalog_pipeline.github_secret_version_name
+  github_remote_uri   = var.github_remote_uri
 }

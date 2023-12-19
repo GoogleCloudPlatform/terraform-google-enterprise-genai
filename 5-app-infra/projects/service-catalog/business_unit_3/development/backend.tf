@@ -16,7 +16,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "bkt-prj-c-bu3infra-pipeline-c8kq-bu3-artifact-publish-state"
+    bucket = "bkt-prj-c-bu3infra-pipeline-c8kq-bu3-service-catalog-state"
     prefix = "terraform/app-infra/business_unit_3/development"
   }
 }

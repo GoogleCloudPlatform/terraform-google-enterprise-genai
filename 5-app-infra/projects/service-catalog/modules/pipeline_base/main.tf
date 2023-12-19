@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-resource "google_project_service_identity" "agent" {
-  provider = google-beta
+# resource "google_project_service_identity" "agent" {
+#   provider = google-beta
 
-  project = var.project_id
-  service = "secretmanager.googleapis.com"
-}
+#   project = var.project_id
+#   service = "secretmanager.googleapis.com"
+# }
 
-resource "google_kms_crypto_key_iam_member" "kms-key-binding" {
-  crypto_key_id = data.google_kms_crypto_key.key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${google_project_service_identity.agent.email}"
-}
+# resource "google_kms_crypto_key_iam_member" "kms-key-binding" {
+#   crypto_key_id = data.google_kms_crypto_key.key.id
+#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+#   member        = "serviceAccount:${google_project_service_identity.agent.email}"
+# }
 resource "google_secret_manager_secret" "github_secret" {
   project   = var.project_id
   secret_id = "github-api-token"
