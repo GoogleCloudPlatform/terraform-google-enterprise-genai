@@ -14,112 +14,62 @@
  * limitations under the License.
  */
 
-output "base_shared_vpc_project" {
-  description = "Project sample base project."
-  value       = module.env.base_shared_vpc_project
+output "composer_project_id" {
+  description = "Project ID of composer project"
+  value       = try(module.composer_cloudbuild_project.project_id, "")
 }
 
-output "base_shared_vpc_project_sa" {
-  description = "Project sample base project SA."
-  value       = module.env.base_shared_vpc_project_sa
+output "composer_project_number" {
+  description = "Project number of composer project"
+  value       = try(module.composer_cloudbuild_project.project_number, "")
 }
 
-output "base_subnets_self_links" {
-  value       = module.env.base_subnets_self_links
-  description = "The self-links of subnets from base environment."
+output "composer_project_name" {
+  description = "Project name of composer project"
+  value       = try(module.composer_cloudbuild_project.project_name, "")
 }
 
-output "floating_project" {
-  description = "Project sample floating project."
-  value       = module.env.floating_project
+output "composer_project_sa" {
+  description = "SA of the composer project"
+  value       = try(module.composer_cloudbuild_project.sa, "")
 }
 
-output "peering_project" {
-  description = "Project sample peering project id."
-  value       = module.env.peering_project
+output "composer_terraform_service_accounts" {
+  description = "Composer Terraform SA mapped to source repos as keys"
+  value       = try(module.composer_cloudbuild_project.terraform_service_accounts, {})
 }
 
-output "peering_network" {
-  description = "Peer network peering resource."
-  value       = module.env.peering_network
+output "composer_repos" {
+  description = "CSR's to store source code for composer repo"
+  value       = try(module.composer_cloudbuild_project.repos, toset([]))
 }
 
-output "restricted_shared_vpc_project" {
-  description = "Project sample restricted project id."
-  value       = module.env.restricted_shared_vpc_project
+output "composer_artifact_buckets" {
+  description = "GCS Buckets to store Cloud Build Artifacts"
+  value       = try(module.composer_cloudbuild_project.artifact_buckets, {})
 }
 
-output "restricted_shared_vpc_project_number" {
-  description = "Project sample restricted project."
-  value       = module.env.restricted_shared_vpc_project_number
+output "composer_state_buckets" {
+  description = "GCS Buckets to store TF state"
+  value       = try(module.composer_cloudbuild_project.state_buckets, {})
 }
 
-output "restricted_subnets_self_links" {
-  value       = module.env.restricted_subnets_self_links
-  description = "The self-links of subnets from restricted environment."
+output "composer_log_buckets" {
+  description = "GCS Buckets to store Cloud Build logs"
+  value       = try(module.composer_cloudbuild_project.log_buckets, {})
 }
 
-output "vpc_service_control_perimeter_name" {
-  description = "VPC Service Control name."
-  value       = module.env.vpc_service_control_perimeter_name
+output "composer_plan_triggers_id" {
+  description = "CB plan triggers"
+  value       = try(module.composer_cloudbuild_project.plan_triggers_id, [])
 }
 
-output "restricted_enabled_apis" {
-  description = "Activated APIs."
-  value       = module.env.restricted_enabled_apis
+output "composer_apply_triggers_id" {
+  description = "CB apply triggers"
+  value       = try(module.composer_cloudbuild_project.apply_triggers_id, [])
 }
 
-output "access_context_manager_policy_id" {
-  description = "Access Context Manager Policy ID."
-  value       = module.env.access_context_manager_policy_id
-}
-
-output "peering_complete" {
-  description = "Output to be used as a module dependency."
-  value       = module.env.peering_complete
-}
-
-output "env_kms_project" {
-  description = "Project sample for KMS usage project ID."
-  value       = module.env.env_kms_project
-}
-
-output "keyring" {
-  description = "The name of the keyring."
-  value       = module.env.keyring
-}
-
-output "keys" {
-  description = "List of created key names."
-  value       = module.env.keys
-}
-
-output "bucket" {
-  description = "The created storage bucket."
-  value       = module.env.bucket
-}
-
-output "peering_subnetwork_self_link" {
-  description = "The subnetwork self link of the peering network."
-  value       = module.env.peering_subnetwork_self_link
-}
-
-output "iap_firewall_tags" {
-  description = "The security tags created for IAP (SSH and RDP) firewall rules and to be used on the VM created on step 5-app-infra on the peering network project."
-  value       = module.env.iap_firewall_tags
-}
-
-output "machine_learning_project_id" {
-  description = "The project ID of the machine learning project."
-  value       = module.ml_env.machine_learning_project
-}
-
-output "machine_learning_project_number" {
-  description = "The project Number of the machine learning project."
-  value       = module.ml_env.machine_learning_project_number
-}
-
-output "machine_learning_key_id" {
-  description = "The kms key ID of the machine learning project."
-  value       = module.ml_env.machine_learning_key_id
+output "enable_cloudbuild_deploy" {
+  description = "Enable infra deployment using Cloud Build."
+  value       = local.enable_cloudbuild_deploy
 }

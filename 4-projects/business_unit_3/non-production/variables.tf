@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+variable "env" {
+  description = "The environment this deployment belongs to (ie. development)"
+  type        = string
+}
+variable "default_region" {
+  description = "Default region to create resources where applicable."
+  type        = string
+  default     = "us-central1"
+}
+
 variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string
@@ -38,13 +48,31 @@ variable "peering_module_depends_on" {
 }
 
 variable "tfc_org_name" {
-  description = "Name of the TFC organization"
+  description = "Name of the TFC organization."
   type        = string
   default     = ""
 }
 
-variable "instance_region" {
-  description = "Region which the peered subnet will be created (Should be same region as the VM that will be created on step 5-app-infra on the peering project)."
-  type        = string
-  default     = "us-central1"
+variable "project_budget" {
+  description = <<EOT
+  Budget configuration.
+  budget_amount: The amount to use as the budget.
+  alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
+  alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
+  alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
+  EOT
+  type = object({
+    budget_amount        = optional(number, 1000)
+    alert_spent_percents = optional(list(number), [1.2])
+    alert_pubsub_topic   = optional(string, null)
+    alert_spend_basis    = optional(string, "FORECASTED_SPEND")
+  })
+  default = {}
 }
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+

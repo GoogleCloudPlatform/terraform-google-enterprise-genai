@@ -14,35 +14,46 @@
  * limitations under the License.
  */
 
-module "env" {
-  source = "../../modules/base_env"
-
-  env                          = "development"
-  business_code                = "bu3"
-  business_unit                = "business_unit_3"
-  remote_state_bucket          = var.remote_state_bucket
-  location_kms                 = var.location_kms
-  location_gcs                 = var.location_gcs
-  tfc_org_name                 = var.tfc_org_name
-  peering_module_depends_on    = var.peering_module_depends_on
-  peering_iap_fw_rules_enabled = true
-  subnet_region                = var.instance_region
-  subnet_ip_range              = "10.5.64.0/21"
+module "bu_folder" {
+  source              = "../../modules/env_folders"
+  business_code       = local.business_code
+  remote_state_bucket = var.remote_state_bucket
+  env                 = var.env
 }
 
-# data "google_folder" "bu_folder" {
-#   folder = module.env.business_unit_folder
-# }
+module "composer_cloudbuild_project" {
+  source              = "../../modules/app_pipelines"
+  count               = local.enable_cloudbuild_deploy ? 1 : 0
+  repo_name           = local.repo_name
+  env                 = var.env
+  default_region      = var.default_region
+  remote_state_bucket = var.remote_state_bucket
+  folder_id           = module.bu_folder.business_unit_folder
+  activate_apis = [
+    "logging.googleapis.com",
+    "storage.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "serviceusage.googleapis.com",
+    "secretmanager.googleapis.com",
+    "composer.googleapis.com",
+    "sourcerepo.googleapis.com",
+  ]
+  #Metadata
+  project_suffix   = "cmpsr-pipeln"
+  application_name = "app-pipelines"
+  business_code    = local.business_code
+}
+
 module "ml_env" {
   source = "../../modules/ml_env"
 
-  env                  = "development"
-  business_code        = "bu3"
-  business_unit        = "business_unit_3"
+  env                  = var.env
+  business_code        = local.business_code
+  business_unit        = local.buiness_unit
   remote_state_bucket  = var.remote_state_bucket
   location_gcs         = var.location_gcs
   tfc_org_name         = var.tfc_org_name
-  business_unit_folder = module.env.business_unit_folder
+  business_unit_folder = module.bu_folder.business_unit_folder
 
-  #   depends_on = [module.env]
 }

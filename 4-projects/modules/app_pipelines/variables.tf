@@ -14,6 +14,34 @@
  * limitations under the License.
  */
 
+variable "folder_id" {
+  description = "folder id of the business unit"
+  type        = string
+}
+variable "project_suffix" {
+  description = "project suffix"
+  type        = string
+}
+
+variable "application_name" {
+  description = "name of application"
+  type        = string
+}
+
+variable "business_code" {
+  description = "business code"
+  type        = string
+}
+
+variable "activate_apis" {
+  description = "API's to activate for this project"
+  type        = list(string)
+}
+variable "repo_name" {
+  description = "name of repo to create"
+  type        = string
+}
+
 variable "env" {
   description = "The environment this deployment belongs to (ie. development)"
   type        = string
@@ -39,12 +67,6 @@ variable "location_gcs" {
   description = "Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring)"
   type        = string
   default     = "US"
-}
-
-variable "peering_module_depends_on" {
-  description = "List of modules or resources peering module depends on."
-  type        = list(any)
-  default     = []
 }
 
 variable "tfc_org_name" {

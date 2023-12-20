@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+variable "env" {
+  description = "The environment this deployment belongs to (ie. development)"
+  type        = string
+}
+variable "default_region" {
+  description = "Default region to create resources where applicable."
+  type        = string
+  default     = "us-central1"
+}
 variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string

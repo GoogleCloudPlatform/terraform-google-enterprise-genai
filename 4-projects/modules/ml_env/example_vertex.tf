@@ -94,7 +94,7 @@ module "machine_learning_project" {
     "storage.googleapis.com",
     "secretmanager.googleapis.com",
     "serviceusage.googleapis.com",
-    "cloudkms.googleapis.com"
+    "cloudkms.googleapis.com",
   ]
 
 
@@ -142,14 +142,3 @@ resource "google_kms_crypto_key_iam_member" "ml_key" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
 }
-
-# resource "google_kms_crypto_key_iam_binding" "encrypt" {
-#   for_each      = { for idx, values in local.rings_flat_map : idx => values }
-#   crypto_key_id = google_kms_crypto_key.ml_key[each.value.key_ring].id
-#   role          = each.value.key_role
-#   members = var.env == "development" ? concat([
-#     "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
-#     ],
-#     local.kms_sa
-#   ) : ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
-# }

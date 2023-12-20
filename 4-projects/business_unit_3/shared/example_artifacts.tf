@@ -40,8 +40,7 @@ module "app_infra_artifacts_project" {
     "serviceusage.googleapis.com",
     "storage.googleapis.com",
     "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com",
-    "cloudkms.googleapis.com",
+    "secretmanager.googleapis.com"
   ]
   # Metadata
   project_suffix    = "artifacts"
@@ -73,4 +72,11 @@ resource "google_project_iam_member" "artifact_tf_sa_roles" {
   project  = module.app_infra_artifacts_project[0].project_id
   role     = each.key
   member   = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-artifact-publish"]}"
+}
+
+// Add Service Agent for Cloud Build
+resource "google_project_iam_member" "artifact_cloudbuild_agent" {
+  project = module.app_infra_artifacts_project[0].project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${module.app_infra_artifacts_project[0].project_number}@cloudbuild.gserviceaccount.com"
 }
