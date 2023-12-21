@@ -140,5 +140,8 @@ resource "google_kms_crypto_key_iam_member" "ml_key" {
   for_each      = google_kms_crypto_key.ml_key
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+  members       = [
+      "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}",
+      "serviceAccount:${data.google_bigquery_default_service_account.bq_sa.email}"
+ ]
 }
