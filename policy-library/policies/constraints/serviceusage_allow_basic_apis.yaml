@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+## Changes start at 73
 
 apiVersion: constraints.gatekeeper.sh/v1alpha1
 kind: GCPServiceUsageConstraintV1
@@ -70,5 +71,13 @@ spec:
     - "storage.googleapis.com"
     - "run.googleapis.com"
     - "eventarc.googleapis.com"
+    - "aiplatform.googleapis.com"
+    - "bigquerymigration.googleapis.com"
+    - "bigquerystorage.googleapis.com"
+    - "containerregistry.googleapis.com"
+    - "dataflow.googleapis.com"
+    - "dataform.googleapis.com"
+    - "deploymentmanager.googleapis.com"
     - "notebooks.googleapis.com"
-    - "datacatalog.googleapis.com"
+    - "composer.googleapis.com"
+    - "containerscanning.googleapis.com"
