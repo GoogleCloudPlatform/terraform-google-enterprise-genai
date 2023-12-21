@@ -143,5 +143,5 @@ resource "google_kms_crypto_key_iam_member" "ml_key" {
   members       = [
       "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}",
       "serviceAccount:${data.google_bigquery_default_service_account.bq_sa.email}"
-   ]
+ ]
 }
