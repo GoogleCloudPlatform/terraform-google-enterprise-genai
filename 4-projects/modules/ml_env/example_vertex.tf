@@ -111,6 +111,10 @@ data "google_storage_project_service_account" "gcs_account" {
   project = module.machine_learning_project.project_id
 }
 
+data "google_bigquery_default_service_account" "bq_sa" {
+  project = module.machine_learning_project.project_id
+}
+
 # resource "google_project_service_identity" "secret_manager" {
 #   provider = google-beta
 #   project  = module.machine_learning_project.project_id
