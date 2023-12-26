@@ -38,3 +38,8 @@ output "project_name" {
   description = "Name of the Project."
   value       = module.project.project_name
 }
+
+output "crypto_key" {
+  description = "keys created for the project"
+  value       = google_kms_crypto_key.key
+}

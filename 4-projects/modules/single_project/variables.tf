@@ -148,3 +148,19 @@ variable "enable_cloudbuild_deploy" {
   type        = bool
   default     = false
 }
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+
+variable "key_rings" {
+  description = "Keyrings to attach project key to"
+  type        = list(string)
+}
+
+variable "remote_state_bucket" {
+  description = "Backend bucket to load Terraform Remote State Data from previous steps."
+  type        = string
+}

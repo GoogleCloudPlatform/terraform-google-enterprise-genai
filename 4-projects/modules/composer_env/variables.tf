@@ -33,10 +33,11 @@ variable "business_code" {
   type        = string
 }
 
-variable "activate_apis" {
-  description = "API's to activate for this project"
-  type        = list(string)
-}
+# variable "activate_apis" {
+#   description = "API's to activate for this project"
+#   type        = list(string)
+# }
+
 variable "repo_name" {
   description = "name of repo to create"
   type        = string
@@ -46,11 +47,11 @@ variable "env" {
   description = "The environment this deployment belongs to (ie. development)"
   type        = string
 }
-variable "default_region" {
-  description = "Default region to create resources where applicable."
-  type        = string
-  default     = "us-central1"
-}
+# variable "default_region" {
+#   description = "Default region to create resources where applicable."
+#   type        = string
+#   default     = "us-central1"
+# }
 
 variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
@@ -98,3 +99,12 @@ variable "key_rotation_period" {
   default     = "7776000s"
 }
 
+variable "shared_kms_key_ring" {
+  description = "Keyrings to attach project key to"
+  type        = list(string)
+}
+
+variable "business_unit" {
+  description = "The business (ex. business_unit_1)."
+  type        = string
+}

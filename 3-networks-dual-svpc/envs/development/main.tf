@@ -59,6 +59,9 @@ locals {
       }
     ]
   }
+
+  kms_project_number = 126209299992
+
 }
 
 module "base_env" {
@@ -84,5 +87,4 @@ module "base_env" {
   restricted_private_service_connect_ip = "10.10.64.5"
   remote_state_bucket                   = var.remote_state_bucket
   tfc_org_name                          = var.tfc_org_name
-
 }

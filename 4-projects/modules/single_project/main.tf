@@ -31,6 +31,12 @@ locals {
     ]
   ]) : []
 
+  pipeline_kms_sas = var.enable_cloudbuild_deploy ? flatten([
+    for repo in keys(var.sa_roles) : [
+      var.app_infra_pipeline_service_accounts[repo]
+    ]
+  ]) : []
+
   network_user_role = var.enable_cloudbuild_deploy ? flatten([
     for repo in local.source_repos : [
       for subnet in var.shared_vpc_subnets :
@@ -105,4 +111,25 @@ resource "google_compute_subnetwork_iam_member" "service_account_role_to_vpc_sub
   region     = each.value.region
   project    = var.shared_vpc_host_project_id
   member     = "serviceAccount:${each.value.sa}"
+}
+
+// Add key for project
+resource "google_kms_crypto_key" "key" {
+  for_each        = toset(var.key_rings)
+  name            = module.project.project_name
+  key_ring        = each.key
+  rotation_period = var.key_rotation_period
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+// Add crypto key viewer role to kms environment project
+
+resource "google_project_iam_member" "kms_viewer" {
+  for_each = var.environment != "common" ? toset(local.pipeline_kms_sas) : toset([])
+  project  = local.environment_kms_project_id
+  role     = "roles/cloudkms.viewer"
+  member   = "serviceAccount:${each.key}"
+
 }

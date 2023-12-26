@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-output "machine_learning_project_id" {
-  description = "Project machine learning project."
-  value       = module.machine_learning_project.project_id
+locals {
+  environment_kms_project_id = try(data.terraform_remote_state.environments_env.outputs.env_kms_project_id, "")
 }
 
-output "machine_learning_project_number" {
-  description = "Project number of machine learning project."
-  value       = module.machine_learning_project.project_number
+data "terraform_remote_state" "environments_env" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/environments/${var.environment}"
+  }
 }
 
-output "machine_learning_key_id" {
-  description = "Key ID for the machine learning project."
-  value       = values(module.machine_learning_project.crypto_key)[*].id
-}

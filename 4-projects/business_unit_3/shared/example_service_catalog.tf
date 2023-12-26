@@ -27,12 +27,14 @@ module "app_service_catalog_project" {
   source = "../../modules/single_project"
   count  = local.enable_cloudbuild_deploy ? 1 : 0
 
-  org_id          = local.org_id
-  billing_account = local.billing_account
-  folder_id       = local.common_folder_name
-  environment     = "common"
-  project_budget  = var.project_budget
-  project_prefix  = local.project_prefix
+  org_id              = local.org_id
+  billing_account     = local.billing_account
+  folder_id           = local.common_folder_name
+  environment         = "common"
+  project_budget      = var.project_budget
+  project_prefix      = local.project_prefix
+  key_rings           = local.shared_kms_key_ring
+  remote_state_bucket = var.remote_state_bucket
   activate_apis = [
     "logging.googleapis.com",
     "storage.googleapis.com",
@@ -50,19 +52,19 @@ module "app_service_catalog_project" {
   business_code     = "bu3"
 }
 
-resource "google_kms_crypto_key" "sc_key" {
-  for_each        = toset(local.shared_kms_key_ring)
-  name            = module.app_service_catalog_project[0].project_name
-  key_ring        = each.key
-  rotation_period = var.key_rotation_period
-  lifecycle {
-    prevent_destroy = false
-  }
-}
+# resource "google_kms_crypto_key" "sc_key" {
+#   for_each        = toset(local.shared_kms_key_ring)
+#   name            = module.app_service_catalog_project[0].project_name
+#   key_ring        = each.key
+#   rotation_period = var.key_rotation_period
+#   lifecycle {
+#     prevent_destroy = false
+#   }
+# }
 
-// Create key for project
+# // Create key for project
 resource "google_kms_crypto_key_iam_member" "sc_key" {
-  for_each      = google_kms_crypto_key.sc_key
+  for_each      = module.app_service_catalog_project[0].crypto_key
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-service-catalog"]}"
@@ -77,24 +79,32 @@ resource "google_project_service_identity" "secretmanager_agent" {
 
 // Add Secret Manager Service Agent to key with encrypt/decrypt permissions 
 resource "google_kms_crypto_key_iam_member" "secretmanager_agent" {
-  for_each      = google_kms_crypto_key.sc_key
+  for_each      = module.app_service_catalog_project[0].crypto_key
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_project_service_identity.secretmanager_agent.email}"
 }
 
+// Grab Service Agent for Storage
+resource "google_project_service_identity" "storage" {
+  provider = google-beta
+  project  = module.app_service_catalog_project[0].project_id
+  service  = "storage.googleapis.com"
+}
 // Add Service Agent for Storage
 resource "google_kms_crypto_key_iam_member" "storage_agent" {
-  for_each      = google_kms_crypto_key.sc_key
+  for_each      = module.app_service_catalog_project[0].crypto_key
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${module.app_service_catalog_project[0].project_number}@gs-project-accounts.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service_identity.storage]
 }
 
 
 // Add infra pipeline SA encrypt/decrypt permissions
 resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
-  for_each      = google_kms_crypto_key.sc_key
+  for_each      = module.app_service_catalog_project[0].crypto_key
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-service-catalog"]}"

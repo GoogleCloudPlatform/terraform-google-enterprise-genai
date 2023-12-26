@@ -16,21 +16,19 @@
 
 locals {
   org_id                              = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
-  billing_account                     = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
-  project_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
+  parent_folder                       = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
+  parent                              = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
   projects_backend_bucket             = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
-  perimeter_name                      = data.terraform_remote_state.network_env.outputs.restricted_service_perimeter_name
-  base_network_self_link              = data.terraform_remote_state.network_env.outputs.base_network_self_link
-  base_subnets_self_links             = data.terraform_remote_state.network_env.outputs.base_subnets_self_links
-  base_host_project_id                = data.terraform_remote_state.network_env.outputs.base_host_project_id
-  restricted_host_project_id          = data.terraform_remote_state.network_env.outputs.restricted_host_project_id
-  restricted_subnets_self_links       = data.terraform_remote_state.network_env.outputs.restricted_subnets_self_links
-  access_context_manager_policy_id    = data.terraform_remote_state.network_env.outputs.access_context_manager_policy_id
-  env_folder_name                     = data.terraform_remote_state.environments_env.outputs.env_folder
+  location_gcs                        = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
+  billing_account                     = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
+  default_region                      = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
+  project_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
+  projects_remote_bucket_tfstate      = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
+  cloud_build_private_worker_pool_id  = try(data.terraform_remote_state.bootstrap.outputs.cloud_build_private_worker_pool_id, "")
+  cloud_builder_artifact_repo         = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
+  enable_cloudbuild_deploy            = local.cloud_builder_artifact_repo != ""
+  environment_kms_key_ring            = data.terraform_remote_state.environments_env.outputs.key_rings
   app_infra_pipeline_service_accounts = data.terraform_remote_state.business_unit_shared.outputs.terraform_service_accounts
-  enable_cloudbuild_deploy            = data.terraform_remote_state.business_unit_shared.outputs.enable_cloudbuild_deploy
-  environments_kms_key_ring           = data.terraform_remote_state.environments_env.outputs.key_rings
-  default_region                      = data.terraform_remote_state.business_unit_shared.outputs.default_region
 }
 
 data "terraform_remote_state" "bootstrap" {
@@ -48,15 +46,6 @@ data "terraform_remote_state" "org" {
   config = {
     bucket = var.remote_state_bucket
     prefix = "terraform/org/state"
-  }
-}
-
-data "terraform_remote_state" "network_env" {
-  backend = "gcs"
-
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/networks/${var.env}"
   }
 }
 

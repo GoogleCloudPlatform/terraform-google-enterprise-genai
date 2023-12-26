@@ -34,40 +34,45 @@ output "project_sa" {
   value       = module.app_cloudbuild_project.sa
 }
 
-output "terraform_service_accounts" {
-  description = "Composer Terraform SA mapped to source repos as keys"
-  value       = try(module.app_pipelines[0].terraform_service_accounts, {})
+output "project_crypto_key" {
+  description = "key created in project"
+  value       = module.app_cloudbuild_project.crypto_key
 }
 
-output "repos" {
-  description = "CSR's to store source code for composer repo"
-  value       = try(module.app_pipelines[0].repos, toset([]))
-}
+# output "terraform_service_accounts" {
+#   description = "Composer Terraform SA mapped to source repos as keys"
+#   value       = try(module.app_pipelines.terraform_service_accounts, {})
+# }
 
-output "artifact_buckets" {
-  description = "GCS Buckets to store Cloud Build Artifacts"
-  value       = try(module.app_pipelines[0].artifact_buckets, {})
-}
+# output "repos" {
+#   description = "CSR's to store source code for composer repo"
+#   value       = try(module.app_pipelines.repos, toset([]))
+# }
 
-output "state_buckets" {
-  description = "GCS Buckets to store TF state"
-  value       = try(module.app_pipelines[0].state_buckets, {})
-}
+# output "artifact_buckets" {
+#   description = "GCS Buckets to store Cloud Build Artifacts"
+#   value       = try(module.app_pipelines.artifact_buckets, {})
+# }
 
-output "log_buckets" {
-  description = "GCS Buckets to store Cloud Build logs"
-  value       = try(module.app_pipelines[0].log_buckets, {})
-}
+# output "state_buckets" {
+#   description = "GCS Buckets to store TF state"
+#   value       = try(module.app_pipelines.state_buckets, {})
+# }
 
-output "plan_triggers_id" {
-  description = "CB plan triggers"
-  value       = try(module.app_pipelines[0].plan_triggers_id, [])
-}
+# output "log_buckets" {
+#   description = "GCS Buckets to store Cloud Build logs"
+#   value       = try(module.app_pipelines.log_buckets, {})
+# }
 
-output "apply_triggers_id" {
-  description = "CB apply triggers"
-  value       = try(module.app_pipelines[0].apply_triggers_id, [])
-}
+# output "plan_triggers_id" {
+#   description = "CB plan triggers"
+#   value       = try(module.app_pipelines.plan_triggers_id, [])
+# }
+
+# output "apply_triggers_id" {
+#   description = "CB apply triggers"
+#   value       = try(module.app_pipelines.apply_triggers_id, [])
+# }
 
 output "enable_cloudbuild_deploy" {
   description = "Enable infra deployment using Cloud Build."

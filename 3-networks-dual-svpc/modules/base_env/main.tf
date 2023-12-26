@@ -275,6 +275,11 @@ module "base_shared_vpc" {
   secondary_ranges = {
     "sb-${var.environment_code}-shared-base-${var.default_region1}" = var.base_subnet_secondary_ranges[var.default_region1]
   }
-  allow_all_ingress_ranges = null
-  allow_all_egress_ranges  = null
+
+  allow_all_ingress_ranges = concat(data.google_netblock_ip_ranges.health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.legacy_health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.iap_forwarders.cidr_blocks_ipv4)
+  allow_all_egress_ranges  = ["0.0.0.0/0"]
+
+  nat_enabled               = true
+  nat_num_addresses_region1 = 1
+  nat_num_addresses_region2 = 1
 }

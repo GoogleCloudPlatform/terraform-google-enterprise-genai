@@ -37,27 +37,20 @@ module "bu_folder" {
 # }
 
 module "composer_cloudbuild_project" {
-  source              = "../../modules/app_pipelines"
-  count               = local.enable_cloudbuild_deploy ? 1 : 0
-  repo_name           = local.repo_name
-  env                 = var.env
-  default_region      = var.default_region
+  source    = "../../modules/composer_env"
+  count     = local.enable_cloudbuild_deploy ? 1 : 0
+  repo_name = local.repo_name
+  env       = var.env
+  # default_region      = var.default_region
   remote_state_bucket = var.remote_state_bucket
   folder_id           = module.bu_folder.business_unit_folder
-  activate_apis = [
-    "logging.googleapis.com",
-    "storage.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "secretmanager.googleapis.com",
-    "composer.googleapis.com",
-    "sourcerepo.googleapis.com",
-  ]
+  shared_kms_key_ring = local.environment_kms_key_ring
+
   #Metadata
   project_suffix   = "cmpsr-pipeln"
   application_name = "compsoer-pipeline"
   business_code    = local.business_code
+  business_unit    = local.buiness_unit
 }
 module "ml_env" {
   source = "../../modules/ml_env"

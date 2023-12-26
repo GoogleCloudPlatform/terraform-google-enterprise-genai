@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-output "machine_learning_project_id" {
-  description = "Project machine learning project."
-  value       = module.machine_learning_project.project_id
+
+data "google_netblock_ip_ranges" "legacy_health_checkers" {
+  range_type = "legacy-health-checkers"
 }
 
-output "machine_learning_project_number" {
-  description = "Project number of machine learning project."
-  value       = module.machine_learning_project.project_number
+data "google_netblock_ip_ranges" "health_checkers" {
+  range_type = "health-checkers"
 }
 
-output "machine_learning_key_id" {
-  description = "Key ID for the machine learning project."
-  value       = values(module.machine_learning_project.crypto_key)[*].id
+// Cloud IAP's TCP forwarding netblock
+data "google_netblock_ip_ranges" "iap_forwarders" {
+  range_type = "iap-forwarders"
 }

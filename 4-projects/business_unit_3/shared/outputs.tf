@@ -68,11 +68,6 @@ output "service_catalog_project_id" {
   value       = try(module.app_service_catalog_project[0].project_id, "")
 }
 
-# output "kms_keyring" {
-#   description = "Self link of the keyring"
-#   value       = module.kms.keyring
-# }
-
 output "common_artifacts_project_id" {
   description = "App Infra Artifacts Project ID"
   value       = try(module.app_infra_artifacts_project[0].project_id, "")

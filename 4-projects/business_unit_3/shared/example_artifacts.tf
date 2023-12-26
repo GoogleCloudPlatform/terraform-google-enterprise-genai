@@ -27,12 +27,14 @@ module "app_infra_artifacts_project" {
   source = "../../modules/single_project"
   count  = local.enable_cloudbuild_deploy ? 1 : 0
 
-  org_id          = local.org_id
-  billing_account = local.billing_account
-  folder_id       = local.common_folder_name
-  environment     = "common"
-  project_budget  = var.project_budget
-  project_prefix  = local.project_prefix
+  org_id              = local.org_id
+  billing_account     = local.billing_account
+  folder_id           = local.common_folder_name
+  environment         = "common"
+  project_budget      = var.project_budget
+  project_prefix      = local.project_prefix
+  key_rings           = local.shared_kms_key_ring
+  remote_state_bucket = var.remote_state_bucket
   activate_apis = [
     "artifactregistry.googleapis.com",
     "logging.googleapis.com",
@@ -51,17 +53,17 @@ module "app_infra_artifacts_project" {
   business_code     = "bu3"
 }
 
-resource "google_kms_crypto_key" "ml_key" {
-  for_each        = toset(local.shared_kms_key_ring)
-  name            = module.app_infra_artifacts_project[0].project_name
-  key_ring        = each.key
-  rotation_period = var.key_rotation_period
-  lifecycle {
-    prevent_destroy = false
-  }
-}
+# resource "google_kms_crypto_key" "ml_key" {
+#   for_each        = toset(local.shared_kms_key_ring)
+#   name            = module.app_infra_artifacts_project[0].project_name
+#   key_ring        = each.key
+#   rotation_period = var.key_rotation_period
+#   lifecycle {
+#     prevent_destroy = false
+#   }
+# }
 resource "google_kms_crypto_key_iam_member" "ml_key" {
-  for_each      = google_kms_crypto_key.ml_key
+  for_each      = module.app_infra_cloudbuild_project[0].crypto_key
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-artifact-publish"]}"
