@@ -14,37 +14,18 @@
  * limitations under the License.
  */
 
-variable "region" {
-  description = "Location of the repository."
+variable "instance_region" {
+  description = "The region where compute instance will be created. A subnetwork must exists in the instance region."
   type        = string
 }
 
-variable "environment" {
+variable "remote_state_bucket" {
+  description = "Backend bucket to load remote state information from previous steps."
   type        = string
-  description = "development | staging | production | common"
-  validation {
-    condition     = contains(["development", "staging", "production", "common"], var.environment)
-    error_message = "Environment must be one of [development, staging, production]."
-  }
-}
-
-variable "name" {
-  description = "Application Name"
-  type        = string
-}
-
-variable "project_id" {
-  description = "Project ID"
 }
 
 variable "github_api_token" {
   description = "API Token from your github repository"
-  type        = string
-  sensitive   = true
-}
-
-variable "github_name_prefix" {
-  description = "A name for your github connection to cloubuild"
   type        = string
 }
 
@@ -57,9 +38,4 @@ variable "github_app_installation_id" {
 variable "github_remote_uri" {
   description = "The remote uri of your github repository"
   type        = string
-}
-
-variable "gcs_bucket_prefix" {
-  description = "Prefix of the bucket name"
-  default     = "bkt"
 }

@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+locals {
+  env_code = substr(var.environment, 0, 1)
+  name_var = format("%s-%s", local.env_code, var.name)
 
-output "artifact_registry_repository_id" {
-  value = google_artifact_registry_repository.repo.id
-}
+  github_owner     = split("/", split("https://github.com/", var.github_remote_uri)[1])[0]
+  github_repo_name = trim(basename(var.github_remote_uri), ".git")
 
-output "cloudbuild_trigger_id" {
-  value = google_cloudbuild_trigger.docker_build.id
+  trigger_sa_roles = [
+    "roles/artifactregistry.reader",
+    "roles/artifactregistry.writer",
+  ]
 }

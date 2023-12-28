@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-output "artifact_registry_repository_id" {
-  value = google_artifact_registry_repository.repo.id
+locals {
+  business_unit = "business_unit_3"
+  environment   = "development"
 }
 
-output "cloudbuild_trigger_id" {
-  value = google_cloudbuild_trigger.docker_build.id
-}

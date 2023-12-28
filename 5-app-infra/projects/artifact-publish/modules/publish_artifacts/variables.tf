@@ -18,16 +18,6 @@ variable "region" {
   description = "Location of the repository."
   type        = string
 }
-
-variable "environment" {
-  type        = string
-  description = "development | staging | production"
-  validation {
-    condition     = contains(["development", "staging", "production"], var.environment)
-    error_message = "Environment must be one of [development, staging, production]."
-  }
-}
-
 variable "name" {
   description = "Name of the repository."
   type        = string
@@ -67,6 +57,15 @@ variable "cleanup_policies" {
   }))
 }
 
+variable "environment" {
+  type        = string
+  description = "development | staging | production | commmon"
+  validation {
+    condition     = contains(["development", "staging", "production", "common"], var.environment)
+    error_message = "Environment must be one of [development, staging, production]."
+  }
+}
+
 variable "project_id" {
   description = "Project ID"
 }
@@ -75,27 +74,12 @@ variable "cloudbuild_repo_id" {
   type        = string
 }
 
+variable "github_remote_uri" {
+  description = "The remote uri of your github repository"
+  type        = string
+}
 
-# variable "github_api_token" {
-#   description = "API Token from your github repository"
-#   type        = string
-#   sensitive   = true
-# }
-
-# variable "github_name_prefix" {
-#   description = "A name for your github connection to cloubuild"
-#   type        = string
-#   default     = "github-cloudbuild"
-# }
-
-# variable "github_app_installation_id" {
-#   description = "The app installation ID that was created when installing Google Cloud Build in Github: https://github.com/apps/google-cloud-build"
-#   type        = number
-
-# }
-
-# variable "github_remote_uri" {
-#   description = "The remote uri of your github repository"
-#   type        = string
-# }
-
+variable "secret_version_name" {
+  description = "Secret Version Name of key"
+  type        = string
+}

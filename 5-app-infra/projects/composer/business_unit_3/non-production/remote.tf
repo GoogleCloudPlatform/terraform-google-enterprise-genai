@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-output "artifact_registry_repository_id" {
-  value = google_artifact_registry_repository.repo.id
+locals {
+  composer_project_id = data.terraform_remote_state.projects_shared.outputs.composer_project_id
 }
 
-output "cloudbuild_trigger_id" {
-  value = google_cloudbuild_trigger.docker_build.id
+data "terraform_remote_state" "projects_shared" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/projects/${local.business_unit}/${local.environment}"
+  }
 }

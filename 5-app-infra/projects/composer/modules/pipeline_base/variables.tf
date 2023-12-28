@@ -21,9 +21,9 @@ variable "region" {
 
 variable "environment" {
   type        = string
-  description = "development | staging | production | common"
+  description = "development | non-production | production | common"
   validation {
-    condition     = contains(["development", "staging", "production", "common"], var.environment)
+    condition     = contains(["development", "non-production", "production", "common"], var.environment)
     error_message = "Environment must be one of [development, staging, production]."
   }
 }

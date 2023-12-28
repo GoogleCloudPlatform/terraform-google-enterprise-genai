@@ -16,20 +16,25 @@
 
 output "trigger_sa_account_id" {
   description = "Account id of service account cloudbuild."
-  value       = google_service_account.trigger_sa
+  value       = module.composer_pipeline.trigger_sa_account_id
 }
 
 output "cloudbuild_v2_repo_id" {
   description = "Repository ID of cloudbuild repository"
-  value       = google_cloudbuildv2_repository.repo.id
+  value       = module.composer_pipeline.cloudbuild_v2_repo_id
 }
 
 output "kms_key_id" {
   description = "Projects Key ID for encrytion"
-  value       = data.google_kms_crypto_key.key.id
+  value       = module.composer_pipeline.kms_key_id
 }
 
-output "github_secret_version_name" {
-  description = "Secret Version Name of key"
-  value       = google_secret_manager_secret_version.github_secret_version.name
+output "storage_bucket_name" {
+  description = "Name of storage bucket created"
+  value       = module.composer.gcs_bucket
+}
+
+output "cloudbuild_trigger_id" {
+  description = "Id of Cloud Build Trigger"
+  value       = module.composer.cloudbuild_trigger_id
 }

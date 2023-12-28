@@ -43,7 +43,7 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
  which are connected as service projects to the shared VPC created in the previous stage.</td>
 </tr>
 <tr>
-<td>5-app-infra - projects/service-catalog (this file)</td>
+<td>5-app-infra - projects/composer(this file)</td>
 <td>Deploys Composer and a pipeline</td>
 </tr>
 </tbody>
@@ -54,50 +54,31 @@ For an overview of the architecture and the parts, see the
 file.
 
 ## Purpose
-The purpose of this step is to deploy a pipeline and a bucket which is linked to a GitHub repository that houses terraform modules for the use in Service Catalog.
-Although Service Catalog itself must be manually deployed, the modules which will be used can still be automated. 
 
-The repository has the structure (truncated for brevity):
-```
-├── bucket
-│   ├── README.md
-│   ├── data.tf
-│   ├── main.tf
-│   ├── outputs.tf
-│   ├── provider.tf
-│   └── variables.tf
-├── composer
-│   ├── README.md
-│   ├── data.tf
-│   ├── iam.roles.tf
-│   ├── iam.users.tf
-│   ├── locals.tf
-│   ├── main.tf
-│   ├── outputs.tf
-│   ├── provider.tf
-│   ├── terraform.tfvars.example
-│   ├── variables.tf
-│   └── vpc.tf
-├── cryptography
-│   ├── README.md
-│   ├── crypto_key
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   └── variables.tf
-│   └── key_ring
-│       ├── main.tf
-│       ├── outputs.tf
-│       └── variables.tf
-```
-Each folder represents a terraform module.  
-When there is a change in any of the terraform module folders, the pipeline will find whichever module has been changed since the last push, `tar.gz` that file and place it in a bucket for Service Catalog to access.
+The purpose of this step is to deploy out composer in an isolated environment.  Composer will be used for machine learning workflows.  A Cloud Build pipeline is also deployed out.  At the time of this writing, it is configured to attach itself to a github repository.  This can eventually be expanded upon to include GCP cloud source repositories and GitLab (among other possible solutions).  The Cloud Build pipeline is responsible for updating composers DAGS when there is any change made in the source repository (ie. GitHub)
 
-This pipeline is listening to the `main` branch of this repository for changes.
-The pipeline can be accessed by navigating to the project name created in step-4:
+Each environment has its own composer deployment, isolated from each other.  They are located in each respective environments (`development`, `non-production`, `production`) under thier respective business unit - in this case, Business Unit 3.  
+
+The Pipeline is connected to a GitHub repsository with a simple structure:
+
+```
+├── README.md
+└── dags
+    └── hello_world.py
+```
+with three branches: `development`, `non-production`, `production`. 
+
+N.B
+-> include github restrictions here <-
+
+Once there is a change to a branch, that will kickoff a pipeline in it's respective environment and update that environments composer DAG.
+
+Once pushed, the pipeline can be accessed by navigating to the project name created in step-4.  They can be found under each respective environemnt and business unit folder or by executing the command:
 
 ```bash
-terraform -chdir="../terraform-example-foundation/4-projects/business_unit_3/shared/" output -raw service_catalog_project_id
+terraform -chdir="../terraform-example-foundation/4-projects/business_unit_3/[development/non-production/production]/" output -raw composer_project_id
 ```
+
 ## Prerequisites
 
 1. 0-bootstrap executed successfully.
@@ -156,21 +137,21 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd ..
    ```
 
-1. Clone the `bu3-service-catalog` repo.
+1. Clone the `bu3-composer` repo.
 
    ```bash
-   gcloud source repos clone bu3-service-catalog --project=${INFRA_PIPELINE_PROJECT_ID}
+   gcloud source repos clone bu3-composer --project=${INFRA_PIPELINE_PROJECT_ID}
    ```
 
 1. Navigate into the repo, change to non-main branch and copy contents of foundation to new repo.
-   All subsequent steps assume you are running them from the bu3-service-catalog directory.
+   All subsequent steps assume you are running them from the bu1-composer directory.
    If you run them from another directory, adjust your copy paths accordingly.
 
    ```bash
-   cd bu3-service-catalog
+   cd bu3-composer
    git checkout -b plan
 
-   cp -RT ../../terraform-example-foundation/5-app-infra/projects/service-catalog .
+   cp -RT ../terraform-example-foundation/5-app-infra/projects/composer .
    cp ../terraform-example-foundation/build/cloudbuild-tf-* .
    cp ../terraform-example-foundation/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
@@ -210,21 +191,36 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git push --set-upstream origin plan
    ```
 
-1. Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+1. Merge changes to development. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
    ```bash
-   git checkout -b shared
-   git push origin shared
+   git checkout -b development
+   git push origin development
    ```
 
+1. Merge changes to non-production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+   pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
+
+   ```bash
+   git checkout -b non-production
+   git push origin non-production
+   ```
+
+1. Merge changes to production branch. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+      pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
+
+   ```bash
+   git checkout -b production
+   git push origin production
+   ```
 
 ### Run Terraform locally
 
 1. The next instructions assume that you are at the same level of the `terraform-example-foundation` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
-   cd terraform-example-foundation/5-app-infra/projects/service-catalog
+   cd terraform-example-foundation/5-app-infra/projects/composer
    cp ../../../build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
@@ -254,7 +250,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    project_id=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo ${project_id}
 
-   terraform_sa=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-service-catalog"' --raw-output)
+   terraform_sa=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-composer"' --raw-output)
    echo ${terraform_sa}
 
    gcloud iam service-accounts add-iam-policy-binding ${terraform_sa} --project ${project_id} --member="${member}" --role="roles/iam.serviceAccountTokenCreator"
@@ -263,7 +259,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
-   export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-service-catalog"' --raw-output)
+   export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-composer"' --raw-output)
    echo "backend_bucket = ${backend_bucket}"
 
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
@@ -280,29 +276,66 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo ${INFRA_PIPELINE_PROJECT_ID}
 
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-service-catalog"' --raw-output)
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-composer"' --raw-output)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
-1. Run `init` and `plan` and review output for environment shared (common).
+1. Run `init` and `plan` and review output for environment production.
 
    ```bash
-   ./tf-wrapper.sh init shared
-   ./tf-wrapper.sh plan shared
+   ./tf-wrapper.sh init production
+   ./tf-wrapper.sh plan production
    ```
 
 1. Run `validate` and check for violations.
 
    ```bash
-   ./tf-wrapper.sh validate shared $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
+   ./tf-wrapper.sh validate production $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
    ```
 
-1. Run `apply` shared.
+1. Run `apply` production.
 
    ```bash
-   ./tf-wrapper.sh apply shared
+   ./tf-wrapper.sh apply production
    ```
 
+1. Run `init` and `plan` and review output for environment non-production.
+
+   ```bash
+   ./tf-wrapper.sh init non-production
+   ./tf-wrapper.sh plan non-production
+   ```
+
+1. Run `validate` and check for violations.
+
+   ```bash
+   ./tf-wrapper.sh validate non-production $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
+   ```
+
+1. Run `apply` non-production.
+
+   ```bash
+   ./tf-wrapper.sh apply non-production
+   ```
+
+1. Run `init` and `plan` and review output for environment development.
+
+   ```bash
+   ./tf-wrapper.sh init development
+   ./tf-wrapper.sh plan development
+   ```
+
+1. Run `validate` and check for violations.
+
+   ```bash
+   ./tf-wrapper.sh validate development $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
+   ```
+
+1. Run `apply` development.
+
+   ```bash
+   ./tf-wrapper.sh apply development
+   ```
 
 If you received any errors or made any changes to the Terraform config or `common.auto.tfvars` you must re-run `./tf-wrapper.sh plan <env>` before running `./tf-wrapper.sh apply <env>`.
 
@@ -311,4 +344,3 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 ```bash
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 ```
-

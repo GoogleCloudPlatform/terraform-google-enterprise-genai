@@ -19,15 +19,6 @@ variable "region" {
   type        = string
 }
 
-variable "environment" {
-  type        = string
-  description = "development | staging | production"
-  validation {
-    condition     = contains(["development", "staging", "production"], var.environment)
-    error_message = "Environment must be one of [development, staging, production]."
-  }
-}
-
 variable "project_id" {
   description = "Project ID"
 }
@@ -51,3 +42,8 @@ variable "github_remote_uri" {
   description = "Url of your github repo"
   type        = string
 }
+
+# variable "machine_learning_project_number" {
+#   description = "Project Number for the Machine Learning (Vertex) Project"
+#   type        = string
+# }

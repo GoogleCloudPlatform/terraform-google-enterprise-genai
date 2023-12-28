@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-
-// clean this up
-# resource "google_project_service_identity" "agent" {
-#   provider = google-beta
-
-#   project = var.project_id
-#   service = "secretmanager.googleapis.com"
-# }
-
 resource "google_project_service_identity" "artifact_registry_agent" {
   provider = google-beta
 
@@ -30,76 +21,13 @@ resource "google_project_service_identity" "artifact_registry_agent" {
   service = "artifactregistry.googleapis.com"
 }
 
-# resource "google_kms_crypto_key_iam_member" "kms-key-binding" {
-#   crypto_key_id = data.google_kms_crypto_key.key.id
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   member        = "serviceAccount:${google_project_service_identity.agent.email}"
-# }
-
 resource "google_kms_crypto_key_iam_member" "artifact-kms-key-binding" {
   crypto_key_id = data.google_kms_crypto_key.key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_project_service_identity.artifact_registry_agent.email}"
 }
 
-# resource "google_secret_manager_secret" "github_secret" {
-#   project   = var.project_id
-#   secret_id = "github-api-token"
-#   replication {
-#     user_managed {
-#       replicas {
-#         location = var.region
-#         customer_managed_encryption {
-#           kms_key_name = data.google_kms_crypto_key.key.id
-#         }
-#       }
-#     }
-#   }
-# }
-
-# resource "google_secret_manager_secret_version" "github_secret_version" {
-#   secret                = google_secret_manager_secret.github_secret.id
-#   is_secret_data_base64 = true
-#   secret_data           = base64encode(var.github_api_token)
-# }
-
-# data "google_iam_policy" "serviceagent_secretAccessor" {
-#   binding {
-#     role    = "roles/secretmanager.secretAccessor"
-#     members = ["serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"]
-#   }
-# }
-
-# resource "google_secret_manager_secret_iam_policy" "policy" {
-#   project     = google_secret_manager_secret.github_secret.project
-#   secret_id   = google_secret_manager_secret.github_secret.secret_id
-#   policy_data = data.google_iam_policy.serviceagent_secretAccessor.policy_data
-# }
-
-# resource "google_cloudbuildv2_connection" "docker_repo_connection" {
-#   provider = google-beta
-#   project  = data.google_project.project.project_id
-#   location = var.region
-#   name     = "${var.github_name_prefix}-connection"
-
-#   github_config {
-#     app_installation_id = var.github_app_installation_id
-#     authorizer_credential {
-#       oauth_token_secret_version = google_secret_manager_secret_version.github_secret_version.id
-#     }
-#   }
-#   depends_on = [google_secret_manager_secret_iam_policy.policy]
-# }
-
-# resource "google_cloudbuildv2_repository" "docker_repo" {
-#   provider          = google-beta
-#   project           = data.google_project.project.project_id
-#   location          = var.region
-#   name              = "${var.github_name_prefix}-repo"
-#   parent_connection = google_cloudbuildv2_connection.docker_repo_connection.id
-#   remote_uri        = var.github_remote_uri
-# }
-resource "google_artifact_registry_repository" "my-repo" {
+resource "google_artifact_registry_repository" "repo" {
   provider               = google-beta
   location               = var.region
   repository_id          = local.name_var
@@ -150,23 +78,10 @@ resource "google_artifact_registry_repository" "my-repo" {
 
   ]
 }
-
-# resource "google_service_account" "trigger_sa" {
-#   account_id  = "sa-apps-${local.name_var}"
-#   project     = var.project_id
-#   description = "Service account for Cloud Build in ${var.project_id}"
-# }
-
-# resource "google_service_account_iam_member" "trigger_sa_impersonate" {
-#   service_account_id = google_service_account.trigger_sa.id
-#   role               = "roles/iam.serviceAccountTokenCreator"
-#   member             = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
-# }
-
 resource "google_artifact_registry_repository_iam_member" "project" {
   for_each   = toset(local.trigger_sa_roles)
   project    = var.project_id
-  repository = google_artifact_registry_repository.my-repo.name
+  repository = google_artifact_registry_repository.repo.name
   location   = var.region
   role       = each.key
   # member     = "serviceAccount:${google_service_account.trigger_sa.email}"
@@ -187,34 +102,36 @@ resource "google_cloudbuild_trigger" "docker_build" {
   }
   build {
     step {
+      id         = "unshallow"
+      name       = "gcr.io/cloud-builders/git"
+      secret_env = ["token"]
+      entrypoint = "/bin/bash"
+      args = [
+        "-c",
+        "git fetch --unshallow https://$token@${local.github_repository}"
+      ]
+
+    }
+    available_secrets {
+      secret_manager {
+        env          = "token"
+        version_name = var.secret_version_name
+      }
+    }
+    step {
       id         = "select-folder"
-      name       = "gcr.io/cloud-builders/docker"
+      name       = "gcr.io/cloud-builders/git"
       entrypoint = "/bin/bash"
       args = [
         "-c",
         <<-EOT
-        commit_message=$(git log --format=%B -n 1 $COMMIT_SHA)
-        if [[ $commit_message == *"build@"* ]]; then
-            docker_image=$${commit_message##*build@}
-            docker_image=$${docker_image%%[[:space:]]*}
-            if [ -z "$docker_image" ]; then
-            echo "Error: Invalid commit message format. Unable to extract Docker image name."
-            echo "commit message should be: 'build@[image-name:tag]'"
-            exit 1
-            fi
-        for folder in $(ls -d images/*); do
-            folder_name=$(basename $folder)
-            if [ "$folder_name" == "$docker_image" ]; then
-            export docker_folder=$folder_name
-            echo "Found docker folder:"
-            echo $docker_folder
-            env | grep "^docker_" > /workspace/build_vars
-            exit 0
-            fi
+        changed_files=$(git diff $${COMMIT_SHA}^1 --name-only -r)
+        changed_folders=$(echo "$changed_files" | awk -F/ '{print $2}' | sort | uniq )
+
+        for folder in $changed_folders; do
+            echo "Found docker folder: $folder"
+            echo $folder >> /workspace/docker_build
         done
-        echo "Error: No matching folder found for Docker image '$docker_image'."
-        exit 1
-      fi
         EOT
       ]
     }
@@ -226,8 +143,10 @@ resource "google_cloudbuild_trigger" "docker_build" {
       args = [
         "-c",
         <<-EOT
-        source /workspace/build_vars
-        docker build -t gcr.io/$PROJECT_ID/$docker_folder images/$docker_folder
+        build_path="/workspace/docker_build"
+        while IFS= read -r line; do
+          docker build -t gcr.io/$PROJECT_ID/$line images/$line
+        done < "$build_path"
         EOT
       ]
     }
@@ -240,8 +159,10 @@ resource "google_cloudbuild_trigger" "docker_build" {
       args = [
         "-c",
         <<-EOT
-        source /workspace/build_vars
-        docker push gcr.io/$PROJECT_ID/$docker_folder
+        build_path="/workspace/docker_build"
+        while IFS= read -r line; do
+          docker push gcr.io/$PROJECT_ID/$line
+        done < "$build_path"
         EOT
       ]
     }

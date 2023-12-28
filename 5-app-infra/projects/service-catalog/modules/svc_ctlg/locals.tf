@@ -17,3 +17,4 @@
 locals {
   github_repository = replace(var.github_remote_uri, "https://", "")
 }
+

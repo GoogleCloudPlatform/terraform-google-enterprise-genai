@@ -36,7 +36,7 @@ resource "random_string" "bucket_name" {
 
 resource "google_storage_bucket" "bucket" {
   location                    = var.region
-  name                        = "${var.gcs_bucket_prefix}-${var.project_id}-${lower(var.region)}-svc-ctlg-${random_string.bucket_name.result}"
+  name                        = "${var.gcs_bucket_prefix}-${var.project_id}-${lower(var.region)}-${random_string.bucket_name.result}"
   project                     = var.project_id
   uniform_bucket_level_access = true
 
@@ -47,6 +47,18 @@ resource "google_storage_bucket" "bucket" {
     enabled = true
   }
 }
+
+resource "google_storage_bucket_iam_member" "bucket_member" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+# resource "google_storage_bucket_iam_member" "bucket_member" {
+#   bucket = google_storage_bucket.bucket.name
+#   role   = "roles/storage.legacyObjectReader"
+#   member = "serviceAccount:${var.machine_learning_project_number}@cloudbuild.gserviceaccount.com"
+# }
 
 resource "google_cloudbuild_trigger" "zip_files" {
   name     = "zip-tf-files-trigger"
@@ -84,12 +96,12 @@ resource "google_cloudbuild_trigger" "zip_files" {
       args = [
         "-c",
         <<-EOT
-        changed_files=$(git diff-tree --name-only $COMMIT_SHA --no-commit-id -r)
+        changed_files=$(git diff $${COMMIT_SHA}^1 --name-only -r)
         changed_folders=$(echo "$changed_files" | awk -F/ '{print $1}' | sort | uniq )
 
         for folder in $changed_folders; do
           echo "Found change in folder: $folder"
-          (cd $folder && find . -type f -name '*.tf' -exec tar -cvPf "/workspace/$folder.tar.gz" {} +)
+          (cd $folder && find . -type f -name '*.tf' -exec tar -cvzPf "/workspace/$folder.tar.gz" {} +)
         done
       EOT
       ]

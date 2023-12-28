@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-output "trigger_sa_account_id" {
-  description = "Account id of service account cloudbuild."
-  value       = google_service_account.trigger_sa
+data "google_project" "project" {
+  project_id = var.project_id
 }
 
-output "cloudbuild_v2_repo_id" {
-  description = "Repository ID of cloudbuild repository"
-  value       = google_cloudbuildv2_repository.repo.id
+data "google_projects" "kms" {
+  # filter = "labels.application_name:org-kms labels.environment:production lifecycleState:ACTIVE"
+  filter = "labels.application_name:env-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
 }
 
-output "kms_key_id" {
-  description = "Projects Key ID for encrytion"
-  value       = data.google_kms_crypto_key.key.id
+data "google_kms_key_ring" "kms" {
+  name     = "sample-keyring"
+  location = var.region
+  project  = data.google_projects.kms.projects.0.project_id
 }
 
-output "github_secret_version_name" {
-  description = "Secret Version Name of key"
-  value       = google_secret_manager_secret_version.github_secret_version.name
+data "google_kms_crypto_key" "key" {
+  name     = data.google_project.project.name
+  key_ring = data.google_kms_key_ring.kms.id
 }
