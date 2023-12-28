@@ -14,29 +14,6 @@
  * limitations under the License.
  */
 
-# locals {
-#   kms_sa = [
-#     "serviceAccount:service-${module.machine_learning_project.project_number}@compute-system.iam.gserviceaccount.com",
-#     "serviceAccount:${google_project_service_identity.secret_manager.email}"
-#   ]
-# kms_key_roles = [
-#   "roles/cloudkms.cryptoKeyEncrypter",
-#   "roles/cloudkms.cryptoKeyDecrypter",
-# ]
-# rings_key_map = {
-#   for idx, key_role in local.kms_key_roles : key_role => local.shared_kms_key_ring
-# }
-
-# rings_flat_map = flatten([
-#   for key_role, key_rings in local.rings_key_map : [
-#     for key in key_rings : {
-#       key_role = key_role
-#       key_ring = key
-#     }
-#   ]
-# ])
-# }
-
 module "machine_learning_project" {
   source = "../single_project"
 
