@@ -64,6 +64,9 @@ resource "time_sleep" "wait_vpc_sc_propagation" {
   ]
 }
 
+#Control ID: COM-CO-8.1
+#NIST 800-53: SC-7 SC-8 
+#CRI Profile: PR.AC-5.1 PR.AC-5.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1 PR.PT-4.1 DE.CM-1.1 DE.CM-1.2 DE.CM-1.3 DE.CM-1.4
 module "regular_service_perimeter" {
   source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
   version = "~> 4.0"

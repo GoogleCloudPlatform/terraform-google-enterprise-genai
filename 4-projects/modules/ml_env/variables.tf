@@ -85,6 +85,10 @@ variable "folder_prefix" {
 #   default     = "key"
 # }
 
+
+#Control ID: COM-CO-2.7
+#NIST 800-53: SC-12 SC-13
+#CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
 variable "key_rotation_period" {
   description = "Rotation period in seconds to be used for KMS Key"
   type        = string

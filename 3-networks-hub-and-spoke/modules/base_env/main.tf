@@ -30,6 +30,10 @@ locals {
   restricted_hub_subnet_ranges = ["10.8.0.0/24", "10.9.0.0/24"]
 
   supported_restricted_service = [
+
+    #Control ID: COM-CO-8.2
+    #NIST 800-53: SC-7 SC-8 
+    #CRI Profile: PR.AC-5.1 PR.AC-5.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1 PR.PT-4.1 DE.CM-1.1 DE.CM-1.2 DE.CM-1.3 DE.CM-1.4
     "accessapproval.googleapis.com",
     "adsdatahub.googleapis.com",
     "aiplatform.googleapis.com",
