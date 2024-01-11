@@ -39,9 +39,22 @@ locals {
     "compute.requireOsLogin",
     "sql.restrictPublicIp",
     "sql.restrictAuthorizedNetworks",
+
+    #Control ID: IAM-CO-4.2
+    #NIST 800-53: AC-3 AC-17 AC-20
+    #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
     "iam.disableServiceAccountKeyCreation",
+
+    #Control ID: IAM-CO-4.1
+    #NIST 800-53: AC-3 AC-17 AC-20
+    #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
     "iam.automaticIamGrantsForDefaultServiceAccounts",
+
+    #Control ID: IAM-CO-4.3
+    #NIST 800-53: AC-3 AC-17 AC-20
+    #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
     "iam.disableServiceAccountKeyUpload",
+
     "storage.uniformBucketLevelAccess",
 
     #Control ID: GCS-CO-4.1
