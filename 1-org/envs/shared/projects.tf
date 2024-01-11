@@ -32,6 +32,9 @@ locals {
   Projects for log sinks
 *****************************************/
 
+#Control ID: COM-CO-7.3
+#NIST 800-53: AAU-2 AU-3 AU-8 AU-9
+#CRI Profile: DM.ED-7.1 DM.ED-7.2 DM.ED-7.3 DM.ED-7.4 PR.IP-1.4
 module "org_audit_logs" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 14.0"

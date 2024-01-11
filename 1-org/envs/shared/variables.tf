@@ -58,6 +58,13 @@ variable "enforce_allowed_worker_pools" {
   default     = false
 }
 
+#Control ID: COM-CO-7.2
+#NIST 800-53: AAU-2 AU-3 AU-8 AU-9
+#CRI Profile: DM.ED-7.1 DM.ED-7.2 DM.ED-7.3 DM.ED-7.4 PR.IP-1.4
+
+#Control ID: COM-CO-7.6
+#NIST 800-53: AAU-2 AU-3 AU-8 AU-9
+#CRI Profile: DM.ED-7.1 DM.ED-7.2 DM.ED-7.3 DM.ED-7.4 PR.IP-1.4
 variable "data_access_logs_enabled" {
   description = "Enable Data Access logs of types DATA_READ, DATA_WRITE for all GCP services. Enabling Data Access logs might result in your organization being charged for the additional logs usage. See https://cloud.google.com/logging/docs/audit#data-access The ADMIN_READ logs are enabled by default."
   type        = bool
