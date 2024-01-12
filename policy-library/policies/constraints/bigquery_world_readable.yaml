@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+#Control ID: BQ-CO-6.1
+#NIST 800-53: AC-3 AC-12 AC-17 AC-20
+#CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.AC-7.1 PR.AC-7.2 PR.PT-3.1 PR-PT-4.1
 apiVersion: constraints.gatekeeper.sh/v1alpha1 # Copyright 2019 Google LLC
 kind: GCPBigQueryDatasetWorldReadableConstraintV1
 metadata:
