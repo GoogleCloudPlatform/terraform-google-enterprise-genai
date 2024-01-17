@@ -68,6 +68,10 @@ variable "project_budget" {
     kms_alert_spent_percents                    = optional(list(number), [1.2])
     kms_alert_pubsub_topic                      = optional(string, null)
     kms_budget_alert_spend_basis                = optional(string, "FORECASTED_SPEND")
+    logging_budget_amount                       = optional(number, 1000)
+    logging_alert_spent_percents                = optional(list(number), [1.2])
+    logging_alert_pubsub_topic                  = optional(string, null)
+    logging_budget_alert_spend_basis            = optional(string, "FORECASTED_SPEND")
   })
   default = {}
 }
@@ -105,3 +109,31 @@ variable "keyring_regions" {
     "us-east4"
   ]
 }
+
+variable "gcs_bucket_prefix" {
+  description = "Bucket Prefix"
+  type        = string
+  default     = "bkt"
+}
+
+variable "gcs_logging_bucket_location" {
+  description = "Location of environment logging bucket"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "gcs_logging_retention_period" {
+  description = "Retention configuration for environment logging bucket"
+  type = object({
+    is_locked             = bool
+    retention_period_days = number
+  })
+  default = null
+}
+
+variable "gcs_logging_key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+

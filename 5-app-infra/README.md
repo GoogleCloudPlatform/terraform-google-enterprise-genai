@@ -55,10 +55,12 @@ file.
 
 ## Purpose
 
-This structure is for deploying out an environment suited for Machine Learning.  You will notice in the folder `projects`, there are several folders.
-Each folder represents a project that will be _expanded_ upon.  In step 4, we have initiated the creation of each  project, enabled API's and assigned roles to various service accounts and service agents that are needed for each respective project to operate successfully.  
+This structure is for deploying out an environment suited for Machine Learning.  You will notice in the folder `projects`, there are several other folders.
+Each folder represents a project that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully.  
 
 For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.  
 
-When viewing each folder under `projects`, consider them as seperate repositories which will be used to deploy out each respective project.  In the case of using Cloud Build (which is what this example is primarily based on), each folder will be placed in its own gcp cloud source repository for deployment.  There is a README placed in each project folder which will highlight the necessary steps to achieve deployment.
+When viewing each folder under `projects`, consider them as seperate repositories which will be used to deploy out each respective project.  In the case of using Cloud Build (which is what this example is primarily based on), each folder will be placed in its own GCP cloud source repository for deployment.  There is a README placed in each project folder which will highlight the necessary steps to achieve deployment.
+
+When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.  
 

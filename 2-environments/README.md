@@ -143,8 +143,27 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```bash
    git push --set-upstream origin plan
    ```
-
 1. Review the plan output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+
+### `N.B.` Read this before continuing further!!
+
+A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent Google service accounts to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.  
+You must disable the contraint in every folder that is about to be configured by terraform, push your code and then apply the contraint again:
+
+#### Do this before you push development, non-production & production
+
+1. Google Console is the quickest way to achieve this.  Under `IAM & Admin`, select `Organization Policies`.  Search for "Domain Restricted Sharing"
+![list-policy](imgs/list-policy.png)
+
+1. Select 'Manage Policy'.  This directs you to the Domain Restricted Sharing Edit Policy page.  It will be set at 'Inherit parent's policy'.  Change this to 'Google-managed default'
+![edit-policy](imgs/edit-policy.png)
+
+1. Follow the instructions on checking out `development`, `non-production` & `production` branches.  Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
+
+### Deployment Continued...
+
+1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `development` folder before continuing further.
+
 1. Merge changes to development branch. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_.
 
@@ -154,6 +173,11 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
+
+1. Enable the Organization Policy on the `development` folder has highlighted [here](#do-this-before-you-push-development-non-production--production)
+
+1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `non-production` folder before continuing further.
+
 1. Merge changes to non-production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
 
@@ -161,6 +185,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git checkout -b non-production
    git push origin non-production
    ```
+1. Enable the Organization Policy on the `non-production` folder has highlighted [here](#do-this-before-you-push-development-non-production--production)
+
+1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `production` folder before continuing further.
 
 1. Merge changes to production branch. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
@@ -169,6 +196,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git checkout -b production
    git push origin production
    ```
+1. Enable the Organization Policy on the `production` folder has highlighted [here](#do-this-before-you-push-development-non-production--production)
+
+
 
 1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md), or go to [3-networks-hub-and-spoke](../3-networks-hub-and-spoke/README.md) to use the [Hub and Spoke](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke) network mode.
 
@@ -220,6 +250,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../0-bootstrap/" output -raw environment_step_terraform_service_account_email)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
+1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `development` folder before continuing further
 
 1. Run `init` and `plan` and review output for environment development.
 
@@ -240,6 +271,8 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ./tf-wrapper.sh apply development
    ```
 
+1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `non-production` folder before continuing further
+
 1. Run `init` and `plan` and review output for environment non-production.
 
    ```bash
@@ -258,6 +291,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ```bash
    ./tf-wrapper.sh apply non-production
    ```
+1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `non-production` folder before continuing further
 
 1. Run `init` and `plan` and review output for environment production.
 

@@ -49,3 +49,18 @@ output "key_rings" {
   description = "Keyring Names created"
   value       = values(module.kms_keyrings)[*].keyring
 }
+
+output "env_logs_project_id" {
+  description = "Project ID for environment logging."
+  value       = module.env_logs.project_id
+}
+
+output "env_logs_project_number" {
+  description = "Project number for environment logging."
+  value       = module.env_logs.project_number
+}
+
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = google_storage_bucket.log_bucket.name
+}
