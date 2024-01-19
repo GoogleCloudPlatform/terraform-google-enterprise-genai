@@ -184,3 +184,9 @@ variable "ingress_policies" {
   }))
   default = []
 }
+
+variable "perimeter_projects" {
+  description = "A list of project numbers to be added to the service perimeter"
+  type        = list(number)
+  default     = []
+}

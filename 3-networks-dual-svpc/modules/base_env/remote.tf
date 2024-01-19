@@ -23,6 +23,8 @@ locals {
   organization_service_account = data.terraform_remote_state.bootstrap.outputs.organization_step_terraform_service_account_email
   networks_service_account     = data.terraform_remote_state.bootstrap.outputs.networks_step_terraform_service_account_email
   projects_service_account     = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+  logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
+
 }
 
 data "terraform_remote_state" "bootstrap" {
@@ -40,5 +42,14 @@ data "terraform_remote_state" "org" {
   config = {
     bucket = var.remote_state_bucket
     prefix = "terraform/org/state"
+  }
+}
+
+data "terraform_remote_state" "env" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/environments/${var.env}"
   }
 }

@@ -69,7 +69,7 @@ module "regular_service_perimeter" {
   policy         = var.access_context_manager_policy_id
   perimeter_name = local.perimeter_name
   description    = "Default VPC Service Controls perimeter"
-  resources      = [var.project_number]
+  resources      = distinct(concat([var.project_number], var.perimeter_projects))
   access_levels  = [module.access_level_members.name]
 
   restricted_services     = var.restricted_services
