@@ -21,20 +21,14 @@ module "bu_folder" {
   env                 = var.env
 }
 
+module "ml_env" {
+  source = "../../modules/ml_env"
 
-module "composer_cloudbuild_project" {
-  source    = "../../modules/composer_env"
-  count     = local.enable_cloudbuild_deploy ? 1 : 0
-  repo_name = local.repo_name
-  env       = var.env
-  # default_region      = var.default_region
-  remote_state_bucket = var.remote_state_bucket
-  folder_id           = module.bu_folder.business_unit_folder
-  shared_kms_key_ring = local.environment_kms_key_ring
-
-  #Metadata
-  project_suffix   = "cmpsr-pipeln"
-  application_name = "app-pipelines"
-  business_code    = local.business_code
-  business_unit    = local.buiness_unit
+  env                  = var.env
+  business_code        = local.business_code
+  business_unit        = local.business_unit
+  remote_state_bucket  = var.remote_state_bucket
+  location_gcs         = var.location_gcs
+  tfc_org_name         = var.tfc_org_name
+  business_unit_folder = module.bu_folder.business_unit_folder
 }

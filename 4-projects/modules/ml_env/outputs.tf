@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ output "machine_learning_project_number" {
   value       = module.machine_learning_project.project_number
 }
 
-output "machine_learning_key_id" {
+output "machine_learning_kms_keys" {
   description = "Key ID for the machine learning project."
-  value       = values(module.machine_learning_project.crypto_key)[*].id
+  value       = module.machine_learning_project.kms_keys
 }

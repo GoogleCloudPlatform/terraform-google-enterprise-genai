@@ -39,7 +39,7 @@ output "project_name" {
   value       = module.project.project_name
 }
 
-output "crypto_key" {
+output "kms_keys" {
   description = "keys created for the project"
-  value       = google_kms_crypto_key.key
+  value       = { for k, v in google_kms_crypto_key.kms_keys : split("/", k)[3] => v }
 }

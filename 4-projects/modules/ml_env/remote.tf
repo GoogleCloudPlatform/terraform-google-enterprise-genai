@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,18 @@ locals {
   app_infra_pipeline_service_accounts = data.terraform_remote_state.business_unit_shared.outputs.terraform_service_accounts
   enable_cloudbuild_deploy            = data.terraform_remote_state.business_unit_shared.outputs.enable_cloudbuild_deploy
   environments_kms_key_ring           = data.terraform_remote_state.environments_env.outputs.key_rings
+  environment_kms_project_id          = data.terraform_remote_state.environments_env.outputs.env_kms_project_id
   default_region                      = data.terraform_remote_state.business_unit_shared.outputs.default_region
+  service_catalog_project_id          = data.terraform_remote_state.business_unit_shared.outputs.service_catalog_project_id
+  service_catalog_repo_name           = data.terraform_remote_state.business_unit_shared.outputs.service_catalog_repo_name
+
+  restricted_subnets_region = flatten([
+    for subnet in local.restricted_subnets_self_links :
+    {
+      subnet = element(split("/", subnet), index(split("/", subnet), "subnetworks", ) + 1, )
+      region = element(split("/", subnet), index(split("/", subnet), "regions") + 1, )
+    }
+  ])
 }
 
 data "terraform_remote_state" "bootstrap" {

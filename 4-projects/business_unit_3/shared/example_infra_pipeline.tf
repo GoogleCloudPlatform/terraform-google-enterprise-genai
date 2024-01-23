@@ -18,7 +18,7 @@ locals {
   repo_names = [
     "bu3-artifact-publish",
     "bu3-service-catalog",
-    "bu3-composer"
+    "bu3-machine-learning",
   ]
 }
 
@@ -41,7 +41,8 @@ module "app_infra_cloudbuild_project" {
     "iam.googleapis.com",
     "artifactregistry.googleapis.com",
     "cloudresourcemanager.googleapis.com",
-    "serviceusage.googleapis.com"
+    "serviceusage.googleapis.com",
+    "bigquery.googleapis.com",
   ]
   # Metadata
   project_suffix    = "infra-pipeline"

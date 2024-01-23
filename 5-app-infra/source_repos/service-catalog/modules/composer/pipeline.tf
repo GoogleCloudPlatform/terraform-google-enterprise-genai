@@ -14,45 +14,45 @@
  * limitations under the License.
  */
 
-resource "google_secret_manager_secret" "github_secret" {
-  project   = data.google_project.project.project_id
-  secret_id = "github-api-token"
+# resource "google_secret_manager_secret" "github_secret" {
+#   project   = data.google_project.project.project_id
+#   secret_id = "github-api-token"
 
-  #Set up Automatic Rotation of Secrets
-  #Control ID: SM-CO-6.2
-  #NIST 800-53: SC-12 SC-13
+#   #Set up Automatic Rotation of Secrets
+#   #Control ID: SM-CO-6.2
+#   #NIST 800-53: SC-12 SC-13
 
-  # how rotation be used with the GitHub token?
-  # rotation {
-  #   next_rotation_time = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timeadd(timestamp(), "720h"))
-  #   rotation_period    = "43200s"
-  # }
+#   # how rotation be used with the GitHub token?
+#   # rotation {
+#   #   next_rotation_time = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timeadd(timestamp(), "720h"))
+#   #   rotation_period    = "43200s"
+#   # }
 
-  #Automatic Secret Replication
-  #Control ID: SM-CO-6.1
-  #NIST 800-53: SC-12 SC-13
-  replication {
-    user_managed {
-      replicas {
-        location = var.region
+#   #Automatic Secret Replication
+#   #Control ID: SM-CO-6.1
+#   #NIST 800-53: SC-12 SC-13
+#   replication {
+#     user_managed {
+#       replicas {
+#         location = var.region
 
-        #Customer Managed Encryption Keys
-        #Control ID: COM-CO-2.3
-        #NIST 800-53: SC-12 SC-13
-        #CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
-        customer_managed_encryption {
-          kms_key_name = data.google_kms_crypto_key.key.id
-        }
-      }
-    }
-  }
-}
+#         #Customer Managed Encryption Keys
+#         #Control ID: COM-CO-2.3
+#         #NIST 800-53: SC-12 SC-13
+#         #CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
+#         customer_managed_encryption {
+#           kms_key_name = data.google_kms_crypto_key.key.id
+#         }
+#       }
+#     }
+#   }
+# }
 
-resource "google_secret_manager_secret_version" "github_secret_version" {
-  secret                = google_secret_manager_secret.github_secret.id
-  is_secret_data_base64 = true
-  secret_data           = base64encode(var.github_api_token)
-}
+# resource "google_secret_manager_secret_version" "github_secret_version" {
+#   secret                = google_secret_manager_secret.github_secret.id
+#   is_secret_data_base64 = true
+#   secret_data           = base64encode(var.github_api_token)
+# }
 
 data "google_iam_policy" "serviceagent_secretAccessor" {
   binding {
@@ -62,8 +62,8 @@ data "google_iam_policy" "serviceagent_secretAccessor" {
 }
 
 resource "google_secret_manager_secret_iam_policy" "policy" {
-  project     = google_secret_manager_secret.github_secret.project
-  secret_id   = google_secret_manager_secret.github_secret.secret_id
+  project     = data.google_secret_manager_secret.github_api_secret.project
+  secret_id   = data.google_secret_manager_secret.github_api_secret.secret_id
   policy_data = data.google_iam_policy.serviceagent_secretAccessor.policy_data
 }
 
@@ -76,7 +76,7 @@ resource "google_cloudbuildv2_connection" "repo_connect" {
   github_config {
     app_installation_id = var.github_app_installation_id
     authorizer_credential {
-      oauth_token_secret_version = google_secret_manager_secret_version.github_secret_version.id
+      oauth_token_secret_version = data.google_secret_manager_secret_version.github_api.id
     }
   }
   depends_on = [google_secret_manager_secret_iam_policy.policy]
@@ -130,7 +130,7 @@ resource "google_cloudbuild_trigger" "zip_files" {
     available_secrets {
       secret_manager {
         env          = "token"
-        version_name = google_secret_manager_secret_version.github_secret_version.name
+        version_name = data.google_secret_manager_secret.github_api_secret.name
       }
     }
     step {
@@ -157,5 +157,5 @@ resource "google_cloudbuild_trigger" "zip_files" {
     }
   }
 
-  depends_on = [google_composer_environment.cluster]
+  depends_on = [google_composer_environment.cluster, google_cloudbuildv2_repository.repo]
 }

@@ -24,7 +24,7 @@ locals {
   networks_service_account     = data.terraform_remote_state.bootstrap.outputs.networks_step_terraform_service_account_email
   projects_service_account     = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
   logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
-
+  kms_env_project_number       = data.terraform_remote_state.env.outputs.env_kms_project_number
 }
 
 data "terraform_remote_state" "bootstrap" {

@@ -31,7 +31,6 @@ locals {
     "serviceAccount:service-${module.app_cloudbuild_project.project_number}@gs-project-accounts.iam.gserviceaccount.com",
     "serviceAccount:service-${module.app_cloudbuild_project.project_number}@compute-system.iam.gserviceaccount.com",
     "serviceAccount:service-${module.app_cloudbuild_project.project_number}@compute-system.iam.gserviceaccount.com",
-    "serviceAccount:service-${module.app_cloudbuild_project.project_number}@gcp-sa-secretmanager.iam.gserviceaccount.com",
   ]
 
   # sa_account_to_crypto_key_id = [

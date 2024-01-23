@@ -17,3 +17,4 @@
 locals {
   keyring_name = "sample-keyring"
 }
+

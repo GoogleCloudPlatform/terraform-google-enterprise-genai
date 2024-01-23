@@ -72,3 +72,8 @@ output "common_artifacts_project_id" {
   description = "App Infra Artifacts Project ID"
   value       = try(module.app_infra_artifacts_project[0].project_id, "")
 }
+
+output "service_catalog_repo_name" {
+  description = "The name of the repository to be created in 5-app-infra"
+  value       = local.cloud_source_repo_name
+}

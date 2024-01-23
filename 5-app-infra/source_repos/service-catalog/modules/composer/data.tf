@@ -50,3 +50,13 @@ data "google_service_account" "composer" {
   account_id = format("%s-%s-%s", var.service_account_prefix, data.google_project.project.labels.env_code, "composer")
   project    = data.google_project.project.project_id
 }
+
+data "google_secret_manager_secret" "github_api_secret" {
+  secret_id = var.github_secret_name
+  project   = data.google_project.project.project_id
+}
+
+data "google_secret_manager_secret_version" "github_api" {
+  secret  = data.google_secret_manager_secret.github_api_secret.id
+  project = data.google_project.project.project_id
+}

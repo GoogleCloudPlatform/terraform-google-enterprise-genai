@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,40 +14,70 @@
  * limitations under the License.
  */
 
+locals {
+  // Project's Shared VPC
+  shared_vpc_host_project_id = local.restricted_host_project_id
+  shared_vpc_subnets         = local.restricted_subnets_self_links
+
+  shared_vpc_roles = [
+    "roles/browser",
+    "roles/compute.networkUser",
+  ]
+
+  service_identity_apis = [
+    "cloudbuild.googleapis.com",
+    "notebooks.googleapis.com"
+  ]
+}
+
 module "machine_learning_project" {
   source = "../single_project"
 
-  org_id                     = local.org_id
-  billing_account            = local.billing_account
-  folder_id                  = var.business_unit_folder
-  environment                = var.env
-  vpc_type                   = "base"
-  shared_vpc_host_project_id = local.base_host_project_id
-  shared_vpc_subnets         = local.base_subnets_self_links
-  project_budget             = var.project_budget
-  project_prefix             = local.project_prefix
-  key_rings                  = local.environments_kms_key_ring
-  remote_state_bucket        = var.remote_state_bucket
+  org_id                             = local.org_id
+  billing_account                    = local.billing_account
+  folder_id                          = var.business_unit_folder
+  environment                        = var.env
+  vpc_type                           = "restricted"
+  default_service_account            = "keep"
+  shared_vpc_host_project_id         = local.shared_vpc_host_project_id
+  shared_vpc_subnets                 = local.shared_vpc_subnets
+  project_budget                     = var.project_budget
+  project_prefix                     = local.project_prefix
+  key_rings                          = local.environments_kms_key_ring
+  remote_state_bucket                = var.remote_state_bucket
+  vpc_service_control_attach_enabled = "true"
+  vpc_service_control_perimeter_name = "accessPolicies/${local.access_context_manager_policy_id}/servicePerimeters/${local.perimeter_name}"
+  vpc_service_control_sleep_duration = "60s"
   // Enabling Cloud Build Deploy to use Service Accounts during the build and give permissions to the SA.
   // The permissions will be the ones necessary for the deployment of the step 5-app-infra
   enable_cloudbuild_deploy = local.enable_cloudbuild_deploy
 
-  # // A map of Service Accounts to use on the infra pipeline (Cloud Build)
-  # // Where the key is the repository name ("${var.business_code}-example-app")
+  // A map of Service Accounts to use on the infra pipeline (Cloud Build)
+  // Where the key is the repository name ("${var.business_code}-example-app")
   app_infra_pipeline_service_accounts = local.app_infra_pipeline_service_accounts
 
   // Map for the roles where the key is the repository name ("${var.business_code}-example-app")
   // and the value is the list of roles that this SA need to deploy step 5-app-infra
   sa_roles = {
-    "bu3-artifact-publish" = [
+    "bu3-machine-learning" = [
+      "roles/aiplatform.admin",
+      "roles/artifactregistry.admin",
+      "roles/bigquery.admin",
+      "roles/cloudbuild.connectionAdmin",
+      "roles/cloudbuild.builds.editor",
+      "roles/composer.admin",
+      "roles/compute.admin",
       "roles/compute.instanceAdmin.v1",
+      "roles/compute.networkAdmin",
+      "roles/iam.roleAdmin",
       "roles/iam.serviceAccountAdmin",
       "roles/iam.serviceAccountUser",
-    ],
-    "bu3-service-catalog" = [
-      "roles/compute.instanceAdmin.v1",
-      "roles/iam.serviceAccountAdmin",
-      "roles/iam.serviceAccountUser",
+      "roles/notebooks.admin",
+      "roles/pubsub.admin",
+      "roles/resourcemanager.projectIamAdmin",
+      "roles/secretmanager.admin",
+      "roles/serviceusage.serviceUsageConsumer",
+      "roles/storage.admin",
     ]
   }
 
@@ -58,83 +88,122 @@ module "machine_learning_project" {
     "bigquerymigration.googleapis.com",
     "bigquerystorage.googleapis.com",
     "cloudbuild.googleapis.com",
+    "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
+    "composer.googleapis.com",
     "compute.googleapis.com",
     "containerregistry.googleapis.com",
     "dataflow.googleapis.com",
     "dataform.googleapis.com",
     "deploymentmanager.googleapis.com",
+    "iam.googleapis.com",
     "logging.googleapis.com",
     "notebooks.googleapis.com",
+    "pubsub.googleapis.com",
+    "secretmanager.googleapis.com",
+    "serviceusage.googleapis.com",
     "storage-api.googleapis.com",
     "storage-component.googleapis.com",
     "storage.googleapis.com",
-    "secretmanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "cloudkms.googleapis.com",
-    "iam.googleapis.com",
   ]
-
 
   # Metadata
   project_suffix    = "machine-learning"
-  application_name  = "${var.business_code}-sample-machine-learning-application"
+  application_name  = "machine-learning"
   billing_code      = "1234"
   primary_contact   = "example@example.com"
   secondary_contact = "example2@example.com"
   business_code     = var.business_code
 }
 
-data "google_storage_project_service_account" "gcs_account" {
+
+// Service Agents
+resource "google_project_service_identity" "cloud_build" {
+  provider = google-beta
+
   project = module.machine_learning_project.project_id
+  service = "cloudbuild.googleapis.com"
 }
 
-# resource "google_project_iam_member" "project_roles" {
-#   project = module.machine_learning_project.project_id
-#   role    = "roles/storage.legacyObjectReader"
-#   member  = "serviceAccount:${module.machine_learning_project.project_number}@cloudbuild.gserviceaccount.com"
-# }
+resource "google_project_service_identity" "notebooks" {
+  provider = google-beta
 
-# resource "google_project_service_identity" "secret_manager" {
-#   provider = google-beta
-#   project  = module.machine_learning_project.project_id
-#   service  = "secretmanager.googleapis.com"
-# }
-# resource "google_kms_crypto_key" "ml_key" {
-#   for_each        = toset(local.shared_kms_key_ring)
-#   name            = module.machine_learning_project.project_name
-#   key_ring        = each.key
-#   rotation_period = var.key_rotation_period
-#   lifecycle {
-#     prevent_destroy = false
-#   }
-# }
+  project = module.machine_learning_project.project_id
+  service = "notebooks.googleapis.com"
+}
+
+resource "google_project_service_identity" "secrets" {
+  provider = google-beta
+
+  project = module.machine_learning_project.project_id
+  service = "secretmanager.googleapis.com"
+}
 
 
-# // Change to iam member, give cloudbuild sa  'roles/cloudkms.admin' = just for development!
+resource "time_sleep" "wait_30_seconds" {
+  create_duration = "30s"
 
-resource "google_kms_crypto_key_iam_member" "dev_ml_key" {
-  for_each      = var.env == "development" ? toset(keys(module.machine_learning_project.crypto_key)) : toset([])
-  crypto_key_id = module.machine_learning_project.crypto_key[each.key].id
+  depends_on = [
+    google_project_service_identity.cloud_build,
+    google_project_service_identity.notebooks,
+    google_project_service_identity.secrets,
+  ]
+}
+
+// Add cloudkms admin to sa
+resource "google_kms_crypto_key_iam_member" "kms_admin" {
+  for_each      = module.machine_learning_project.kms_keys
+  crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
-  member        = "serviceAccount:${module.machine_learning_project.project_number}@cloudbuild.gserviceaccount.com"
+  member        = "serviceAccount:${local.app_infra_pipeline_service_accounts["bu3-machine-learning"]}"
 }
 
-resource "google_kms_crypto_key_iam_member" "ml_key" {
-  for_each      = module.machine_learning_project.crypto_key
+// Add crypto key viewer role to kms environment project
+resource "google_project_iam_member" "cloud_build_kms_viewer" {
+  project = local.environment_kms_project_id
+  role    = "roles/cloudkms.viewer"
+  member  = "serviceAccount:${google_project_service_identity.cloud_build.email}"
+
+  depends_on = [time_sleep.wait_30_seconds]
+}
+
+// Cloud Build's Service Agent permissions on Shared VPC
+resource "google_project_iam_member" "cloud_build_network_user" {
+  for_each = toset(local.shared_vpc_roles)
+  project  = local.shared_vpc_host_project_id
+
+  role   = each.value
+  member = "serviceAccount:${google_project_service_identity.cloud_build.email}"
+
+  depends_on = [time_sleep.wait_30_seconds]
+}
+
+// Notebooks' Aervice Agent permissions on Shared VPC
+resource "google_compute_subnetwork_iam_member" "notebook_network_user" {
+  provider = google-beta
+  for_each = { for nr in local.restricted_subnets_region : (nr.subnet) => nr }
+
+  subnetwork = each.value.subnet
+  role       = "roles/compute.networkUser"
+  region     = each.value.region
+  project    = local.shared_vpc_host_project_id
+  member     = "serviceAccount:${google_project_service_identity.notebooks.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "secrets" {
+  for_each = module.machine_learning_project.kms_keys
+
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+  member        = "serviceAccount:${google_project_service_identity.secrets.email}"
+
+  depends_on = [time_sleep.wait_30_seconds]
 }
 
-
-// Big Query
-data "google_bigquery_default_service_account" "bq_sa" {
-  project = module.machine_learning_project.project_id
-}
-resource "google_kms_crypto_key_iam_member" "big_query_ml_key" {
-  for_each      = module.machine_learning_project.crypto_key
-  crypto_key_id = each.value.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_bigquery_default_service_account.bq_sa.email}"
+// Allow machine-learning sa access to service catalog cloud source repository
+resource "google_sourcerepo_repository_iam_member" "read" {
+  project    = local.service_catalog_project_id
+  repository = local.service_catalog_repo_name
+  role       = "roles/viewer"
+  member     = "serviceAccount:${local.app_infra_pipeline_service_accounts["bu3-machine-learning"]}"
 }

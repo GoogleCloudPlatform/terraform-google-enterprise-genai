@@ -24,15 +24,16 @@ resource "google_secret_manager_secret" "secret" {
   #Control ID: SM-CO-6.2
   #NIST 800-53: SC-12 SC-13
 
+  /* XXX: No secret rotation for static secrets
   rotation {
     next_rotation_time = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timeadd(timestamp(), "720h"))
     rotation_period    = "43200s"
-
   }
 
   topics {
     name = google_pubsub_topic.secret-rotations.id
   }
+  */
 
   #Automatic Secret Replication
   #Control ID: SM-CO-6.1
@@ -55,12 +56,15 @@ resource "google_secret_manager_secret" "secret" {
     }
   }
 
+  /* XXX: No secret rotation for static secrets
   depends_on = [
     google_pubsub_topic_iam_binding.pubsub_binding,
     google_pubsub_topic.secret-rotations
   ]
+  */
 }
 
+/* XXX: No secret rotation for static secrets
 resource "google_pubsub_topic" "secret_rotations" {
   name    = "secret-rotation-notifications"
   project = data.google_project.project.project_id
@@ -74,3 +78,4 @@ resource "google_pubsub_topic_iam_binding" "pubsub_binding" {
     "serviceAccount:${google_project_service_identity.agent.email}"
   ]
 }
+*/

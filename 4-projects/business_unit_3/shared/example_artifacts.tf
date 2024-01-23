@@ -21,6 +21,7 @@ locals {
     "roles/artifactregistry.admin",
     "roles/iam.serviceAccountAdmin",
     "roles/cloudbuild.connectionAdmin",
+    "roles/source.admin",
   ]
 }
 module "app_infra_artifacts_project" {
@@ -42,7 +43,8 @@ module "app_infra_artifacts_project" {
     "serviceusage.googleapis.com",
     "storage.googleapis.com",
     "cloudbuild.googleapis.com",
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "sourcerepo.googleapis.com",
   ]
   # Metadata
   project_suffix    = "artifacts"
@@ -62,8 +64,9 @@ module "app_infra_artifacts_project" {
 #     prevent_destroy = false
 #   }
 # }
+
 resource "google_kms_crypto_key_iam_member" "ml_key" {
-  for_each      = module.app_infra_cloudbuild_project[0].crypto_key
+  for_each      = module.app_infra_cloudbuild_project[0].kms_keys
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-artifact-publish"]}"

@@ -107,11 +107,11 @@ variable "github_remote_uri" {
   type        = string
 }
 
-variable "github_api_token" {
-  description = "API Token from your github repository"
-  type        = string
-  sensitive   = true
-}
+# variable "github_api_token" {
+#   description = "API Token from your github repository"
+#   type        = string
+#   sensitive   = true
+# }
 
 variable "github_name_prefix" {
   description = "A name for your github connection to cloubuild"
@@ -135,4 +135,10 @@ variable "project_id" {
   description = "Optional project ID where Cloud Composer Environment is created."
   type        = string
   default     = null
+}
+
+variable "github_secret_name" {
+  description = "Name of the github secret to extract github token info"
+  type        = string
+  default     = "github-api-token"
 }

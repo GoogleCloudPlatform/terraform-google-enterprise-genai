@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,15 @@ variable "gcs_bucket_prefix" {
   default     = "bkt"
 }
 
+variable "region" {
+  type        = string
+  description = "The resource region, one of [us-central1, us-east4]."
+  default     = "us-central1"
+  validation {
+    condition     = contains(["us-central1", "us-east4"], var.region)
+    error_message = "Region must be one of [us-central1, us-east4]."
+  }
+}
 variable "remote_state_bucket" {
   description = "Backend bucket to load Terraform Remote State Data from previous steps."
   type        = string
@@ -79,16 +88,6 @@ variable "folder_prefix" {
   default     = "fldr"
 }
 
-# variable "kms_key_name_prefix" {
-#   description = "Name for kms key."
-#   type        = string
-#   default     = "key"
-# }
-
-
-#Control ID: COM-CO-2.7
-#NIST 800-53: SC-12 SC-13
-#CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
 variable "key_rotation_period" {
   description = "Rotation period in seconds to be used for KMS Key"
   type        = string

@@ -231,7 +231,7 @@ module "restricted_shared_vpc" {
   nat_num_addresses_region1 = 1
   nat_num_addresses_region2 = 1
 
-  perimeter_projects = [local.logging_env_project_number]
+  perimeter_projects = [local.logging_env_project_number, local.kms_env_project_number]
 }
 
 /******************************************

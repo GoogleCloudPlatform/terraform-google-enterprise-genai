@@ -61,6 +61,7 @@ module "project" {
   org_id                   = var.org_id
   billing_account          = var.billing_account
   folder_id                = var.folder_id
+  default_service_account  = var.default_service_account
 
   svpc_host_project_id = var.shared_vpc_host_project_id
   shared_vpc_subnets   = var.shared_vpc_subnets # Optional: To enable subnetting, replace to "module.networking_project.subnetwork_self_link"
@@ -102,7 +103,15 @@ resource "google_folder_iam_member" "folder_network_viewer" {
   member = "serviceAccount:${each.value}"
 }
 
-resource "google_compute_subnetwork_iam_member" "service_account_role_to_vpc_subnets" {
+resource "google_project_iam_member" "shared_vpc_network_viewer" {
+  for_each = var.shared_vpc_host_project_id != "" ? toset(local.pipeline_kms_sas) : toset([])
+
+  project = var.shared_vpc_host_project_id
+  role    = "roles/compute.networkViewer"
+  member  = "serviceAccount:${each.key}"
+}
+
+resource "google_compute_subnetwork_iam_member" "account_role_to_vpc_subnets" {
   provider = google-beta
   for_each = { for nr in local.network_user_role : "${nr.repo}-${nr.subnet}-${nr.sa}" => nr }
 
@@ -114,7 +123,7 @@ resource "google_compute_subnetwork_iam_member" "service_account_role_to_vpc_sub
 }
 
 // Add key for project
-resource "google_kms_crypto_key" "key" {
+resource "google_kms_crypto_key" "kms_keys" {
   for_each        = toset(var.key_rings)
   name            = module.project.project_name
   key_ring        = each.key
@@ -125,11 +134,9 @@ resource "google_kms_crypto_key" "key" {
 }
 
 // Add crypto key viewer role to kms environment project
-
 resource "google_project_iam_member" "kms_viewer" {
   for_each = var.environment != "common" ? toset(local.pipeline_kms_sas) : toset([])
   project  = local.environment_kms_project_id
   role     = "roles/cloudkms.viewer"
   member   = "serviceAccount:${each.key}"
-
 }

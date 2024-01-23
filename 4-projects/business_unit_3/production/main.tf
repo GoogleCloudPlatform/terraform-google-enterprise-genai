@@ -20,47 +20,15 @@ module "bu_folder" {
   remote_state_bucket = var.remote_state_bucket
   env                 = var.env
 }
-# module "env" {
-#   source = "../../modules/base_env"
 
-#   env                          = "production"
-#   business_code                = "bu3"
-#   business_unit                = "business_unit_3"
-#   remote_state_bucket          = var.remote_state_bucket
-#   location_kms                 = var.location_kms
-#   location_gcs                 = var.location_gcs
-#   tfc_org_name                 = var.tfc_org_name
-#   peering_module_depends_on    = var.peering_module_depends_on
-#   peering_iap_fw_rules_enabled = true
-#   subnet_region                = var.instance_region
-#   subnet_ip_range              = "10.5.192.0/21"
-# }
-
-module "composer_cloudbuild_project" {
-  source    = "../../modules/composer_env"
-  count     = local.enable_cloudbuild_deploy ? 1 : 0
-  repo_name = local.repo_name
-  env       = var.env
-  # default_region      = var.default_region
-  remote_state_bucket = var.remote_state_bucket
-  folder_id           = module.bu_folder.business_unit_folder
-  shared_kms_key_ring = local.environment_kms_key_ring
-
-  #Metadata
-  project_suffix   = "cmpsr-pipeln"
-  application_name = "compsoer-pipeline"
-  business_code    = local.business_code
-  business_unit    = local.buiness_unit
-}
 module "ml_env" {
   source = "../../modules/ml_env"
 
   env                  = var.env
   business_code        = local.business_code
-  business_unit        = local.buiness_unit
+  business_unit        = local.business_unit
   remote_state_bucket  = var.remote_state_bucket
   location_gcs         = var.location_gcs
   tfc_org_name         = var.tfc_org_name
   business_unit_folder = module.bu_folder.business_unit_folder
-
 }

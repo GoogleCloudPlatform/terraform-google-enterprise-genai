@@ -33,3 +33,4 @@ data "google_kms_crypto_key" "key" {
   name     = data.google_project.project.name
   key_ring = data.google_kms_key_ring.kms.id
 }
+

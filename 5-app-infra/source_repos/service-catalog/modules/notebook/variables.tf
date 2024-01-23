@@ -81,7 +81,7 @@ variable "image_project" {
 variable "image_family" {
   description = "Use this VM image family to find the image; the newest image in this family will be used."
   type        = string
-  default     = null
+  default     = "common-cpu-notebooks"
 }
 
 variable "image_name" {
