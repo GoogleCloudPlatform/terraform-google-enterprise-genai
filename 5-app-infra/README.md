@@ -64,3 +64,87 @@ When viewing each folder under `projects`, consider them as seperate repositorie
 
 When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.  
 
+## VPC-SC
+
+Before deploying your projects, be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
+As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `4-networks-dual-svpc` and _update_ 
+your ingress rules.  
+
+Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
+
+In `common.auto.tfvars` update your `perimeter_additional_members` to include:
+ * the service acccount for bu3infra-pipeline: `"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"`
+ * the service account for your cicd pipeline: `"serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"`
+ * your development environment logging bucket service account: `"serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"`
+ * your development environment service acount for cloudbuild: `"serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"`
+
+ In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes:
+
+    ```
+    ingress_policies = [
+        // users
+        {
+            "from" = {
+            "identity_type" = "ANY_IDENTITY"
+            "sources" = {
+                "access_level" = "accessPolicies/270868347751/accessLevels/alp_d_shared_restricted_members_556e"
+            }
+            },
+            "to" = {
+            "resources" = [
+                "projects/[prj-[your-environment][shared-restricted-project-number]",
+                "projects/[prj-[your-environment]-kms-project-number]",
+                "projects/[prj-[your-environment]-bu3machine-learning-number]",
+            ]
+            "operations" = {
+                "compute.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "dns.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "logging.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "storage.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudkms.googleapis.com" = {
+                "methods" = ["*"]
+                }
+            }
+            }
+        },
+    ]
+    ```
+
+for your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
+
+    ```
+    egress_policies = [
+        // notebooks
+        {
+            "from" = {
+            "identity_type" = ""
+            "identities" = [
+                "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com",     
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",   
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com", 
+            ]
+            },
+            "to" = {
+            "resources" = ["projects/[prj-d-kms-project-number]"]
+            "operations" = {
+                "compute.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudkms.googleapis.com" = {
+                "methods" = ["*"]
+                }
+            }
+            }
+        },
+    ]
+    ```
+
+Please note that this will cover some but not ALL the policies that will be needed.  During deployment there will be violations that will occur which come from unknown google projects outside the scope of your organization.  It will be the responsibility of the operator(s) deploying this process to view logs about the errors and make adjustments accordingly.
