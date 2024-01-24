@@ -75,6 +75,18 @@ Please refer to [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into is
 **Note:** If you are using MacOS, replace `cp -RT` with `cp -R` in the relevant
 commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
+You will need a github repository set up for this step.  This repository houses the DAG's for composer.  As of this writing, the structure is as follows:
+   ```
+   .
+   ├── README.md
+   └── dags
+      ├── hello_world.py
+      └── strings.py
+   ```
+Add in your dags in the `dags` folder.  Any changes to this folder will trigger a pipeline and place the dags in the appropriate composer environment depending on which branch it is pushed to (`development`, `non-production`, `production`)
+
+Have a github token for access to your repository ready, along with an [Application Installation Id](https://github.com/badal-io/ml-foundations-composer/tree/development) and the remote uri to your repository.
+
 ### Deploying with Cloud Build
 
 1. Clone the `gcp-policies` repo based on the Terraform output from the `0-bootstrap` step.
@@ -142,13 +154,15 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 3 envs folders [README.md](./business_unit_3/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
+
+1. Update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
 
 1. Commit changes.
 
