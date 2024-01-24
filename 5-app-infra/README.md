@@ -64,6 +64,8 @@ When viewing each folder under `projects`, consider them as seperate repositorie
 
 When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.  
 
+It is recommended that you _first deploy_ the `common` projects (`artifact-publish` and `service-catalog` before deploying `machine-learning`.  The order of deploying the `common` projects does not matter, however `machine-learning` should be the last project to be inflated.  
+
 ## VPC-SC
 
 Before deploying your projects, be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
@@ -147,4 +149,22 @@ for your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
     ]
     ```
 
-Please note that this will cover some but not ALL the policies that will be needed.  During deployment there will be violations that will occur which come from unknown google projects outside the scope of your organization.  It will be the responsibility of the operator(s) deploying this process to view logs about the errors and make adjustments accordingly.
+Please note that this will cover some but not ALL the policies that will be needed.  During deployment there will be violations that will occur which come from unknown google projects outside the scope of your organization.  It will be the responsibility of the operator(s) deploying this process to view logs about the errors and make adjustments accordingly.  Most notably, this was observed for Service Catalog.  There will be an instance where an egress policy to be added for `cloudbuild.googleapis.com` access:
+
+    ```
+    // Service Catalog
+    {
+        "from" = {
+        "identity_type" = "ANY_IDENTITY"
+        "identities"    = []
+        },
+        "to" = {
+        "resources" = ["projects/[some random google project id]"] 
+        "operations" = {
+            "cloudbuild.googleapis.com" = {
+            "methods" = ["*"]
+            }
+        }
+        }
+    },
+    ```
