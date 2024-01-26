@@ -27,10 +27,6 @@ perimeter_additional_members = [
   "user:mike.futerko@badal.io",
   "user:renato.dattilo@badal.io",
   "user:zbutt@badal.io",
-  "serviceAccount:sa-tf-cb-bu3-machine-learning@prj-c-bu3infra-pipeline-c8kq.iam.gserviceaccount.com", // bu3infra-pipeline pipeline sa
-  "serviceAccount:sa-terraform-env@prj-b-seed-fb52.iam.gserviceaccount.com",                           // prj-b-cicd-gybw pipeline sa
-  "serviceAccount:service-352151227625@gs-project-accounts.iam.gserviceaccount.com",                   // dev env logging bucket gcs project service account
-  "serviceAccount:234217653834@cloudbuild.gserviceaccount.com",                                        // Cloud Build SA
 ]
 
 remote_state_bucket = "bkt-prj-b-seed-tfstate-ef26"
