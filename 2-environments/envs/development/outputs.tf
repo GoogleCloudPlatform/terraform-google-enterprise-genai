@@ -34,6 +34,11 @@ output "env_kms_project_id" {
   value       = module.env.env_kms_project_id
 }
 
+output "env_kms_project_number" {
+  description = "Project Number for environment Cloud Key Management Service (KMS)."
+  value       = module.env.env_kms_project_number
+}
+
 output "key_rings" {
   description = "Keyring Names created"
   value       = module.env.key_rings
