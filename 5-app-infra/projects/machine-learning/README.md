@@ -87,9 +87,6 @@ Add in your dags in the `dags` folder.  Any changes to this folder will trigger 
 
 Have a github token for access to your repository ready, along with an [Application Installation Id](https://github.com/badal-io/ml-foundations-composer/tree/development) and the remote uri to your repository.
 
-In `modules/base_env/main.tf`, you will notice each module is pointing to a google source repsitory.  This google source repository is created in `5-app-infra/projects/service-catalog` which houses all of the modules that are needed for machine learning.
-
-
 ### Deploying with Cloud Build
 
 1. Clone the `gcp-policies` repo based on the Terraform output from the `0-bootstrap` step.

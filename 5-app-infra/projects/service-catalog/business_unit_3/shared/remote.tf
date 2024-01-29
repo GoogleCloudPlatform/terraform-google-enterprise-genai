@@ -16,7 +16,8 @@
 
 locals {
   service_catalog_project_id      = data.terraform_remote_state.projects_shared.outputs.service_catalog_project_id
-  machine_learning_project_number = data.terraform_remote_state.machine_learening_development.outputs.machine_learning_project_number
+  service_catalog_repo_name       = data.terraform_remote_state.projects_shared.outputs.service_catalog_repo_name
+  machine_learning_project_number = data.terraform_remote_state.machine_learning_development.outputs.machine_learning_project_number
 }
 
 data "terraform_remote_state" "projects_shared" {
@@ -28,7 +29,7 @@ data "terraform_remote_state" "projects_shared" {
   }
 }
 
-data "terraform_remote_state" "machine_learening_development" {
+data "terraform_remote_state" "machine_learning_development" {
   backend = "gcs"
   config = {
     bucket = var.remote_state_bucket

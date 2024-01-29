@@ -69,17 +69,3 @@ variable "environment" {
 variable "project_id" {
   description = "Project ID"
 }
-variable "cloudbuild_repo_id" {
-  description = "CloudBuild repository id"
-  type        = string
-}
-
-variable "github_remote_uri" {
-  description = "The remote uri of your github repository"
-  type        = string
-}
-
-variable "secret_version_name" {
-  description = "Secret Version Name of key"
-  type        = string
-}

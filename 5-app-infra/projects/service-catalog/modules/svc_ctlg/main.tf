@@ -48,47 +48,63 @@ resource "google_storage_bucket" "bucket" {
   }
 }
 
-resource "google_storage_bucket_iam_member" "bucket_member" {
-  bucket = google_storage_bucket.bucket.name
-  role   = "roles/storage.admin"
-  member = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+resource "google_storage_bucket_iam_member" "bucket_role" {
+  for_each = { for gcs in local.bucket_roles : "${gcs.role}-${gcs.acct}" => gcs }
+  bucket   = google_storage_bucket.bucket.name
+  role     = each.value.role
+  member   = each.value.acct
 }
 
-# resource "google_storage_bucket_iam_member" "bucket_member" {
-#   bucket = google_storage_bucket.bucket.name
-#   role   = "roles/storage.legacyObjectReader"
-#   member = "serviceAccount:${var.machine_learning_project_number}@cloudbuild.gserviceaccount.com"
-# }
+resource "google_sourcerepo_repository" "service_catalog" {
+  project = var.project_id
+  name    = var.name
+}
 
 resource "google_cloudbuild_trigger" "zip_files" {
   name     = "zip-tf-files-trigger"
   project  = var.project_id
   location = var.region
 
-  repository_event_config {
-    repository = var.cloudbuild_repo_id
-    push {
-      branch = "^main$"
-    }
+  # repository_event_config {
+  #   repository = var.cloudbuild_repo_id
+  #   push {
+  #     branch = "^main$"
+  #   }
+  # }
+
+  trigger_template {
+    branch_name = "^main$"
+    repo_name   = google_sourcerepo_repository.service_catalog.name
   }
+
   build {
+    # step {
+    #   id         = "unshallow"
+    #   name       = "gcr.io/cloud-builders/git"
+    #   secret_env = ["token"]
+    #   entrypoint = "/bin/bash"
+    #   args = [
+    #     "-c",
+    #     "git fetch --unshallow https://$token@${local.github_repository}"
+    #   ]
+
+    # }
     step {
       id         = "unshallow"
       name       = "gcr.io/cloud-builders/git"
-      secret_env = ["token"]
       entrypoint = "/bin/bash"
       args = [
         "-c",
-        "git fetch --unshallow https://$token@${local.github_repository}"
+        "git fetch --unshallow"
       ]
 
     }
-    available_secrets {
-      secret_manager {
-        env          = "token"
-        version_name = var.secret_version_name
-      }
-    }
+    # available_secrets {
+    #   secret_manager {
+    #     env          = "token"
+    #     version_name = var.secret_version_name
+    #   }
+    # }
     step {
       id         = "find-folders-affected-in-push"
       name       = "gcr.io/cloud-builders/git"
@@ -97,11 +113,11 @@ resource "google_cloudbuild_trigger" "zip_files" {
         "-c",
         <<-EOT
         changed_files=$(git diff $${COMMIT_SHA}^1 --name-only -r)
-        changed_folders=$(echo "$changed_files" | awk -F/ '{print $1}' | sort | uniq )
+        changed_folders=$(echo "$changed_files" | awk -F/ '{print $2}' | sort | uniq )
 
         for folder in $changed_folders; do
           echo "Found change in folder: $folder"
-          (cd $folder && find . -type f -name '*.tf' -exec tar -cvzPf "/workspace/$folder.tar.gz" {} +)
+          (cd modules/$folder && find . -type f -name '*.tf' -exec tar -cvzPf "/workspace/$folder.tar.gz" {} +)
         done
       EOT
       ]

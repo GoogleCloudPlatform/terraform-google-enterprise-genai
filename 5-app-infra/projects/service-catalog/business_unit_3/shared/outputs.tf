@@ -14,21 +14,6 @@
  * limitations under the License.
  */
 
-output "trigger_sa_account_id" {
-  description = "Account id of service account cloudbuild."
-  value       = module.service_catalog_pipeline.trigger_sa_account_id
-}
-
-output "cloudbuild_v2_repo_id" {
-  description = "Repository ID of cloudbuild repository"
-  value       = module.service_catalog_pipeline.cloudbuild_v2_repo_id
-}
-
-output "kms_key_id" {
-  description = "Projects Key ID for encrytion"
-  value       = module.service_catalog_pipeline.kms_key_id
-}
-
 output "storage_bucket_name" {
   description = "Name of storage bucket created"
   value       = module.service_catalog.storage_bucket_name
@@ -37,4 +22,8 @@ output "storage_bucket_name" {
 output "cloudbuild_trigger_id" {
   description = "Id of Cloud Build Trigger"
   value       = module.service_catalog.cloudbuild_trigger_id
+}
+
+output "service_catalog_repo_name" {
+  value = module.service_catalog.service_catalog_repo_name
 }

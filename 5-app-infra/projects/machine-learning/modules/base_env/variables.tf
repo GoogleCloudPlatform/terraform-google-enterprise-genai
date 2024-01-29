@@ -18,16 +18,6 @@
 #     Global Inputs    #
 ########################
 
-variable "service_catalog_repo_name" {
-  description = "Name of the Service Account repository needed for module source"
-  type        = string
-}
-
-variable "service_catalog_project_id" {
-  description = "Name of the Service Account project ID needed for module source"
-  type        = string
-}
-
 variable "env" {
   description = "Environment name. (ex. production)"
   type        = string

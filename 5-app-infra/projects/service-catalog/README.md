@@ -53,46 +53,61 @@ For an overview of the architecture and the parts, see the
 [terraform-example-foundation README](https://github.com/terraform-google-modules/terraform-example-foundation)
 file.
 
-## Purpose
-The purpose of this step is to deploy a pipeline and a bucket which is linked to a GitHub repository that houses terraform modules for the use in Service Catalog.
+## Purpose(s)
+This project has two main purposes:
+
+1. To deploy a pipeline and a bucket which is linked to a Google Cloud Repository that houses terraform modules for the use in Service Catalog.
 Although Service Catalog itself must be manually deployed, the modules which will be used can still be automated. 
 
+2. To deploy infrastructure for operational environments (ie. `non-production` & `production`.)
+
+The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are. 
+
 The repository has the structure (truncated for brevity):
-```
-├── bucket
-│   ├── README.md
-│   ├── data.tf
-│   ├── main.tf
-│   ├── outputs.tf
-│   ├── provider.tf
-│   └── variables.tf
-├── composer
-│   ├── README.md
-│   ├── data.tf
-│   ├── iam.roles.tf
-│   ├── iam.users.tf
-│   ├── locals.tf
-│   ├── main.tf
-│   ├── outputs.tf
-│   ├── provider.tf
-│   ├── terraform.tfvars.example
-│   ├── variables.tf
-│   └── vpc.tf
-├── cryptography
-│   ├── README.md
-│   ├── crypto_key
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   └── variables.tf
-│   └── key_ring
-│       ├── main.tf
-│       ├── outputs.tf
-│       └── variables.tf
-```
-Each folder represents a terraform module.  
+   ```
+   business_unit_3
+   ├── development
+   ├── non-production
+   ├── production
+   modules
+   ├── bucket
+   │   ├── README.md
+   │   ├── data.tf
+   │   ├── main.tf
+   │   ├── outputs.tf
+   │   ├── provider.tf
+   │   └── variables.tf
+   ├── composer
+   │   ├── README.md
+   │   ├── data.tf
+   │   ├── iam.roles.tf
+   │   ├── iam.users.tf
+   │   ├── locals.tf
+   │   ├── main.tf
+   │   ├── outputs.tf
+   │   ├── provider.tf
+   │   ├── terraform.tfvars.example
+   │   ├── variables.tf
+   │   └── vpc.tf
+   ├── cryptography
+   │   ├── README.md
+   │   ├── crypto_key
+   │   │   ├── main.tf
+   │   │   ├── outputs.tf
+   │   │   └── variables.tf
+   │   └── key_ring
+   │       ├── main.tf
+   │       ├── outputs.tf
+   │       └── variables.tf
+   ```
+Each folder under `modules` represents a terraform module.  
 When there is a change in any of the terraform module folders, the pipeline will find whichever module has been changed since the last push, `tar.gz` that file and place it in a bucket for Service Catalog to access.
 
-This pipeline is listening to the `main` branch of this repository for changes.
+This pipeline is listening to the `main` branch of this repository for changes in order for the modules to be uploaded to service catalog.
+
+The pipeline also listens for changes made to `plan`, `development`, `non-production` & `production` branches, this is used for deploying infrastructure to each project.
+
+
 The pipeline can be accessed by navigating to the project name created in step-4:
 
 ```bash
@@ -218,6 +233,34 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git push origin shared
    ```
 
+## Post deployment
+1. `cd` out of the `foundations` repository.
+
+1. Grab the Service Catalogs ID
+   ```shell
+   export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="terraform-example-foundation/4-projects/business_unit_3/shared" output -raw service_catalog_project_id)
+   echo ${SERVICE_CATALOG_PROJECT_ID}
+   ``` 
+
+1. Clone the freshly minted Cloud Source Repository that was created for this project. 
+   ```shell
+   gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
+   ```
+1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos` folder.
+   ```shell
+   cd service-catalog
+   cp -r ../terraform-example-foundation/5-app-infra/source_repos/service-catalog/ .
+   ```
+
+1. Commit changes and push main branch to the new repo.
+   ```shell
+   git add .
+   git commit -m 'Initialize Service Catalog Build Repo'
+
+   git push --set-upstream origin main
+   ```
+
+1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
 ### Run Terraform locally
 

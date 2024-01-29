@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-output "trigger_sa_account_id" {
-  description = "Account id of service account cloudbuild."
-  value       = google_service_account.trigger_sa
-}
+instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
 
-output "cloudbuild_v2_repo_id" {
-  description = "Repository ID of cloudbuild repository"
-  value       = google_cloudbuildv2_repository.repo.id
-}
+remote_state_bucket = "REPLCE_ME"
 
-output "kms_key_id" {
-  description = "Projects Key ID for encrytion"
-  value       = data.google_kms_crypto_key.key.id
-}
+github_app_installation_id = "REPLACE_ME"
 
-output "github_secret_version_name" {
-  description = "Secret Version Name of key"
-  value       = google_secret_manager_secret_version.github_secret_version.name
-}
+github_remote_uri = "REPLACE_ME"

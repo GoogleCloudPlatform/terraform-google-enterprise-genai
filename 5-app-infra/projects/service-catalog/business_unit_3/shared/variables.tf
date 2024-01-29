@@ -23,19 +23,3 @@ variable "remote_state_bucket" {
   description = "Backend bucket to load remote state information from previous steps."
   type        = string
 }
-
-variable "github_api_token" {
-  description = "API Token from your github repository"
-  type        = string
-}
-
-variable "github_app_installation_id" {
-  description = "The app installation ID that was created when installing Google Cloud Build in Github: https://github.com/apps/google-cloud-build"
-  type        = number
-
-}
-
-variable "github_remote_uri" {
-  description = "The remote uri of your github repository"
-  type        = string
-}

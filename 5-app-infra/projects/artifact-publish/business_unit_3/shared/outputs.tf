@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-output "trigger_sa_account_id" {
-  description = "Account id of service account cloudbuild."
-  value       = module.artifact_pipeline.trigger_sa_account_id
-}
+# output "trigger_sa_account_id" {
+#   description = "Account id of service account cloudbuild."
+#   value       = module.artifact_pipeline.trigger_sa_account_id
+# }
 
-output "cloudbuild_v2_repo_id" {
-  description = "Repository ID of cloudbuild repository"
-  value       = module.artifact_pipeline.cloudbuild_v2_repo_id
-}
+# output "cloudbuild_v2_repo_id" {
+#   description = "Repository ID of cloudbuild repository"
+#   value       = module.artifact_pipeline.cloudbuild_v2_repo_id
+# }
 
-output "kms_key_id" {
-  description = "Projects Key ID for encrytion"
-  value       = module.artifact_pipeline.kms_key_id
-}
+# output "kms_key_id" {
+#   description = "Projects Key ID for encrytion"
+#   value       = module.artifact_pipeline.kms_key_id
+# }
 
 output "artifact_registry_repository_id" {
   value = module.artifact_publish.artifact_registry_repository_id
@@ -37,3 +37,6 @@ output "cloudbuild_trigger_id" {
   value = module.artifact_publish.cloudbuild_trigger_id
 }
 
+output "artifact_repo_name" {
+  value = module.artifact_publish.artifact_repo_name
+}

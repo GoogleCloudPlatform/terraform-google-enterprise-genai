@@ -15,6 +15,27 @@
  */
 
 locals {
-  github_repository = replace(var.github_remote_uri, "https://", "")
+  # github_repository = replace(var.github_remote_uri, "https://", "")
+
+  bucket_permissions = {
+
+    "roles/storage.admin" = [
+      "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+    ],
+    "roles/storage.legacyObjectReader" = [
+      "serviceAccount:${var.machine_learning_project_number}@cloudbuild.gserviceaccount.com",
+    ],
+  }
+
+  bucket_roles = flatten([
+    for role in keys(local.bucket_permissions) : [
+      for sa in local.bucket_permissions[role] :
+      {
+        role = role
+        acct = sa
+      }
+    ]
+  ])
 }
+
 

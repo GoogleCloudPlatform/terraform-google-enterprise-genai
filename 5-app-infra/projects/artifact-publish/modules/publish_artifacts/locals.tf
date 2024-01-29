@@ -29,5 +29,5 @@ locals {
     "roles/artifactregistry.reader",
     "roles/artifactregistry.writer",
   ]
-  github_repository = replace(var.github_remote_uri, "https://", "")
+  # github_repository = replace(var.github_remote_uri, "https://", "")
 }

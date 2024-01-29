@@ -18,12 +18,10 @@
 module "base_env" {
   source = "../../modules/base_env"
 
-  env                        = local.env
-  environment_code           = local.environment_code
-  business_code              = local.business_code
-  project_id                 = local.machine_learning_project_id
-  service_catalog_repo_name  = local.service_catalog_repo_name
-  service_catalog_project_id = local.service_catalog_project_id
+  env              = local.env
+  environment_code = local.environment_code
+  business_code    = local.business_code
+  project_id       = local.machine_learning_project_id
 
   kms_keys = local.machine_learning_kms_keys
 

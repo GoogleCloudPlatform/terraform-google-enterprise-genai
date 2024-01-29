@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+variable "name" {
+  description = "Name of the repository."
+  type        = string
+}
 variable "region" {
   description = "Location of the repository."
   type        = string
@@ -28,22 +32,7 @@ variable "gcs_bucket_prefix" {
   default     = "bkt"
 }
 
-variable "cloudbuild_repo_id" {
-  description = "CloudBuild repository id"
+variable "machine_learning_project_number" {
+  description = "Project Number for the Machine Learning (Vertex) Project"
   type        = string
 }
-
-variable "secret_version_name" {
-  description = "Secret Version Name of key"
-  type        = string
-}
-
-variable "github_remote_uri" {
-  description = "Url of your github repo"
-  type        = string
-}
-
-# variable "machine_learning_project_number" {
-#   description = "Project Number for the Machine Learning (Vertex) Project"
-#   type        = string
-# }

@@ -14,31 +14,15 @@
  * limitations under the License.
  */
 
-
-module "artifact_pipeline" {
-  source                     = "../../modules/pipeline_base"
-  environment                = local.environment
-  project_id                 = local.common_artifacts_project_id
-  name                       = "publish-artifacts"
-  github_app_installation_id = var.github_app_installation_id
-  github_name_prefix         = "github-cloudbuild"
-  github_api_token           = var.github_api_token
-  github_remote_uri          = var.github_remote_uri
-  region                     = var.instance_region
-}
 module "artifact_publish" {
   source = "../../modules/publish_artifacts"
 
-  environment         = local.environment
-  github_remote_uri   = var.github_remote_uri
-  description         = "Publish Artifacts for ML Projects"
-  project_id          = local.common_artifacts_project_id
-  name                = "publish-artifacts"
-  format              = "DOCKER"
-  secret_version_name = module.artifact_pipeline.github_secret_version_name
-  cloudbuild_repo_id  = module.artifact_pipeline.cloudbuild_v2_repo_id
-  region              = var.instance_region
-  # remote_state_bucket = var.remote_state_bucket
+  environment = local.environment
+  description = "Publish Artifacts for ML Projects"
+  project_id  = local.common_artifacts_project_id
+  name        = "publish-artifacts"
+  format      = "DOCKER"
+  region      = var.instance_region
   cleanup_policies = [{
     id     = "keep-tagged-release"
     action = "KEEP"

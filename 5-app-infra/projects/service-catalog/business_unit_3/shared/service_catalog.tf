@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-
-module "service_catalog_pipeline" {
-  source = "../../modules/pipeline_base"
-
-  environment                = local.environment
-  project_id                 = local.service_catalog_project_id
-  name                       = "service-catalog"
-  github_app_installation_id = var.github_app_installation_id
-  github_name_prefix         = "github-sc-cloudbuild"
-  github_api_token           = var.github_api_token
-  github_remote_uri          = var.github_remote_uri
-  region                     = var.instance_region
-}
-
 module "service_catalog" {
   source = "../../modules/svc_ctlg"
 
-  project_id          = local.service_catalog_project_id
-  region              = var.instance_region
-  cloudbuild_repo_id  = module.service_catalog_pipeline.cloudbuild_v2_repo_id
-  secret_version_name = module.service_catalog_pipeline.github_secret_version_name
-  github_remote_uri   = var.github_remote_uri
-  # machine_learning_project_number = local.machine_learning_project_number
+  project_id                      = local.service_catalog_project_id
+  region                          = var.instance_region
+  name                            = local.service_catalog_repo_name
+  machine_learning_project_number = local.machine_learning_project_number
 }

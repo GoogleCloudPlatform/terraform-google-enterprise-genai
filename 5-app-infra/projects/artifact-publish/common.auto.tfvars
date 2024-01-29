@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  service_catalog_repo_uri = "https://source.developers.google.com/p/${var.service_catalog_project_id}/r/${var.service_catalog_repo_name}"
-}
+instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
+
+remote_state_bucket = "UPDATE_ME"

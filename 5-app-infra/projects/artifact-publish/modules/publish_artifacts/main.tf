@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 resource "google_project_service_identity" "artifact_registry_agent" {
   provider = google-beta
 
@@ -88,35 +87,28 @@ resource "google_artifact_registry_repository_iam_member" "project" {
   member = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
+resource "google_sourcerepo_repository" "artifact_repo" {
+  project = var.project_id
+  name    = var.name
+}
 resource "google_cloudbuild_trigger" "docker_build" {
   name     = "docker-build"
   project  = var.project_id
   location = var.region
 
-  # service_account = google_service_account.trigger_sa.id
-  repository_event_config {
-    repository = var.cloudbuild_repo_id
-    push {
-      branch = "^main$"
-    }
+  trigger_template {
+    branch_name = "^main$"
+    repo_name   = google_sourcerepo_repository.artifact_repo.name
   }
   build {
     step {
       id         = "unshallow"
       name       = "gcr.io/cloud-builders/git"
-      secret_env = ["token"]
       entrypoint = "/bin/bash"
       args = [
         "-c",
-        "git fetch --unshallow https://$token@${local.github_repository}"
+        "git fetch --unshallow"
       ]
-
-    }
-    available_secrets {
-      secret_manager {
-        env          = "token"
-        version_name = var.secret_version_name
-      }
     }
     step {
       id         = "select-folder"
