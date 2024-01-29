@@ -162,8 +162,25 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
 
+
 1. Update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
 
+1. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
+
+   ```bash
+   export remote_state_bucket=$(terraform -chdir="../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   echo "remote_state_bucket = ${remote_state_bucket}"
+   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   ```
+   
+1. Update `backend.tf` with your bucket from the infra pipeline output.
+
+   ```bash
+   export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-machine-learning"' --raw-output)
+   echo "backend_bucket = ${backend_bucket}"
+
+   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+   ```
 1. Commit changes.
 
    ```bash

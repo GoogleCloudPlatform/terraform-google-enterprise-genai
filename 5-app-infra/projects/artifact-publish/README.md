@@ -166,7 +166,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   export remote_state_bucket=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -raw state_buckets)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
@@ -244,6 +244,24 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    export remote_state_bucket=$(terraform -chdir="../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   ```
+   
+1. Update `backend.tf` with your bucket from the infra pipeline output.
+
+   ```bash
+   export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-artifact-publish"' --raw-output)
+   echo "backend_bucket = ${backend_bucket}"
+
+   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+   ```
+
+1. Update `backend.tf` with your bucket from the infra pipeline output.
+
+   ```bash
+   export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-artifact-publish"' --raw-output)
+   echo "backend_bucket = ${backend_bucket}"
+
+   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
 
 1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
