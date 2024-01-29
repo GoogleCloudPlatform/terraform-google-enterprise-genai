@@ -170,12 +170,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
-
-1. Update `common.auto.tfvars` with your GitHub information.  You will need:
-- `github_api_token` = your GitHub API token [More Info here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
-- `github_app_installation_id` = [More Info Here](https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github?generation=2nd-gen)
-- `github_remote_uri` = The full URI to the github repository containing your code
-
 1. Commit changes.
 
    ```bash

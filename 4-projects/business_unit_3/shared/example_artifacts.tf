@@ -16,12 +16,13 @@
 
 locals {
   artifact_tf_sa_roles = [
-    "roles/secretmanager.admin",
-    "roles/cloudbuild.builds.editor",
     "roles/artifactregistry.admin",
-    "roles/iam.serviceAccountAdmin",
+    "roles/cloudbuild.builds.editor",
     "roles/cloudbuild.connectionAdmin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/secretmanager.admin",
     "roles/source.admin",
+    "roles/storage.admin",
   ]
 }
 module "app_infra_artifacts_project" {

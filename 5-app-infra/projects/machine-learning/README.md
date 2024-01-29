@@ -177,7 +177,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    github_token = "YOUR-GITHUB-TOKEN"
 
    for env in "${envs[@]}"; do
-      output=$(terraform -chdir="../terraform-example-foundation/4-projects/business_unit_3/${env}" output -raw machine_learning_project_id)
+      output=$(terraform -chdir="../terraform-example-foundation/4-projects/business_unit_3/${env}" output -raw machine_learning_project_id) 
       project_ids+=("$output")
    done
 
