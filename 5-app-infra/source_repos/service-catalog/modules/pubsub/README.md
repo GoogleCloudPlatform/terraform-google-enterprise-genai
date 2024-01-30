@@ -23,7 +23,6 @@ No requirements.
 |------|---------|
 | <a name="provider_google"></a> [google](#provider\_google) | n/a |
 | <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
-| <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
 
@@ -33,10 +32,7 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [google-beta_google_project_service_identity.agent](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
 | [google-beta_google_pubsub_topic.pubsub_topic](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_pubsub_topic) | resource |
-| [google_kms_crypto_key_iam_member.kms-key-binding](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [time_sleep.wait_30_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [google_kms_crypto_key.key](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
 | [google_kms_key_ring.kms](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
 | [google_project.project](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
@@ -56,7 +52,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_id"></a> [id](#output\_id) | an identifier for the resource with format projects/{{project}}/topics/{{name}} |
+| <a name="output_pubsub_topic"></a> [pubsub\_topic](#output\_pubsub\_topic) | Pub/Sub Topic. |
 <!-- END_TF_DOCS -->
 
 ## Security Controls

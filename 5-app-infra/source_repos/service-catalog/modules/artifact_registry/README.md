@@ -1,5 +1,5 @@
 <!-- BEGIN_TF_DOCS -->
-Copyright 2023 Google LLC
+Copyright 2024 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ No requirements.
 |------|---------|
 | <a name="provider_google"></a> [google](#provider\_google) | n/a |
 | <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
-| <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
 
@@ -34,9 +33,6 @@ No modules.
 | Name | Type |
 |------|------|
 | [google-beta_google_artifact_registry_repository.registry](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_artifact_registry_repository) | resource |
-| [google-beta_google_project_service_identity.artifact_registry](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
-| [google_kms_crypto_key_iam_member.kms-key-binding](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [time_sleep.wait_30_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [google_kms_crypto_key.key](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
 | [google_kms_key_ring.kms](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
 | [google_project.project](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
@@ -58,11 +54,3 @@ No modules.
 
 No outputs.
 <!-- END_TF_DOCS -->
-
-## Security Controls
-
-The following table outlines which of the suggested controls for Vertex Generative AI are enabled in this module.
-| Name | Control ID | NIST 800-53 | CRI Profile | Category | Source Blueprint
-|------|------------|-------------|-------------|----------| ----------------|
-|Customer Managed Encryption Keys| COM-CO-2.3| SC-12 <br />SC-13| PR.DS-1.1 <br />PR.DS-2.1<br /> PR.DS-2.2 <br /> PR.DS-5.1 | Recommended | Secure Foundation v4
-|Clean Up Policy | AR-CO-6.1 | SI-12 | PR.IP-2.1 <br />PR.IP-2.2<br />  PR.IP-2.3 | Recommended based on customer use case | ML Foundation v0.1.0-alpha.1

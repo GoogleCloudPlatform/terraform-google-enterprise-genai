@@ -25,7 +25,7 @@ To execute the provided Terraform configuration the following IAM permissions ar
 
 
 <!-- BEGIN_TF_DOCS -->
-Copyright 2023 Google LLC
+Copyright 2024 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ No requirements.
 |------|---------|
 | <a name="provider_google"></a> [google](#provider\_google) | n/a |
 | <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
-| <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
 
@@ -59,11 +58,8 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [google-beta_google_project_service_identity.agent](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
 | [google-beta_google_storage_bucket.bucket](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_storage_bucket) | resource |
-| [google_kms_crypto_key_iam_member.kms-key-binding](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
 | [google_storage_bucket_object.root_folder](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_object) | resource |
-| [time_sleep.wait_30_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [google_kms_crypto_key.key](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
 | [google_kms_key_ring.kms](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
 | [google_project.project](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
@@ -78,7 +74,6 @@ No modules.
 | <a name="input_dual_region_locations"></a> [dual\_region\_locations](#input\_dual\_region\_locations) | dual region description | `list(string)` | `[]` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | (Optional, Default: true) When deleting a bucket, this boolean option will delete all contained objects. If you try to delete a bucket that contains objects, Terraform will fail that run. | `bool` | `true` | no |
 | <a name="input_gcs_bucket_prefix"></a> [gcs\_bucket\_prefix](#input\_gcs\_bucket\_prefix) | Name prefix to be used for GCS Bucket | `string` | `"bkt"` | no |
-| <a name="input_keyring_name"></a> [keyring\_name](#input\_keyring\_name) | Central keyring name | `string` | `"sample-keyring"` | no |
 | <a name="input_labels"></a> [labels](#input\_labels) | Labels to be attached to the buckets | `map(string)` | <pre>{<br>  "classification": "dataclassification",<br>  "label": "samplelabel",<br>  "owner": "testowner"<br>}</pre> | no |
 | <a name="input_lifecycle_rules"></a> [lifecycle\_rules](#input\_lifecycle\_rules) | List of lifecycle rules to configure. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket.html#lifecycle_rule except condition.matches\_storage\_class should be a comma delimited string. | <pre>set(object({<br>    # Object with keys:<br>    # - type - The type of the action of this Lifecycle Rule. Supported values: Delete and SetStorageClass.<br>    # - storage_class - (Required if action type is SetStorageClass) The target Storage Class of objects affected by this Lifecycle Rule.<br>    action = map(string)<br><br>    # Object with keys:<br>    # - age - (Optional) Minimum age of an object in days to satisfy this condition.<br>    # - created_before - (Optional) Creation date of an object in RFC 3339 (e.g. 2017-06-13) to satisfy this condition.<br>    # - with_state - (Optional) Match to live and/or archived objects. Supported values include: "LIVE", "ARCHIVED", "ANY".<br>    # - matches_storage_class - (Optional) Comma delimited string for storage class of objects to satisfy this condition. Supported values include: MULTI_REGIONAL, REGIONAL.<br>    # - num_newer_versions - (Optional) Relevant only for versioned objects. The number of newer versions of an object to satisfy this condition.<br>    # - custom_time_before - (Optional) A date in the RFC 3339 format YYYY-MM-DD. This condition is satisfied when the customTime metadata for the object is set to an earlier date than the date used in this lifecycle condition.<br>    # - days_since_custom_time - (Optional) The number of days from the Custom-Time metadata attribute after which this condition becomes true.<br>    # - days_since_noncurrent_time - (Optional) Relevant only for versioned objects. Number of days elapsed since the noncurrent timestamp of an object.<br>    # - noncurrent_time_before - (Optional) Relevant only for versioned objects. The date in RFC 3339 (e.g. 2017-06-13) when the object became nonconcurrent.<br>    condition = map(string)<br>  }))</pre> | <pre>[<br>  {<br>    "action": {<br>      "storage_class": "NEARLINE",<br>      "type": "SetStorageClass"<br>    },<br>    "condition": {<br>      "age": "30",<br>      "matches_storage_class": "REGIONAL"<br>    }<br>  },<br>  {<br>    "action": {<br>      "type": "Delete"<br>    },<br>    "condition": {<br>      "with_state": "ARCHIVED"<br>    }<br>  }<br>]</pre> | no |
 | <a name="input_name"></a> [name](#input\_name) | name of bucket | `string` | n/a | yes |
@@ -95,9 +90,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_name"></a> [name](#output\_name) | Generated unique name fort the bucket |
-| <a name="output_self_link"></a> [self\_link](#output\_self\_link) | The URI of the created resource |
-| <a name="output_url"></a> [url](#output\_url) | The base URL of the bucket, in the format gs://<bucket-name> |
+| <a name="output_storage_bucket"></a> [storage\_bucket](#output\_storage\_bucket) | Storage Bucket. |
 <!-- END_TF_DOCS -->
 
 ## Security Controls

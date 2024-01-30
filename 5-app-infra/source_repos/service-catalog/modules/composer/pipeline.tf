@@ -14,46 +14,6 @@
  * limitations under the License.
  */
 
-# resource "google_secret_manager_secret" "github_secret" {
-#   project   = data.google_project.project.project_id
-#   secret_id = "github-api-token"
-
-#   #Set up Automatic Rotation of Secrets
-#   #Control ID: SM-CO-6.2
-#   #NIST 800-53: SC-12 SC-13
-
-#   # how rotation be used with the GitHub token?
-#   # rotation {
-#   #   next_rotation_time = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timeadd(timestamp(), "720h"))
-#   #   rotation_period    = "43200s"
-#   # }
-
-#   #Automatic Secret Replication
-#   #Control ID: SM-CO-6.1
-#   #NIST 800-53: SC-12 SC-13
-#   replication {
-#     user_managed {
-#       replicas {
-#         location = var.region
-
-#         #Customer Managed Encryption Keys
-#         #Control ID: COM-CO-2.3
-#         #NIST 800-53: SC-12 SC-13
-#         #CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
-#         customer_managed_encryption {
-#           kms_key_name = data.google_kms_crypto_key.key.id
-#         }
-#       }
-#     }
-#   }
-# }
-
-# resource "google_secret_manager_secret_version" "github_secret_version" {
-#   secret                = google_secret_manager_secret.github_secret.id
-#   is_secret_data_base64 = true
-#   secret_data           = base64encode(var.github_api_token)
-# }
-
 data "google_iam_policy" "serviceagent_secretAccessor" {
   binding {
     role    = "roles/secretmanager.secretAccessor"

@@ -107,12 +107,6 @@ variable "github_remote_uri" {
   type        = string
 }
 
-# variable "github_api_token" {
-#   description = "API Token from your github repository"
-#   type        = string
-#   sensitive   = true
-# }
-
 variable "github_name_prefix" {
   description = "A name for your github connection to cloubuild"
   type        = string

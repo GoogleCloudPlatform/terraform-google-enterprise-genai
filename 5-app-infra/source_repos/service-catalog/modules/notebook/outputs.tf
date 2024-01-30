@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,37 @@
  * limitations under the License.
  */
 
-output "notebooks_instance" {
-  description = "Notebook Instance."
-  value       = google_notebooks_instance.instance
+output "id" {
+  description = "an identifier for the resource with format projects/{{project}}/locations/{{location}}/instances/{{name}}"
+  value = google_workbench_instance.instance.id
+}
+
+output "proxy_uri" {
+  description = "The proxy endpoint that is used to access the Jupyter notebook. Only returned when the resource is in a PROVISIONED state. If needed you can utilize terraform apply -refresh-only to await the population of this value."
+  value       = google_workbench_instance.instance.proxy_uri
+}
+
+output "state" {
+  description = "The state of this instance."
+  value       = google_workbench_instance.instance.state
+}
+
+output "create_time" {
+  description = "Instance creation time"
+  value       = google_workbench_instance.instance.create_time
+}
+
+output "update_time" {
+  description = "Instance update time."
+  value = google_workbench_instance.instance.update_time
+}
+
+output "terraform_labels" {
+  description = "The combination of labels configured directly on the resource and default labels configured on the provider."
+  value       = google_workbench_instance.instance.terraform_labels
+}
+
+output "effective_labels" {
+  description = "All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services."
+  value       = google_workbench_instance.instance.effective_labels
 }

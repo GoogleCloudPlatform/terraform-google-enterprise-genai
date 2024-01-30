@@ -41,7 +41,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_keyring_name"></a> [keyring\_name](#input\_keyring\_name) | Central keyring name | `string` | `"sample-keyring"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the metadata store instance | `string` | `null` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | Optional Project ID. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |
@@ -50,7 +49,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_blob_storage_path_prefix"></a> [blob\_storage\_path\_prefix](#output\_blob\_storage\_path\_prefix) | Consumer project Cloud Storage path prefix used to store blob data, which can either be a bucket or directory. Does not end with a '/'. |
-| <a name="output_id"></a> [id](#output\_id) | an identifier for the resource with format {{name}} |
-| <a name="output_name"></a> [name](#output\_name) | Name of the Tensorboard. |
+| <a name="output_vertex_ai_tensorboard"></a> [vertex\_ai\_tensorboard](#output\_vertex\_ai\_tensorboard) | TensorBoard resource. |
 <!-- END_TF_DOCS -->

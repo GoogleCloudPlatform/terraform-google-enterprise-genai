@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,6 @@ variable "instance_owners" {
   type        = set(string)
 }
 
-# variable "service_account" {
-#   description = "service account to attach to this instance"
-#   type        = string
-# }
-
-# variable "service_account_scopes" {
-#   description = <<EOT
-#                 the uri of the service account scopes to be be included in Compute Engine instances.
-#                 If not specified, the following scopes are defined: https://www.googleapis.com/auth/cloud-platform\
-#                 https://www.googleapis.com/auth/userinfo.email
-#                 EOT
-#   type         = set(string)
-# }
 
 variable "accelerator_type" {
   description = "The type of accelerator to use"
@@ -90,18 +77,6 @@ variable "image_name" {
   default     = ""
 }
 
-variable "container_repository" {
-  description = "The path to the container image repository. For example: gcr.io/{project_id}/{imageName}"
-  type        = string
-  default     = null
-}
-
-variable "container_tag" {
-  description = "The tag of the container image. If not specified, this defaults to the latest tag."
-  type        = string
-  default     = "latest"
-}
-
 variable "install_gpu_driver" {
   description = "Whether the end user authorizes Google Cloud to install GPU driver on this instance. Only applicable to instances with GPUs."
   type        = bool
@@ -113,8 +88,8 @@ variable "boot_disk_type" {
   type        = string
   default     = "PD_SSD"
   validation {
-    condition     = contains(["DISK_TYPE_UNSPECIFIED", "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.boot_disk_type)
-    error_message = "Illegal value for disk type"
+    condition = contains(["DISK_TYPE_UNSPECIFIED", "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.boot_disk_type)
+    error_message = "Illegal value for boot disk type"
   }
 }
 
@@ -124,19 +99,24 @@ variable "boot_disk_size_gb" {
   default     = "100"
 }
 
+variable "data_disk_type" {
+  description = "Optional. Input only. Indicates the type of the disk. Possible values are: PD_STANDARD, PD_SSD, PD_BALANCED, PD_EXTREME."
+  type        = string
+  default = "PD_SSD"
+  validation {
+    condition = contains(["PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.data_disk_type)
+    error_message = "Illegal value for data disk type"
+  }
+}
+
 variable "data_disk_size_gb" {
   description = "(Optional) The size of the data disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB)"
   type        = string
   default     = "100"
 }
 
-variable "no_public_ip" {
-  description = "No public IP will be assigned to this instance"
-  type        = bool
-  default     = true
-}
 
-variable "no_proxy_access" {
+variable "disable_proxy_access" {
   description = "(Optional) The notebook instance will not register with the proxy"
   type        = bool
   default     = false
@@ -148,23 +128,6 @@ variable "boundry_code" {
   default     = "001"
 }
 
-variable "enable_integrity_monitoring" {
-  description = "(Optional) Defines whether the instance has integrity monitoring enabled. Enables monitoring and attestation of the boot integrity of the instance"
-  type        = bool
-  default     = true
-}
-
-variable "enable_secure_boot" {
-  description = "(Optional) Defines whether the instance has Secure Boot enabled."
-  type        = bool
-  default     = true
-}
-
-variable "enable_vtpm" {
-  description = "(Optional) Defines whether the instance has the vTPM enabled."
-  type        = bool
-  default     = true
-}
 
 variable "project_id" {
   type        = string

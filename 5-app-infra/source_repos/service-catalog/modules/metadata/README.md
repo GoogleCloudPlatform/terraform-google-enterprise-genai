@@ -1,5 +1,5 @@
 <!-- BEGIN_TF_DOCS -->
-Copyright 2023 Google LLC
+Copyright 2024 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_keyring_name"></a> [keyring\_name](#input\_keyring\_name) | Central keyring name | `string` | `"sample-keyring"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name of the metadata store instance | `string` | `null` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | Optional Project ID. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |
@@ -51,5 +50,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_id"></a> [id](#output\_id) | an identifier for the resource with format {{name}} |
+| <a name="output_vertex_ai_metadata_store"></a> [vertex\_ai\_metadata\_store](#output\_vertex\_ai\_metadata\_store) | Vertex AI Metadata Store. |
 <!-- END_TF_DOCS -->

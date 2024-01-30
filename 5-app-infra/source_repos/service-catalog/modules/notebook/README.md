@@ -19,7 +19,7 @@
 
 
 <!-- BEGIN_TF_DOCS -->
-Copyright 2024 Google LLC
+Copyright 2023 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,9 +41,7 @@ No requirements.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | n/a |
-| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
-| <a name="provider_time"></a> [time](#provider\_time) | n/a |
+| <a name="provider_google"></a> [google](#provider\_google) | 5.14.0 |
 
 ## Modules
 
@@ -53,10 +51,7 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [google-beta_google_project_service_identity.agent](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
-| [google_kms_crypto_key_iam_member.kms-key-binding](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [google_notebooks_instance.instance](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/notebooks_instance) | resource |
-| [time_sleep.wait_30_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [google_workbench_instance.instance](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/workbench_instance) | resource |
 | [google_compute_network.shared_vpc](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) | data source |
 | [google_compute_subnetwork.subnet](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 | [google_kms_crypto_key.key](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
@@ -76,14 +71,11 @@ No modules.
 | <a name="input_boot_disk_size_gb"></a> [boot\_disk\_size\_gb](#input\_boot\_disk\_size\_gb) | (Optional) The size of the boot disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB) | `string` | `"100"` | no |
 | <a name="input_boot_disk_type"></a> [boot\_disk\_type](#input\_boot\_disk\_type) | Possible disk types for notebook instances | `string` | `"PD_SSD"` | no |
 | <a name="input_boundry_code"></a> [boundry\_code](#input\_boundry\_code) | The boundry code for the tenant | `string` | `"001"` | no |
-| <a name="input_container_repository"></a> [container\_repository](#input\_container\_repository) | The path to the container image repository. For example: gcr.io/{project\_id}/{imageName} | `string` | `null` | no |
-| <a name="input_container_tag"></a> [container\_tag](#input\_container\_tag) | The tag of the container image. If not specified, this defaults to the latest tag. | `string` | `"latest"` | no |
 | <a name="input_core_count"></a> [core\_count](#input\_core\_count) | number of accelerators to use | `number` | `1` | no |
 | <a name="input_data_disk_size_gb"></a> [data\_disk\_size\_gb](#input\_data\_disk\_size\_gb) | (Optional) The size of the data disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB) | `string` | `"100"` | no |
-| <a name="input_enable_integrity_monitoring"></a> [enable\_integrity\_monitoring](#input\_enable\_integrity\_monitoring) | (Optional) Defines whether the instance has integrity monitoring enabled. Enables monitoring and attestation of the boot integrity of the instance | `bool` | `true` | no |
-| <a name="input_enable_secure_boot"></a> [enable\_secure\_boot](#input\_enable\_secure\_boot) | (Optional) Defines whether the instance has Secure Boot enabled. | `bool` | `true` | no |
-| <a name="input_enable_vtpm"></a> [enable\_vtpm](#input\_enable\_vtpm) | (Optional) Defines whether the instance has the vTPM enabled. | `bool` | `true` | no |
-| <a name="input_image_family"></a> [image\_family](#input\_image\_family) | Use this VM image family to find the image; the newest image in this family will be used. | `string` | `null` | no |
+| <a name="input_data_disk_type"></a> [data\_disk\_type](#input\_data\_disk\_type) | Optional. Input only. Indicates the type of the disk. Possible values are: PD\_STANDARD, PD\_SSD, PD\_BALANCED, PD\_EXTREME. | `string` | `"PD_SSD"` | no |
+| <a name="input_disable_proxy_access"></a> [disable\_proxy\_access](#input\_disable\_proxy\_access) | (Optional) The notebook instance will not register with the proxy | `bool` | `false` | no |
+| <a name="input_image_family"></a> [image\_family](#input\_image\_family) | Use this VM image family to find the image; the newest image in this family will be used. | `string` | `"common-cpu-notebooks"` | no |
 | <a name="input_image_name"></a> [image\_name](#input\_image\_name) | Use VM image name to find the image. | `string` | `""` | no |
 | <a name="input_image_project"></a> [image\_project](#input\_image\_project) | The name of the Google Cloud project that this VM image belongs to. Format: projects/{project\_id} | `string` | `"deeplearning-platform-release"` | no |
 | <a name="input_install_gpu_driver"></a> [install\_gpu\_driver](#input\_install\_gpu\_driver) | Whether the end user authorizes Google Cloud to install GPU driver on this instance. Only applicable to instances with GPUs. | `bool` | `false` | no |
@@ -91,8 +83,6 @@ No modules.
 | <a name="input_location"></a> [location](#input\_location) | Notebook instance location (zone). | `string` | `"us-central1-a"` | no |
 | <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | type of the machine to spin up for the notebook | `string` | `"e2-standard-4"` | no |
 | <a name="input_name"></a> [name](#input\_name) | name of the notebook instance | `string` | n/a | yes |
-| <a name="input_no_proxy_access"></a> [no\_proxy\_access](#input\_no\_proxy\_access) | (Optional) The notebook instance will not register with the proxy | `bool` | `false` | no |
-| <a name="input_no_public_ip"></a> [no\_public\_ip](#input\_no\_public\_ip) | No public IP will be assigned to this instance | `bool` | `true` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | Optional Project ID. | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | The Compute Engine tags to add to instance. | `list(string)` | <pre>[<br>  "egress-internet"<br>]</pre> | no |
 

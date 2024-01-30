@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ data "google_compute_subnetwork" "subnet" {
 }
 
 data "google_kms_key_ring" "kms" {
-  name     = local.keyring_name
+  name     = "sample-keyring"
   location = local.region
   project  = data.google_projects.kms.projects.0.project_id
 }

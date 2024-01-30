@@ -15,5 +15,6 @@
  */
 
 locals {
-  keyring_name = "sample-keyring"
+  keyring_name      = "sample-keyring"
+  pubsub_topic_name = "secret-rotation-notifications"
 }

@@ -51,12 +51,16 @@ data "google_service_account" "composer" {
   project    = data.google_project.project.project_id
 }
 
+data "google_pubsub_topic" "secret_rotations" {
+  name    = "secret-rotation-notifications"
+  project = data.google_project.project.project_id
+}
+
 data "google_secret_manager_secret" "github_api_secret" {
   secret_id = var.github_secret_name
   project   = data.google_project.project.project_id
 }
 
 data "google_secret_manager_secret_version" "github_api" {
-  secret  = data.google_secret_manager_secret.github_api_secret.id
-  project = data.google_project.project.project_id
+  secret = data.google_secret_manager_secret.github_api_secret.id
 }

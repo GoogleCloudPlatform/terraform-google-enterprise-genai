@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,5 @@
 
 locals {
   name_var = format("%s-%s", data.google_project.project.labels.env_code, var.name)
-
-  region              = substr(var.location, 0, length(var.location) - 2)
-  notebooks_node_use4 = "172.16.8.0/22"
-  notebooks_node_usc1 = "172.17.8.0/22"
-
-  # notebooks specific
-  notebooks_master_use4 = "192.168.0.0/28"
-  notebooks_master_usc1 = "192.168.1.0/28"
-
-  network_name = local.region == "us-central1" ? "notebooks-vpc-usc1" : "notebooks-vpc-use4"
-  subnetwork   = local.region == "us-central1" ? "notebooks-primary-usc1" : "notebooks-primary-use4"
-
-  keyring_name = "sample-keyring"
+  region   = substr(var.location, 0, length(var.location) - 2)
 }

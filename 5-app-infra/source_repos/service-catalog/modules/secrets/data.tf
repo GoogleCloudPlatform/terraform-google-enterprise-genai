@@ -33,3 +33,7 @@ data "google_kms_crypto_key" "key" {
   key_ring = data.google_kms_key_ring.kms.id
 }
 
+data "google_pubsub_topic" "secret_rotations" {
+  name    = local.pubsub_topic_name
+  project = data.google_project.project.project_id
+}
