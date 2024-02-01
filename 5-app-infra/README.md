@@ -79,7 +79,8 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
  * the service account for your cicd pipeline: `"serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"`
  * your development environment logging bucket service account: `"serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"`
  * your development environment service acount for cloudbuild: `"serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"`
-
+ * your development evironment service account for compute: `"serviceACcount:[prj-d-machine-learning-project-number]-compute@developer.gserviceaccount.com"`
+ 
  In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes:
 
     ```

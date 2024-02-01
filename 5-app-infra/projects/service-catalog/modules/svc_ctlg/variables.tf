@@ -25,11 +25,17 @@ variable "region" {
 
 variable "project_id" {
   description = "Project ID"
+  type        = string
 }
 
 variable "gcs_bucket_prefix" {
   description = "Prefix of the bucket name"
   default     = "bkt"
+}
+
+variable "tf_service_catalog_sa_email" {
+  description = "Full email of the terraform service account for service-catalog"
+  type        = string
 }
 
 variable "machine_learning_project_number" {

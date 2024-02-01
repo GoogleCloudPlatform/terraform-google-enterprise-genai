@@ -201,9 +201,9 @@ resource "google_kms_crypto_key_iam_member" "secrets" {
 }
 
 // Allow machine-learning sa access to service catalog cloud source repository
-resource "google_sourcerepo_repository_iam_member" "read" {
-  project    = local.service_catalog_project_id
-  repository = local.service_catalog_repo_name
-  role       = "roles/viewer"
-  member     = "serviceAccount:${local.app_infra_pipeline_service_accounts["bu3-machine-learning"]}"
-}
+# resource "google_sourcerepo_repository_iam_member" "read" {
+#   project    = local.service_catalog_project_id
+#   repository = local.service_catalog_repo_name
+#   role       = "roles/viewer"
+#   member     = "serviceAccount:${local.app_infra_pipeline_service_accounts["bu3-machine-learning"]}"
+# }

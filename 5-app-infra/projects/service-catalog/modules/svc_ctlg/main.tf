@@ -60,6 +60,15 @@ resource "google_sourcerepo_repository" "service_catalog" {
   name    = var.name
 }
 
+resource "google_sourcerepo_repository_iam_member" "read" {
+  project    = var.project_id
+  repository = google_sourcerepo_repository.service_catalog.name
+  role       = "roles/viewer"
+  member     = "serviceAccount:${var.tf_service_catalog_sa_email}"
+
+  depends_on = [google_sourcerepo_repository.service_catalog]
+}
+
 resource "google_cloudbuild_trigger" "zip_files" {
   name     = "zip-tf-files-trigger"
   project  = var.project_id
