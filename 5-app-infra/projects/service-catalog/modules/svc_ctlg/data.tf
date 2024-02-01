@@ -19,8 +19,8 @@ data "google_project" "project" {
 }
 
 data "google_projects" "kms" {
-  # filter = "labels.application_name:org-kms labels.environment:production lifecycleState:ACTIVE"
-  filter = "labels.application_name:env-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
+  filter = "labels.application_name:org-kms labels.environment:production lifecycleState:ACTIVE"
+  # filter = "labels.application_name:org-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
 }
 
 data "google_kms_key_ring" "kms" {
@@ -35,5 +35,5 @@ data "google_kms_crypto_key" "key" {
 }
 
 data "google_projects" "log" {
-  filter = "labels.application_name:env-logging labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
+  filter = "labels.application_name:org-logging labels.environment:production lifecycleState:ACTIVE"
 }
