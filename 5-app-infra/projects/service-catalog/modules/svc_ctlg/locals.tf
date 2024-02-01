@@ -16,7 +16,7 @@
 
 locals {
   # github_repository = replace(var.github_remote_uri, "https://", "")
-
+  log_bucket_prefix = "bkt"
   bucket_permissions = {
 
     "roles/storage.admin" = [

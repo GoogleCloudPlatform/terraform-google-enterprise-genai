@@ -21,4 +21,5 @@ module "service_catalog" {
   region                          = var.instance_region
   name                            = local.service_catalog_repo_name
   machine_learning_project_number = local.machine_learning_project_number
+  tf_service_catalog_sa_email     = local.tf_service_catalog_sa_email
 }

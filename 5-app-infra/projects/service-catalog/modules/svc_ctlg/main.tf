@@ -46,6 +46,10 @@ resource "google_storage_bucket" "bucket" {
   versioning {
     enabled = true
   }
+  logging {
+    log_bucket = join("-", [local.log_bucket_prefix, data.google_projects.log.projects.0.project_id])
+  }
+
 }
 
 resource "google_storage_bucket_iam_member" "bucket_role" {
