@@ -59,7 +59,7 @@ locals {
   allowed_locations            = ["us-locations"]
   allowed_integrations         = ["github.com", "source.developers.google.com"]
   restricted_tls_versions      = ["TLS_VERSION_1", "TLS_VERSION_1_1"]
-  restricted_non_cmek_services = ["bigquery.googleapis.com","aiplatform.googleapis.com"]
+  restricted_non_cmek_services = ["bigquery.googleapis.com", "aiplatform.googleapis.com"]
   allowed_vertex_images = [
     "ainotebooks-vm/deeplearning-platform-release/image-family/pytorch-1-13-cu113-notebooks",
     "ainotebooks-vm/deeplearning-platform-release/image-family/pytorch-1-13-cu113-notebooks",
@@ -69,7 +69,8 @@ locals {
     "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py37",
     "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu110.py310",
     "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/tf2-cpu.2-12.py310",
-  "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/tf2-gpu.2-12.py310"]
+    "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/tf2-gpu.2-12.py310"
+  ]
   allowed_vertex_access_modes = ["single-user", "service-account"]
   access_scope                = local.parent_folder != "" ? ["under:folders/${local.folder_id}"] : ["under:organizations/${local.org_id}"]
 }

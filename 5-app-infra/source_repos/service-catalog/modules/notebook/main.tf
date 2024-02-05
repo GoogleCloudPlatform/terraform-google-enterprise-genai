@@ -61,7 +61,9 @@ resource "google_workbench_instance" "instance" {
       kms_key         = data.google_kms_crypto_key.key.id
     }
 
-    enable_ip_forwarding = true
+    enable_ip_forwarding = false
+
+    tags = var.tags
 
     network_interfaces {
       network  = data.google_compute_network.shared_vpc.id
@@ -74,6 +76,9 @@ resource "google_workbench_instance" "instance" {
       notebook-disable-root      = "true"
       notebook-disable-terminal  = "true"
       notebook-upgrade-schedule  = "00 19 * * MON"
+      disable-mixer              = "true"
+      report-dns-resolution      = "true"
+      report-event-health        = "true"
       terraform                  = "true"
     }
   }
