@@ -16,7 +16,7 @@
 
 output "id" {
   description = "an identifier for the resource with format projects/{{project}}/locations/{{location}}/instances/{{name}}"
-  value = google_workbench_instance.instance.id
+  value       = google_workbench_instance.instance.id
 }
 
 output "proxy_uri" {
@@ -36,7 +36,7 @@ output "create_time" {
 
 output "update_time" {
   description = "Instance update time."
-  value = google_workbench_instance.instance.update_time
+  value       = google_workbench_instance.instance.update_time
 }
 
 output "terraform_labels" {

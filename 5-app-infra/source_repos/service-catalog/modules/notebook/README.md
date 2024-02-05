@@ -75,9 +75,9 @@ No modules.
 | <a name="input_data_disk_size_gb"></a> [data\_disk\_size\_gb](#input\_data\_disk\_size\_gb) | (Optional) The size of the data disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB) | `string` | `"100"` | no |
 | <a name="input_data_disk_type"></a> [data\_disk\_type](#input\_data\_disk\_type) | Optional. Input only. Indicates the type of the disk. Possible values are: PD\_STANDARD, PD\_SSD, PD\_BALANCED, PD\_EXTREME. | `string` | `"PD_SSD"` | no |
 | <a name="input_disable_proxy_access"></a> [disable\_proxy\_access](#input\_disable\_proxy\_access) | (Optional) The notebook instance will not register with the proxy | `bool` | `false` | no |
-| <a name="input_image_family"></a> [image\_family](#input\_image\_family) | Use this VM image family to find the image; the newest image in this family will be used. | `string` | `"common-cpu-notebooks"` | no |
+| <a name="input_image_family"></a> [image\_family](#input\_image\_family) | Use this VM image family to find the image; the newest image in this family will be used. | `string` | `"workbench-instances"` | no |
 | <a name="input_image_name"></a> [image\_name](#input\_image\_name) | Use VM image name to find the image. | `string` | `""` | no |
-| <a name="input_image_project"></a> [image\_project](#input\_image\_project) | The name of the Google Cloud project that this VM image belongs to. Format: projects/{project\_id} | `string` | `"deeplearning-platform-release"` | no |
+| <a name="input_image_project"></a> [image\_project](#input\_image\_project) | The name of the Google Cloud project that this VM image belongs to. Format: projects/{project\_id} | `string` | `"cloud-notebooks-managed"` | no |
 | <a name="input_install_gpu_driver"></a> [install\_gpu\_driver](#input\_install\_gpu\_driver) | Whether the end user authorizes Google Cloud to install GPU driver on this instance. Only applicable to instances with GPUs. | `bool` | `false` | no |
 | <a name="input_instance_owners"></a> [instance\_owners](#input\_instance\_owners) | email of the owner of the instance, e.g. alias@example.com. Only one owner is supported! | `set(string)` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Notebook instance location (zone). | `string` | `"us-central1-a"` | no |

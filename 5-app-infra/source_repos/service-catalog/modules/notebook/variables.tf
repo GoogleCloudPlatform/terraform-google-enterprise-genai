@@ -62,13 +62,15 @@ variable "core_count" {
 variable "image_project" {
   description = "The name of the Google Cloud project that this VM image belongs to. Format: projects/{project_id}"
   type        = string
-  default     = "deeplearning-platform-release"
+  # default     = "deeplearning-platform-release"
+  default = "cloud-notebooks-managed"
 }
 
 variable "image_family" {
   description = "Use this VM image family to find the image; the newest image in this family will be used."
   type        = string
-  default     = "common-cpu-notebooks"
+  # default     = "common-cpu-notebooks"
+  default = "workbench-instances"
 }
 
 variable "image_name" {
@@ -88,7 +90,7 @@ variable "boot_disk_type" {
   type        = string
   default     = "PD_SSD"
   validation {
-    condition = contains(["DISK_TYPE_UNSPECIFIED", "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.boot_disk_type)
+    condition     = contains(["DISK_TYPE_UNSPECIFIED", "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.boot_disk_type)
     error_message = "Illegal value for boot disk type"
   }
 }
@@ -102,9 +104,9 @@ variable "boot_disk_size_gb" {
 variable "data_disk_type" {
   description = "Optional. Input only. Indicates the type of the disk. Possible values are: PD_STANDARD, PD_SSD, PD_BALANCED, PD_EXTREME."
   type        = string
-  default = "PD_SSD"
+  default     = "PD_SSD"
   validation {
-    condition = contains(["PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.data_disk_type)
+    condition     = contains(["PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.data_disk_type)
     error_message = "Illegal value for data disk type"
   }
 }
@@ -121,6 +123,12 @@ variable "disable_proxy_access" {
   type        = bool
   default     = false
 }
+
+# variable "dataproc_kernel_access" {
+#   description = "(Optional) Enables access to Dataproc kernels."
+#   type        = bool
+#   default     = true
+# }
 
 variable "boundry_code" {
   description = "The boundry code for the tenant"
