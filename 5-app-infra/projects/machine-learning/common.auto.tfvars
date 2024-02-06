@@ -16,7 +16,7 @@
 
 instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
 
-remote_state_bucket = "REPLCE_ME"
+remote_state_bucket = "REMOTE_STATE_BUCKET"
 
 github_app_installation_id = "REPLACE_ME"
 

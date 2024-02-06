@@ -87,6 +87,12 @@ Add in your dags in the `dags` folder.  Any changes to this folder will trigger 
 
 Have a github token for access to your repository ready, along with an [Application Installation Id](https://github.com/badal-io/ml-foundations-composer/tree/development) and the remote uri to your repository.
 
+These environmental project inflations are closely tied to the `service-catalog` project that have already deployed.  By now, the `bu3-service-catalog` should have been inflated.   `service-catalog` contains modules that are being deployed in an interactive (development) environment. Since they already exist; they can be used as terraform modules for operational (non-production, production) environments.  This was done in order to avoid code redundancy. One area for all `machine-learning` deployments.
+
+Under `modules/base_env/main.tf` you will notice all module calls are using `git` links as sources.  These links refer to the `service-catalog` cloud source repository we have already set up.  
+
+Step 12 in "Deploying with Cloud Build" highlights the necessary steps needed to point the module resources to the correct location.
+
 ### Deploying with Cloud Build
 
 1. Clone the `gcp-policies` repo based on the Terraform output from the `0-bootstrap` step.
@@ -142,7 +148,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd bu3-machine-learning
    git checkout -b plan
 
-   cp -RT ../terraform-example-foundation/5-app-infra/projects/machine-learning .
+   cp -RT ../terraform-example-foundation/5-app-infra/projects/machine-learning/ .
    cp ../terraform-example-foundation/build/cloudbuild-tf-* .
    cp ../terraform-example-foundation/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
@@ -179,7 +185,21 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-machine-learning"' --raw-output)
    echo "backend_bucket = ${backend_bucket}"
 
-   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+   ## Linux
+   for i in `find . -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+
+   ## MacOS
+   for i in `find . -name 'backend.tf'`; do sed -i "" "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+   ```
+1. Update `modules/base_env/main.tf` with the name of service catalog project id to complete the git fqdn for module sources:
+   ```bash
+   export service_catalog_project_id=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   
+   ##LINUX
+   sed -i "s/[SERVICE-CATALOG-PROJECT-ID]/${service_catalog_project_id}/" ./modules/base_env/main.tf
+
+   ##MacOS
+   sed -i "" "s/[SERVICE-CATALOG-PROJECT-ID]/${service_catalog_project_id}/" ./modules/base_env/main.tf
    ```
 1. Commit changes.
 
@@ -213,7 +233,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Merge changes to development. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
-   ```bash
+   ```
    git checkout -b development
    git push origin development
    ```
