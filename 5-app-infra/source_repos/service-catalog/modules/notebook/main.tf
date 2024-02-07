@@ -77,7 +77,7 @@ resource "google_workbench_instance" "instance" {
       notebook-disable-terminal  = "true"
       notebook-upgrade-schedule  = "00 19 * * MON"
       # disable-mixer              = "${var.dataproc_kernel_access ? false : true}"
-      disable-mixer         = "true" // Enable access to Dataproc kernels
+      disable-mixer         = "false" // Enable access to Dataproc kernels
       report-dns-resolution = "true"
       report-event-health   = "true"
       terraform             = "true"
