@@ -68,7 +68,7 @@ It is recommended that you _first deploy_ the `common` projects (`artifact-publi
 
 ## VPC-SC
 
-Before deploying your projects, be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
+Be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
 As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `4-networks-dual-svpc` and _update_ 
 your ingress rules.  
 
@@ -94,9 +94,9 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
             },
             "to" = {
             "resources" = [
-                "projects/[prj-[your-environment][shared-restricted-project-number]",
-                "projects/[prj-[your-environment]-kms-project-number]",
-                "projects/[prj-[your-environment]-bu3machine-learning-number]",
+                "projects/[prj-[your-environment-shared-restricted-project-number]",
+                "projects/[prj-[your-environment-kms-project-number]",
+                "projects/[prj-[your-environment-bu3machine-learning-number]",
             ]
             "operations" = {
                 "compute.googleapis.com" = {
@@ -128,8 +128,7 @@ for your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
         {
             "from" = {
             "identity_type" = ""
-            "identities" = [
-                "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com",     
+            "identities" = [     
                 "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",   
                 "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com", 
             ]
