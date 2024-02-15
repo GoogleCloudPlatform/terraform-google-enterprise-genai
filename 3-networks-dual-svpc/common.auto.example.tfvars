@@ -15,18 +15,11 @@
  */
 
 // The DNS name of peering managed zone. Must end with a period.
-domain = "mlfoundation.badal.io."
+domain = "example.com."
 
 // Update the following line and add you email in the perimeter_additional_members list.
 // You must be in this list to be able to view/access resources in the project protected by the VPC service controls.
 
-perimeter_additional_members = [
-  "user:adam.hussein@badal.io",
-  "user:kevin.cheema@badal.io",
-  "user:majid.alikhani@badal.io",
-  "user:mike.futerko@badal.io",
-  "user:renato.dattilo@badal.io",
-  "user:zbutt@badal.io",
-]
+perimeter_additional_members = ["user:YOUR-USER-EMAIL@example.com"]
 
-remote_state_bucket = "bkt-prj-b-seed-tfstate-ef26"
+remote_state_bucket = "REMOTE_STATE_BUCKET"

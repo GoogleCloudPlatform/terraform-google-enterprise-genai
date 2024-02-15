@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-access_context_manager_policy_id = 270868347751
+access_context_manager_policy_id = ACCESS_CONTEXT_MANAGER_ID

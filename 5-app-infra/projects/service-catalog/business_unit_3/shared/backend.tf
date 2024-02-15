@@ -16,7 +16,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "bkt-prj-c-bu3infra-pipeline-c8kq-bu3-service-catalog-state"
+    bucket = "UPDATE_APP_INFRA_BUCKET"
     prefix = "terraform/app-infra/business_unit_3/shared"
   }
 }
