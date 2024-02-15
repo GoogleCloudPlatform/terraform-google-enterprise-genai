@@ -73,6 +73,8 @@ locals {
   ]
   allowed_vertex_access_modes = ["single-user", "service-account"]
   access_scope                = local.parent_folder != "" ? ["under:folders/${local.folder_id}"] : ["under:organizations/${local.org_id}"]
+  allowed_vertex_vpc_networks = [for instance in module.base_restricted_environment_network : format("under:projects/%s", instance.restricted_shared_vpc_project_id)]
+
 }
 
 module "ml_organization_policies_type_boolean" {
