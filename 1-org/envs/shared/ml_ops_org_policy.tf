@@ -258,22 +258,19 @@ module "vertexai_allowed_images" {
   constraint        = "constraints/ainotebooks.environmentOptions"
 }
 
+module "restrict_vertex_notebook_vpc_networks" {
+  #Restrict VPC networks on new Vertex AI Workbench instances
+  #Control ID: VAI-CO-4.8
+  #NIST 800-53 SC-7 SC-8
+  #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
+  source  = "terraform-google-modules/org-policy/google"
+  version = "~> 5.1"
 
-// Disabled for now - under:organizations does _not_ work as intended
-
-# module "restrict_vertex_notebook_vpc_networks" {
-#   #Restrict VPC networks on new Vertex AI Workbench instances
-#   #Control ID: VAI-CO-4.8
-#   #NIST 800-53 SC-7 SC-8
-#   #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
-#   source  = "terraform-google-modules/org-policy/google"
-#   version = "~> 5.1"
-
-#   organization_id   = local.organization_id
-#   folder_id         = local.folder_id
-#   policy_for        = local.policy_for
-#   policy_type       = "list"
-#   allow_list_length = 1
-#   allow             = local.access_scope
-#   constraint        = "constraints/ainotebooks.restrictVpcNetworks"
-# }
+  organization_id   = local.organization_id
+  folder_id         = local.folder_id
+  policy_for        = local.policy_for
+  policy_type       = "list"
+  allow_list_length = length(local.allowed_vertex_vpc_networks)
+  allow             = local.allowed_vertex_vpc_networks
+  constraint        = "constraints/ainotebooks.restrictVpcNetworks"
+}
