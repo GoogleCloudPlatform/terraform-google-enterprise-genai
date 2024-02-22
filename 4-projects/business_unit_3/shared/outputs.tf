@@ -74,6 +74,21 @@ output "common_artifacts_project_id" {
 }
 
 output "service_catalog_repo_name" {
-  description = "The name of the repository to be created in 5-app-infra"
-  value       = local.cloud_source_repo_name
+  description = "The name of the Service Catalog repository"
+  value       = google_sourcerepo_repository.service_catalog.name
+}
+
+output "service_catalog_repo_id" {
+  description = "ID of the Service Catalog repository"
+  value       = google_sourcerepo_repository.service_catalog.id
+}
+
+output "artifacts_repo_name" {
+  description = "The name of the Artifacts repository"
+  value       = google_sourcerepo_repository.artifact_repo.name
+}
+
+output "artifacts_repo_id" {
+  description = "ID of the Artifacts repository"
+  value       = google_sourcerepo_repository.artifact_repo.id
 }

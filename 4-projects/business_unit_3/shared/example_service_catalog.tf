@@ -24,7 +24,7 @@ locals {
     "roles/source.admin",
   ]
 
-  cloud_source_repo_name = "service-catalog"
+  cloud_source_service_catalog_repo_name = "service-catalog"
 }
 
 module "app_service_catalog_project" {
@@ -115,6 +115,13 @@ resource "google_project_iam_member" "cloudbuild_agent" {
   project = module.app_service_catalog_project[0].project_id
   role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${module.app_service_catalog_project[0].project_number}@cloudbuild.gserviceaccount.com"
+}
+
+// Add Service Catalog Source Repository
+
+resource "google_sourcerepo_repository" "service_catalog" {
+  project = module.app_service_catalog_project[0].project_id
+  name    = local.cloud_source_service_catalog_repo_name
 }
 
 /**

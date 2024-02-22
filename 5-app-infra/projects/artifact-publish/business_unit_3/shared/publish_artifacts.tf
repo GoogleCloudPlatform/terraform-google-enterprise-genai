@@ -20,7 +20,7 @@ module "artifact_publish" {
   environment = local.environment
   description = "Publish Artifacts for ML Projects"
   project_id  = local.common_artifacts_project_id
-  name        = "publish-artifacts"
+  name        = local.artifacts_repo_name
   format      = "DOCKER"
   region      = var.instance_region
   cleanup_policies = [{

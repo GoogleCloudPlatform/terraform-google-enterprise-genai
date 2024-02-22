@@ -29,14 +29,6 @@
 #   value       = module.artifact_pipeline.kms_key_id
 # }
 
-output "artifact_registry_repository_id" {
-  value = module.artifact_publish.artifact_registry_repository_id
-}
-
 output "cloudbuild_trigger_id" {
   value = module.artifact_publish.cloudbuild_trigger_id
-}
-
-output "artifact_repo_name" {
-  value = module.artifact_publish.artifact_repo_name
 }

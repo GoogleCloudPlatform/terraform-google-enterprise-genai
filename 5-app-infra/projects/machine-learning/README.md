@@ -148,9 +148,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd bu3-machine-learning
    git checkout -b plan
 
-   cp -RT ../terraform-example-foundation/5-app-infra/projects/machine-learning/ .
-   cp ../terraform-example-foundation/build/cloudbuild-tf-* .
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp -RT ../../terraform-example-foundation/5-app-infra/projects/machine-learning/ .
+   cp ../../terraform-example-foundation/build/cloudbuild-tf-* .
+   cp ../../terraform-example-foundation/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -159,15 +159,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```bash
    mv common.auto.example.tfvars common.auto.tfvars
    ```
-
-1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 3 envs folders [README.md](./business_unit_3/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
-
-   ```bash
-   export remote_state_bucket=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
-   echo "remote_state_bucket = ${remote_state_bucket}"
-   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
-   ```
-
 
 1. Update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
 

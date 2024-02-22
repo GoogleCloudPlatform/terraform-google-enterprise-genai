@@ -23,7 +23,3 @@ output "cloudbuild_trigger_id" {
   description = "Id of Cloud Build Trigger"
   value       = module.service_catalog.cloudbuild_trigger_id
 }
-
-output "service_catalog_repo_name" {
-  value = module.service_catalog.service_catalog_repo_name
-}

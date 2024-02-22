@@ -80,17 +80,17 @@ resource "google_artifact_registry_repository" "repo" {
 resource "google_artifact_registry_repository_iam_member" "project" {
   for_each   = toset(local.trigger_sa_roles)
   project    = var.project_id
-  repository = google_artifact_registry_repository.repo.name
+  repository = var.name
   location   = var.region
   role       = each.key
   # member     = "serviceAccount:${google_service_account.trigger_sa.email}"
   member = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
-resource "google_sourcerepo_repository" "artifact_repo" {
-  project = var.project_id
-  name    = var.name
-}
+# resource "google_sourcerepo_repository" "artifact_repo" {
+#   project = var.project_id
+#   name    = var.name
+# }
 resource "google_cloudbuild_trigger" "docker_build" {
   name     = "docker-build"
   project  = var.project_id
@@ -98,7 +98,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
 
   trigger_template {
     branch_name = "^main$"
-    repo_name   = google_sourcerepo_repository.artifact_repo.name
+    repo_name   = var.name
   }
   build {
     step {

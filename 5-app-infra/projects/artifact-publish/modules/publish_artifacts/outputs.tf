@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-output "artifact_registry_repository_id" {
-  value = google_artifact_registry_repository.repo.id
-}
-
 output "cloudbuild_trigger_id" {
   value = google_cloudbuild_trigger.docker_build.id
 }
 
-output "artifact_repo_name" {
-  value = google_sourcerepo_repository.artifact_repo.name
-}

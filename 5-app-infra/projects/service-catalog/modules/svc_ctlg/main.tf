@@ -59,18 +59,16 @@ resource "google_storage_bucket_iam_member" "bucket_role" {
   member   = each.value.acct
 }
 
-resource "google_sourcerepo_repository" "service_catalog" {
-  project = var.project_id
-  name    = var.name
-}
+# resource "google_sourcerepo_repository" "service_catalog" {
+#   project = var.project_id
+#   name    = var.name
+# }
 
 resource "google_sourcerepo_repository_iam_member" "read" {
   project    = var.project_id
-  repository = google_sourcerepo_repository.service_catalog.name
+  repository = var.name
   role       = "roles/viewer"
   member     = "serviceAccount:${var.tf_service_catalog_sa_email}"
-
-  depends_on = [google_sourcerepo_repository.service_catalog]
 }
 
 resource "google_cloudbuild_trigger" "zip_files" {
@@ -87,7 +85,7 @@ resource "google_cloudbuild_trigger" "zip_files" {
 
   trigger_template {
     branch_name = "^main$"
-    repo_name   = google_sourcerepo_repository.service_catalog.name
+    repo_name   = var.name
   }
 
   build {

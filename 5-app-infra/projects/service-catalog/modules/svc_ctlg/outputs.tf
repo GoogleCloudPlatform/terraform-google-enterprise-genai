@@ -23,7 +23,3 @@ output "cloudbuild_trigger_id" {
   description = "Id of Cloud Build Trigger"
   value       = google_cloudbuild_trigger.zip_files.id
 }
-
-output "service_catalog_repo_name" {
-  value = google_sourcerepo_repository.service_catalog.name
-}

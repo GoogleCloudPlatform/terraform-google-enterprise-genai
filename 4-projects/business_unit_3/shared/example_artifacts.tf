@@ -24,6 +24,8 @@ locals {
     "roles/source.admin",
     "roles/storage.admin",
   ]
+
+  cloud_source_artifacts_repo_name = "publish-artifacts"
 }
 module "app_infra_artifacts_project" {
   source = "../../modules/single_project"
@@ -85,4 +87,11 @@ resource "google_project_iam_member" "artifact_cloudbuild_agent" {
   project = module.app_infra_artifacts_project[0].project_id
   role    = "roles/secretmanager.secretAccessor"
   member  = "serviceAccount:${module.app_infra_artifacts_project[0].project_number}@cloudbuild.gserviceaccount.com"
+}
+
+// Add Repository for Artifact repo
+
+resource "google_sourcerepo_repository" "artifact_repo" {
+  project = module.app_infra_artifacts_project[0].project_id
+  name    = local.cloud_source_artifacts_repo_name
 }
