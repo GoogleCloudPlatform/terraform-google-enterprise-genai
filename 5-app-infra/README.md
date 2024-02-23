@@ -69,10 +69,10 @@ It is recommended that you _first deploy_ the `common` projects (`artifact-publi
 ## VPC-SC
 
 Be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
-As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `4-networks-dual-svpc` and _update_ 
+As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `3-networks-dual-svpc` and _update_ 
 your ingress rules.  
 
-Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
+Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, ###`non-production.auto.tfvars` & `production.auto.tfvars`.
 
 In `common.auto.tfvars` update your `perimeter_additional_members` to include:
  * the service acccount for bu3infra-pipeline: `"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"`

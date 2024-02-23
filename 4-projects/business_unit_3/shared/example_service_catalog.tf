@@ -49,7 +49,7 @@ module "app_service_catalog_project" {
     "sourcerepo.googleapis.com",
   ]
   # Metadata
-  project_suffix    = local.cloud_source_repo_name
+  project_suffix    = local.cloud_source_service_catalog_repo_name
   application_name  = "app-infra-ml"
   billing_code      = "1234"
   primary_contact   = "example@example.com"
