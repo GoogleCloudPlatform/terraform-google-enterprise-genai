@@ -80,7 +80,7 @@ resource "google_artifact_registry_repository" "repo" {
 resource "google_artifact_registry_repository_iam_member" "project" {
   for_each   = toset(local.trigger_sa_roles)
   project    = var.project_id
-  repository = var.name
+  repository = google_artifact_registry_repository.repo.name
   location   = var.region
   role       = each.key
   # member     = "serviceAccount:${google_service_account.trigger_sa.email}"
