@@ -64,7 +64,10 @@ When viewing each folder under `projects`, consider them as seperate repositorie
 
 When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.  
 
-It is recommended that you _first deploy_ the `common` projects (`artifact-publish` and `service-catalog` before deploying `machine-learning`.  The order of deploying the `common` projects does not matter, however `machine-learning` should be the last project to be inflated.  
+It is recommended that you _first deploy_ the `common` projects (`artifact-publish` and `service-catalog` before deploying `machine-learning`.  The order of deploying the `common` projects does not matter, however `machine-learning` should be the last project to be inflated.
+
+When inflating these projects; they must be deployed in the following order:
+    1. 
 
 ## VPC-SC
 

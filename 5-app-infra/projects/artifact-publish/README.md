@@ -152,8 +152,8 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git checkout -b plan
 
    cp -RT ../terraform-example-foundation/5-app-infra/projects/artifact-publish/ .
-   cp ../../terraform-example-foundation/build/cloudbuild-tf-* .
-   cp ../../terraform-example-foundation/build/tf-wrapper.sh .
+   cp ../terraform-example-foundation/build/cloudbuild-tf-* .
+   cp ../terraform-example-foundation/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
