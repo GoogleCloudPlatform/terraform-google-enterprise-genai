@@ -244,7 +244,8 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git checkout -b production
    git push origin production
    ```
-### Post Deployment
+
+## Post Deployment
 
 Since this project is in a service perimiter, there will be _additional_ entries that will be needed.  This is most notable for the `interactive` environment (development).  Since many of the necessary service agents and permissions were deployed in this project, we will _need to return to `3-networks`_ and add in more agents to the  DEVELOPMENT.AUTO.TFVARS file under `egress_policies`. 
 Notably:
@@ -312,7 +313,7 @@ we want the `unknown-project-number` here.  Add this into your `egress_policies`
   },
 ```
 
-### Run Terraform locally
+## Running Terraform locally
 
 1. The next instructions assume that you are at the same level of the `terraform-example-foundation` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 

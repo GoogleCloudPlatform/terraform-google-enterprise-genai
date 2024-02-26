@@ -219,7 +219,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos` folder.
    ```shell
    cd publish-artifacts
-   cp -r ../ml-foundations/5-app-infra/source_repos/artifact-publish/ .
+   cp -r ../ml-foundations/5-app-infra/source_repos/artifact-publish/* .
    ```
 1. Commit changes and push your main branch to the new repo.
    ```shell

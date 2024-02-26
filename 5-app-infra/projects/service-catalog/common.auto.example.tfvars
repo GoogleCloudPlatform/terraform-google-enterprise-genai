@@ -16,7 +16,7 @@
 
 instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
 
-remote_state_bucket = "bkt-prj-b-seed-fb52-gcp-projects-tfstate"
+remote_state_bucket = "REMOTE_STATE_BUCKET"
 
 # github_api_token = "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"
 
