@@ -253,7 +253,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos` folder.
    ```shell
    cd service-catalog
-   cp -r ../terraform-example-foundation/5-app-infra/source_repos/service-catalog/ .
+   cp -RT ../terraform-example-foundation/5-app-infra/source_repos/service-catalog/ .
    ```
 
 1. Commit changes and push main branch to the new repo.
