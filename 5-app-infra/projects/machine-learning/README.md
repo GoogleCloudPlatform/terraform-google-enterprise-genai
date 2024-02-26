@@ -184,7 +184,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 1. Update `modules/base_env/main.tf` with the name of service catalog project id to complete the git fqdn for module sources:
    ```bash
-   export service_catalog_project_id=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   export service_catalog_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
    
    ##LINUX
    sed -i "s/SERVICE-CATALOG-PROJECT-ID/${service_catalog_project_id}/" ./modules/base_env/main.tf
