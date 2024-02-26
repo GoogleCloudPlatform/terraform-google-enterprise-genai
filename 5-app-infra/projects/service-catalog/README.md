@@ -242,7 +242,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 1. Grab the Service Catalogs ID
    ```shell
-   export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="terraform-example-foundation/4-projects/business_unit_3/shared" output -raw service_catalog_project_id)
+   export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw service_catalog_project_id)
    echo ${SERVICE_CATALOG_PROJECT_ID}
    ``` 
 
