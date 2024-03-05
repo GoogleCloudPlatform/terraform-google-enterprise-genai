@@ -207,3 +207,11 @@ resource "google_sourcerepo_repository_iam_member" "read" {
   role       = "roles/viewer"
   member     = "serviceAccount:${local.app_infra_pipeline_service_accounts["bu3-machine-learning"]}"
 }
+
+// Add Browser Role to CloudBuild at Env Folder
+
+resource "google_folder_iam_member" "name" {
+  folder = local.env_folder_name
+  role   = "roles/browser"
+  member = "serviceAccount:${google_project_service_identity.cloud_build.email}"
+}

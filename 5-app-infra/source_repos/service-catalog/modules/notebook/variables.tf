@@ -98,7 +98,7 @@ variable "boot_disk_type" {
 variable "boot_disk_size_gb" {
   description = "(Optional) The size of the boot disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB)"
   type        = string
-  default     = "100"
+  default     = "150"
 }
 
 variable "data_disk_type" {
@@ -114,7 +114,7 @@ variable "data_disk_type" {
 variable "data_disk_size_gb" {
   description = "(Optional) The size of the data disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB)"
   type        = string
-  default     = "100"
+  default     = "150"
 }
 
 

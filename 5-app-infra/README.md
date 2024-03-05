@@ -55,8 +55,7 @@ file.
 
 ## Purpose
 
-This structure is for deploying out an environment suited for Machine Learning.  You will notice in the folder `projects`, there are several other folders.
-Each folder represents a project that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully.  
+Folders `1-artifact-publish`, `3-serive-catalog` and `5-machine-learning` are projects that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully.  Folders `2-artifact-publish-repo` and `4-service-catalog-repo` are seperate cloud build repositories that have their own unique piplelines configured. These are used for building out in-house Docker images for your machine-learning pipelines and terraform modules that will be used in `notebooks` in your interactive (development) environment, as well as deployment modules for your operational (non-production, production) environments respectively.  
 
 For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.  
 
@@ -64,10 +63,16 @@ When viewing each folder under `projects`, consider them as seperate repositorie
 
 When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.  
 
-It is recommended that you _first deploy_ the `common` projects (`artifact-publish` and `service-catalog` before deploying `machine-learning`.  The order of deploying the `common` projects does not matter, however `machine-learning` should be the last project to be inflated.
+The order of deployments for the machine-learning's project is as follows:
 
-When inflating these projects; they must be deployed in the following order:
-    1. 
+* 0-gcp-polcies
+* 1-artifact-publish
+* 2-artifact-publish-repo
+* 3-service-catalog
+* 4-service-catalog-repo
+* 5-vpc-sc
+* 6-machine-learning
+* 7-machine-learning-post-deploy
 
 ## VPC-SC
 

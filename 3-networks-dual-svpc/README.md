@@ -210,6 +210,12 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
+1. Log into gcloud using service account impersonation and then set your configuration:
+   ```bash
+   gcloud auth application-default login --impersonate-service-account=${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
+   gcloud config set auth/impersonate_service_account ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
+   ```
+
 1. Run `init` and `plan` and review output for environment shared.
 
    ```bash
@@ -227,6 +233,11 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
    ```bash
    ./tf-wrapper.sh apply shared
+   ```
+
+1. Unset your gcloud configuration to remove impersonation:
+   ```bash
+   gcloud config unset auth/impersonate_service_account
    ```
 
 1. Push your plan branch to trigger a plan for all environments. Because the
@@ -261,12 +272,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```bash
    git checkout -b non-production
    git push origin non-production
-   ```
-
-1. Before executing the next steps, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
-
-   ```bash
-   unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    ```
 
 1. You can now move to the instructions in the [4-projects](../4-projects/README.md) step.
