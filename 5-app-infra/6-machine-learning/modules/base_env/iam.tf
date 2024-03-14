@@ -162,7 +162,7 @@ resource "google_kms_crypto_key_iam_member" "service_agent_kms_key_binding" {
 #    Service Catalog   #
 ########################
 resource "google_project_iam_member" "cloud_build" {
-  for_each = { for k, v in toset(local.cloudbuild_roles) : k => v if var.env == "development" }
+  for_each = { for k, v in toset(local.cloudbuild_roles) : k => v if var.env == "development" || var.env == "non-production" }
   project  = var.project_id
   role     = each.key
   member   = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"

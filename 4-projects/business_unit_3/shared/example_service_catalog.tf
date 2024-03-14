@@ -23,13 +23,11 @@ locals {
     "roles/storage.admin",
     "roles/source.admin",
   ]
-
-  cloud_source_service_catalog_repo_name = "service-catalog"
 }
 
 module "app_service_catalog_project" {
   source = "../../modules/single_project"
-  count  = local.enable_cloudbuild_deploy ? 1 : 0
+  # count  = local.enable_cloudbuild_deploy ? 1 : 0
 
   org_id              = local.org_id
   billing_account     = local.billing_account
@@ -49,7 +47,7 @@ module "app_service_catalog_project" {
     "sourcerepo.googleapis.com",
   ]
   # Metadata
-  project_suffix    = local.cloud_source_service_catalog_repo_name
+  project_suffix    = var.cloud_source_service_catalog_repo_name
   application_name  = "app-infra-ml"
   billing_code      = "1234"
   primary_contact   = "example@example.com"
@@ -121,7 +119,7 @@ resource "google_project_iam_member" "cloudbuild_agent" {
 
 resource "google_sourcerepo_repository" "service_catalog" {
   project = module.app_service_catalog_project[0].project_id
-  name    = local.cloud_source_service_catalog_repo_name
+  name    = var.cloud_source_service_catalog_repo_name
 }
 
 /**

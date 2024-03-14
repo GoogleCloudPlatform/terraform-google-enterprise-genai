@@ -25,11 +25,10 @@ locals {
     "roles/storage.admin",
   ]
 
-  cloud_source_artifacts_repo_name = "publish-artifacts"
 }
 module "app_infra_artifacts_project" {
   source = "../../modules/single_project"
-  count  = local.enable_cloudbuild_deploy ? 1 : 0
+  # count  = local.enable_cloudbuild_deploy ? 1 : 0
 
   org_id              = local.org_id
   billing_account     = local.billing_account
@@ -93,5 +92,5 @@ resource "google_project_iam_member" "artifact_cloudbuild_agent" {
 
 resource "google_sourcerepo_repository" "artifact_repo" {
   project = module.app_infra_artifacts_project[0].project_id
-  name    = local.cloud_source_artifacts_repo_name
+  name    = var.cloud_source_artifacts_repo_name
 }

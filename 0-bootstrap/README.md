@@ -85,6 +85,7 @@ Also make sure that you've done the following:
    - The `roles/orgpolicy.policyAdmin` role on the Google Cloud organization.
    - The `roles/billing.admin` role on the billing account.
    - The `roles/resourcemanager.folderCreator` role.
+   - The `roles/iam.serviceAccountTokenCreator` role
 
 If other users need to be able to run these procedures, add them to the group
 represented by the `org_project_creators` variable.

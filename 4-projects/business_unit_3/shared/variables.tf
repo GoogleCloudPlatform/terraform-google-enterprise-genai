@@ -78,3 +78,12 @@ variable "key_rotation_period" {
   default     = "7776000s"
 }
 
+variable "cloud_source_service_catalog_repo_name" {
+  description = "Name to give the cloud source repository for Service Catalog"
+  type        = string
+}
+
+variable "cloud_source_artifacts_repo_name" {
+  description = "Name to give the could source repository for Artifacts"
+  type        = string
+}
