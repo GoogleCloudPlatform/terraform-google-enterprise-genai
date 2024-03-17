@@ -25,33 +25,84 @@ Each time a pipeline job finishes successfully, a new version of the census inco
 You can read more about the details of the pipeline components on the [pipeline's repo](https://github.com/badal-io/vertexpipeline-promotion/tree/dev?tab=readme-ov-file#use-case)
 
 # Step by step
+Before you start, make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
+Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy the bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
 ### 1. Run the notebook 
-- Fork the repository to make you own copy on git. Clone it in the workbench in dev and run [the notebook](https://github.com/badal-io/vertexpipeline-promotion/blob/dev/census_pipeline.ipynb) cell by cell. Don't forget to set the correct values corresponding to your dev project.
+- Fork the repository to make you own copy on git and clone it in the workbench in your dev project. To clone the repo, click on the git icon on the left bar menu, enter your credentials. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/badal-io/vertexpipeline-promotion/blob/dev/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
 
 ### 2. Configure cloud build
-- After the notebook runs successfully and the pipeline's test run finishes in the dev environment, create a cloud build trigger in your non-prod project. Configure the trigger to run when there is a merge into the staging (non-prod) branch. 
+- After the notebook runs successfully and the pipeline's test run finishes in the dev environment, create a cloud build trigger in your non-prod project. Configure the trigger to run when there is a merge into the staging (non-prod) branch by following the below settings.
 
-- Open the cloudbuild.yaml file in your workbench and for steps 1 and 2, replace the bucket name with the name of your own bucket in the non-prod project
+    |Setting|Value|
+    |-------|-----|
+    |Event|push to branch|
+    |Repository generation|1st gen|
+    |Repository|the url to your fork of the repo|
+    |Branch|staging|
+    |Configuration|Autodetected/Cloud Build configuration file (yaml or json)|
+    |Location|Repository|
+    |Cloud Build configuration file location|cloudbuild.yaml|
+    
 
-- Change the name of the image for step 3 and 4 to that of your own artifact project, i.e., `us-central1-docker.pkg.dev/{artifact_project_id}/c-publish-artifacts/vertexpipeline:v2` This is the project with artifact registry that houses the image required to run the pipeline
+- Open the cloudbuild.yaml file in your workbench and for steps 1 which uploads the source code for the dataflow job to your bucket.
 
-- Optionally if you want to schedule pipeline runs on regular intervals, replace the composer bucket in the final step with your own composer bucket. Otherwise comment this step out.
+    ```
+    name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', '-r', './src', 'gs://{your-bucket-name}']
+    ```
+
+- Similarly in step 2, replace the bucket name with the name of your own bucket in the non-prod project in order to upload the data to your bucket:
+    ```
+    name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', '-r', './data', 'gs://{your-bucket-name}']
+    ```
+
+- Change the name of the image for step 3 and 4 to that of your own artifact project, i.e., `us-central1-docker.pkg.dev/{artifact_project_id}/c-publish-artifacts/vertexpipeline:v2` This is the project with artifact registry that houses the image required to run the pipeline.
+
+```
+ - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
+    entrypoint: 'python'
+    args: ['compile_pipeline.py']
+    id: 'compile_job'
+  
+  # run pipeline
+  - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
+    entrypoint: 'python'
+    args: ['runpipeline.py']
+    id: 'run_job'
+    waitFor: ['compile_job']
+```
+
+- Optionally, if you want to schedule pipeline runs on regular intervals, uncomment the last two steps and replace the composer bucket with the name of your composer's bucket. The first step uploads the pipeline's yaml to the bucket and the second step uploads the dag to read that yaml and trigger the vertex pipeline:
+```
+ # upload to composer
+   - name: 'gcr.io/cloud-builders/gsutil'
+     args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://{your-composer-bucket}/dags/common/vertex-ai-pipeline/']
+     id: 'upload_composer_file'
+     
+ # upload pipeline dag to composer
+    - name: 'gcr.io/cloud-builders/gsutil'
+      args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
+      id: 'upload dag'
+```
 
 ### 3. Configure variables in compile_pipeline.py and runpipeline.py
-- Make sure to set the correct values for variables like **PROJECT_ID**, **BUCKET_URI**, encryption keys and service accounts:
+- Make sure to set the correct values for variables like **PROJECT_ID**, **BUCKET_URI**, encryption keys and service accounts, etc.:
 
     |variable|definition|example value|
     |--------|----------|-----|
-    |PROJECT_ID|The id of the non-prod project|`prj-n-bu3machine-learning-98j2`|
-    |BUCKET_URI|URI of the non-prod bucket|`gs://bkt-n-ml-storage-snds`|
+    |PROJECT_ID|The id of the non-prod project|`{none-prod-project-id}`|
+    |BUCKET_URI|URI of the non-prod bucket|`gs://non-prod-bucket`|
     |REGION|The region for pipeline jobs|Can be left as default `us-central1`|
-    |PROD_PROJECT_ID|ID of the prod project|`prj-p-bu3machine-learning-98j2`|
-    |DATAFLOW_SUBNET|The shared subnet in non-prod env required to run the dataflow job|`https://www.googleapis.com/compute/v1/projects/prj-n-shared-restricted-souc/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1`|
-    |SERVICE_ACCOUNT|The service account used to run the pipeline and it's components such as the model monitoring job. This is the compute default service account of non-prod if you don't plan on using another costume service account|`{project_number}-compute@developer.gserviceaccount.com`|
-    |PROD_SERICE_ACCOUNT|The service account used to create endpoint, upload the model, and deploy the model in the prod project. This is the compute default service account of prod if you don't plan on using another costume service account||
-    |deployment_config['encryption']|The kms key for the prod env. This key is used to encrypt the vertex model, endpoint, model deployment, and model monitoring.|`projects/prj-p-kms-we3s/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-p-bu3machine-learning`|
-    |encryption_spec_key_name|The name of the encryption key for the non-prod env. This key is used to create the vertex pipeline job and it's associated metadata store|`projects/prj-n-kms-we3s/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-n-bu3machine-learning`|
+    |PROD_PROJECT_ID|ID of the prod project|`prod-project-id`|
+    |Image|The image artifact used to run the pipeline components. The image is already built and pushed to the artifact repository in your artifact project under the common folder|f"us-central1-docker.pkg.dev/{{artifact-project}}/{{artifact-repository}}/vertexpipeline:v2"|
+    |DATAFLOW_SUBNET|The shared subnet in non-prod env required to run the dataflow job|`https://www.googleapis.com/compute/v1/projects/{non-prod-network-project}/regions/us-central1/subnetworks/{subnetwork-name}`|
+    |SERVICE_ACCOUNT|The service account used to run the pipeline and it's components such as the model monitoring job. This is the compute default service account of non-prod if you don't plan on using another costume service account|`{non-prod-project_number}-compute@developer.gserviceaccount.com`|
+    |PROD_SERICE_ACCOUNT|The service account used to create endpoint, upload the model, and deploy the model in the prod project. This is the compute default service account of prod if you don't plan on using another costume service account|`{prod-project_number}-compute@developer.gserviceaccount.com`|
+    |deployment_config['encryption']|The kms key for the prod env. This key is used to encrypt the vertex model, endpoint, model deployment, and model monitoring.|`projects/{prod-kms-project}/locations/us-central1/keyRings/{keyring-name}/cryptoKeys/{key-name}`|
+    |encryption_spec_key_name|The name of the encryption key for the non-prod env. This key is used to create the vertex pipeline job and it's associated metadata store|`projects/{non-prod-kms-project}/locations/us-central1/keyRings/{keyring-name}/cryptoKeys/{key-name}`|
     |monitoring_config['email']|The email that Vertex AI monitoring will email alerts to|`your email`|
-    
+
+The compile_pipeline.py and runpipeline.py files are commented to point out these variables.
 ### 4. Merge and deploy
 - Once everything is configured, you can commit your changes and push to the dev branch. Then, create a PR to from dev to staging(non-prod) which will result in triggering the pipeline if approved. The vertex pipeline takes about 30 minutes to finish and if there are no errors, a trained model will be deployed to and endpoint in the prod project which you can use to make prediction requests.
