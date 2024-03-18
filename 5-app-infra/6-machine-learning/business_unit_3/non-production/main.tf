@@ -26,6 +26,8 @@ module "base_env" {
   kms_keys = local.machine_learning_kms_keys
 
   // Composer
+  composer_enabled = true
+
   composer_name = "composer"
   composer_airflow_config_overrides = {
     core-dags_are_paused_at_creation = "true"
@@ -49,7 +51,7 @@ module "base_env" {
   metadata_name = "metadata-store-${local.env}"
 
   // Bucket
-  bucket_name = "ml-storage"
+  bucket_name = "ml-storage-akdv"
 
   // TensorBoard
   tensorboard_name = "ml-tensorboard-${local.env}"

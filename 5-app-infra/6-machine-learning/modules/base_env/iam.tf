@@ -15,11 +15,20 @@
  */
 
 locals {
+
   composer_roles = [
     "roles/composer.worker",
     "projects/${var.project_id}/roles/composerServiceAccountGCS", // Cloud Storage
     "projects/${var.project_id}/roles/composerServiceAccountBQ",  // BigQuery
     "projects/${var.project_id}/roles/composerServiceAccountBQ",  // Vertex AI
+  ]
+
+  compute_sa_roles = [
+    "roles/bigquery.admin",
+    "roles/dataflow.admin",
+    "roles/dataflow.worker",
+    "roles/storage.objectUser",
+    "roles/aiplatform.admin",
   ]
 
   cloudbuild_roles = [
@@ -76,11 +85,22 @@ locals {
     "service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com",            // storage.googleapis.com
   ]
 
+  aiplatform_non_prod_sa = [
+    "serviceAccount:service-${data.google_projects.non-production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_projects.non-production.projects.0.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+  ]
+
+  aiplatform_prod_sa = [
+    "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+  ]
+
   service_agent_key_binding = flatten([
     for r, k in var.kms_keys : [
       for sa in local.service_agents : { region = r, email = sa, key = k }
     ]
   ])
+
 }
 
 ################################
@@ -108,6 +128,13 @@ resource "google_kms_crypto_key_iam_member" "composer_kms_key_binding" {
   member        = "serviceAccount:${google_service_account.composer.email}"
 }
 
+resource "google_kms_crypto_key_iam_member" "composer_kms_key_binding_non_prod" {
+  for_each      = { for k, v in var.kms_keys : k => v if var.env == "non-production" }
+  crypto_key_id = each.value.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
 resource "google_service_account_iam_member" "composer_service_agent" {
   provider           = google-beta
   service_account_id = google_service_account.composer.id
@@ -116,17 +143,17 @@ resource "google_service_account_iam_member" "composer_service_agent" {
 }
 
 resource "google_service_account_iam_member" "compute_non_production" {
-  count              = var.env == "non-production" ? 1 : 0
-  provider           = google-beta
-  service_account_id = data.google_service_account.non-production.id
+  count = var.env == "non-production" ? 1 : 0
+  # provider           = google-beta
+  service_account_id = data.google_service_account.non-production.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${data.google_projects.production.projects.0.number}-compute@developer.gserviceaccount.com"
 }
 
 resource "google_service_account_iam_member" "compute_production" {
-  count              = var.env == "production" ? 1 : 0
-  provider           = google-beta
-  service_account_id = data.google_service_account.production.id
+  count = var.env == "production" ? 1 : 0
+  # provider           = google-beta
+  service_account_id = data.google_service_account.production.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${data.google_projects.non-production.projects.0.number}-compute@developer.gserviceaccount.com"
 }
@@ -158,9 +185,9 @@ resource "google_kms_crypto_key_iam_member" "service_agent_kms_key_binding" {
   depends_on = [time_sleep.wait_30_seconds]
 }
 
-########################
-#    Service Catalog   #
-########################
+###############################
+# Service Catalog & Pipelines #
+###############################
 resource "google_project_iam_member" "cloud_build" {
   for_each = { for k, v in toset(local.cloudbuild_roles) : k => v if var.env == "development" || var.env == "non-production" }
   project  = var.project_id
@@ -168,6 +195,52 @@ resource "google_project_iam_member" "cloud_build" {
   member   = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
 }
 
+resource "google_project_iam_member" "bq_pipeline_prod" {
+  for_each = { for k, v in toset(local.aiplatform_non_prod_sa) : k => v if var.env == "production" }
+  provider = google-beta
+  project  = var.project_id
+  member   = each.key
+  role     = "roles/bigquery.dataViewer"
+}
+
+resource "google_project_iam_member" "bq_pipeline_prod_vertex_admin" {
+  count    = var.env == "production" ? 1 : 0
+  provider = google-beta
+  project  = var.project_id
+  member   = "serviceAccount:service-${data.google_projects.non-production.projects.0.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com"
+  role     = "roles/aiplatform.admin"
+}
+
+resource "google_project_iam_member" "get_iam_policy_prod" {
+  count    = var.env == "production" ? 1 : 0
+  provider = google-beta
+  project  = var.project_id
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+  role     = "roles/iam.serviceAccountViewer"
+}
+
+resource "google_project_iam_member" "bq_pipeline_non_prod" {
+  for_each = { for k, v in toset(local.aiplatform_prod_sa) : k => v if var.env == "non-production" }
+  provider = google-beta
+  project  = var.project_id
+  member   = each.key
+  role     = "roles/bigquery.dataViewer"
+}
+
+resource "google_project_iam_member" "monitoring" {
+  count   = var.env == "non-production" ? 1 : 0
+  project = var.project_id
+  role    = "roles/bigquery.admin"
+  member  = "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "compute_roles" {
+  for_each = toset(local.compute_sa_roles)
+  provider = google-beta
+  project  = var.project_id
+  member   = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+  role     = each.key
+}
 
 ########################
 #       Notebooks      #
@@ -178,4 +251,17 @@ resource "google_project_iam_member" "compute" {
   project = var.project_id
   role    = "roles/storage.objectUser"
   member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+########################
+#   Bucket Access      #
+########################
+
+resource "google_storage_bucket_iam_member" "prod_access" {
+  count  = var.env == "non-production" ? 1 : 0
+  bucket = join("-", [var.gcs_bucket_prefix, data.google_project.project.labels.env_code, var.bucket_name])
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+
+  depends_on = [module.bucket]
 }

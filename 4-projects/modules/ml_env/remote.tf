@@ -34,6 +34,7 @@ locals {
   default_region                      = data.terraform_remote_state.business_unit_shared.outputs.default_region
   service_catalog_project_id          = data.terraform_remote_state.business_unit_shared.outputs.service_catalog_project_id
   service_catalog_repo_name           = data.terraform_remote_state.business_unit_shared.outputs.service_catalog_repo_name
+  common_artifact_project_id          = data.terraform_remote_state.business_unit_shared.outputs.common_artifacts_project_id
 
   restricted_subnets_region = flatten([
     for subnet in local.restricted_subnets_self_links :

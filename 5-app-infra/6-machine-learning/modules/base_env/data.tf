@@ -19,11 +19,11 @@ data "google_project" "project" {
 }
 
 data "google_projects" "non-production" {
-  filter = "labels.application_name:machine-learning labels.environment:non-production"
+  filter = "labels.application_name:machine-learning labels.env_code:n"
 }
 
 data "google_projects" "production" {
-  filter = "labels.application_name:machine-learning labels.environment:production"
+  filter = "labels.application_name:machine-learning labels.env_code:p"
 }
 
 data "google_service_account" "non-production" {

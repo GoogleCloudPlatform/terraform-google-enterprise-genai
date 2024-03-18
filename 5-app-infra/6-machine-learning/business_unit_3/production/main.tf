@@ -50,7 +50,7 @@ module "base_env" {
   metadata_name = "metadata-store-${local.env}"
 
   // Bucket
-  bucket_name = "ml-storage"
+  bucket_name = "ml-storage-gvdf"
 
   // TensorBoard
   tensorboard_name = "ml-tensorboard-${local.env}"

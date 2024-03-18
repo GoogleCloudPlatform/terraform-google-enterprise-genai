@@ -70,6 +70,11 @@ variable "service_account_prefix" {
 #      Composer        #
 ########################
 
+variable "composer_enabled" {
+  description = "Enable Composer (defualt to false)"
+  type        = bool
+  default     = false
+}
 variable "composer_name" {
   description = "Name of Composer environment"
   type        = string

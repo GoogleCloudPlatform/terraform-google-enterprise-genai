@@ -139,6 +139,12 @@ resource "google_project_service_identity" "secrets" {
   service = "secretmanager.googleapis.com"
 }
 
+resource "google_project_service_identity" "aiplatform" {
+  provider = google-beta
+
+  project = module.machine_learning_project.project_id
+  service = "aiplatform.googleapis.com"
+}
 
 resource "time_sleep" "wait_30_seconds" {
   create_duration = "30s"
@@ -147,6 +153,7 @@ resource "time_sleep" "wait_30_seconds" {
     google_project_service_identity.cloud_build,
     google_project_service_identity.notebooks,
     google_project_service_identity.secrets,
+    google_project_service_identity.aiplatform,
   ]
 }
 
@@ -214,4 +221,15 @@ resource "google_folder_iam_member" "name" {
   folder = local.env_folder_name
   role   = "roles/browser"
   member = "serviceAccount:${google_project_service_identity.cloud_build.email}"
+}
+
+// Add Artifact Registry Access to Vertex AI Agent
+
+resource "google_project_iam_member" "access_artifacts" {
+  count   = var.env == "production" ? 1 : 0
+  project = local.common_artifact_project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:service-${module.machine_learning_project.project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+
+  depends_on = [time_sleep.wait_30_seconds]
 }

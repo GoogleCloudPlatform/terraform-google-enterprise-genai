@@ -17,9 +17,10 @@
 // Composer
 
 output "composer" {
-  value       = try(module.base_env.composer, "")
+  value       = module.base_env.composer
   description = "Cloud Composer Environment."
 }
+
 
 ########################
 #      Metadata        #
@@ -27,7 +28,7 @@ output "composer" {
 
 output "metadata" {
   description = "an identifier for the resource with format {{name}}"
-  value       = try(module.base_env.metadata, "")
+  value       = module.base_env.metadata
 }
 
 ########################
@@ -36,7 +37,7 @@ output "metadata" {
 
 output "bucket" {
   description = "Generated unique name fort the bucket"
-  value       = try(module.base_env.bucket, "")
+  value       = module.base_env.bucket
 }
 
 ########################
@@ -45,5 +46,5 @@ output "bucket" {
 
 output "tensorboard" {
   description = "TensorBoard resource."
-  value       = try(module.base_env.tensorboard, "")
+  value       = module.base_env.tensorboard
 }
