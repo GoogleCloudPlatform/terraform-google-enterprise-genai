@@ -66,12 +66,19 @@ cd into gcp-networks
 Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
 
 In `common.auto.tfvars` update your `perimeter_additional_members` to include:
- * the service acccount for bu3infra-pipeline: `"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"`
- * the service account for your cicd pipeline: `"serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"`
- * your development environment logging bucket service account: `"serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"`
- * your development environment service acount for cloudbuild: `"serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"`
+```
+"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com" 
+"serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"
+"serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"
+"serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"
+```
 
- In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes:
+
+ In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
+
+You can find the `sources.access_level` information by going to `Security` in your GCP Organization. 
+Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
+
 
     ```
     ingress_policies = [
@@ -80,7 +87,7 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
             "from" = {
             "identity_type" = "ANY_IDENTITY"
             "sources" = {
-                "access_level" = "accessPolicies/270868347751/accessLevels/alp_d_shared_restricted_members_556e"
+                "access_level" = "[YOUR_ACCESS_LEVEL]"
             }
             },
             "to" = {
@@ -121,7 +128,7 @@ egress_policies = [
         "identity_type" = ""
         "identities" = [     
             "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",   
-            "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com", 
+            "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
         ]
         },
         "to" = {
@@ -138,23 +145,3 @@ egress_policies = [
     },
 ]
 ```
-
-<!-- Please note that this will cover some but not ALL the policies that will be needed.  During deployment there will be violations that will occur which come from unknown google projects outside the scope of your organization.  It will be the responsibility of the operator(s) deploying this process to view logs about the errors and make adjustments accordingly.  Most notably, this was observed for Service Catalog.  There will be an instance where an egress policy to be added for `cloudbuild.googleapis.com` access:
-
-```bash
-// Service Catalog
-{
-    "from" = {
-    "identity_type" = "ANY_IDENTITY"
-    "identities"    = []
-    },
-    "to" = {
-    "resources" = ["projects/[some random google project id]"] 
-    "operations" = {
-        "cloudbuild.googleapis.com" = {
-        "methods" = ["*"]
-        }
-    }
-    }
-},
-``` -->

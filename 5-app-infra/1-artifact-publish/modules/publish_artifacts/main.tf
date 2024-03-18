@@ -80,7 +80,7 @@ resource "google_artifact_registry_repository" "repo" {
 resource "google_artifact_registry_repository_iam_member" "project" {
   for_each   = toset(local.trigger_sa_roles)
   project    = var.project_id
-  repository = google_artifact_registry_repository.repo.name
+  repository = var.name
   location   = var.region
   role       = each.key
   # member     = "serviceAccount:${google_service_account.trigger_sa.email}"
@@ -137,7 +137,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
         <<-EOT
         build_path="/workspace/docker_build"
         while IFS= read -r line; do
-          docker build -t gcr.io/$PROJECT_ID/$line images/$line
+          docker build -t ${var.region}-docker.pkg.dev/$PROJECT_ID/c-publish-artifacts/$line images/$line
         done < "$build_path"
         EOT
       ]
@@ -153,7 +153,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
         <<-EOT
         build_path="/workspace/docker_build"
         while IFS= read -r line; do
-          docker push gcr.io/$PROJECT_ID/$line
+          docker push ${var.region}-docker.pkg.dev/$PROJECT_ID/c-publish-artifacts/$line
         done < "$build_path"
         EOT
       ]
