@@ -1,0 +1,18 @@
+steps:
+  # Install dependencies
+  - name: python
+    entrypoint: pip
+    args: ["install", "google-cloud-aiplatform==1.36.0", "--user"]
+    id: 'requirements'
+  
+  # run pipeline
+  - name: 'python'
+    entrypoint: 'python'
+    args: ['runpipeline.py']
+    id: 'run_job'
+    waitFor: ['requirements']
+    
+  # update composer dag
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://us-central1-d-isolated-comp-8f58e4b5-bucket/dags/common/vertex-ai-pipeline/']
+    id: 'upload_composer_file'
