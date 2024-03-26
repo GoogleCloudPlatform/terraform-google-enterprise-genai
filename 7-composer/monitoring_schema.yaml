@@ -1,0 +1,43 @@
+type: object
+properties:
+  age:
+    type: number
+  capital_gain:
+    type: number
+  capital_loss:
+    type: number
+  education:
+    type: string
+  education_num:
+    type: number
+  fnlwgt:
+    type: number
+  gender:
+    type: string
+  hours_per_week:
+    type: number
+  marital_status:
+    type: string
+  native_country:
+    type: string
+  occupation:
+    type: string
+  race:
+    type: string
+  relationship:
+    type: string
+  workclass:
+    type: string
+required:
+- age
+- workclass
+- education
+- marital_status
+- occupation
+- relationship
+- race
+- gender
+- capital_gain
+- capital_loss
+- hours_per_week
+- native_country
