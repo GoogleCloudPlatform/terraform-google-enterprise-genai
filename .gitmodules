@@ -1,0 +1,3 @@
+[submodule "7-vertexpipeline"]
+	path = 7-vertexpipeline
+	url = git@github.com:badal-io/vertexpipeline-promotion.git
