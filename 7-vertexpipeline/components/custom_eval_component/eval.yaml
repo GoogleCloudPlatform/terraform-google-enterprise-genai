@@ -59,7 +59,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.4.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -114,11 +114,12 @@ deploymentSpec:
           \ = read_bigquery(table).batch(batch_size)\n    keras_model = tf.keras.models.load_model(model.path)\n\
           \    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)\n\
           \    loss, accuracy = keras_model.evaluate(eval_ds, callbacks=[tensorboard])\n\
-          \    metrics.log_metric(\"accuracy\", accuracy)\n\n    if accuracy > 0.8:\n\
+          \    metrics.log_metric(\"accuracy\", accuracy)\n    # Deploy the model\
+          \ only if its accuracy is higher than 80 percent\n    if accuracy > 0.8:\n\
           \        dep_decision = \"true\"\n        keras_model.save(model_dir)\n\
           \    else:\n        dep_decision = \"false\"\n    return (dep_decision,)\n\
           \n"
-        image: us-central1-docker.pkg.dev/interactive-407117/pipelinerepo/pipeline_tutorial:latest
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
 pipelineInfo:
   name: custom-eval-model
 root:
@@ -198,4 +199,4 @@ root:
       dep_decision:
         parameterType: STRING
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.4.0
+sdkVersion: kfp-2.7.0

@@ -1,21 +1,22 @@
 # PIPELINE DEFINITION
 # Name: census-income-pipeline
 # Inputs:
-#    base_train_dir: str [Default: 'gs://vertexpipe/training']
+#    base_train_dir: str [Default: 'gs://bkt-d-vertexpipe-test-dev/training']
 #    batch_size: int [Default: 32.0]
 #    bq_dataset: str [Default: 'census_dataset']
 #    bq_eval_table: str [Default: 'census_eval_table']
 #    bq_train_table: str [Default: 'census_train_table']
 #    bucket_name: str
 #    create_bq_dataset_query: str
-#    dataflow_temp_location: str [Default: 'gs://vertexpipe/temp_dataflow']
+#    dataflow_subnet: str
+#    dataflow_temp_location: str [Default: 'gs://bkt-d-vertexpipe-test-dev/temp_dataflow']
 #    deployed_model_name: str [Default: 'income_bracket_predictor']
 #    deployment_image: str [Default: 'us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest']
 #    deployment_project: str
 #    encryption: str
 #    endpoint_name: str [Default: 'census_endpoint']
 #    epochs: int [Default: 5.0]
-#    eval_data_url: str [Default: 'gs://vertexpipe/data/adult.test.csv']
+#    eval_data_url: str [Default: 'gs://bkt-d-vertexpipe-test-dev/data/adult.test.csv']
 #    job_name: str [Default: 'census-ingest']
 #    lr: float [Default: 0.01]
 #    max_nodes: int [Default: 4.0]
@@ -23,15 +24,15 @@
 #    model_dir: str
 #    monitoring_email: str
 #    monitoring_name: str
+#    prod_service_account: str
 #    project: str
-#    python_file_path: str [Default: 'gs://vertexpipe/src/ingest_pipeline.py']
+#    python_file_path: str [Default: 'gs://bkt-d-vertexpipe-test-dev/src/ingest_pipeline.py']
 #    region: str
-#    requirements_file_path: str [Default: 'gs://vertexpipe/requirements.txt']
 #    runner: str [Default: 'DataflowRunner']
 #    service_account: str
-#    tb_log_dir: str [Default: 'gs://vertexpipe/tblogs']
+#    tb_log_dir: str [Default: 'gs://bkt-d-vertexpipe-test-dev/tblogs']
 #    traffic_split: int [Default: 25.0]
-#    train_data_url: str [Default: 'gs://vertexpipe/data/adult.data.csv']
+#    train_data_url: str [Default: 'gs://bkt-d-vertexpipe-test-dev/data/adult.data.csv']
 # Outputs:
 #    custom-eval-model-metrics: system.Metrics
 components:
@@ -121,6 +122,8 @@ components:
           parameterType: STRING
         runner:
           parameterType: STRING
+        subnet:
+          parameterType: STRING
         url:
           parameterType: STRING
     outputDefinitions:
@@ -140,6 +143,8 @@ components:
         job_name:
           parameterType: STRING
         runner:
+          parameterType: STRING
+        subnet:
           parameterType: STRING
         url:
           parameterType: STRING
@@ -216,7 +221,7 @@ components:
               region:
                 componentInputParameter: pipelinechannel--region
               service_account:
-                componentInputParameter: pipelinechannel--service_account
+                componentInputParameter: pipelinechannel--prod_service_account
               serving_container_image_uri:
                 componentInputParameter: pipelinechannel--deployment_image
               split:
@@ -257,6 +262,8 @@ components:
         pipelinechannel--monitoring_email:
           parameterType: STRING
         pipelinechannel--monitoring_name:
+          parameterType: STRING
+        pipelinechannel--prod_service_account:
           parameterType: STRING
         pipelinechannel--project:
           parameterType: STRING
@@ -409,7 +416,7 @@ components:
               - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip\
                 \ || python3 -m ensurepip --user || apt-get install python3-pip\n\
                 fi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet\
-                \ --no-warn-script-location 'kfp==2.4.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+                \ --no-warn-script-location 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
                 \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
               - sh
               - -ec
@@ -492,7 +499,7 @@ components:
                 \ metrics=['accuracy'])\n    keras_model.fit(training_ds, epochs=epochs,\
                 \ callbacks=[tensorboard])\n    keras_model.save(model.path)\n\n"
               env: []
-              image_uri: us-central1-docker.pkg.dev/interactive-407117/pipelinerepo/pipeline_tutorial:latest
+              image_uri: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
             disk_spec:
               boot_disk_size_gb: 100.0
               boot_disk_type: pd-ssd
@@ -677,7 +684,7 @@ deploymentSpec:
         - -u
         - -m
         - google_cloud_pipeline_components.container.v1.bigquery.query_job.launcher
-        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.6.0
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
     exec-build-dataflow-args:
       container:
         args:
@@ -690,7 +697,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.4.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -706,12 +713,14 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef build_dataflow_args(\n    bq_dataset: str,\n    url: str,\n \
           \   bq_table: str,\n    job_name: str,\n    runner: str,\n    bq_project:\
-          \ str,\n) -> list:\n    return [\n        \"--job_name\",\n        job_name,\n\
-          \        \"--runner\",\n        runner,\n        \"--url\",\n        url,\n\
-          \        \"--bq-dataset\",\n        bq_dataset,\n        \"--bq-table\"\
-          ,\n        bq_table,\n        \"--bq-project\",\n        bq_project\n  \
-          \  ]\n\n"
-        image: python:3.8-slim
+          \ str,\n    subnet: str,\n) -> list:\n    return [\n        \"--job_name\"\
+          ,\n        job_name,\n        \"--runner\",\n        runner,\n        \"\
+          --url\",\n        url,\n        \"--bq-dataset\",\n        bq_dataset,\n\
+          \        \"--bq-table\",\n        bq_table,\n        \"--bq-project\",\n\
+          \        bq_project,\n        \"--subnetwork\",\n        subnet,\n     \
+          \   \"--no_use_public_ips\",\n        \"--worker_zone\",\n        \"us-central1-c\"\
+          ,\n    ]\n\n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
     exec-build-dataflow-args-2:
       container:
         args:
@@ -724,7 +733,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.4.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -740,12 +749,14 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef build_dataflow_args(\n    bq_dataset: str,\n    url: str,\n \
           \   bq_table: str,\n    job_name: str,\n    runner: str,\n    bq_project:\
-          \ str,\n) -> list:\n    return [\n        \"--job_name\",\n        job_name,\n\
-          \        \"--runner\",\n        runner,\n        \"--url\",\n        url,\n\
-          \        \"--bq-dataset\",\n        bq_dataset,\n        \"--bq-table\"\
-          ,\n        bq_table,\n        \"--bq-project\",\n        bq_project\n  \
-          \  ]\n\n"
-        image: python:3.8-slim
+          \ str,\n    subnet: str,\n) -> list:\n    return [\n        \"--job_name\"\
+          ,\n        job_name,\n        \"--runner\",\n        runner,\n        \"\
+          --url\",\n        url,\n        \"--bq-dataset\",\n        bq_dataset,\n\
+          \        \"--bq-table\",\n        bq_table,\n        \"--bq-project\",\n\
+          \        bq_project,\n        \"--subnetwork\",\n        subnet,\n     \
+          \   \"--no_use_public_ips\",\n        \"--worker_zone\",\n        \"us-central1-c\"\
+          ,\n    ]\n\n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
     exec-create-monitoring:
       container:
         args:
@@ -758,7 +769,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.4.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -777,13 +788,17 @@ deploymentSpec:
           \ str,\n    bucket_name: str,\n    email: str,\n    encryption: str,\n \
           \   service_account: str,\n):\n    from google.cloud.aiplatform import model_monitoring\n\
           \    from google.cloud import aiplatform\n    from google.cloud import bigquery\n\
-          \    from google.cloud import storage\n    import time\n    aiplatform.init(service_account=service_account)\n\
-          \    list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'display_name=\"\
-          {monitoring_name}\"', project=project_id)\n    if len(list_monitors) ==\
-          \ 0:\n        alerting_config = model_monitoring.EmailAlertConfig(\n   \
-          \         user_emails=[email], enable_logging=True\n        )\n        #\
-          \ schedule config\n        MONITOR_INTERVAL = 1\n        schedule_config\
-          \ = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)\n\
+          \    from google.cloud import storage\n    from collections import OrderedDict\n\
+          \    import time\n    import yaml\n    def ordered_dict_representer(self,\
+          \ value):  # can be a lambda if that's what you prefer\n        return self.represent_mapping('tag:yaml.org,2002:map',\
+          \ value.items())\n    yaml.add_representer(OrderedDict, ordered_dict_representer)\n\
+          \n    aiplatform.init(service_account=service_account)\n    list_monitors\
+          \ = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'(state=\"JOB_STATE_SUCCEEDED\"\
+          \ OR state=\"JOB_STATE_RUNNING\") AND display_name=\"{monitoring_name}\"\
+          ', project=project_id)\n    if len(list_monitors) == 0:\n        alerting_config\
+          \ = model_monitoring.EmailAlertConfig(\n            user_emails=[email],\
+          \ enable_logging=True\n        )\n        # schedule config\n        MONITOR_INTERVAL\
+          \ = 1\n        schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)\n\
           \        # sampling strategy\n        SAMPLE_RATE = 0.5 \n        logging_sampling_strategy\
           \ = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)\n     \
           \   # drift config\n        DRIFT_THRESHOLD_VALUE = 0.05\n        DRIFT_THRESHOLDS\
@@ -800,28 +815,28 @@ deploymentSpec:
           \ = model_monitoring.ObjectiveConfig(\n            skew_detection_config=skew_config,\n\
           \            drift_detection_config=drift_config,\n            explanation_config=None,\n\
           \        )\n\n        bqclient = bigquery.Client()\n        table = bigquery.TableReference.from_string(DATASET_BQ_URI[5:])\n\
-          \        bq_table = bqclient.get_table(table)\n        yaml = \"\"\"type:\
-          \ object\n        properties:\n        \"\"\"\n        schema = bq_table.schema\n\
-          \        for feature in schema:\n            if feature.name == TARGET:\n\
-          \                continue\n            if feature.field_type == \"STRING\"\
-          :\n                f_type = \"string\"\n            else:\n            \
-          \    f_type = \"float\"\n            yaml += f\"\"\"  {feature.name}:\n\
-          \            type: {f_type}\n        \"\"\"\n\n        yaml += \"\"\"required:\n\
-          \        \"\"\"\n        for feature in schema:\n            if feature.name\
-          \ == \"income_bracket\":\n                continue\n            yaml +=\
-          \ f\"\"\"- {feature.name}\n        \"\"\"\n        with open(\"monitoring_schema.yaml\"\
-          , \"w\") as f:\n            f.write(yaml)\n        storage_client = storage.Client()\n\
-          \        bucket = storage_client.bucket(bucket_name)\n        blob = bucket.blob(\"\
-          monitoring_schema.yaml\")\n        blob.upload_from_string(yaml)\n\n   \
-          \     monitoring_job = aiplatform.ModelDeploymentMonitoringJob.create(\n\
+          \        bq_table = bqclient.get_table(table)\n        schema = bq_table.schema\n\
+          \        schemayaml = OrderedDict({\n            \"type\": \"object\",\n\
+          \            \"properties\": {},\n            \"required\": []\n       \
+          \ })\n        for feature in schema:\n            if feature.name in [\"\
+          income_bracket\"]:\n                continue\n            if feature.field_type\
+          \ == \"STRING\":\n                f_type = \"string\"\n            else:\n\
+          \                f_type = \"number\"\n            schemayaml['properties'][feature.name]\
+          \ = {\"type\": f_type}\n            if feature.name not in [\"fnlwgt\",\
+          \ \"education_num\"]:\n                schemayaml['required'].append(feature.name)\n\
+          \n        with open(\"monitoring_schema.yaml\", \"w\") as yaml_file:\n \
+          \           yaml.dump(schemayaml, yaml_file, default_flow_style=False)\n\
+          \        storage_client = storage.Client()\n        bucket = storage_client.bucket(bucket_name)\n\
+          \        blob = bucket.blob(\"monitoring_schema.yaml\")\n        blob.upload_from_filename(\"\
+          monitoring_schema.yaml\")\n\n        monitoring_job = aiplatform.ModelDeploymentMonitoringJob.create(\n\
           \            display_name=monitoring_name,\n            project=project_id,\n\
           \            location=region,\n            endpoint=endpoint.metadata['resourceName'],\n\
           \            logging_sampling_strategy=logging_sampling_strategy,\n    \
           \        schedule_config=schedule_config,\n            alert_config=alerting_config,\n\
           \            objective_configs=objective_config,\n            analysis_instance_schema_uri=f\"\
-          {bucket_name}/monitoring_schema.yaml\",\n            encryption_spec_key_name=encryption,\n\
+          gs://{bucket_name}/monitoring_schema.yaml\",\n            encryption_spec_key_name=encryption,\n\
           \        )\n\n"
-        image: us-central1-docker.pkg.dev/interactive-407117/pipelinerepo/pipeline_tutorial:latest
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
     exec-custom-eval-model:
       container:
         args:
@@ -834,7 +849,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.4.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -889,11 +904,12 @@ deploymentSpec:
           \ = read_bigquery(table).batch(batch_size)\n    keras_model = tf.keras.models.load_model(model.path)\n\
           \    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)\n\
           \    loss, accuracy = keras_model.evaluate(eval_ds, callbacks=[tensorboard])\n\
-          \    metrics.log_metric(\"accuracy\", accuracy)\n\n    if accuracy > 0.8:\n\
+          \    metrics.log_metric(\"accuracy\", accuracy)\n    # Deploy the model\
+          \ only if its accuracy is higher than 80 percent\n    if accuracy > 0.8:\n\
           \        dep_decision = \"true\"\n        keras_model.save(model_dir)\n\
           \    else:\n        dep_decision = \"false\"\n    return (dep_decision,)\n\
           \n"
-        image: us-central1-docker.pkg.dev/interactive-407117/pipelinerepo/pipeline_tutorial:latest
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
     exec-custom-train-model:
       container:
         args:
@@ -921,7 +937,7 @@ deploymentSpec:
         - -u
         - -m
         - google_cloud_pipeline_components.container.v1.custom_job.launcher
-        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.6.0
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
     exec-dataflow-python:
       container:
         args:
@@ -944,7 +960,7 @@ deploymentSpec:
         - -u
         - -m
         - google_cloud_pipeline_components.container.v1.dataflow.dataflow_launcher
-        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.6.0
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
     exec-dataflow-python-2:
       container:
         args:
@@ -967,7 +983,7 @@ deploymentSpec:
         - -u
         - -m
         - google_cloud_pipeline_components.container.v1.dataflow.dataflow_launcher
-        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.6.0
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
     exec-deploy-model:
       container:
         args:
@@ -980,7 +996,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.4.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -1033,17 +1049,16 @@ deploymentSpec:
           n1-standard-4\",\n                endpoint=endpoint,\n                traffic_split={\"\
           0\": 25, latest_model_id: 75},\n                deployed_model_display_name=model_name,\n\
           \                min_replica_count=min_nodes,\n                max_replica_count=max_nodes,\n\
-          \                encryption_spec_key_name=encryption,\n                #\
-          \ service_account=\"compute default\"\n            )\n        else:\n  \
-          \          model_deploy = uploaded_model.deploy(\n            # machine_type=\"\
-          n1-standard-4\",\n            endpoint=endpoint,\n            traffic_split={\"\
-          0\": 100},\n            min_replica_count=min_nodes,\n            max_replica_count=max_nodes,\n\
-          \            deployed_model_display_name=model_name,\n            encryption_spec_key_name=encryption,\n\
-          \            # service_account=\"compute default\"\n        )\n        return\
-          \ model_deploy.resource_name\n\n    vertex_endpoint.uri = deploy_to_endpoint(vertex_model,\
-          \ endpoint)\n    vertex_endpoint.metadata['resourceName']=endpoint.resource_name\n\
+          \                encryption_spec_key_name=encryption,\n                service_account=service_account\n\
+          \            )\n        else:\n            model_deploy = uploaded_model.deploy(\n\
+          \            # machine_type=\"n1-standard-4\",\n            endpoint=endpoint,\n\
+          \            traffic_split={\"0\": 100},\n            min_replica_count=min_nodes,\n\
+          \            max_replica_count=max_nodes,\n            deployed_model_display_name=model_name,\n\
+          \            encryption_spec_key_name=encryption,\n            service_account=service_account\n\
+          \        )\n        return model_deploy.resource_name\n\n    vertex_endpoint.uri\
+          \ = deploy_to_endpoint(vertex_model, endpoint)\n    vertex_endpoint.metadata['resourceName']=endpoint.resource_name\n\
           \n"
-        image: us-central1-docker.pkg.dev/interactive-407117/pipelinerepo/pipeline_tutorial:latest
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
     exec-wait-gcp-resources:
       container:
         args:
@@ -1062,7 +1077,7 @@ deploymentSpec:
         - -u
         - -m
         - google_cloud_pipeline_components.container.v1.wait_gcp_resources.launcher
-        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.6.0
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
     exec-wait-gcp-resources-2:
       container:
         args:
@@ -1081,7 +1096,7 @@ deploymentSpec:
         - -u
         - -m
         - google_cloud_pipeline_components.container.v1.wait_gcp_resources.launcher
-        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.6.0
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
 pipelineInfo:
   name: census-income-pipeline
 root:
@@ -1130,6 +1145,8 @@ root:
               componentInputParameter: job_name
             runner:
               componentInputParameter: runner
+            subnet:
+              componentInputParameter: dataflow_subnet
             url:
               componentInputParameter: train_data_url
         taskInfo:
@@ -1156,6 +1173,8 @@ root:
               componentInputParameter: job_name
             runner:
               componentInputParameter: runner
+            subnet:
+              componentInputParameter: dataflow_subnet
             url:
               componentInputParameter: eval_data_url
         taskInfo:
@@ -1203,6 +1222,8 @@ root:
               componentInputParameter: monitoring_email
             pipelinechannel--monitoring_name:
               componentInputParameter: monitoring_name
+            pipelinechannel--prod_service_account:
+              componentInputParameter: prod_service_account
             pipelinechannel--project:
               componentInputParameter: project
             pipelinechannel--region:
@@ -1295,8 +1316,6 @@ root:
               componentInputParameter: project
             python_module_path:
               componentInputParameter: python_file_path
-            requirements_file_path:
-              componentInputParameter: requirements_file_path
             temp_location:
               runtimeValue:
                 constant: '{{$.inputs.parameters[''pipelinechannel--dataflow_temp_location'']}}/train'
@@ -1323,8 +1342,6 @@ root:
               componentInputParameter: project
             python_module_path:
               componentInputParameter: python_file_path
-            requirements_file_path:
-              componentInputParameter: requirements_file_path
             temp_location:
               runtimeValue:
                 constant: '{{$.inputs.parameters[''pipelinechannel--dataflow_temp_location'']}}/eval'
@@ -1363,7 +1380,7 @@ root:
   inputDefinitions:
     parameters:
       base_train_dir:
-        defaultValue: gs://vertexpipe/training
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/training
         isOptional: true
         parameterType: STRING
       batch_size:
@@ -1386,8 +1403,10 @@ root:
         parameterType: STRING
       create_bq_dataset_query:
         parameterType: STRING
+      dataflow_subnet:
+        parameterType: STRING
       dataflow_temp_location:
-        defaultValue: gs://vertexpipe/temp_dataflow
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/temp_dataflow
         isOptional: true
         parameterType: STRING
       deployed_model_name:
@@ -1411,7 +1430,7 @@ root:
         isOptional: true
         parameterType: NUMBER_INTEGER
       eval_data_url:
-        defaultValue: gs://vertexpipe/data/adult.test.csv
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/data/adult.test.csv
         isOptional: true
         parameterType: STRING
       job_name:
@@ -1436,17 +1455,15 @@ root:
         parameterType: STRING
       monitoring_name:
         parameterType: STRING
+      prod_service_account:
+        parameterType: STRING
       project:
         parameterType: STRING
       python_file_path:
-        defaultValue: gs://vertexpipe/src/ingest_pipeline.py
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/src/ingest_pipeline.py
         isOptional: true
         parameterType: STRING
       region:
-        parameterType: STRING
-      requirements_file_path:
-        defaultValue: gs://vertexpipe/requirements.txt
-        isOptional: true
         parameterType: STRING
       runner:
         defaultValue: DataflowRunner
@@ -1455,7 +1472,7 @@ root:
       service_account:
         parameterType: STRING
       tb_log_dir:
-        defaultValue: gs://vertexpipe/tblogs
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/tblogs
         isOptional: true
         parameterType: STRING
       traffic_split:
@@ -1463,7 +1480,7 @@ root:
         isOptional: true
         parameterType: NUMBER_INTEGER
       train_data_url:
-        defaultValue: gs://vertexpipe/data/adult.data.csv
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/data/adult.data.csv
         isOptional: true
         parameterType: STRING
   outputDefinitions:
@@ -1473,4 +1490,4 @@ root:
           schemaTitle: system.Metrics
           schemaVersion: 0.0.1
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.4.0
+sdkVersion: kfp-2.7.0
