@@ -22,7 +22,7 @@ The cloud build trigger will be setup in the non-prod project which is where the
 
 Each time a pipeline job finishes successfully, a new version of the census income bracket predictor model will be deployed on the endpoint which will only take 25 percent of the traffic wherease the other 75 percent goes to the previous version of the model to enable A/B testing.
 
-You can read more about the details of the pipeline components on the [pipeline's repo](https://github.com/badal-io/vertexpipeline-promotion/tree/dev?tab=readme-ov-file#use-case)
+You can read more about the details of the pipeline components on the [pipeline's repo](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/tree/main/7-vertexpipeline#readme)
 
 # Step by step
 Before you start, make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
