@@ -16,7 +16,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "bkt-prj-c-bu3infra-pipeline-wv2v-bu3-machine-learning-state"
+    bucket = "UPDATE_APP_INFRA_BUCKET-bu3infra-pipeline-wv2v-bu3-machine-learning-state"
     prefix = "terraform/app-infra/business_unit_3/production"
   }
 }
