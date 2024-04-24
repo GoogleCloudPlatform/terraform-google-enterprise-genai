@@ -1,7 +1,7 @@
 # Overview
 This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench is deployed from service catalog and The datascientis can use it to write their code including any experiments, data processing code and pipeline components. In addition, a cloud storage bucket is deployed to use as the storage for our operations. Optionally a composer environment is which will later be used to schedule the pipeline run on intervals.
 
-For our pipeline which trains and deploys a model on the [census income dataset](https://archive.ics.uci.edu/dataset/20/census+income), we use a notebook in the dev workbench to create our pipeline components, put them together into a pipeline and do a dry run of the pipeline to make sure there are no issues. You can access the repository [here](https://github.com/badal-io/vertexpipeline-promotion/tree/dev). [^1]
+For our pipeline which trains and deploys a model on the [census income dataset](https://archive.ics.uci.edu/dataset/20/census+income), we use a notebook in the dev workbench to create our pipeline components, put them together into a pipeline and do a dry run of the pipeline to make sure there are no issues. You can access the repository [here](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/tree/main/7-vertexpipeline). [^1]
 
 [^1]: There is a Dockerfile in the repo which is the docker image used to run all pipeline steps and cloud build steps. In non-prod and prod environments, the only NIST compliant way to access additional dependencies and requirements is via docker images uploaded to artifact registry. We have baked everything for running the pipeline into this docker which exsits in the shared artifact registry.
 
@@ -22,13 +22,13 @@ The cloud build trigger will be setup in the non-prod project which is where the
 
 Each time a pipeline job finishes successfully, a new version of the census income bracket predictor model will be deployed on the endpoint which will only take 25 percent of the traffic wherease the other 75 percent goes to the previous version of the model to enable A/B testing.
 
-You can read more about the details of the pipeline components on the [pipeline's repo](https://github.com/badal-io/vertexpipeline-promotion/tree/dev?tab=readme-ov-file#use-case)
+You can read more about the details of the pipeline components on the [pipeline's repo](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/tree/main/7-vertexpipeline#readme)
 
 # Step by step
 Before you start, make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
 Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy the bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
 ### 1. Run the notebook 
-- Fork the repository to make you own copy on git and clone it in the workbench in your dev project. To clone the repo, click on the git icon on the left bar menu, enter your credentials. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/badal-io/vertexpipeline-promotion/blob/dev/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
+- Take 7-vertexpipeline folder and make you own copy as a standalone git repository and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/7-vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
 
 ### 2. Configure cloud build
 - After the notebook runs successfully and the pipeline's test run finishes in the dev environment, create a cloud build trigger in your non-prod project. Configure the trigger to run when there is a merge into the staging (non-prod) branch by following the below settings.

@@ -50,7 +50,7 @@ deploymentSpec:
         - -c
         - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
           \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.4.0'\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
           \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
           $0\" \"$@\"\n"
         - sh
@@ -69,13 +69,17 @@ deploymentSpec:
           \ str,\n    bucket_name: str,\n    email: str,\n    encryption: str,\n \
           \   service_account: str,\n):\n    from google.cloud.aiplatform import model_monitoring\n\
           \    from google.cloud import aiplatform\n    from google.cloud import bigquery\n\
-          \    from google.cloud import storage\n    import time\n    aiplatform.init(service_account=service_account)\n\
-          \    list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'display_name=\"\
-          {monitoring_name}\"', project=project_id)\n    if len(list_monitors) ==\
-          \ 0:\n        alerting_config = model_monitoring.EmailAlertConfig(\n   \
-          \         user_emails=[email], enable_logging=True\n        )\n        #\
-          \ schedule config\n        MONITOR_INTERVAL = 1\n        schedule_config\
-          \ = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)\n\
+          \    from google.cloud import storage\n    from collections import OrderedDict\n\
+          \    import time\n    import yaml\n    def ordered_dict_representer(self,\
+          \ value):  # can be a lambda if that's what you prefer\n        return self.represent_mapping('tag:yaml.org,2002:map',\
+          \ value.items())\n    yaml.add_representer(OrderedDict, ordered_dict_representer)\n\
+          \n    aiplatform.init(service_account=service_account)\n    list_monitors\
+          \ = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'(state=\"JOB_STATE_SUCCEEDED\"\
+          \ OR state=\"JOB_STATE_RUNNING\") AND display_name=\"{monitoring_name}\"\
+          ', project=project_id)\n    if len(list_monitors) == 0:\n        alerting_config\
+          \ = model_monitoring.EmailAlertConfig(\n            user_emails=[email],\
+          \ enable_logging=True\n        )\n        # schedule config\n        MONITOR_INTERVAL\
+          \ = 1\n        schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)\n\
           \        # sampling strategy\n        SAMPLE_RATE = 0.5 \n        logging_sampling_strategy\
           \ = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)\n     \
           \   # drift config\n        DRIFT_THRESHOLD_VALUE = 0.05\n        DRIFT_THRESHOLDS\
@@ -92,28 +96,28 @@ deploymentSpec:
           \ = model_monitoring.ObjectiveConfig(\n            skew_detection_config=skew_config,\n\
           \            drift_detection_config=drift_config,\n            explanation_config=None,\n\
           \        )\n\n        bqclient = bigquery.Client()\n        table = bigquery.TableReference.from_string(DATASET_BQ_URI[5:])\n\
-          \        bq_table = bqclient.get_table(table)\n        yaml = \"\"\"type:\
-          \ object\n        properties:\n        \"\"\"\n        schema = bq_table.schema\n\
-          \        for feature in schema:\n            if feature.name == TARGET:\n\
-          \                continue\n            if feature.field_type == \"STRING\"\
-          :\n                f_type = \"string\"\n            else:\n            \
-          \    f_type = \"float\"\n            yaml += f\"\"\"  {feature.name}:\n\
-          \            type: {f_type}\n        \"\"\"\n\n        yaml += \"\"\"required:\n\
-          \        \"\"\"\n        for feature in schema:\n            if feature.name\
-          \ == \"income_bracket\":\n                continue\n            yaml +=\
-          \ f\"\"\"- {feature.name}\n        \"\"\"\n        with open(\"monitoring_schema.yaml\"\
-          , \"w\") as f:\n            f.write(yaml)\n        storage_client = storage.Client()\n\
-          \        bucket = storage_client.bucket(bucket_name)\n        blob = bucket.blob(\"\
-          monitoring_schema.yaml\")\n        blob.upload_from_string(yaml)\n\n   \
-          \     monitoring_job = aiplatform.ModelDeploymentMonitoringJob.create(\n\
+          \        bq_table = bqclient.get_table(table)\n        schema = bq_table.schema\n\
+          \        schemayaml = OrderedDict({\n            \"type\": \"object\",\n\
+          \            \"properties\": {},\n            \"required\": []\n       \
+          \ })\n        for feature in schema:\n            if feature.name in [\"\
+          income_bracket\"]:\n                continue\n            if feature.field_type\
+          \ == \"STRING\":\n                f_type = \"string\"\n            else:\n\
+          \                f_type = \"number\"\n            schemayaml['properties'][feature.name]\
+          \ = {\"type\": f_type}\n            if feature.name not in [\"fnlwgt\",\
+          \ \"education_num\"]:\n                schemayaml['required'].append(feature.name)\n\
+          \n        with open(\"monitoring_schema.yaml\", \"w\") as yaml_file:\n \
+          \           yaml.dump(schemayaml, yaml_file, default_flow_style=False)\n\
+          \        storage_client = storage.Client()\n        bucket = storage_client.bucket(bucket_name)\n\
+          \        blob = bucket.blob(\"monitoring_schema.yaml\")\n        blob.upload_from_filename(\"\
+          monitoring_schema.yaml\")\n\n        monitoring_job = aiplatform.ModelDeploymentMonitoringJob.create(\n\
           \            display_name=monitoring_name,\n            project=project_id,\n\
           \            location=region,\n            endpoint=endpoint.metadata['resourceName'],\n\
           \            logging_sampling_strategy=logging_sampling_strategy,\n    \
           \        schedule_config=schedule_config,\n            alert_config=alerting_config,\n\
           \            objective_configs=objective_config,\n            analysis_instance_schema_uri=f\"\
-          {bucket_name}/monitoring_schema.yaml\",\n            encryption_spec_key_name=encryption,\n\
+          gs://{bucket_name}/monitoring_schema.yaml\",\n            encryption_spec_key_name=encryption,\n\
           \        )\n\n"
-        image: us-central1-docker.pkg.dev/interactive-407117/pipelinerepo/pipeline_tutorial:latest
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
 pipelineInfo:
   name: create-monitoring
 root:
@@ -171,4 +175,4 @@ root:
       service_account:
         parameterType: STRING
 schemaVersion: 2.1.0
-sdkVersion: kfp-2.4.0
+sdkVersion: kfp-2.7.0

@@ -1,0 +1,90 @@
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: age
+    type: FLOAT
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: workclass
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: fnlwgt
+    type: FLOAT
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: education
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: education_num
+    type: FLOAT
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: marital_status
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: occupation
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: relationship
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: race
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: gender
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: capital_gain
+    type: FLOAT
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: capital_loss
+    type: FLOAT
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: hours_per_week
+    type: FLOAT
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: native_country
+    type: STRING
+- !!python/object:google.cloud.bigquery.schema.SchemaField
+  _fields: !!python/tuple []
+  _properties:
+    mode: NULLABLE
+    name: income_bracket
+    type: STRING

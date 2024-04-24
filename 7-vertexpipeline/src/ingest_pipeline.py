@@ -45,7 +45,7 @@ def get_bigquery_schema():
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--url', dest='url', default="gs://vertexpipe/data/adult.data.csv",
+    parser.add_argument('--url', dest='url', default="BUCKET_URI/data/adult.data.csv",
                         help='url of the data to be downloaded')
     parser.add_argument('--bq-dataset', dest='dataset_id', required=False,
                         default='census_dataset', help='Dataset name used in BigQuery.')

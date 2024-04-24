@@ -1,18 +1,31 @@
-steps:
-  # Install dependencies
-  - name: python
-    entrypoint: pip
-    args: ["install", "google-cloud-aiplatform==1.36.0", "--user"]
-    id: 'requirements'
+steps: 
+  # upload dataflow src file to bucket
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', '-r', './src', 'gs://bkt-n-ml-storage-akdv']
+    
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', '-r', './data', 'gs://bkt-n-ml-storage-akdv']
+    
+  # compile pipeline
+  - name: 'us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2'
+    entrypoint: 'python'
+    args: ['compile_pipeline.py']
+    id: 'compile_job'
   
   # run pipeline
-  - name: 'python'
+  - name: 'us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2'
     entrypoint: 'python'
     args: ['runpipeline.py']
     id: 'run_job'
-    waitFor: ['requirements']
+    waitFor: ['compile_job']
     
-  # update composer dag
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://us-central1-d-isolated-comp-8f58e4b5-bucket/dags/common/vertex-ai-pipeline/']
-    id: 'upload_composer_file'
+  #   # upload pipeline yaml to composer
+  # - name: 'gcr.io/cloud-builders/gsutil'
+  #   args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://us-central1-d-isolated-comp-8f58e4b5-bucket/dags/common/vertex-ai-pipeline/']
+  #   id: 'upload_composer_file'
+  
+  #   # upload pipeline dag to composer
+  # - name: 'gcr.io/cloud-builders/gsutil'
+  #   args: ['cp', './composer/dags/dag.py', 'gs://us-central1-d-isolated-comp-8f58e4b5-bucket/dags/']
+  #   id: 'upload dag'
+  
