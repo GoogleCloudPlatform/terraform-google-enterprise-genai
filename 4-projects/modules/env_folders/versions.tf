@@ -24,6 +24,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-example-foundation:projects/v3.0.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:projects/v0.0.1"
   }
 }

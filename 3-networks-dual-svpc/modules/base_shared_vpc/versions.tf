@@ -28,10 +28,10 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-example-foundation:base_shared_vpc/v3.0.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:base_shared_vpc/v0.0.1"
   }
 
   provider_meta "google-beta" {
-    module_name = "blueprints/terraform/terraform-example-foundation:base_shared_vpc/v3.0.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:base_shared_vpc/v0.0.1"
   }
 }

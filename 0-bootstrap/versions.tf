@@ -37,7 +37,7 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-example-foundation:bootstrap/v3.0.0"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:bootstrap/v0.0.1"
   }
 
 }
