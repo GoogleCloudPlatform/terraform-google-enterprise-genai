@@ -175,7 +175,17 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
-   
+
+1. Use `terraform output` to retrieve the Service Catalog project-id from the projects step and update values in `module/base_env`.
+
+   ```bash
+   export service_catalog_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   echo "service_catalog_project_id = ${service_catalog_project_id}"
+
+   ## Linux
+   sed -i "s/SERVICE_CATALOG_PROJECT_ID/${service_catalog_project_id}/g" ./modules/base_env/main.tf
+   ```
+
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
@@ -304,6 +314,16 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    echo "backend_bucket = ${backend_bucket}"
 
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+   ```
+
+1. Update `modules/base_env/main.tf` with Service Catalog Project Id.
+
+   ```bash
+   export service_catalog_project_id=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   echo "service_catalog_project_id = ${service_catalog_project_id}"
+
+   ## Linux
+   sed -i "s/SERVICE_CATALOG_PROJECT_ID/${service_catalog_project_id}/g" ./modules/base_env/main.tf
    ```
 
 We will now deploy each of our environments (development/production/non-production) using this script.
