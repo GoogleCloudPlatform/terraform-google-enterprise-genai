@@ -23,6 +23,4 @@ module "base_env" {
   business_code    = local.business_code
   project_id       = local.machine_learning_project_id
   kms_keys         = local.machine_learning_kms_keys
-
-  service_catalog_project_id = local.service_catalog_project_id
 }

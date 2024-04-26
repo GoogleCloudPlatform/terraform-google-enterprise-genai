@@ -20,7 +20,7 @@
 
 module "composer" {
   count  = var.env != "development" && var.composer_enabled ? 1 : 0
-  source = "git::https://source.developers.google.com/p/${var.service_catalog_project_id}/r/service-catalog//modules/composer?ref=main"
+  source = "git::https://source.developers.google.com/p/prj-c-bu3service-catalog-m43e/r/service-catalog//modules/composer?ref=main"
 
   project_id                 = var.project_id
   name                       = var.composer_name
@@ -46,7 +46,7 @@ module "composer" {
 
 module "big_query" {
   count  = var.env != "development" ? 1 : 0
-  source = "git::https://source.developers.google.com/p/${var.service_catalog_project_id}/r/service-catalog//modules/bigquery?ref=main"
+  source = "git::https://source.developers.google.com/p/prj-c-bu3service-catalog-m43e/r/service-catalog//modules/bigquery?ref=main"
 
   project_id = var.project_id
   dataset_id = var.big_query_dataset_id
@@ -67,7 +67,7 @@ module "big_query" {
 
 module "metadata" {
   count  = var.env != "development" ? 1 : 0
-  source = "git::https://source.developers.google.com/p/${var.service_catalog_project_id}/r/service-catalog//modules/metadata?ref=main"
+  source = "git::https://source.developers.google.com/p/prj-c-bu3service-catalog-m43e/r/service-catalog//modules/metadata?ref=main"
 
   project_id = var.project_id
   name       = var.metadata_name
@@ -83,7 +83,7 @@ module "metadata" {
 
 module "bucket" {
   count  = var.env != "development" ? 1 : 0
-  source = "git::https://source.developers.google.com/p/${var.service_catalog_project_id}/r/service-catalog//modules/bucket?ref=main"
+  source = "git::https://source.developers.google.com/p/prj-c-bu3service-catalog-m43e/r/service-catalog//modules/bucket?ref=main"
 
   project_id = var.project_id
   name       = var.bucket_name
@@ -110,7 +110,7 @@ module "bucket" {
 
 module "tensorboard" {
   count  = var.env != "development" ? 1 : 0
-  source = "git::https://source.developers.google.com/p/${var.service_catalog_project_id}/r/service-catalog//modules/tensorboard?ref=main"
+  source = "git::https://source.developers.google.com/p/prj-c-bu3service-catalog-m43e/r/service-catalog//modules/tensorboard?ref=main"
 
   project_id = var.project_id
   name       = var.tensorboard_name
