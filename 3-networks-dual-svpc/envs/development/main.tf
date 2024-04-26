@@ -59,9 +59,6 @@ locals {
       }
     ]
   }
-
-  kms_project_number = 126209299992
-
 }
 
 module "base_env" {

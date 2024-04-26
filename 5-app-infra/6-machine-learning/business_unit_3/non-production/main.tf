@@ -55,4 +55,6 @@ module "base_env" {
 
   // TensorBoard
   tensorboard_name = "ml-tensorboard-${local.env}"
+
+  service_catalog_project_id = local.service_catalog_project_id
 }

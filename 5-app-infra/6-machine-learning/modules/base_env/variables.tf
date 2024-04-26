@@ -39,6 +39,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "service_catalog_project_id" {
+  description = "Service Catalog Project ID"
+  type        = string
+}
+
 variable "region" {
   type        = string
   description = "The resource region, one of [us-central1, us-east4]."
