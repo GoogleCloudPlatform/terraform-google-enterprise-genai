@@ -73,12 +73,13 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 1. Enter the repo folder and copy over the artifact files from `5-app-infra/2-artifact-publish-repo` folder.
    ```shell
    cd publish-artifacts
+   git commit -m "Initialize Repository" --allow-empty
    cp -RT ../ml-foundations/5-app-infra/2-artifact-publish-repo/ .
    ```
 1. Commit changes and push your main branch to the new repo.
    ```shell
    git add .
-   git commit -m 'Initialize Artifact Build Repo'
+   git commit -m 'Build Images'
 
    git push --set-upstream origin main
    ```
