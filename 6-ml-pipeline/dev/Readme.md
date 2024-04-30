@@ -109,7 +109,8 @@ The compile_pipeline.py and runpipeline.py files are commented to point out thes
 
 ### 5. Model Validation
 
-- Once you have the model running at an endpoint in the production project, you will be able to test it. Here is a step-by-step to make a request to your model using `gcloud` and `curl`:
+Once you have the model running at an endpoint in the production project, you will be able to test it.
+Here are step-by-step instructions to make a request to your model using `gcloud` and `curl`:
 
 1. Initialize variables on your terminal session
 
@@ -118,7 +119,7 @@ The compile_pipeline.py and runpipeline.py files are commented to point out thes
     PROJECT_ID=<REPLACE_WITH_PROJECT_ID>
     INPUT_DATA_FILE="body.json"
     ```
-    > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the google cloud console
+    > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the Google Cloud Console (https://console.cloud.google.com/vertex-ai/online-prediction/endpointshttps://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=<PROD_ML_PROJECT>`)
 
 2. Create a file named `body.json` and put some sample data into it:
 
@@ -146,10 +147,13 @@ The compile_pipeline.py and runpipeline.py files are commented to point out thes
 3. Run a curl request using `body.json` file as the JSON Body.
 
     ```bash
-    curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" https://us-central1-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/us-central1/endpoints/${ENDPOINT_ID}:predict -d "@${INPUT_DATA_FILE}"
+    curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+    -H "Content-Type: application/json" \
+    https://us-central1-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/us-central1/endpoints/${ENDPOINT_ID}:predict -d "@${INPUT_DATA_FILE}"
     ```
 
-    - You should get an output from 0 to 1, indicating the level of confidence of the binary classification based on the parameters above. Values closer to 1 means the individual is more likely to be included in the income_bracket greater than 50K.
+    - You should get an output from 0 to 1, indicating the level of confidence of the binary classification based on the parameters above.
+    Values closer to 1 means the individual is more likely to be included in the income_bracket greater than 50K.
 
 # Common errors
 - ***google.api_core.exceptions.ResourceExhausted: 429 The following quotas are exceeded: ```CustomModelServingCPUsPerProjectPerRegion 8: The following quotas are exceeded: CustomModelServingCPUsPerProjectPerRegion``` or similar error***:
