@@ -113,43 +113,43 @@ The compile_pipeline.py and runpipeline.py files are commented to point out thes
 
 1. Initialize variables on your terminal session
 
-  ```bash
-  ENDPOINT_ID=<REPLACE_WITH_ENDPOINT_ID>
-  PROJECT_ID=<REPLACE_WITH_PROJECT_ID>
-  INPUT_DATA_FILE="body.json"
-  ```
-  > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the google cloud console
+    ```bash
+    ENDPOINT_ID=<REPLACE_WITH_ENDPOINT_ID>
+    PROJECT_ID=<REPLACE_WITH_PROJECT_ID>
+    INPUT_DATA_FILE="body.json"
+    ```
+    > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the google cloud console
 
 2. Create a file named `body.json` and put some sample data into it:
 
-  ```json
-  {
-      "instances": [
-          {
-              "features/gender": "Female",
-              "features/workclass": "Private",
-              "features/occupation": "Tech-support",
-              "features/marital_status": "Married-civ-spouse",
-              "features/race": "White",
-              "features/capital_gain": 0,
-              "features/education": "9th",
-              "features/age": 33,
-              "features/hours_per_week": 40,
-              "features/relationship": "Wife",
-              "features/native_country": "Brazil",
-              "features/capital_loss": 0
-          }
-      ]
-  }
-  ```
+    ```json
+    {
+        "instances": [
+            {
+                "features/gender": "Female",
+                "features/workclass": "Private",
+                "features/occupation": "Tech-support",
+                "features/marital_status": "Married-civ-spouse",
+                "features/race": "White",
+                "features/capital_gain": 0,
+                "features/education": "9th",
+                "features/age": 33,
+                "features/hours_per_week": 40,
+                "features/relationship": "Wife",
+                "features/native_country": "Brazil",
+                "features/capital_loss": 0
+            }
+        ]
+    }
+    ```
 
 3. Run a curl request using `body.json` file as the JSON Body.
 
-  ```bash
-  curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" https://us-central1-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/us-central1/endpoints/${ENDPOINT_ID}:predict -d "@${INPUT_DATA_FILE}"
-  ```
+    ```bash
+    curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" https://us-central1-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/us-central1/endpoints/${ENDPOINT_ID}:predict -d "@${INPUT_DATA_FILE}"
+    ```
 
-  - You should get an output from 0 to 1, indicating the level of confidence of the binary classification based on the parameters above. Values closer to 1 means the individual is more likely to be included in the income_bracket greater than 50K.
+    - You should get an output from 0 to 1, indicating the level of confidence of the binary classification based on the parameters above. Values closer to 1 means the individual is more likely to be included in the income_bracket greater than 50K.
 
 # Common errors
 - ***google.api_core.exceptions.ResourceExhausted: 429 The following quotas are exceeded: ```CustomModelServingCPUsPerProjectPerRegion 8: The following quotas are exceeded: CustomModelServingCPUsPerProjectPerRegion``` or similar error***:
