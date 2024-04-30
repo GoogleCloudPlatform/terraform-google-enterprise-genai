@@ -70,8 +70,8 @@ def load_data_into_bigquery(args, pipeline_args):
     options = PipelineOptions(pipeline_args)
     options.view_as(SetupOptions).save_main_session = True
     p = beam.Pipeline(options=options)
- 
-    (p 
+
+    (p
      | 'Create PCollection' >> beam.Create([args.url])
      | 'ReadFromText' >> ReadAllFromText(skip_header_lines=1)
      | 'string to bq row' >> beam.Map(lambda s: transform(s))
