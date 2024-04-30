@@ -136,7 +136,7 @@ The compile_pipeline.py and runpipeline.py files are commented to point out thes
                 "features/age": 33,
                 "features/hours_per_week": 40,
                 "features/relationship": "Wife",
-                "features/native_country": "Brazil",
+                "features/native_country": "Canada",
                 "features/capital_loss": 0
             }
         ]
