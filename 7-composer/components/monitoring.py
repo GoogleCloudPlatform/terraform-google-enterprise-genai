@@ -36,7 +36,7 @@ def create_monitoring(
     def ordered_dict_representer(self, value):  # can be a lambda if that's what you prefer
         return self.represent_mapping('tag:yaml.org,2002:map', value.items())
     yaml.add_representer(OrderedDict, ordered_dict_representer)
-    
+
     aiplatform.init(service_account=service_account)
     list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'state="JOB_STATE_SUCCEEDED" AND display_name="{monitoring_name}"', project=project_id)
     if len(list_monitors) == 0:
@@ -47,7 +47,7 @@ def create_monitoring(
         MONITOR_INTERVAL = 1
         schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)
         # sampling strategy
-        SAMPLE_RATE = 0.5 
+        SAMPLE_RATE = 0.5
         logging_sampling_strategy = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)
         # drift config
         DRIFT_THRESHOLD_VALUE = 0.05
@@ -93,7 +93,7 @@ def create_monitoring(
             schemayaml['properties'][feature.name] = {"type": f_type}
             if feature.name not in ["fnlwgt", "education_num"]:
                 schemayaml['required'].append(feature.name)
-            
+
         with open("monitoring_schema.yaml", "w") as yaml_file:
             yaml.dump(schemayaml, yaml_file, default_flow_style=False)
         storage_client = storage.Client()

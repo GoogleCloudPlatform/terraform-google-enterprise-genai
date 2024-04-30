@@ -33,7 +33,7 @@ def deploy_model(
         # vertex_model: Output[Model],
         # vertex_endpoint: Output[Model]
 ):
-    from google.cloud import aiplatform    
+    from google.cloud import aiplatform
     aiplatform.init(service_account=service_account)
     def create_endpoint():
         endpoints = aiplatform.Endpoint.list(
@@ -57,7 +57,7 @@ def deploy_model(
                 project=project_id,
                 location=region,
                 encryption_spec_key_name=encryption_keyname,
-        )   
+        )
             endpoint_artifact = create_artifact_sample(
                 project=project_id,
                 location=region,
@@ -72,7 +72,7 @@ def deploy_model(
         return endpoint, endpoint_artifact
 
     endpoint, endpoint_artifact = create_endpoint()
-    
+
 
     def upload_model():
         listed_model = aiplatform.Model.list(
@@ -118,7 +118,7 @@ def deploy_model(
                           'resource_name': model_upload.resource_name,
                           'update_time': model_upload.update_time.strftime("%D %H:%m:%s"),
                           'version_id': model_upload.version_id},
-            )    
+            )
         model_upload_event = create_execution_sample(
             display_name='composer_model_upload',
             input_artifacts=[model_artifact],
@@ -128,10 +128,10 @@ def deploy_model(
             description='Composer event uploading model to vertex',
         )
         return model_upload, vertexmodel_artifact
-    
+
     uploaded_model, vertexmodel_artifact = upload_model()
-    
-    
+
+
     def deploy_to_endpoint(model, endpoint):
         deployed_models = endpoint.list_models()
         if len(deployed_models) > 0:
@@ -183,7 +183,7 @@ def deploy_model(
     )
 
 
-    
+
 if __name__=="__main__":
     args = get_args()
     deploy_model(

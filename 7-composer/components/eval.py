@@ -34,8 +34,8 @@ def custom_eval_model(
     from tensorflow_io.bigquery import BigQueryReadSession
     from tensorflow import feature_column
     from google.cloud import bigquery
-    
-    
+
+
     import tensorflow as tf
     CSV_SCHEMA = [
       bigquery.SchemaField("age", "FLOAT64"),
@@ -59,14 +59,14 @@ def custom_eval_model(
     def transform_row(row_dict):
         # Trim all string tensors
         trimmed_dict = { column:
-                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor) 
+                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor)
                       for (column,tensor) in row_dict.items()
                       }
         # Extract feature column
         income_bracket = trimmed_dict.pop('income_bracket')
         # Convert feature column to 0.0/1.0
-        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), 
-                     lambda: tf.constant(1.0), 
+        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'),
+                     lambda: tf.constant(1.0),
                      lambda: tf.constant(0.0))
         return (trimmed_dict, income_bracket_float)
 
@@ -75,9 +75,9 @@ def custom_eval_model(
         read_session = tensorflow_io_bigquery_client.read_session(
           "projects/" + project,
           project, table, dataset,
-          list(field.name for field in CSV_SCHEMA 
+          list(field.name for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
-          list(dtypes.double if field.field_type == 'FLOAT64' 
+          list(dtypes.double if field.field_type == 'FLOAT64'
                else dtypes.string for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
           requested_streams=2)
@@ -90,7 +90,7 @@ def custom_eval_model(
     keras_model = tf.keras.models.load_model(model_dir)
     tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)
     loss, accuracy = keras_model.evaluate(eval_ds, callbacks=[tensorboard])
-    
+
     metric = create_artifact_sample(
         project=project,
         location='us-central1',
@@ -98,17 +98,17 @@ def custom_eval_model(
         description='Eval metrics produced from composer dag',
         metadata={'accuracy': accuracy}
     )
-    
-    model_artifact = list_artifact_sample(project=project, 
-                     location='us-central1', 
+
+    model_artifact = list_artifact_sample(project=project,
+                     location='us-central1',
                      display_name_filter="display_name=\"composer_trained_census_model\"",
                      order_by="LAST_UPDATE_TIME desc")[0]
-    
-    data_artifact = list_artifact_sample(project=project, 
-                     location='us-central1', 
+
+    data_artifact = list_artifact_sample(project=project,
+                     location='us-central1',
                      display_name_filter="display_name=\"composer_training_data\"",
                      order_by="LAST_UPDATE_TIME desc")[0]
-    
+
     execution_event = create_execution_sample(
         display_name='evaluation_execution_composer',
         input_artifacts=[data_artifact, model_artifact],

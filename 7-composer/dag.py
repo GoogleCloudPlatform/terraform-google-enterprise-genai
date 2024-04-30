@@ -126,10 +126,10 @@ wait_for_evaldata_ingest_op = DataflowJobStatusSensor(
 training_op = PythonOperator(
     task_id='model_training',
     python_callable=custom_train_model,
-    op_kwargs={'project': PROJECT_ID, 
-               'table':TRAINING_TABLE_ID, 
-               'dataset': DATASET_ID, 
-               'tb_log_dir': f"{BUCKET_URI}/tblogs", 
+    op_kwargs={'project': PROJECT_ID,
+               'table':TRAINING_TABLE_ID,
+               'dataset': DATASET_ID,
+               'tb_log_dir': f"{BUCKET_URI}/tblogs",
                'model_dir': f"{BUCKET_URI}/modelartifact",},
     dag=dag
 )
@@ -139,10 +139,10 @@ eval_op = ShortCircuitOperator(
     provide_context=True,
     python_callable=custom_eval_model,
     op_kwargs={
-               'project': PROJECT_ID, 
-               'table':TRAINING_TABLE_ID, 
-               'dataset': DATASET_ID, 
-               'tb_log_dir': f"{BUCKET_URI}/tblogs", 
+               'project': PROJECT_ID,
+               'table':TRAINING_TABLE_ID,
+               'dataset': DATASET_ID,
+               'tb_log_dir': f"{BUCKET_URI}/tblogs",
                'model_dir': f"{BUCKET_URI}/modelartifact",},
     dag=dag
 )

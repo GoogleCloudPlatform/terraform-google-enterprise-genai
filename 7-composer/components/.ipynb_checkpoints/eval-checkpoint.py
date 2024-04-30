@@ -33,8 +33,8 @@ def custom_eval_model(
     from tensorflow_io.bigquery import BigQueryReadSession
     from tensorflow import feature_column
     from google.cloud import bigquery
-    
-    
+
+
     import tensorflow as tf
     CSV_SCHEMA = [
       bigquery.SchemaField("age", "FLOAT64"),
@@ -58,14 +58,14 @@ def custom_eval_model(
     def transform_row(row_dict):
         # Trim all string tensors
         trimmed_dict = { column:
-                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor) 
+                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor)
                       for (column,tensor) in row_dict.items()
                       }
         # Extract feature column
         income_bracket = trimmed_dict.pop('income_bracket')
         # Convert feature column to 0.0/1.0
-        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), 
-                     lambda: tf.constant(1.0), 
+        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'),
+                     lambda: tf.constant(1.0),
                      lambda: tf.constant(0.0))
         return (trimmed_dict, income_bracket_float)
 
@@ -74,9 +74,9 @@ def custom_eval_model(
         read_session = tensorflow_io_bigquery_client.read_session(
           "projects/" + project,
           project, table, dataset,
-          list(field.name for field in CSV_SCHEMA 
+          list(field.name for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
-          list(dtypes.double if field.field_type == 'FLOAT64' 
+          list(dtypes.double if field.field_type == 'FLOAT64'
                else dtypes.string for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
           requested_streams=2)
@@ -90,7 +90,7 @@ def custom_eval_model(
     tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)
     loss, accuracy = keras_model.evaluate(eval_ds, callbacks=[tensorboard])
     metrics.log_metric("accuracy", accuracy)
-    
+
     if accuracy > 0.8:
         dep_decision = "true"
         keras_model.save(model_dir)

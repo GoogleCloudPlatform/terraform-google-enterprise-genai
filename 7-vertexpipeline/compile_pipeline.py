@@ -75,14 +75,14 @@ def custom_train_model(
     batch_size: int = 32,
     lr: float = 0.01, # not used here but can be passed to an optimizer
 ):
-    
+
     from tensorflow.python.framework import ops
     from tensorflow.python.framework import dtypes
     from tensorflow_io.bigquery import BigQueryClient
     from tensorflow_io.bigquery import BigQueryReadSession
     from tensorflow import feature_column
     from google.cloud import bigquery
-    
+
     import tensorflow as tf
     CSV_SCHEMA = [
       bigquery.SchemaField("age", "FLOAT64"),
@@ -106,14 +106,14 @@ def custom_train_model(
     def transform_row(row_dict):
         # Trim all string tensors
         trimmed_dict = { column:
-                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor) 
+                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor)
                       for (column,tensor) in row_dict.items()
                       }
         # Extract feature column
         income_bracket = trimmed_dict.pop('income_bracket')
         # Convert feature column to 0.0/1.0
-        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), 
-                     lambda: tf.constant(1.0), 
+        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'),
+                     lambda: tf.constant(1.0),
                      lambda: tf.constant(0.0))
         return (trimmed_dict, income_bracket_float)
 
@@ -122,9 +122,9 @@ def custom_train_model(
         read_session = tensorflow_io_bigquery_client.read_session(
           "projects/" + project,
           project, table, dataset,
-          list(field.name for field in CSV_SCHEMA 
+          list(field.name for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
-          list(dtypes.double if field.field_type == 'FLOAT64' 
+          list(dtypes.double if field.field_type == 'FLOAT64'
                else dtypes.string for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
           requested_streams=2)
@@ -183,7 +183,7 @@ def custom_train_model(
     keras_model.compile(loss='binary_crossentropy', metrics=['accuracy'])
     keras_model.fit(training_ds, epochs=epochs, callbacks=[tensorboard])
     keras_model.save(model.path)
-    
+
 # custom_train_model = components.create_component_from_func(
 #     custom_train_model_fun, base_image=Image)
 custom_job_distributed_training_op = utils.create_custom_training_job_op_from_component(
@@ -208,8 +208,8 @@ def custom_eval_model(
     from tensorflow_io.bigquery import BigQueryReadSession
     from tensorflow import feature_column
     from google.cloud import bigquery
-    
-    
+
+
     import tensorflow as tf
     CSV_SCHEMA = [
       bigquery.SchemaField("age", "FLOAT64"),
@@ -233,14 +233,14 @@ def custom_eval_model(
     def transform_row(row_dict):
         # Trim all string tensors
         trimmed_dict = { column:
-                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor) 
+                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor)
                       for (column,tensor) in row_dict.items()
                       }
         # Extract feature column
         income_bracket = trimmed_dict.pop('income_bracket')
         # Convert feature column to 0.0/1.0
-        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), 
-                     lambda: tf.constant(1.0), 
+        income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'),
+                     lambda: tf.constant(1.0),
                      lambda: tf.constant(0.0))
         return (trimmed_dict, income_bracket_float)
 
@@ -249,9 +249,9 @@ def custom_eval_model(
         read_session = tensorflow_io_bigquery_client.read_session(
           "projects/" + project,
           project, table, dataset,
-          list(field.name for field in CSV_SCHEMA 
+          list(field.name for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
-          list(dtypes.double if field.field_type == 'FLOAT64' 
+          list(dtypes.double if field.field_type == 'FLOAT64'
                else dtypes.string for field in CSV_SCHEMA
                if not field.name in UNUSED_COLUMNS),
           requested_streams=2)
@@ -265,7 +265,7 @@ def custom_eval_model(
     tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)
     loss, accuracy = keras_model.evaluate(eval_ds, callbacks=[tensorboard])
     metrics.log_metric("accuracy", accuracy)
-    
+
     if accuracy > 0.7:
         dep_decision = "true"
         keras_model.save(model_dir)
@@ -291,7 +291,7 @@ def deploy_model(
         vertex_model: Output[Model],
         vertex_endpoint: Output[Model]
 ):
-    from google.cloud import aiplatform    
+    from google.cloud import aiplatform
     aiplatform.init(service_account=service_account)
     def create_endpoint():
         endpoints = aiplatform.Endpoint.list(
@@ -312,7 +312,7 @@ def deploy_model(
         return endpoint
 
     endpoint = create_endpoint()
-    
+
 
     def upload_model():
         listed_model = aiplatform.Model.list(
@@ -339,12 +339,12 @@ def deploy_model(
                     location=region,
                     project=project_id,
                     encryption_spec_key_name=encryption,
-                
+
             )
         return model_upload
-    
+
     uploaded_model = upload_model()
-    
+
     # Save data to the output params
     vertex_model.uri = uploaded_model.resource_name
     def deploy_to_endpoint(model, endpoint):
@@ -404,7 +404,7 @@ def create_monitoring(
     def ordered_dict_representer(self, value):  # can be a lambda if that's what you prefer
         return self.represent_mapping('tag:yaml.org,2002:map', value.items())
     yaml.add_representer(OrderedDict, ordered_dict_representer)
-    
+
     aiplatform.init(service_account=service_account)
     list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'(state="JOB_STATE_SUCCEEDED" OR state="JOB_STATE_RUNNING") AND display_name="{monitoring_name}"', project=project_id)
     if len(list_monitors) == 0:
@@ -415,7 +415,7 @@ def create_monitoring(
         MONITOR_INTERVAL = 1
         schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)
         # sampling strategy
-        SAMPLE_RATE = 0.5 
+        SAMPLE_RATE = 0.5
         logging_sampling_strategy = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)
         # drift config
         DRIFT_THRESHOLD_VALUE = 0.05
@@ -461,7 +461,7 @@ def create_monitoring(
             schemayaml['properties'][feature.name] = {"type": f_type}
             if feature.name not in ["fnlwgt", "education_num"]:
                 schemayaml['required'].append(feature.name)
-            
+
         with open("monitoring_schema.yaml", "w") as yaml_file:
             yaml.dump(schemayaml, yaml_file, default_flow_style=False)
         storage_client = storage.Client()
@@ -506,11 +506,11 @@ def pipeline(
     job_name: str=JOB_NAME,
     python_file_path: str=f'{BUCKET_URI}/src/ingest_pipeline.py',
     dataflow_temp_location: str=f'{BUCKET_URI}/temp_dataflow',
-    runner: str=RUNNER,                
-    lr: float=0.01, 
+    runner: str=RUNNER,
+    lr: float=0.01,
     epochs: int=5,
     batch_size: int=32,
-    base_train_dir: str=f'{BUCKET_URI}/training', 
+    base_train_dir: str=f'{BUCKET_URI}/training',
     tb_log_dir: str=f'{BUCKET_URI}/tblogs',
     deployment_image: str="us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest",
     deployed_model_name: str='income_bracket_predictor',
@@ -525,14 +525,14 @@ def pipeline(
         DataflowPythonJobOp
     from google_cloud_pipeline_components.v1.wait_gcp_resources import \
         WaitGcpResourcesOp
-    
+
     from google_cloud_pipeline_components.types import artifact_types
     from google_cloud_pipeline_components.v1.batch_predict_job import \
         ModelBatchPredictOp
     from google_cloud_pipeline_components.v1.model import ModelUploadOp
     from kfp.dsl import importer_node
     from google_cloud_pipeline_components.v1.endpoint import EndpointCreateOp, ModelDeployOp
-    
+
     # create the dataset
     bq_dataset_op = BigqueryQueryJobOp(
         query=create_bq_dataset_query,
@@ -582,7 +582,7 @@ def pipeline(
     dataflow_wait_eval_op = WaitGcpResourcesOp(
         gcp_resources=dataflow_python_eval_op.outputs["gcp_resources"]
     ).after(dataflow_python_eval_op)
-        
+
     # create and train model
     custom_training_task = custom_job_distributed_training_op(
         lr=lr,
@@ -595,7 +595,7 @@ def pipeline(
         tb_log_dir=tb_log_dir,
         batch_size=batch_size
     ).after(dataflow_wait_train_op)
-    
+
     custom_eval_task = custom_eval_model(
         model_dir=model_dir,
         project=project,
@@ -637,7 +637,7 @@ def pipeline(
             encryption=encryption,
             service_account=service_account
         ).after(model_deploy_op)
-        
+
 
 
 

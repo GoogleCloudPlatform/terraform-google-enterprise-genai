@@ -27,7 +27,7 @@ You can read more about the details of the pipeline components on the [pipeline'
 # Step by step
 Before you start, make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
 Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy the bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
-### 1. Run the notebook 
+### 1. Run the notebook
 - Take 7-vertexpipeline folder and make you own copy as a standalone git repository and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/7-vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
 
 ### 2. Configure cloud build
@@ -42,7 +42,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
     |Configuration|Autodetected/Cloud Build configuration file (yaml or json)|
     |Location|Repository|
     |Cloud Build configuration file location|cloudbuild.yaml|
-    
+
 
 - Open the cloudbuild.yaml file in your workbench and for steps 1 which uploads the source code for the dataflow job to your bucket.
 
@@ -64,7 +64,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
     entrypoint: 'python'
     args: ['compile_pipeline.py']
     id: 'compile_job'
-  
+
   # run pipeline
   - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
     entrypoint: 'python'
@@ -79,7 +79,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
    - name: 'gcr.io/cloud-builders/gsutil'
      args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://{your-composer-bucket}/dags/common/vertex-ai-pipeline/']
      id: 'upload_composer_file'
-     
+
  # upload pipeline dag to composer
     - name: 'gcr.io/cloud-builders/gsutil'
       args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']

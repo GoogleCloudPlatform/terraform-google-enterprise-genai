@@ -62,12 +62,12 @@ cd into gcp-networks
   ```bash
   cd ../gcp-networks
   ```
-    
+
 Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
 
 In `common.auto.tfvars` update your `perimeter_additional_members` to include:
 ```
-"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com" 
+"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"
 "serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"
 "serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"
 "serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"
@@ -76,7 +76,7 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
 
  In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
 
-You can find the `sources.access_level` information by going to `Security` in your GCP Organization. 
+You can find the `sources.access_level` information by going to `Security` in your GCP Organization.
 Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
 
 
@@ -126,8 +126,8 @@ egress_policies = [
     {
         "from" = {
         "identity_type" = ""
-        "identities" = [     
-            "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",   
+        "identities" = [
+            "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
             "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
         ]
         },

@@ -55,13 +55,13 @@ file.
 
 ## Purpose
 
-Folders `1-artifact-publish`, `3-serive-catalog` and `5-machine-learning` are projects that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully.  Folders `2-artifact-publish-repo` and `4-service-catalog-repo` are seperate cloud build repositories that have their own unique piplelines configured. These are used for building out in-house Docker images for your machine-learning pipelines and terraform modules that will be used in `notebooks` in your interactive (development) environment, as well as deployment modules for your operational (non-production, production) environments respectively.  
+Folders `1-artifact-publish`, `3-serive-catalog` and `5-machine-learning` are projects that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully.  Folders `2-artifact-publish-repo` and `4-service-catalog-repo` are seperate cloud build repositories that have their own unique piplelines configured. These are used for building out in-house Docker images for your machine-learning pipelines and terraform modules that will be used in `notebooks` in your interactive (development) environment, as well as deployment modules for your operational (non-production, production) environments respectively.
 
-For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.  
+For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.
 
 When viewing each folder under `projects`, consider them as seperate repositories which will be used to deploy out each respective project.  In the case of using Cloud Build (which is what this example is primarily based on), each folder will be placed in its own GCP cloud source repository for deployment.  There is a README placed in each project folder which will highlight the necessary steps to achieve deployment.
 
-When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.  
+When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.
 
 The order of deployments for the machine-learning's project is as follows:
 
@@ -77,8 +77,8 @@ The order of deployments for the machine-learning's project is as follows:
 ## VPC-SC
 
 Be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
-As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `3-networks-dual-svpc` and _update_ 
-your ingress rules.  
+As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `3-networks-dual-svpc` and _update_
+your ingress rules.
 
 Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, ###`non-production.auto.tfvars` & `production.auto.tfvars`.
 
@@ -136,9 +136,9 @@ for your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
         {
             "from" = {
             "identity_type" = ""
-            "identities" = [     
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",   
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com", 
+            "identities" = [
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
             ]
             },
             "to" = {
@@ -166,7 +166,7 @@ Please note that this will cover some but not ALL the policies that will be need
         "identities"    = []
         },
         "to" = {
-        "resources" = ["projects/[some random google project id]"] 
+        "resources" = ["projects/[some random google project id]"]
         "operations" = {
             "cloudbuild.googleapis.com" = {
             "methods" = ["*"]

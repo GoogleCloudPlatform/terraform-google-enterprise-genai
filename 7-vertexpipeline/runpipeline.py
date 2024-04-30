@@ -16,7 +16,7 @@ import os
 # from typing import NamedTuple
 
 class vertex_ai_pipeline:
-    def __init__(self, 
+    def __init__(self,
         PROJECT_ID:str = "non-prod-projectID", \
         PROD_PROJECT_ID:str = 'prod-projectID', \
         REGION:str = "us-central1", \
@@ -31,7 +31,7 @@ class vertex_ai_pipeline:
         TRAINING_TABLE_ID:str = 'census_train_table', \
         EVAL_TABLE_ID:str = 'census_eval_table', \
         RUNNER:str = "DataflowRunner", \
-        DATAFLOW_SUBNET:str = "https://www.googleapis.com/compute/v1/projects/prj-n-shared-restricted-wooh/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1", 
+        DATAFLOW_SUBNET:str = "https://www.googleapis.com/compute/v1/projects/prj-n-shared-restricted-wooh/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1",
         JOB_NAME:str = "census-ingest", \
         SERVICE_ACCOUNT:str = "1053774269887-compute@developer.gserviceaccount.com", \
         PROD_SERVICE_ACCOUNT: str = "941180056038-compute@developer.gserviceaccount.com"
@@ -40,7 +40,7 @@ class vertex_ai_pipeline:
         self.timestamp = datetime.now().strftime("%d_%H_%M_%S")
         self.PROJECT_ID = PROJECT_ID
         self.PROD_PROJECT_ID = PROD_PROJECT_ID
-        self.REGION = REGION 
+        self.REGION = REGION
         self.BUCKET_URI = BUCKET_URI
         self.DATA_PATH = DATA_PATH
 
@@ -86,9 +86,9 @@ class vertex_ai_pipeline:
                         "subnet": DATAFLOW_SUBNET
         }
         self.train_config={
-                     'lr': 0.01, 
-                     'epochs': 5, 
-                     'base_train_dir': f'{BUCKET_URI}/training', 
+                     'lr': 0.01,
+                     'epochs': 5,
+                     'base_train_dir': f'{BUCKET_URI}/training',
                      'tb_log_dir': f'{BUCKET_URI}/tblogs',
         }
 
@@ -106,8 +106,8 @@ class vertex_ai_pipeline:
         }
 
         self.monitoring_config={
-            'email': 'my.email@myorg.com', 
-            'name': 'census_monitoring'  
+            'email': 'my.email@myorg.com',
+            'name': 'census_monitoring'
         }
 
         self.pipelineroot = f'{BUCKET_URI}/pipelineroot'
@@ -154,9 +154,9 @@ class vertex_ai_pipeline:
             },
             enable_caching=False,
         )
-        
+
         return pipeline.run(service_account=self.SERVICE_ACCOUNT)
-    
+
 
 if __name__ == "__main__":
     pipeline = vertex_ai_pipeline(
@@ -182,5 +182,5 @@ if __name__ == "__main__":
         # Replace with the compute default service account of your prod project
         PROD_SERVICE_ACCOUNT="941180056038-compute@developer.gserviceaccount.com"
     )
-    
+
     pipeline.execute()

@@ -32,7 +32,7 @@ def deploy_model(
         vertex_model: Output[Model],
         vertex_endpoint: Output[Model]
 ):
-    from google.cloud import aiplatform    
+    from google.cloud import aiplatform
     aiplatform.init(service_account=service_account)
     def create_endpoint():
         endpoints = aiplatform.Endpoint.list(
@@ -52,7 +52,7 @@ def deploy_model(
         return endpoint
 
     endpoint = create_endpoint()
-    
+
 
     def upload_model():
         listed_model = aiplatform.Model.list(
@@ -77,9 +77,9 @@ def deploy_model(
                     location=region,
             )
         return model_upload
-    
+
     uploaded_model = upload_model()
-    
+
     # Save data to the output params
     vertex_model.uri = uploaded_model.resource_name
     def deploy_to_endpoint(model, endpoint):
@@ -110,10 +110,10 @@ def deploy_model(
 
     vertex_endpoint.uri = deploy_to_endpoint(vertex_model, endpoint)
     vertex_endpoint.metadata['resourceName']=endpoint.resource_name
-    
 
 
-    
+
+
 if __name__=="__main__":
     args = get_args()
     deploy_model(

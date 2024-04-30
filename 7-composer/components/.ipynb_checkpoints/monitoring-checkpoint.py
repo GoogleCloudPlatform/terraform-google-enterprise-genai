@@ -40,7 +40,7 @@ def create_monitoring(
         MONITOR_INTERVAL = 1
         schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)
         # sampling strategy
-        SAMPLE_RATE = 0.5 
+        SAMPLE_RATE = 0.5
         logging_sampling_strategy = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)
         # drift config
         DRIFT_THRESHOLD_VALUE = 0.05
@@ -110,7 +110,7 @@ def create_monitoring(
             objective_configs=objective_config,
             analysis_instance_schema_uri=f"{bucket_name}/monitoring_schema.yaml",
         )
-        
+
 
 if __name__=="__main__":
     args = get_args()
