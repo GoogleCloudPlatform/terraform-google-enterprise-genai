@@ -117,3 +117,32 @@ The following table outlines which of the suggested controls for Vertex Generati
 |Ensure HMAC keys for service accounts are handled correctly| GCS-CO-6.9| SI-12 <br /> SC-13 | PR.IP-1.1 <br />PR.IP-1.2<br />  PR.IP-2.1<br /> PR.DS-2.2 <br /> PR.DS-5.1 | Required | ML Foundation v0.1.0-alpha.1
 |Owner Tag| GCS-CO-7.1| SI-12 | PR.IP-2.1 <br />PR.IP-2.2<br />  PR.IP-2.3 | Recommended based on customer use case | ML Foundation v0.1.0-alpha.1
 
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| add\_random\_suffix | whether to add a random suffix to the bucket name | `bool` | `false` | no |
+| dual\_region\_locations | dual region description | `list(string)` | `[]` | no |
+| force\_destroy | (Optional, Default: true) When deleting a bucket, this boolean option will delete all contained objects. If you try to delete a bucket that contains objects, Terraform will fail that run. | `bool` | `true` | no |
+| gcs\_bucket\_prefix | Name prefix to be used for GCS Bucket | `string` | `"bkt"` | no |
+| labels | Labels to be attached to the buckets | `map(string)` | <pre>{<br>  "classification": "dataclassification",<br>  "label": "samplelabel",<br>  "owner": "testowner"<br>}</pre> | no |
+| lifecycle\_rules | List of lifecycle rules to configure. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket.html#lifecycle_rule except condition.matches\_storage\_class should be a comma delimited string. | <pre>set(object({<br>    # Object with keys:<br>    # - type - The type of the action of this Lifecycle Rule. Supported values: Delete and SetStorageClass.<br>    # - storage_class - (Required if action type is SetStorageClass) The target Storage Class of objects affected by this Lifecycle Rule.<br>    action = map(string)<br><br>    # Object with keys:<br>    # - age - (Optional) Minimum age of an object in days to satisfy this condition.<br>    # - created_before - (Optional) Creation date of an object in RFC 3339 (e.g. 2017-06-13) to satisfy this condition.<br>    # - with_state - (Optional) Match to live and/or archived objects. Supported values include: "LIVE", "ARCHIVED", "ANY".<br>    # - matches_storage_class - (Optional) Comma delimited string for storage class of objects to satisfy this condition. Supported values include: MULTI_REGIONAL, REGIONAL.<br>    # - num_newer_versions - (Optional) Relevant only for versioned objects. The number of newer versions of an object to satisfy this condition.<br>    # - custom_time_before - (Optional) A date in the RFC 3339 format YYYY-MM-DD. This condition is satisfied when the customTime metadata for the object is set to an earlier date than the date used in this lifecycle condition.<br>    # - days_since_custom_time - (Optional) The number of days from the Custom-Time metadata attribute after which this condition becomes true.<br>    # - days_since_noncurrent_time - (Optional) Relevant only for versioned objects. Number of days elapsed since the noncurrent timestamp of an object.<br>    # - noncurrent_time_before - (Optional) Relevant only for versioned objects. The date in RFC 3339 (e.g. 2017-06-13) when the object became nonconcurrent.<br>    condition = map(string)<br>  }))</pre> | <pre>[<br>  {<br>    "action": {<br>      "storage_class": "NEARLINE",<br>      "type": "SetStorageClass"<br>    },<br>    "condition": {<br>      "age": "30",<br>      "matches_storage_class": "REGIONAL"<br>    }<br>  },<br>  {<br>    "action": {<br>      "type": "Delete"<br>    },<br>    "condition": {<br>      "with_state": "ARCHIVED"<br>    }<br>  }<br>]</pre> | no |
+| name | name of bucket | `string` | n/a | yes |
+| object\_folder\_temporary\_hold | Set root folder temporary hold according to security control GCS-CO-6.16, toggle off to allow for object deletion. | `bool` | `false` | no |
+| project\_id | Optional Project ID. | `string` | `null` | no |
+| region | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |
+| requester\_pays | Enables Requester Pays on a storage bucket. | `bool` | `false` | no |
+| retention\_policy | Map of retention policy values. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket#retention_policy | `any` | `{}` | no |
+| storage\_class | Storage class to create the bucket | `string` | `"STANDARD"` | no |
+| uniform\_bucket\_level\_access | Whether to have uniform access levels or not | `bool` | `true` | no |
+| versioning\_enabled | Whether to enable versioning or not | `bool` | `true` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| storage\_bucket | Storage Bucket. |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

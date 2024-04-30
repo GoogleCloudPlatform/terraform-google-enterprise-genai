@@ -54,3 +54,21 @@ No modules.
 
 No outputs.
 <!-- END_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| cleanup\_policies | List of cleanup policies. | <pre>list(object({<br>    id     = string<br>    action = optional(string)<br>    condition = optional(list(object({<br>      tag_state             = optional(string)<br>      tag_prefixes          = optional(list(string))<br>      package_name_prefixes = optional(list(string))<br>      older_than            = optional(string)<br>    })))<br>    most_recent_versions = optional(list(object({<br>      package_name_prefixes = optional(list(string))<br>      keep_count            = optional(number)<br>    })))<br>  }))</pre> | <pre>[<br>  {<br>    "action": "DELETE",<br>    "condition": [<br>      {<br>        "older_than": "2592000s",<br>        "tag_prefixes": [<br>          "alpha",<br>          "v0"<br>        ],<br>        "tag_state": "TAGGED"<br>      }<br>    ],<br>    "id": "delete-prerelease"<br>  }<br>]</pre> | no |
+| cleanup\_policy\_dry\_run | Whether to perform a dry run of the cleanup policy. | `bool` | `false` | no |
+| description | Description of the repository. | `string` | `""` | no |
+| format | Format of the repository. | `string` | `"DOCKER"` | no |
+| name | Name of the repository. | `string` | n/a | yes |
+| project\_id | Optional Project ID. | `string` | `null` | no |
+| region | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |
+
+## Outputs
+
+No outputs.
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
