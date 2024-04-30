@@ -119,6 +119,7 @@ Here are step-by-step instructions to make a request to your model using `gcloud
     PROJECT_ID=<REPLACE_WITH_PROJECT_ID>
     INPUT_DATA_FILE="body.json"
     ```
+
     > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the Google Cloud Console (https://console.cloud.google.com/vertex-ai/online-prediction/endpointshttps://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=<PROD_ML_PROJECT>`)
 
 2. Create a file named `body.json` and put some sample data into it:
