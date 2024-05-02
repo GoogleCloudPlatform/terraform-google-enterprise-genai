@@ -69,7 +69,7 @@ resource "google_project_service_identity" "secretmanager_agent" {
   service  = "secretmanager.googleapis.com"
 }
 
-// Add Secret Manager Service Agent to key with encrypt/decrypt permissions 
+// Add Secret Manager Service Agent to key with encrypt/decrypt permissions
 resource "google_kms_crypto_key_iam_member" "secretmanager_agent" {
   for_each      = module.app_service_catalog_project[0].kms_keys
   crypto_key_id = each.value.id

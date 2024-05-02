@@ -14,7 +14,7 @@
 #
 
 #Control ID: DNS-CO-6.1
-#NIST 800-53: SC-7 SC-8 
+#NIST 800-53: SC-7 SC-8
 #CRI Profile: PR.AC-5.1 PR.AC-5.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1 PR.PT-4.1 DE.CM-1.1 DE.CM-1.2 DE.CM-1.3 DE.CM-1.4
 apiVersion: constraints.gatekeeper.sh/v1alpha1
 kind: GCPDNSSECConstraintV1

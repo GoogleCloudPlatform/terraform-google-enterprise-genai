@@ -13,11 +13,11 @@ RUN mkdir /usr/local/gcloud /usr/local/terraform
 RUN if [ "$(uname -m)" = "x86_64" ]; then \
         export ARCH=amd64; \
         export ARCH_GCLOUD=x86_64; \
-    elif [ "$(uname -m)" = "aarch64" ]; then \ 
+    elif [ "$(uname -m)" = "aarch64" ]; then \
         export ARCH=arm64; \
-        export ARCH_GCLOUD=arm; \ 
+        export ARCH_GCLOUD=arm; \
     else \
-        export ARCH=unknown; \ 
+        export ARCH=unknown; \
     fi && \
     echo "ARCH=$ARCH" >> /etc/environment && \
     apk add --no-cache bash curl jq unzip git ca-certificates gnupg python3 && \

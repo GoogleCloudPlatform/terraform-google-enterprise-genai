@@ -1,16 +1,31 @@
-
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 sa_accounts = [
     "sa1",
     "sa2",
     "sa3",
-  ]
+]
 
 service_catalog_crypto_key = {
     "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring": {
         "destroy_scheduled_duration": "86400s",
-        "id": "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln",
+        "id": ("projects/prj-d-kms-cgvl/locations/us-central1/keyRings"
+               "/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln"),
         "import_only": False,
-        "key_ring": "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring",
+        "key_ring": ("projects/prj-d-kms-cgvl/locations/us-central1"
+                     "/keyRings/sample-keyring"),
         "labels": {},
         "name": "prj-d-bu3cmpsr-pipeln",
         "purpose": "ENCRYPT_DECRYPT",
@@ -26,9 +41,11 @@ service_catalog_crypto_key = {
     },
     "projects/prj-d-kms-cgvl/locations/us-east4/keyRings/sample-keyring": {
         "destroy_scheduled_duration": "86400s",
-        "id": "projects/prj-d-kms-cgvl/locations/us-east4/keyRings/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln",
+        "id": ("projects/prj-d-kms-cgvl/locations/us-east4/keyRings"
+               "/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln"),
         "import_only": False,
-        "key_ring": "projects/prj-d-kms-cgvl/locations/us-east4/keyRings/sample-keyring",
+        "key_ring": ("projects/prj-d-kms-cgvl/locations/us-east4"
+                     "/keyRings/sample-keyring"),
         "labels": {},
         "name": "prj-d-bu3cmpsr-pipeln",
         "purpose": "ENCRYPT_DECRYPT",

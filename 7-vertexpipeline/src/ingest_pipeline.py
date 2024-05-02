@@ -1,3 +1,18 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# flake8: noqa
 from __future__ import absolute_import
 import logging
 import argparse
@@ -8,6 +23,7 @@ from apache_beam.io.gcp.bigquery import WriteToBigQuery
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.io.gcp.internal.clients import bigquery
 from apache_beam.options.pipeline_options import SetupOptions
+
 
 def get_bigquery_schema():
     """
@@ -32,7 +48,7 @@ def get_bigquery_schema():
                ("hours_per_week", "FLOAT64", 'nullable'),
                ("native_country", "STRING", 'nullable'),
                ("income_bracket", "STRING", 'nullable')
-              )
+               )
 
     for column in columns:
         column_schema = bigquery.TableFieldSchema()
@@ -42,6 +58,7 @@ def get_bigquery_schema():
         table_schema.fields.append(column_schema)
 
     return table_schema
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -56,38 +73,41 @@ def get_args():
     args, pipeline_args = parser.parse_known_args()
     return args, pipeline_args
 
+
 def transform(line):
     values = line.split(",")
     d = {}
-    fields = ["age","workclass","fnlwgt","education","education_num",
-              "marital_status","occupation","relationship","race","gender",
-              "capital_gain","capital_loss","hours_per_week","native_country","income_bracket"]
+    fields = ["age", "workclass", "fnlwgt", "education", "education_num",
+              "marital_status", "occupation", "relationship", "race", "gender",
+              "capital_gain", "capital_loss", "hours_per_week", "native_country", "income_bracket"]
     for i in range(len(fields)):
         d[fields[i]] = values[i].strip()
     return d
+
 
 def load_data_into_bigquery(args, pipeline_args):
     options = PipelineOptions(pipeline_args)
     options.view_as(SetupOptions).save_main_session = True
     p = beam.Pipeline(options=options)
- 
-    (p 
+
+    (p
      | 'Create PCollection' >> beam.Create([args.url])
      | 'ReadFromText' >> ReadAllFromText(skip_header_lines=1)
      | 'string to bq row' >> beam.Map(lambda s: transform(s))
      | 'WriteToBigQuery' >> WriteToBigQuery(
-        table=args.table_id,
-        dataset=args.dataset_id,
-        project=args.project_id,
-        schema=get_bigquery_schema(),
-        create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-        write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-    )
-    )
+         table=args.table_id,
+         dataset=args.dataset_id,
+         project=args.project_id,
+         schema=get_bigquery_schema(),
+         create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+         write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+     )
+     )
 
     job = p.run()
     if options.get_all_options()['runner'] == 'DirectRunner':
         job.wait_until_finish()
+
 
 if __name__ == '__main__':
     args, pipeline_args = get_args()
