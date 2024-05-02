@@ -98,8 +98,6 @@ No modules.
 | <a name="output_terraform_labels"></a> [terraform\_labels](#output\_terraform\_labels) | The combination of labels configured directly on the resource and default labels configured on the provider. |
 | <a name="output_update_time"></a> [update\_time](#output\_update\_time) | Instance update time. |
 <!-- END_TF_DOCS -->
-<<<<<<< HEAD
-=======
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -137,4 +135,3 @@ No modules.
 | update\_time | Instance update time. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
->>>>>>> main
