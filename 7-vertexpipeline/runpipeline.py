@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# flake8: noqa
 from datetime import datetime
 from google.cloud import aiplatform
 import os

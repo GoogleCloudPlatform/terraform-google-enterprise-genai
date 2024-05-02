@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 import argparse
+# flake8: noqa
 from typing import Optional, Dict, List, Any
 from google.cloud import aiplatform
 from google.cloud.aiplatform.metadata.schema.system import artifact_schema

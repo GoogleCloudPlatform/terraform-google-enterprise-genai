@@ -13,7 +13,11 @@
 # limitations under the License.
 #
 import argparse
-from common.components.utils import create_artifact_sample, create_execution_sample, list_artifact_sample
+from common.components.utils import (
+    create_artifact_sample,
+    create_execution_sample,
+    list_artifact_sample
+)
 
 
 def get_args():
@@ -74,16 +78,19 @@ def deploy_model(
                 location=region,
                 encryption_spec_key_name=encryption_keyname,
             )
+            metadata = {
+                'create_time': endpoint.create_time.strftime("%D %H:%m:%s"),
+                'display_namme': endpoint.display_name,
+                'resource_name': endpoint.resource_name,
+                'update_time': endpoint.update_time.strftime("%D %H:%m:%s")
+            }
             endpoint_artifact = create_artifact_sample(
                 project=project_id,
                 location=region,
                 uri=endpoint.resource_name,
                 display_name='composer_modelendpoint',
                 description='model endpoint created via composer dag',
-                metadata={'create_time': endpoint.create_time.strftime("%D %H:%m:%s"),
-                          'display_namme': endpoint.display_name,
-                          'resource_name': endpoint.resource_name,
-                          'update_time': endpoint.update_time.strftime("%D %H:%m:%s")}
+                metadata=metadata
             )
         return endpoint, endpoint_artifact
 
@@ -115,26 +122,30 @@ def deploy_model(
                 project=project_id,
                 encryption_spec_key_name=encryption_keyname
             )
-
+        custom_filter = "display_name=\"composer_trained_census_model\""
         model_artifact = list_artifact_sample(
             project=project_id,
             location=region,
-            display_name_filter="display_name=\"composer_trained_census_model\"",
+            display_name_filter=custom_filter,
             order_by="LAST_UPDATE_TIME desc"
         )[0]
+        metadata = {
+            'create_time': model_upload.create_time.strftime("%D %H:%m:%s"),
+            'container_spec': model_upload.container_spec.image_uri,
+            'resource_name': model_upload.resource_name,
+            'update_time': model_upload.update_time.strftime("%D %H:%m:%s"),
+            'version_id': model_upload.version_id
+        }
         vertexmodel_artifact = create_artifact_sample(
             project=project_id,
             location=region,
             uri=model_upload.uri,
             display_name='composer_vertexmodel',
             description='uploaded vertex model via composer dag',
-            metadata={'create_time': model_upload.create_time.strftime("%D %H:%m:%s"),
-                      'container_spec': model_upload.container_spec.image_uri,
-                      'resource_name': model_upload.resource_name,
-                      'update_time': model_upload.update_time.strftime("%D %H:%m:%s"),
-                      'version_id': model_upload.version_id},
+            metadata=metadata,
         )
-        model_upload_event = create_execution_sample(
+        # model_upload_event
+        _ = create_execution_sample(
             display_name='composer_model_upload',
             input_artifacts=[model_artifact],
             output_artifacts=[vertexmodel_artifact],
@@ -173,17 +184,22 @@ def deploy_model(
                 encryption_spec_key_name=encryption_keyname
                 # service_account="compute default"
             )
+        create_time = deployed_endpoint.create_time.strftime("%D %H:%m:%s")
+        update_time = deployed_endpoint.update_time.strftime("%D %H:%m:%s")
+        metadata = {
+            'create_time': create_time,
+            'display_namme': deployed_endpoint.display_name,
+            'resource_name': deployed_endpoint.resource_name,
+            'update_time': update_time,
+            'traffic_split': deployed_endpoint.traffic_split
+        }
         deployed_endpoint_artifact = create_artifact_sample(
             project=project_id,
             location=region,
             uri=deployed_endpoint.resource_name,
             display_name="composer_deployed_endpoint",
             description='The endpoint with deployed model via composer',
-            metadata={'create_time': deployed_endpoint.create_time.strftime("%D %H:%m:%s"),
-                        'display_namme': deployed_endpoint.display_name,
-                        'resource_name': deployed_endpoint.resource_name,
-                        'update_time': deployed_endpoint.update_time.strftime("%D %H:%m:%s"),
-                        'traffic_split': deployed_endpoint.traffic_split}
+            metadata=metadata
         )
         return deployed_endpoint_artifact
 

@@ -21,9 +21,11 @@ sa_accounts = [
 service_catalog_crypto_key = {
     "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring": {
         "destroy_scheduled_duration": "86400s",
-        "id": "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln",
+        "id": ("projects/prj-d-kms-cgvl/locations/us-central1/keyRings"
+               "/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln"),
         "import_only": False,
-        "key_ring": "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring",
+        "key_ring": ("projects/prj-d-kms-cgvl/locations/us-central1"
+                     "/keyRings/sample-keyring"),
         "labels": {},
         "name": "prj-d-bu3cmpsr-pipeln",
         "purpose": "ENCRYPT_DECRYPT",
@@ -39,9 +41,11 @@ service_catalog_crypto_key = {
     },
     "projects/prj-d-kms-cgvl/locations/us-east4/keyRings/sample-keyring": {
         "destroy_scheduled_duration": "86400s",
-        "id": "projects/prj-d-kms-cgvl/locations/us-east4/keyRings/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln",
+        "id": ("projects/prj-d-kms-cgvl/locations/us-east4/keyRings"
+               "/sample-keyring/cryptoKeys/prj-d-bu3cmpsr-pipeln"),
         "import_only": False,
-        "key_ring": "projects/prj-d-kms-cgvl/locations/us-east4/keyRings/sample-keyring",
+        "key_ring": ("projects/prj-d-kms-cgvl/locations/us-east4"
+                     "/keyRings/sample-keyring"),
         "labels": {},
         "name": "prj-d-bu3cmpsr-pipeln",
         "purpose": "ENCRYPT_DECRYPT",

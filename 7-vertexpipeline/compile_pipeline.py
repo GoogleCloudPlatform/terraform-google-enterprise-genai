@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# flake8: noqa
 from kfp.dsl import component
 from kfp import components
 from kfp import compiler, dsl
@@ -29,7 +30,8 @@ BUCKET_URI = "gs://{bucket-name}"
 KFP_COMPONENTS_PATH = "components"
 SRC = "src"
 BUILD = "build"
-# Replace {artifact-project} and {artifact-repository} with your artifact project and repository
+# Replace {artifact-project} and {artifact-repository}
+# with your artifact project and repository
 Image = f"us-central1-docker.pkg.dev/{{artifact-project}}/{{artifact-repository}}/vertexpipeline:v2"
 
 

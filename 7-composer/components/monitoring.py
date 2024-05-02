@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# flake8: noqa
 import argparse
 from common.components.utils import create_artifact_sample, create_execution_sample, list_artifact_sample
 

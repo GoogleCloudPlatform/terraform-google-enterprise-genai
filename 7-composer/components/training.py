@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# flake8: noqa
 import argparse
 from typing import Optional, Dict, List, Any
 from google.cloud import aiplatform
