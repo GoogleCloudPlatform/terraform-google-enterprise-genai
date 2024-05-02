@@ -38,6 +38,7 @@ dag = DAG(
     dagrun_timeout=timedelta(minutes=60),
 )
 
+
 def run_pipeline_function_callable():
     # Import the module and call the function
     import importlib.util
@@ -50,6 +51,7 @@ def run_pipeline_function_callable():
 
     # Call the execute method on the instance
     pipeline_instance.execute()
+
 
 t1 = PythonOperator(
     task_id='vertexaipipelinetest',

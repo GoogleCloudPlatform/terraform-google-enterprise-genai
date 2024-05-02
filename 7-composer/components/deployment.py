@@ -15,6 +15,7 @@
 import argparse
 from common.components.utils import create_artifact_sample, create_execution_sample, list_artifact_sample
 
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--serving-container', dest='serving_container')
@@ -49,15 +50,16 @@ def deploy_model(
 ):
     from google.cloud import aiplatform
     aiplatform.init(service_account=service_account)
+
     def create_endpoint():
         endpoints = aiplatform.Endpoint.list(
-        filter=f'display_name="{endpoint_name}"',
-        order_by='create_time desc',
-        project=project_id,
-        location=region,
+            filter=f'display_name="{endpoint_name}"',
+            order_by='create_time desc',
+            project=project_id,
+            location=region,
         )
         if len(endpoints) > 0:
-            endpoint = endpoints[0] # most recently created
+            endpoint = endpoints[0]  # most recently created
             endpoint_artifact = list_artifact_sample(
                 project=project_id,
                 location=region,
@@ -71,7 +73,7 @@ def deploy_model(
                 project=project_id,
                 location=region,
                 encryption_spec_key_name=encryption_keyname,
-        )
+            )
             endpoint_artifact = create_artifact_sample(
                 project=project_id,
                 location=region,
@@ -87,32 +89,31 @@ def deploy_model(
 
     endpoint, endpoint_artifact = create_endpoint()
 
-
     def upload_model():
         listed_model = aiplatform.Model.list(
-        filter=f'display_name="{model_name}"',
-        project=project_id,
-        location=region,
+            filter=f'display_name="{model_name}"',
+            project=project_id,
+            location=region,
         )
         if len(listed_model) > 0:
             model_version = listed_model[0]
             model_upload = aiplatform.Model.upload(
-                    display_name=model_name,
-                    parent_model=model_version.resource_name,
-                    artifact_uri=model_dir,
-                    serving_container_image_uri=serving_container_image_uri,
-                    location=region,
-                    project=project_id,
-                    encryption_spec_key_name=encryption_keyname,
+                display_name=model_name,
+                parent_model=model_version.resource_name,
+                artifact_uri=model_dir,
+                serving_container_image_uri=serving_container_image_uri,
+                location=region,
+                project=project_id,
+                encryption_spec_key_name=encryption_keyname,
             )
         else:
             model_upload = aiplatform.Model.upload(
-                    display_name=model_name,
-                    artifact_uri=model_dir,
-                    serving_container_image_uri=serving_container_image_uri,
-                    location=region,
-                    project=project_id,
-                    encryption_spec_key_name=encryption_keyname
+                display_name=model_name,
+                artifact_uri=model_dir,
+                serving_container_image_uri=serving_container_image_uri,
+                location=region,
+                project=project_id,
+                encryption_spec_key_name=encryption_keyname
             )
 
         model_artifact = list_artifact_sample(
@@ -122,17 +123,17 @@ def deploy_model(
             order_by="LAST_UPDATE_TIME desc"
         )[0]
         vertexmodel_artifact = create_artifact_sample(
-                project=project_id,
-                location=region,
-                uri=model_upload.uri,
-                display_name='composer_vertexmodel',
-                description='uploaded vertex model via composer dag',
-                metadata={'create_time': model_upload.create_time.strftime("%D %H:%m:%s"),
-                          'container_spec': model_upload.container_spec.image_uri,
-                          'resource_name': model_upload.resource_name,
-                          'update_time': model_upload.update_time.strftime("%D %H:%m:%s"),
-                          'version_id': model_upload.version_id},
-            )
+            project=project_id,
+            location=region,
+            uri=model_upload.uri,
+            display_name='composer_vertexmodel',
+            description='uploaded vertex model via composer dag',
+            metadata={'create_time': model_upload.create_time.strftime("%D %H:%m:%s"),
+                      'container_spec': model_upload.container_spec.image_uri,
+                      'resource_name': model_upload.resource_name,
+                      'update_time': model_upload.update_time.strftime("%D %H:%m:%s"),
+                      'version_id': model_upload.version_id},
+        )
         model_upload_event = create_execution_sample(
             display_name='composer_model_upload',
             input_artifacts=[model_artifact],
@@ -145,11 +146,11 @@ def deploy_model(
 
     uploaded_model, vertexmodel_artifact = upload_model()
 
-
     def deploy_to_endpoint(model, endpoint):
         deployed_models = endpoint.list_models()
         if len(deployed_models) > 0:
-            latest_model = sorted(deployed_models, key=lambda x: float(x.model_version_id), reverse=True)[0]
+            latest_model = sorted(deployed_models, key=lambda x: float(
+                x.model_version_id), reverse=True)[0]
             latest_model_id = latest_model.id
             deployed_endpoint = uploaded_model.deploy(
                 # machine_type="n1-standard-4",
@@ -163,15 +164,15 @@ def deploy_model(
             )
         else:
             deployed_endpoint = uploaded_model.deploy(
-            # machine_type="n1-standard-4",
-            endpoint=endpoint,
-            traffic_split={"0": 100},
-            min_replica_count=min_nodes,
-            max_replica_count=max_nodes,
-            deployed_model_display_name=model_name,
-            encryption_spec_key_name=encryption_keyname
-            # service_account="compute default"
-        )
+                # machine_type="n1-standard-4",
+                endpoint=endpoint,
+                traffic_split={"0": 100},
+                min_replica_count=min_nodes,
+                max_replica_count=max_nodes,
+                deployed_model_display_name=model_name,
+                encryption_spec_key_name=encryption_keyname
+                # service_account="compute default"
+            )
         deployed_endpoint_artifact = create_artifact_sample(
             project=project_id,
             location=region,
@@ -197,8 +198,7 @@ def deploy_model(
     )
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     args = get_args()
     deploy_model(
         serving_container_image_uri=args.serving_container,
@@ -211,4 +211,4 @@ if __name__=="__main__":
         min_nodes=args.min_nodes,
         max_nodes=args.max_nodes,
         service_account=args.service_account,
-)
+    )

@@ -23,6 +23,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.io.gcp.internal.clients import bigquery
 from apache_beam.options.pipeline_options import SetupOptions
 
+
 def get_bigquery_schema():
     """
     A function to get the BigQuery schema.
@@ -46,7 +47,7 @@ def get_bigquery_schema():
                ("hours_per_week", "FLOAT64", 'nullable'),
                ("native_country", "STRING", 'nullable'),
                ("income_bracket", "STRING", 'nullable')
-              )
+               )
 
     for column in columns:
         column_schema = bigquery.TableFieldSchema()
@@ -56,6 +57,7 @@ def get_bigquery_schema():
         table_schema.fields.append(column_schema)
 
     return table_schema
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -70,15 +72,17 @@ def get_args():
     args, pipeline_args = parser.parse_known_args()
     return args, pipeline_args
 
+
 def transform(line):
     values = line.split(",")
     d = {}
-    fields = ["age","workclass","fnlwgt","education","education_num",
-              "marital_status","occupation","relationship","race","gender",
-              "capital_gain","capital_loss","hours_per_week","native_country","income_bracket"]
+    fields = ["age", "workclass", "fnlwgt", "education", "education_num",
+              "marital_status", "occupation", "relationship", "race", "gender",
+              "capital_gain", "capital_loss", "hours_per_week", "native_country", "income_bracket"]
     for i in range(len(fields)):
         d[fields[i]] = values[i].strip()
     return d
+
 
 def load_data_into_bigquery(args, pipeline_args):
     options = PipelineOptions(pipeline_args)
@@ -90,18 +94,19 @@ def load_data_into_bigquery(args, pipeline_args):
      | 'ReadFromText' >> ReadAllFromText(skip_header_lines=1)
      | 'string to bq row' >> beam.Map(lambda s: transform(s))
      | 'WriteToBigQuery' >> WriteToBigQuery(
-        table=args.table_id,
-        dataset=args.dataset_id,
-        project=args.project_id,
-        schema=get_bigquery_schema(),
-        create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-        write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-    )
-    )
+         table=args.table_id,
+         dataset=args.dataset_id,
+         project=args.project_id,
+         schema=get_bigquery_schema(),
+         create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+         write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+     )
+     )
 
     job = p.run()
     if options.get_all_options()['runner'] == 'DirectRunner':
         job.wait_until_finish()
+
 
 if __name__ == '__main__':
     args, pipeline_args = get_args()

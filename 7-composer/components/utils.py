@@ -17,6 +17,7 @@ from google.cloud.aiplatform.metadata.schema.system import execution_schema
 from google.cloud import aiplatform
 from typing import Optional, Dict, List, Any
 
+
 def create_artifact_sample(
     project: str,
     location: str,
@@ -36,6 +37,7 @@ def create_artifact_sample(
         metadata=metadata,
     )
     return system_artifact_schema.create(project=project, location=location,)
+
 
 def create_execution_sample(
     display_name: str,

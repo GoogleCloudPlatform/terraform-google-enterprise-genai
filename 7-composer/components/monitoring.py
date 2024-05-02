@@ -15,6 +15,7 @@
 import argparse
 from common.components.utils import create_artifact_sample, create_execution_sample, list_artifact_sample
 
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--monitoring-name', dest='monitoring_name')
@@ -47,29 +48,35 @@ def create_monitoring(
     from collections import OrderedDict
     import time
     import yaml
-    def ordered_dict_representer(self, value):  # can be a lambda if that's what you prefer
+
+    # can be a lambda if that's what you prefer
+    def ordered_dict_representer(self, value):
         return self.represent_mapping('tag:yaml.org,2002:map', value.items())
     yaml.add_representer(OrderedDict, ordered_dict_representer)
 
     aiplatform.init(service_account=service_account)
-    list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'state="JOB_STATE_SUCCEEDED" AND display_name="{monitoring_name}"', project=project_id)
+    list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(
+        filter=f'state="JOB_STATE_SUCCEEDED" AND display_name="{monitoring_name}"', project=project_id)
     if len(list_monitors) == 0:
         alerting_config = model_monitoring.EmailAlertConfig(
             user_emails=[email], enable_logging=True
         )
         # schedule config
         MONITOR_INTERVAL = 1
-        schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)
+        schedule_config = model_monitoring.ScheduleConfig(
+            monitor_interval=MONITOR_INTERVAL)
         # sampling strategy
         SAMPLE_RATE = 0.5
-        logging_sampling_strategy = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)
+        logging_sampling_strategy = model_monitoring.RandomSampleConfig(
+            sample_rate=SAMPLE_RATE)
         # drift config
         DRIFT_THRESHOLD_VALUE = 0.05
         DRIFT_THRESHOLDS = {
             "capital_gain": DRIFT_THRESHOLD_VALUE,
             "capital_loss": DRIFT_THRESHOLD_VALUE,
         }
-        drift_config = model_monitoring.DriftDetectionConfig(drift_thresholds=DRIFT_THRESHOLDS)
+        drift_config = model_monitoring.DriftDetectionConfig(
+            drift_thresholds=DRIFT_THRESHOLDS)
         # Skew config
         DATASET_BQ_URI = bq_data_uri
         TARGET = "income_bracket"
@@ -133,7 +140,8 @@ def create_monitoring(
             encryption_spec_key_name=encryption_keyname,
         )
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     args = get_args()
     create_monitoring(
         monitoring_name=args.monitoring_name,
@@ -143,4 +151,4 @@ if __name__=="__main__":
         bucket_name=args.bucket_name,
         email=args.email,
         service_account=args.service_account,
-)
+    )

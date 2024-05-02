@@ -42,9 +42,10 @@ DATASET_ID = 'census_dataset'
 TRAINING_TABLE_ID = 'census_train_table'
 EVAL_TABLE_ID = 'census_eval_table'
 RUNNER = "DataflowRunner"
-REGION="us-central1"
-JOB_NAME="census-ingest"
+REGION = "us-central1"
+JOB_NAME = "census-ingest"
 UNUSED_COLUMNS = ["fnlwgt", "education_num"]
+
 
 @component(base_image=Image)
 def build_dataflow_args(
@@ -78,6 +79,7 @@ def build_dataflow_args(
 # build_dataflow_args = components.create_component_from_func(
 #     build_dataflow_args_fun, base_image='python:3.8-slim')
 
+
 @component(base_image=Image)
 def custom_train_model(
     project: str,
@@ -87,7 +89,7 @@ def custom_train_model(
     model: Output[Model],
     epochs: int = 5,
     batch_size: int = 32,
-    lr: float = 0.01, # not used here but can be passed to an optimizer
+    lr: float = 0.01,  # not used here but can be passed to an optimizer
 ):
 
     from tensorflow.python.framework import ops
@@ -99,49 +101,51 @@ def custom_train_model(
 
     import tensorflow as tf
     CSV_SCHEMA = [
-      bigquery.SchemaField("age", "FLOAT64"),
-      bigquery.SchemaField("workclass", "STRING"),
-      bigquery.SchemaField("fnlwgt", "FLOAT64"),
-      bigquery.SchemaField("education", "STRING"),
-      bigquery.SchemaField("education_num", "FLOAT64"),
-      bigquery.SchemaField("marital_status", "STRING"),
-      bigquery.SchemaField("occupation", "STRING"),
-      bigquery.SchemaField("relationship", "STRING"),
-      bigquery.SchemaField("race", "STRING"),
-      bigquery.SchemaField("gender", "STRING"),
-      bigquery.SchemaField("capital_gain", "FLOAT64"),
-      bigquery.SchemaField("capital_loss", "FLOAT64"),
-      bigquery.SchemaField("hours_per_week", "FLOAT64"),
-      bigquery.SchemaField("native_country", "STRING"),
-      bigquery.SchemaField("income_bracket", "STRING"),
-  ]
+        bigquery.SchemaField("age", "FLOAT64"),
+        bigquery.SchemaField("workclass", "STRING"),
+        bigquery.SchemaField("fnlwgt", "FLOAT64"),
+        bigquery.SchemaField("education", "STRING"),
+        bigquery.SchemaField("education_num", "FLOAT64"),
+        bigquery.SchemaField("marital_status", "STRING"),
+        bigquery.SchemaField("occupation", "STRING"),
+        bigquery.SchemaField("relationship", "STRING"),
+        bigquery.SchemaField("race", "STRING"),
+        bigquery.SchemaField("gender", "STRING"),
+        bigquery.SchemaField("capital_gain", "FLOAT64"),
+        bigquery.SchemaField("capital_loss", "FLOAT64"),
+        bigquery.SchemaField("hours_per_week", "FLOAT64"),
+        bigquery.SchemaField("native_country", "STRING"),
+        bigquery.SchemaField("income_bracket", "STRING"),
+    ]
 
     UNUSED_COLUMNS = ["fnlwgt", "education_num"]
+
     def transform_row(row_dict):
         # Trim all string tensors
-        trimmed_dict = { column:
-                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor)
-                      for (column,tensor) in row_dict.items()
-                      }
+        trimmed_dict = {column:
+                        (tf.strings.strip(tensor)
+                         if tensor.dtype == 'string' else tensor)
+                        for (column, tensor) in row_dict.items()
+                        }
         # Extract feature column
         income_bracket = trimmed_dict.pop('income_bracket')
         # Convert feature column to 0.0/1.0
         income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'),
-                     lambda: tf.constant(1.0),
-                     lambda: tf.constant(0.0))
+                                       lambda: tf.constant(1.0),
+                                       lambda: tf.constant(0.0))
         return (trimmed_dict, income_bracket_float)
 
     def read_bigquery(table_name, dataset=dataset):
         tensorflow_io_bigquery_client = BigQueryClient()
         read_session = tensorflow_io_bigquery_client.read_session(
-          "projects/" + project,
-          project, table, dataset,
-          list(field.name for field in CSV_SCHEMA
-               if not field.name in UNUSED_COLUMNS),
-          list(dtypes.double if field.field_type == 'FLOAT64'
-               else dtypes.string for field in CSV_SCHEMA
-               if not field.name in UNUSED_COLUMNS),
-          requested_streams=2)
+            "projects/" + project,
+            project, table, dataset,
+            list(field.name for field in CSV_SCHEMA
+                 if not field.name in UNUSED_COLUMNS),
+            list(dtypes.double if field.field_type == 'FLOAT64'
+                 else dtypes.string for field in CSV_SCHEMA
+                 if not field.name in UNUSED_COLUMNS),
+            requested_streams=2)
 
         dataset = read_session.parallel_read_rows()
         transformed_ds = dataset.map(transform_row)
@@ -149,17 +153,17 @@ def custom_train_model(
 
     training_ds = read_bigquery(table).shuffle(10000).batch(batch_size)
 
-
-
     feature_columns = []
+
     def get_categorical_feature_values(column):
-        query = 'SELECT DISTINCT TRIM({}) FROM `{}`.{}.{}'.format(column, project, dataset, table)
+        query = 'SELECT DISTINCT TRIM({}) FROM `{}`.{}.{}'.format(
+            column, project, dataset, table)
         client = bigquery.Client(project=project)
         dataset_ref = client.dataset(dataset)
         job_config = bigquery.QueryJobConfig()
         query_job = client.query(query, job_config=job_config)
         result = query_job.to_dataframe()
-        return result.values[:,0]
+        return result.values[:, 0]
 
     # numeric cols
     for header in ['capital_gain', 'capital_loss', 'hours_per_week']:
@@ -170,33 +174,35 @@ def custom_train_model(
                    'race', 'native_country', 'education']:
         categorical_feature = feature_column.categorical_column_with_vocabulary_list(
             header, get_categorical_feature_values(header))
-        categorical_feature_one_hot = feature_column.indicator_column(categorical_feature)
+        categorical_feature_one_hot = feature_column.indicator_column(
+            categorical_feature)
         feature_columns.append(categorical_feature_one_hot)
 
     # bucketized cols
     age = feature_column.numeric_column('age')
-    age_buckets = feature_column.bucketized_column(age, boundaries=[18, 25, 30, 35, 40, 45, 50, 55, 60, 65])
+    age_buckets = feature_column.bucketized_column(
+        age, boundaries=[18, 25, 30, 35, 40, 45, 50, 55, 60, 65])
     feature_columns.append(age_buckets)
 
     feature_layer = tf.keras.layers.DenseFeatures(feature_columns)
 
-
     Dense = tf.keras.layers.Dense
     keras_model = tf.keras.Sequential(
-      [
-        feature_layer,
-          Dense(100, activation=tf.nn.relu, kernel_initializer='uniform'),
-          Dense(75, activation=tf.nn.relu),
-          Dense(50, activation=tf.nn.relu),
-          Dense(25, activation=tf.nn.relu),
-          Dense(1, activation=tf.nn.sigmoid)
-      ])
+        [
+            feature_layer,
+            Dense(100, activation=tf.nn.relu, kernel_initializer='uniform'),
+            Dense(75, activation=tf.nn.relu),
+            Dense(50, activation=tf.nn.relu),
+            Dense(25, activation=tf.nn.relu),
+            Dense(1, activation=tf.nn.sigmoid)
+        ])
 
     tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)
     # Compile Keras model
     keras_model.compile(loss='binary_crossentropy', metrics=['accuracy'])
     keras_model.fit(training_ds, epochs=epochs, callbacks=[tensorboard])
     keras_model.save(model.path)
+
 
 # custom_train_model = components.create_component_from_func(
 #     custom_train_model_fun, base_image=Image)
@@ -215,7 +221,7 @@ def custom_eval_model(
     model: Input[Model],
     metrics: Output[Metrics],
     batch_size: int = 32,
-)-> NamedTuple("Outputs", [("dep_decision", str)]):
+) -> NamedTuple("Outputs", [("dep_decision", str)]):
     from tensorflow.python.framework import ops
     from tensorflow.python.framework import dtypes
     from tensorflow_io.bigquery import BigQueryClient
@@ -223,52 +229,53 @@ def custom_eval_model(
     from tensorflow import feature_column
     from google.cloud import bigquery
 
-
     import tensorflow as tf
     CSV_SCHEMA = [
-      bigquery.SchemaField("age", "FLOAT64"),
-      bigquery.SchemaField("workclass", "STRING"),
-      bigquery.SchemaField("fnlwgt", "FLOAT64"),
-      bigquery.SchemaField("education", "STRING"),
-      bigquery.SchemaField("education_num", "FLOAT64"),
-      bigquery.SchemaField("marital_status", "STRING"),
-      bigquery.SchemaField("occupation", "STRING"),
-      bigquery.SchemaField("relationship", "STRING"),
-      bigquery.SchemaField("race", "STRING"),
-      bigquery.SchemaField("gender", "STRING"),
-      bigquery.SchemaField("capital_gain", "FLOAT64"),
-      bigquery.SchemaField("capital_loss", "FLOAT64"),
-      bigquery.SchemaField("hours_per_week", "FLOAT64"),
-      bigquery.SchemaField("native_country", "STRING"),
-      bigquery.SchemaField("income_bracket", "STRING"),
-  ]
+        bigquery.SchemaField("age", "FLOAT64"),
+        bigquery.SchemaField("workclass", "STRING"),
+        bigquery.SchemaField("fnlwgt", "FLOAT64"),
+        bigquery.SchemaField("education", "STRING"),
+        bigquery.SchemaField("education_num", "FLOAT64"),
+        bigquery.SchemaField("marital_status", "STRING"),
+        bigquery.SchemaField("occupation", "STRING"),
+        bigquery.SchemaField("relationship", "STRING"),
+        bigquery.SchemaField("race", "STRING"),
+        bigquery.SchemaField("gender", "STRING"),
+        bigquery.SchemaField("capital_gain", "FLOAT64"),
+        bigquery.SchemaField("capital_loss", "FLOAT64"),
+        bigquery.SchemaField("hours_per_week", "FLOAT64"),
+        bigquery.SchemaField("native_country", "STRING"),
+        bigquery.SchemaField("income_bracket", "STRING"),
+    ]
 
     UNUSED_COLUMNS = ["fnlwgt", "education_num"]
+
     def transform_row(row_dict):
         # Trim all string tensors
-        trimmed_dict = { column:
-                      (tf.strings.strip(tensor) if tensor.dtype == 'string' else tensor)
-                      for (column,tensor) in row_dict.items()
-                      }
+        trimmed_dict = {column:
+                        (tf.strings.strip(tensor)
+                         if tensor.dtype == 'string' else tensor)
+                        for (column, tensor) in row_dict.items()
+                        }
         # Extract feature column
         income_bracket = trimmed_dict.pop('income_bracket')
         # Convert feature column to 0.0/1.0
         income_bracket_float = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'),
-                     lambda: tf.constant(1.0),
-                     lambda: tf.constant(0.0))
+                                       lambda: tf.constant(1.0),
+                                       lambda: tf.constant(0.0))
         return (trimmed_dict, income_bracket_float)
 
     def read_bigquery(table_name, dataset=dataset):
         tensorflow_io_bigquery_client = BigQueryClient()
         read_session = tensorflow_io_bigquery_client.read_session(
-          "projects/" + project,
-          project, table, dataset,
-          list(field.name for field in CSV_SCHEMA
-               if not field.name in UNUSED_COLUMNS),
-          list(dtypes.double if field.field_type == 'FLOAT64'
-               else dtypes.string for field in CSV_SCHEMA
-               if not field.name in UNUSED_COLUMNS),
-          requested_streams=2)
+            "projects/" + project,
+            project, table, dataset,
+            list(field.name for field in CSV_SCHEMA
+                 if not field.name in UNUSED_COLUMNS),
+            list(dtypes.double if field.field_type == 'FLOAT64'
+                 else dtypes.string for field in CSV_SCHEMA
+                 if not field.name in UNUSED_COLUMNS),
+            requested_streams=2)
 
         dataset = read_session.parallel_read_rows()
         transformed_ds = dataset.map(transform_row)
@@ -307,52 +314,52 @@ def deploy_model(
 ):
     from google.cloud import aiplatform
     aiplatform.init(service_account=service_account)
+
     def create_endpoint():
         endpoints = aiplatform.Endpoint.list(
-        filter=f'display_name="{endpoint_name}"',
-        order_by='create_time desc',
-        project=project_id,
-        location=region,
+            filter=f'display_name="{endpoint_name}"',
+            order_by='create_time desc',
+            project=project_id,
+            location=region,
         )
         if len(endpoints) > 0:
-            endpoint = endpoints[0] # most recently created
+            endpoint = endpoints[0]  # most recently created
         else:
             endpoint = aiplatform.Endpoint.create(
                 display_name=endpoint_name,
                 project=project_id,
                 location=region,
                 encryption_spec_key_name=encryption
-        )
+            )
         return endpoint
 
     endpoint = create_endpoint()
 
-
     def upload_model():
         listed_model = aiplatform.Model.list(
-        filter=f'display_name="{model_name}"',
-        project=project_id,
-        location=region,
+            filter=f'display_name="{model_name}"',
+            project=project_id,
+            location=region,
         )
         if len(listed_model) > 0:
             model_version = listed_model[0]
             model_upload = aiplatform.Model.upload(
-                    display_name=model_name,
-                    parent_model=model_version.resource_name,
-                    artifact_uri=model_dir,
-                    serving_container_image_uri=serving_container_image_uri,
-                    location=region,
-                    project=project_id,
-                    encryption_spec_key_name=encryption
+                display_name=model_name,
+                parent_model=model_version.resource_name,
+                artifact_uri=model_dir,
+                serving_container_image_uri=serving_container_image_uri,
+                location=region,
+                project=project_id,
+                encryption_spec_key_name=encryption
             )
         else:
             model_upload = aiplatform.Model.upload(
-                    display_name=model_name,
-                    artifact_uri=model_dir,
-                    serving_container_image_uri=serving_container_image_uri,
-                    location=region,
-                    project=project_id,
-                    encryption_spec_key_name=encryption,
+                display_name=model_name,
+                artifact_uri=model_dir,
+                serving_container_image_uri=serving_container_image_uri,
+                location=region,
+                project=project_id,
+                encryption_spec_key_name=encryption,
 
             )
         return model_upload
@@ -361,11 +368,13 @@ def deploy_model(
 
     # Save data to the output params
     vertex_model.uri = uploaded_model.resource_name
+
     def deploy_to_endpoint(model, endpoint):
         deployed_models = endpoint.list_models()
         if len(deployed_models) > 0:
             latest_model_id = deployed_models[-1].id
-            print("your objects properties:", deployed_models[0].create_time.__dir__())
+            print("your objects properties:",
+                  deployed_models[0].create_time.__dir__())
             model_deploy = uploaded_model.deploy(
                 # machine_type="n1-standard-4",
                 endpoint=endpoint,
@@ -378,19 +387,19 @@ def deploy_model(
             )
         else:
             model_deploy = uploaded_model.deploy(
-            # machine_type="n1-standard-4",
-            endpoint=endpoint,
-            traffic_split={"0": 100},
-            min_replica_count=min_nodes,
-            max_replica_count=max_nodes,
-            deployed_model_display_name=model_name,
-            encryption_spec_key_name=encryption,
-            service_account=service_account
-        )
+                # machine_type="n1-standard-4",
+                endpoint=endpoint,
+                traffic_split={"0": 100},
+                min_replica_count=min_nodes,
+                max_replica_count=max_nodes,
+                deployed_model_display_name=model_name,
+                encryption_spec_key_name=encryption,
+                service_account=service_account
+            )
         return model_deploy.resource_name
 
     vertex_endpoint.uri = deploy_to_endpoint(vertex_model, endpoint)
-    vertex_endpoint.metadata['resourceName']=endpoint.resource_name
+    vertex_endpoint.metadata['resourceName'] = endpoint.resource_name
 
 
 # deploy_model = components.create_component_from_func(
@@ -415,29 +424,35 @@ def create_monitoring(
     from collections import OrderedDict
     import time
     import yaml
-    def ordered_dict_representer(self, value):  # can be a lambda if that's what you prefer
+
+    # can be a lambda if that's what you prefer
+    def ordered_dict_representer(self, value):
         return self.represent_mapping('tag:yaml.org,2002:map', value.items())
     yaml.add_representer(OrderedDict, ordered_dict_representer)
 
     aiplatform.init(service_account=service_account)
-    list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'(state="JOB_STATE_SUCCEEDED" OR state="JOB_STATE_RUNNING") AND display_name="{monitoring_name}"', project=project_id)
+    list_monitors = aiplatform.ModelDeploymentMonitoringJob.list(
+        filter=f'(state="JOB_STATE_SUCCEEDED" OR state="JOB_STATE_RUNNING") AND display_name="{monitoring_name}"', project=project_id)
     if len(list_monitors) == 0:
         alerting_config = model_monitoring.EmailAlertConfig(
             user_emails=[email], enable_logging=True
         )
         # schedule config
         MONITOR_INTERVAL = 1
-        schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)
+        schedule_config = model_monitoring.ScheduleConfig(
+            monitor_interval=MONITOR_INTERVAL)
         # sampling strategy
         SAMPLE_RATE = 0.5
-        logging_sampling_strategy = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)
+        logging_sampling_strategy = model_monitoring.RandomSampleConfig(
+            sample_rate=SAMPLE_RATE)
         # drift config
         DRIFT_THRESHOLD_VALUE = 0.05
         DRIFT_THRESHOLDS = {
             "capital_gain": DRIFT_THRESHOLD_VALUE,
             "capital_loss": DRIFT_THRESHOLD_VALUE,
         }
-        drift_config = model_monitoring.DriftDetectionConfig(drift_thresholds=DRIFT_THRESHOLDS)
+        drift_config = model_monitoring.DriftDetectionConfig(
+            drift_thresholds=DRIFT_THRESHOLDS)
         # Skew config
         DATASET_BQ_URI = bq_data_uri
         TARGET = "income_bracket"
@@ -498,6 +513,7 @@ def create_monitoring(
 # create_monitoring = components.create_component_from_func(
 #     create_monitoring_fun, base_image=Image)
 
+
 @dsl.pipeline(name="census-income-pipeline")
 def pipeline(
     create_bq_dataset_query: str,
@@ -512,26 +528,26 @@ def pipeline(
     service_account: str,
     prod_service_account: str,
     dataflow_subnet: str,
-    train_data_url: str=TRAINING_URL,
-    eval_data_url: str=EVAL_URL,
-    bq_dataset: str=DATASET_ID,
-    bq_train_table: str=TRAINING_TABLE_ID,
-    bq_eval_table: str=EVAL_TABLE_ID,
-    job_name: str=JOB_NAME,
-    python_file_path: str=f'{BUCKET_URI}/src/ingest_pipeline.py',
-    dataflow_temp_location: str=f'{BUCKET_URI}/temp_dataflow',
-    runner: str=RUNNER,
-    lr: float=0.01,
-    epochs: int=5,
-    batch_size: int=32,
-    base_train_dir: str=f'{BUCKET_URI}/training',
-    tb_log_dir: str=f'{BUCKET_URI}/tblogs',
-    deployment_image: str="us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest",
-    deployed_model_name: str='income_bracket_predictor',
-    endpoint_name: str='census_endpoint',
-    min_nodes: int=2,
-    max_nodes: int=4,
-    traffic_split: int=25,
+    train_data_url: str = TRAINING_URL,
+    eval_data_url: str = EVAL_URL,
+    bq_dataset: str = DATASET_ID,
+    bq_train_table: str = TRAINING_TABLE_ID,
+    bq_eval_table: str = EVAL_TABLE_ID,
+    job_name: str = JOB_NAME,
+    python_file_path: str = f'{BUCKET_URI}/src/ingest_pipeline.py',
+    dataflow_temp_location: str = f'{BUCKET_URI}/temp_dataflow',
+    runner: str = RUNNER,
+    lr: float = 0.01,
+    epochs: int = 5,
+    batch_size: int = 32,
+    base_train_dir: str = f'{BUCKET_URI}/training',
+    tb_log_dir: str = f'{BUCKET_URI}/tblogs',
+    deployment_image: str = "us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest",
+    deployed_model_name: str = 'income_bracket_predictor',
+    endpoint_name: str = 'census_endpoint',
+    min_nodes: int = 2,
+    max_nodes: int = 4,
+    traffic_split: int = 25,
 ):
     from google_cloud_pipeline_components.v1.bigquery import (
         BigqueryQueryJobOp)
@@ -653,8 +669,6 @@ def pipeline(
         ).after(model_deploy_op)
 
 
-
-
-
 if __name__ == "__main__":
-    compiler.Compiler().compile(pipeline_func=pipeline, package_path="./common/vertex-ai-pipeline/pipeline_package.yaml")
+    compiler.Compiler().compile(pipeline_func=pipeline,
+                                package_path="./common/vertex-ai-pipeline/pipeline_package.yaml")

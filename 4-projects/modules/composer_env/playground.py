@@ -16,7 +16,7 @@ sa_accounts = [
     "sa1",
     "sa2",
     "sa3",
-  ]
+]
 
 service_catalog_crypto_key = {
     "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring": {
