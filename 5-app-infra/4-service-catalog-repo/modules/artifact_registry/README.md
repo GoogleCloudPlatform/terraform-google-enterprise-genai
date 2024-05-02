@@ -54,8 +54,6 @@ No modules.
 
 No outputs.
 <!-- END_TF_DOCS -->
-<<<<<<< HEAD
-=======
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -74,4 +72,3 @@ No outputs.
 No outputs.
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
->>>>>>> main

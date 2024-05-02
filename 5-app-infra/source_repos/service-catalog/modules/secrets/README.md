@@ -61,8 +61,6 @@ The following table outlines which of the suggested controls for Vertex Generati
 |Customer Managed Encryption Keys| COM-CO-2.3| SC-12 <br />SC-13 | PR.DS-1.1 <br />PR.DS-2.1<br /> PR.DS-2.2 <br /> PR.DS-5.1 | Recommended | Secure Foundation v4
 |Automatic Secret Replication| SM-CO-6.1| SC-12 <br /> SC-13| None | Recommended based on customer use case | ML Foundation v0.1.0-alpha.1
 |Set up Automatic Rotation of Secrets| SM-CO-6.2| SC-12 <br /> SC-13| None | Recommended based on customer use case | ML Foundation v0.1.0-alpha.1
-<<<<<<< HEAD
-=======
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -79,4 +77,3 @@ The following table outlines which of the suggested controls for Vertex Generati
 | secret\_manager | Secret Manager resource. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
->>>>>>> main
