@@ -94,8 +94,6 @@ The following table outlines which of the suggested controls for Vertex Generati
 | Name | Control ID | NIST 800-53 | CRI Profile | Category | Source Blueprint
 |------|------------|-------------|-------------|----------| ----------------|
 |Customer Managed Encryption Keys| COM-CO-2.3| SC-12 <br />SC-13| PR.DS-1.1 <br /> PR.DS-2.1 <br /> PR.DS-2.2 <br /> PR.DS-5.1 | Recommended | Secure Foundation v4
-<<<<<<< HEAD
-=======
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -129,4 +127,3 @@ The following table outlines which of the suggested controls for Vertex Generati
 | gke\_cluster | Google Kubernetes Engine cluster used to run the Cloud Composer Environment. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
->>>>>>> main

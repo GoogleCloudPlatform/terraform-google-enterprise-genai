@@ -51,8 +51,6 @@ No modules.
 |------|-------------|
 | <a name="output_vertex_ai_tensorboard"></a> [vertex\_ai\_tensorboard](#output\_vertex\_ai\_tensorboard) | TensorBoard resource. |
 <!-- END_TF_DOCS -->
-<<<<<<< HEAD
-=======
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -69,4 +67,3 @@ No modules.
 | vertex\_ai\_tensorboard | TensorBoard resource. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
->>>>>>> main

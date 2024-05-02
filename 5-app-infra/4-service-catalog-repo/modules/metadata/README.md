@@ -52,8 +52,6 @@ No modules.
 |------|-------------|
 | <a name="output_vertex_ai_metadata_store"></a> [vertex\_ai\_metadata\_store](#output\_vertex\_ai\_metadata\_store) | Vertex AI Metadata Store. |
 <!-- END_TF_DOCS -->
-<<<<<<< HEAD
-=======
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -70,4 +68,3 @@ No modules.
 | vertex\_ai\_metadata\_store | Vertex AI Metadata Store. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
->>>>>>> main

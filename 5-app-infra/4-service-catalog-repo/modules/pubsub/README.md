@@ -62,8 +62,6 @@ The following table outlines which of the suggested controls for Vertex Generati
 |------|------------|-------------|-------------|----------| ----------------|
 |Customer Managed Encryption Keys for Pub/Sub Messages| PS-CO-6.1| SC-12 <br />SC-13| PR.DS-1.1 <br />PR.DS-1.2<br /> PR.DS-2.1 <br /> PR.DS-2.2 <br /> PR.DS-5.1 | Recommended | Secure Foundation v4
 |Configure Message Storage Policies | PS-CO-4.1 | AC-3 <br /> AC-17 <br /> AC-20 <br />| PR.AC-3.1 <br />PR.AC-3.2<br />  PR.AC-4.1 <br /> PR.AC-4.2 <br /> PR.AC-4.3 <br /> PR.AC-6.1 <br /> PR.PT-3.1 <br /> PR.PT-4.1 | Optional | ML Foundation v0.1.0-alpha.1
-<<<<<<< HEAD
-=======
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
@@ -82,4 +80,3 @@ The following table outlines which of the suggested controls for Vertex Generati
 | pubsub\_topic | Pub/Sub Topic. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
->>>>>>> main
