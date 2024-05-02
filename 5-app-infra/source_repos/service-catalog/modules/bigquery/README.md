@@ -55,3 +55,25 @@ No requirements.
 
 No outputs.
 <!-- END_TF_DOCS -->
+<<<<<<< HEAD
+=======
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| dataset\_id | A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (\_). The maximum length is 1,024 characters. | `string` | n/a | yes |
+| default\_partition\_expiration\_ms | The default partition expiration for all partitioned tables in the dataset, in milliseconds. Once this property is set, all newly-created partitioned tables in the dataset will have an expirationMs property in the timePartitioning settings set to this value, and changing the value will only affect new tables, not existing ones. The storage in a partition will have an expiration time of its partition time plus this value. | `number` | `null` | no |
+| default\_table\_expiration\_ms | The default lifetime of all tables in the dataset, in milliseconds. The minimum value is 3600000 milliseconds (one hour). Once this property is set, all newly-created tables in the dataset will have an expirationTime property set to the creation time plus the value in this property, and changing the value will only affect new tables, not existing ones. When the expirationTime for a given table is reached, that table will be deleted automatically. If a table's expirationTime is modified or removed before the table expires, or if you provide an explicit expirationTime when creating a table, that value takes precedence over the default expiration time indicated by this property. | `number` | `null` | no |
+| delete\_contents\_on\_destroy | If true, delete all the tables in the dataset when destroying the dataset; otherwise, destroying the dataset does not affect the tables in the dataset. If you try to delete a dataset that contains tables, and you set delete\_contents\_on\_destroy to false when you created the dataset, the request will fail. Always use this flag with caution. A missing value is treated as false. | `bool` | `false` | no |
+| description | A user-friendly description of the dataset | `string` | `""` | no |
+| friendly\_name | A descriptive name for the dataset | `string` | `""` | no |
+| project\_id | Optional Project ID. | `string` | `null` | no |
+| region | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |
+
+## Outputs
+
+No outputs.
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+>>>>>>> main

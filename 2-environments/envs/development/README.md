@@ -13,11 +13,12 @@
 |------|-------------|
 | env\_folder | Environment folder created under parent. |
 | env\_kms\_project\_id | Project for environment Cloud Key Management Service (KMS). |
-| env\_secrets\_project\_id | Project for environment related secrets. |
-| monitoring\_project\_id | Project for monitoring infra. |
-| key\_rings | Keyring Names created |
+| env\_kms\_project\_number | Project Number for environment Cloud Key Management Service (KMS). |
+| env\_log\_bucket\_name | Name of environment log bucket |
 | env\_log\_project\_id | Project ID of the environments log project |
 | env\_log\_project\_number | Project Number of the environments log project |
-| env\_log\_bucket\_name | Name of environment log bucket |
+| env\_secrets\_project\_id | Project for environment related secrets. |
+| key\_rings | Keyring Names created |
+| monitoring\_project\_id | Project for monitoring infra. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

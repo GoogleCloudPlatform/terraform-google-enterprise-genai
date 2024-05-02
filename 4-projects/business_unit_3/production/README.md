@@ -3,6 +3,8 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| default\_region | Default region to create resources where applicable. | `string` | `"us-central1"` | no |
+| env | The environment this deployment belongs to (ie. development) | `string` | n/a | yes |
 | instance\_region | Region which the peered subnet will be created (Should be same region as the VM that will be created on step 5-app-infra on the peering project). | `string` | `"us-central1"` | no |
 | location\_gcs | Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring) | `string` | `"US"` | no |
 | location\_kms | Case-Sensitive Location for KMS Keyring (Should be same region as the GCS Bucket) | `string` | `"us"` | no |
@@ -14,24 +16,9 @@
 
 | Name | Description |
 |------|-------------|
-| access\_context\_manager\_policy\_id | Access Context Manager Policy ID. |
-| base\_shared\_vpc\_project | Project sample base project. |
-| base\_shared\_vpc\_project\_sa | Project sample base project SA. |
-| base\_subnets\_self\_links | The self-links of subnets from base environment. |
-| bucket | The created storage bucket. |
-| env\_kms\_project | Project sample for KMS usage project ID. |
-| floating\_project | Project sample floating project. |
-| iap\_firewall\_tags | The security tags created for IAP (SSH and RDP) firewall rules and to be used on the VM created on step 5-app-infra on the peering network project. |
-| keyring | The name of the keyring. |
-| keys | List of created key names. |
-| peering\_complete | Output to be used as a module dependency. |
-| peering\_network | Peer network peering resource. |
-| peering\_project | Project sample peering project id. |
-| peering\_subnetwork\_self\_link | The subnetwork self link of the peering network. |
-| restricted\_enabled\_apis | Activated APIs. |
-| restricted\_shared\_vpc\_project | Project sample restricted project id. |
-| restricted\_shared\_vpc\_project\_number | Project sample restricted project. |
-| restricted\_subnets\_self\_links | The self-links of subnets from restricted environment. |
-| vpc\_service\_control\_perimeter\_name | VPC Service Control name. |
+| enable\_cloudbuild\_deploy | Enable infra deployment using Cloud Build. |
+| machine\_learning\_kms\_keys | Key ID for the machine learning project. |
+| machine\_learning\_project\_id | Project machine learning project. |
+| machine\_learning\_project\_number | Project number of machine learning project. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
