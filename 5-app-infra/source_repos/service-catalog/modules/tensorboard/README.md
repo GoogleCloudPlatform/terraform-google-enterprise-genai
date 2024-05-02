@@ -51,3 +51,19 @@ No modules.
 |------|-------------|
 | <a name="output_vertex_ai_tensorboard"></a> [vertex\_ai\_tensorboard](#output\_vertex\_ai\_tensorboard) | TensorBoard resource. |
 <!-- END_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| name | The name of the metadata store instance | `string` | `null` | no |
+| project\_id | Optional Project ID. | `string` | `null` | no |
+| region | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| vertex\_ai\_tensorboard | TensorBoard resource. |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

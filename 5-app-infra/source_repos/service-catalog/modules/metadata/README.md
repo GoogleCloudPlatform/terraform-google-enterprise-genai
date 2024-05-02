@@ -52,3 +52,19 @@ No modules.
 |------|-------------|
 | <a name="output_vertex_ai_metadata_store"></a> [vertex\_ai\_metadata\_store](#output\_vertex\_ai\_metadata\_store) | Vertex AI Metadata Store. |
 <!-- END_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| name | The name of the metadata store instance | `string` | `null` | no |
+| project\_id | Optional Project ID. | `string` | `null` | no |
+| region | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| vertex\_ai\_metadata\_store | Vertex AI Metadata Store. |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

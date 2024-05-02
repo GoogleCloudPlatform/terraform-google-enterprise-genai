@@ -9,14 +9,18 @@
 | billing\_account | The ID of the billing account to associated this project with | `string` | n/a | yes |
 | billing\_code | The code that's used to provide chargeback information | `string` | n/a | yes |
 | business\_code | The code that describes which business unit owns the project | `string` | `"abcd"` | no |
+| default\_service\_account | Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`. | `string` | `"disable"` | no |
 | enable\_cloudbuild\_deploy | Enable infra deployment using Cloud Build | `bool` | `false` | no |
 | environment | The environment the single project belongs to | `string` | n/a | yes |
 | folder\_id | The folder id where project will be created | `string` | n/a | yes |
+| key\_rings | Keyrings to attach project key to | `list(string)` | n/a | yes |
+| key\_rotation\_period | Rotation period in seconds to be used for KMS Key | `string` | `"7776000s"` | no |
 | org\_id | The organization id for the associated services | `string` | n/a | yes |
 | primary\_contact | The primary email contact for the project | `string` | n/a | yes |
 | project\_budget | Budget configuration.<br>  budget\_amount: The amount to use as the budget.<br>  alert\_spent\_percents: A list of percentages of the budget to alert on when threshold is exceeded.<br>  alert\_pubsub\_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.<br>  alert\_spend\_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default). | <pre>object({<br>    budget_amount        = optional(number, 1000)<br>    alert_spent_percents = optional(list(number), [1.2])<br>    alert_pubsub_topic   = optional(string, null)<br>    alert_spend_basis    = optional(string, "FORECASTED_SPEND")<br>  })</pre> | `{}` | no |
 | project\_prefix | Name prefix to use for projects created. | `string` | `"prj"` | no |
 | project\_suffix | The name of the GCP project. Max 16 characters with 3 character business unit code. | `string` | n/a | yes |
+| remote\_state\_bucket | Backend bucket to load Terraform Remote State Data from previous steps. | `string` | n/a | yes |
 | sa\_roles | A list of roles to give the Service Account from App Infra Pipeline. | `map(list(string))` | `{}` | no |
 | secondary\_contact | The secondary email contact for the project | `string` | `""` | no |
 | shared\_vpc\_host\_project\_id | Shared VPC host project ID | `string` | `""` | no |
@@ -31,7 +35,9 @@
 | Name | Description |
 |------|-------------|
 | enabled\_apis | VPC Service Control services. |
+| kms\_keys | keys created for the project |
 | project\_id | Project sample project id. |
+| project\_name | Name of the Project. |
 | project\_number | Project sample project number. |
 | sa | Project SA email |
 
