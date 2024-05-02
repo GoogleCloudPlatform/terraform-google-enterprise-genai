@@ -64,9 +64,9 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
    ```shell
    export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw common_artifacts_project_id)
    echo ${ARTIFACT_PROJECT_ID}
-   ``` 
+   ```
 
-1. Clone the freshly minted Cloud Source Repository that was created for this project. 
+1. Clone the freshly minted Cloud Source Repository that was created for this project.
    ```shell
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```

@@ -51,9 +51,9 @@ This repo provides a number of the [Google Service Catalog](https://cloud.google
    ```shell
    export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw service_catalog_project_id)
    echo ${SERVICE_CATALOG_PROJECT_ID}
-   ``` 
+   ```
 
-1. Clone the freshly minted Cloud Source Repository that was created for this project. 
+1. Clone the freshly minted Cloud Source Repository that was created for this project.
    ```shell
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```

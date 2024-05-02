@@ -89,7 +89,7 @@ Have a github token for access to your repository ready, along with an [Applicat
 
 These environmental project inflations are closely tied to the `service-catalog` project that have already deployed.  By now, the `bu3-service-catalog` should have been inflated.   `service-catalog` contains modules that are being deployed in an interactive (development) environment. Since they already exist; they can be used as terraform modules for operational (non-production, production) environments.  This was done in order to avoid code redundancy. One area for all `machine-learning` deployments.
 
-Under `modules/base_env/main.tf` you will notice all module calls are using `git` links as sources.  These links refer to the `service-catalog` cloud source repository we have already set up.  
+Under `modules/base_env/main.tf` you will notice all module calls are using `git` links as sources.  These links refer to the `service-catalog` cloud source repository we have already set up.
 
 Step 12 in "Deploying with Cloud Build" highlights the necessary steps needed to point the module resources to the correct location.
 
@@ -169,7 +169,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
-   
+
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
@@ -185,7 +185,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `modules/base_env/main.tf` with the name of service catalog project id to complete the git fqdn for module sources:
    ```bash
    export service_catalog_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
-   
+
    ##LINUX
    sed -i "s/SERVICE-CATALOG-PROJECT-ID/${service_catalog_project_id}/" ./modules/base_env/main.tf
 
@@ -205,7 +205,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    github_token = "YOUR-GITHUB-TOKEN"
 
    for env in "${envs[@]}"; do
-      output=$(terraform -chdir="../gcp-projects/business_unit_3/${env}" output -raw machine_learning_project_id) 
+      output=$(terraform -chdir="../gcp-projects/business_unit_3/${env}" output -raw machine_learning_project_id)
       project_ids+=("$output")
    done
 
@@ -247,7 +247,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 ## Post Deployment
 
-Since this project is in a service perimiter, there will be _additional_ entries that will be needed.  This is most notable for the `interactive` environment (development).  Since many of the necessary service agents and permissions were deployed in this project, we will _need to return to `3-networks`_ and add in more agents to the  DEVELOPMENT.AUTO.TFVARS file under `egress_policies`. 
+Since this project is in a service perimiter, there will be _additional_ entries that will be needed.  This is most notable for the `interactive` environment (development).  Since many of the necessary service agents and permissions were deployed in this project, we will _need to return to `3-networks`_ and add in more agents to the  DEVELOPMENT.AUTO.TFVARS file under `egress_policies`.
 Notably:
 
    * "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
@@ -259,10 +259,10 @@ This should be added under identities.  It should look like this::
         {
             "from" = {
             "identity_type" = ""
-            "identities" = [ 
-                "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition    
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",   
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com", 
+            "identities" = [
+                "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
             ]
             },
             "to" = {
@@ -294,7 +294,7 @@ egressViolations: [
    }
 ]
 ```
-we want the `unknown-project-number` here.  Add this into your `egress_policies` in `3-networks` under DEVELOPMENT.AUTO.TFVARS 
+we want the `unknown-project-number` here.  Add this into your `egress_policies` in `3-networks` under DEVELOPMENT.AUTO.TFVARS
 ```
 // Service Catalog
   {

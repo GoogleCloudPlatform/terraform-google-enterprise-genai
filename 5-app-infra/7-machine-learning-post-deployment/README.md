@@ -40,7 +40,7 @@
 
 1.  Many of the necessary service agents and permissions were deployed in all project environments for machine-learning.  Additional entries will be needed for each environment.
 
-1. Add in more agents to the  DEVELOPMENT.AUTO.TFVARS file under `egress_policies`. 
+1. Add in more agents to the  DEVELOPMENT.AUTO.TFVARS file under `egress_policies`.
 Notably:
 
    * "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
@@ -52,10 +52,10 @@ Notably:
           {
               "from" = {
               "identity_type" = ""
-              "identities" = [ 
-                  "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition    
-                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",   
-                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com", 
+              "identities" = [
+                  "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition
+                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
+                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
               ]
               },
               "to" = {
@@ -100,7 +100,7 @@ Notably:
           ]
         },
         "to" = {
-          "resources" = ["projects/[prj-n-bu3machine-learning-number]"] 
+          "resources" = ["projects/[prj-n-bu3machine-learning-number]"]
           "operations" = {
             "compute.googleapis.com" = {
               "methods" = ["*"]

@@ -146,3 +146,4 @@ The following table outlines which of the suggested controls for Vertex Generati
 | storage\_bucket | Storage Bucket. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+

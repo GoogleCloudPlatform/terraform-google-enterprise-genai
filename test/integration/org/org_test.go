@@ -198,7 +198,7 @@ func TestOrg(t *testing.T) {
 			assert.Equal(1, len(vertexWorkbenchAccessMode.Get("listPolicy.allowedValues").Array()), "vertex workbench access mode should be restricted")
 
 			vertexAiAllowedImages := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/ainotebooks.environmentOptions", parentFolder)
-			assert.Equal(1, len(vertexAiAllowedImage.Get("listPolicy.allowedValues").Array()), "vertex allowed images should be restricted") 
+			assert.Equal(1, len(vertexAiAllowedImage.Get("listPolicy.allowedValues").Array()), "vertex allowed images should be restricted")
 
 			// compute.requireOsLogin is neither a boolean policy nor a list policy
 			requireOsLogin := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/compute.requireOsLogin", parentFolder)

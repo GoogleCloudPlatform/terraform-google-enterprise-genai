@@ -75,3 +75,6 @@ helpers/foundation-deployer/.steps.json
 
 # File to populate env vars used by Docker test runs
 .envrc
+
+#ignore directory pynb checkpoints
+.ipynb_checkpoints/

@@ -57,11 +57,11 @@ file.
 This project has two main purposes:
 
 1. To deploy a pipeline and a bucket which is linked to a Google Cloud Repository that houses terraform modules for the use in Service Catalog.
-Although Service Catalog itself must be manually deployed, the modules which will be used can still be automated. 
+Although Service Catalog itself must be manually deployed, the modules which will be used can still be automated.
 
 2. To deploy infrastructure for operational environments (ie. `non-production` & `production`.)
 
-The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are. 
+The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are.
 
 The repository has the structure (truncated for brevity):
    ```
@@ -100,7 +100,7 @@ The repository has the structure (truncated for brevity):
    │       ├── outputs.tf
    │       └── variables.tf
    ```
-Each folder under `modules` represents a terraform module.  
+Each folder under `modules` represents a terraform module.
 When there is a change in any of the terraform module folders, the pipeline will find whichever module has been changed since the last push, `tar.gz` that file and place it in a bucket for Service Catalog to access.
 
 This pipeline is listening to the `main` branch of this repository for changes in order for the modules to be uploaded to service catalog.

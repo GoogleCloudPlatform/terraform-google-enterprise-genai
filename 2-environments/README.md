@@ -147,7 +147,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 ### `N.B.` Read this before continuing further!!
 
-A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent Google service accounts to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.  
+A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent Google service accounts to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
 You must disable the contraint in every folder that is about to be configured by terraform, push your code and then apply the contraint again:
 
 #### Do this before you push development, non-production & production
