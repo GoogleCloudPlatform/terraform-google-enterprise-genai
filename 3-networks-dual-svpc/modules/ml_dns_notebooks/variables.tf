@@ -16,10 +16,10 @@
 
 variable "project_id" {
   type        = string
-  description = "TODO"
+  description = "Project ID of the project in which Cloud DNS configurations will be made."
 }
 
 variable "private_service_connect_ip" {
   type        = string
-  description = "TODO"
+  description = "Google Private Service Connect IP Address."
 }

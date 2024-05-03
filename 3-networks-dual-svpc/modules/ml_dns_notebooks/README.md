@@ -1,15 +1,18 @@
-# TODO TITLE
+# ML DNS Notebooks
 
-TODO DESCRIPTION
+Configures the service endpoints to use a custom Private Service Connect IP.
 
+- *.notebooks.cloud.google.com
+- *.notebooks.googleusercontent.com
+- *.kernels.googleusercontent.com
+ 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| environment\_code | TODO | `string` | n/a | yes |
-| private\_service\_connect\_ip | TODO | `string` | n/a | yes |
-| project\_id | TODO | `string` | n/a | yes |
+| private\_service\_connect\_ip | Google Private Service Connect IP Address. | `string` | n/a | yes |
+| project\_id | Project ID of the project in which Cloud DNS configurations will be made. | `string` | n/a | yes |
 
 ## Outputs
 
