@@ -53,7 +53,7 @@ resource "google_project_service_identity" "service_agents_kms" {
 }
 
 resource "google_kms_crypto_key_iam_member" "app_key" {
-  for_each      = module.app_cloudbuild_project.crypto_key
+  for_each      = module.app_cloudbuild_project.kms_keys
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${local.app_infra_pipeline_service_accounts[var.repo_name]}"
@@ -61,7 +61,7 @@ resource "google_kms_crypto_key_iam_member" "app_key" {
 
 // Add Secret Manager Service Agent to key with encrypt/decrypt permissions
 resource "google_kms_crypto_key_iam_binding" "secretmanager_agent" {
-  for_each      = module.app_cloudbuild_project.crypto_key
+  for_each      = module.app_cloudbuild_project.kms_keys
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   members       = local.kms_secret_sa_accounts

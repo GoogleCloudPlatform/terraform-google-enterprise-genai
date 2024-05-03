@@ -36,7 +36,7 @@ output "project_sa" {
 
 output "project_crypto_key" {
   description = "key created in project"
-  value       = module.app_cloudbuild_project.crypto_key
+  value       = module.app_cloudbuild_project.kms_keys
 }
 
 # output "terraform_service_accounts" {
