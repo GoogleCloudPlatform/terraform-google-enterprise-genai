@@ -12,6 +12,7 @@ Configures the service endpoints to use a custom Private Service Connect IP.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | private\_service\_connect\_ip | Google Private Service Connect IP Address. | `string` | n/a | yes |
+| private\_visibility\_config\_networks | List of VPC self links that can see this zone. | `list(string)` | `[]` | no |
 | project\_id | Project ID of the project in which Cloud DNS configurations will be made. | `string` | n/a | yes |
 
 ## Outputs
