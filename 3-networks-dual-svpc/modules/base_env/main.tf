@@ -235,9 +235,10 @@ module "restricted_shared_vpc" {
 }
 
 module "ml_dns_vertex_ai" {
-  source                     = "../ml_dns_notebooks"
-  project_id                 = local.restricted_project_id
-  private_service_connect_ip = var.restricted_private_service_connect_ip
+  source                             = "../ml_dns_notebooks"
+  project_id                         = local.restricted_project_id
+  private_service_connect_ip         = var.restricted_private_service_connect_ip
+  private_visibility_config_networks = [module.restricted_shared_vpc.network_self_link]
 }
 
 /******************************************
