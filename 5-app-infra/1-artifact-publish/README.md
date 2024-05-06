@@ -191,7 +191,7 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
-   
+
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash

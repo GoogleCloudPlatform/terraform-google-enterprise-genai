@@ -4,7 +4,7 @@ Machine learning pipeline from development to production
 # Use case
 This example illustrates the promotion of a a machine learning pipeline from an interactive tenant to a production tenant. The example specifically trains a model on a [UCI census dataset](%28https://archive.ics.uci.edu/dataset/20/census+income%29)
 for binary classification.
-The steps in the vertex pipelines version of the pipeline are as follows. 
+The steps in the vertex pipelines version of the pipeline are as follows.
 *This pipeline is also replicated with airflow operators for cloud composer.*
 ## Bigquery dataset creation
 In the first step, a bigquery dataset is created using a bigquery operator offered by google as such:
@@ -12,7 +12,7 @@ In the first step, a bigquery dataset is created using a bigquery operator offer
     create_bq_dataset_query = f"""
         CREATE SCHEMA IF NOT EXISTS {DATASET_ID}
         """
-         
+
     bq_dataset_op = BigqueryQueryJobOp(
         query=create_bq_dataset_query,
         project=project,
@@ -35,7 +35,7 @@ Dataflow operator from google operators is used to ingest data raw data from a g
         bq_project=project,
         subnet=dataflow_subnet
     ).after(bq_dataset_op)
-    
+
      dataflow_python_train_op = DataflowPythonJobOp(
         requirements_file_path=requirements_file_path,
         python_module_path=python_file_path,
@@ -44,7 +44,7 @@ Dataflow operator from google operators is used to ingest data raw data from a g
         location=region,
         temp_location=f"{dataflow_temp_location}/train",
     ).after(dataflow_args_train)
-    
+
     dataflow_wait_train_op = WaitGcpResourcesOp(
         gcp_resources=dataflow_python_train_op.outputs["gcp_resources"]
     ).after(dataflow_python_train_op)
@@ -64,7 +64,7 @@ Once the data lands in the tables, the costume training process kick starts
         tb_log_dir=tb_log_dir,
         batch_size=batch_size
     ).after(dataflow_wait_train_op)
-    
+
 
 ## Model evaluation
 
@@ -158,8 +158,8 @@ The following method runs the pipeline. Note that a kms encryption key is suppli
         "service_account": deployment_config["service_account"],
         "prod_service_account": deployment_config["prod_service_account"],
         "monitoring_name": monitoring_config['name'],
-        "monitoring_email": monitoring_config['email'], 
-        
+        "monitoring_email": monitoring_config['email'],
+
     },
     enable_caching=False,
 )
@@ -168,7 +168,7 @@ The following method runs the pipeline. Note that a kms encryption key is suppli
 
 # Promotion workflow
 
-The interactive (dev) tenant is where the experimentation takes place. Once a training algorithm is chosen and the ML pipeline steps are outlined, the pipeline is created using vertex pipeline components (managed kubeflow). This ML pipeline is configured such that it runs in non-prod (staging), however, the deployment and the model monitoring steps take place in prod. This is to save training resources as the data is already available in non-prod (staging). 
+The interactive (dev) tenant is where the experimentation takes place. Once a training algorithm is chosen and the ML pipeline steps are outlined, the pipeline is created using vertex pipeline components (managed kubeflow). This ML pipeline is configured such that it runs in non-prod (staging), however, the deployment and the model monitoring steps take place in prod. This is to save training resources as the data is already available in non-prod (staging).
 
 > graph
 
@@ -177,17 +177,17 @@ Once the data scientist creates their pipeline they can push (the pipeline.yaml 
  - Install the dependencies
  - run the scripts to generate the pipeline.yaml file and run the the pipeline
  - upload the pipeline.yaml to the composer bucket on gcs (for scheduled runs)
- 
+
 The first version of the of model is trained and deployed due to the cloud build trigger. However, to keep the model up to date with incoming data, a simple composer dag is configured to run the same pipeline on scheduled intervals.
 
 Note: For the first iteration, the pipeline.yaml file is generated and directly pushed to the repo. However, this can be done as a cloud build step as well in order to integrate security checks.
 
 ## Service accounts
-Note that the is triggered by cloud build (for the first time) and cloud composer (for the scheduled run). Therefore, by default the respective service accounts are used for the vertex pipeline run. However, in our code we have configured two service accounts to run different steps. 
+Note that the is triggered by cloud build (for the first time) and cloud composer (for the scheduled run). Therefore, by default the respective service accounts are used for the vertex pipeline run. However, in our code we have configured two service accounts to run different steps.
 
 - The bigquery service agent on the non-prod project will need EncryptDecrypt permission on the kms key so that it can create the dataset using the CMEK key.
  - First, a non-prod service account to take care of components that run in non-prod (dataset creation, dataflow, training, and evaluation). This could simply be the default compute engine service account for the non-prod tenant. This service account needs write permission to upload the trained model from the non-prod bucket to the Vertex environment of prod.
- - Another service account that has permissions on the prod tenant in order to deploy the model and the model monitoring job. This could simply be the default service account for the prod tenant. This service account will also need read permission on bigquery of non-prod where the data exists so that the monitoring job deployed by this service account in prod 
+ - Another service account that has permissions on the prod tenant in order to deploy the model and the model monitoring job. This could simply be the default service account for the prod tenant. This service account will also need read permission on bigquery of non-prod where the data exists so that the monitoring job deployed by this service account in prod
 
 
 

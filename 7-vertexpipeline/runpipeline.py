@@ -1,3 +1,18 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# flake8: noqa
 from datetime import datetime
 from google.cloud import aiplatform
 import os
@@ -15,38 +30,40 @@ import os
 # from google.api_core.exceptions import GoogleAPIError
 # from typing import NamedTuple
 
+
 class vertex_ai_pipeline:
-    def __init__(self, 
-        PROJECT_ID:str = "non-prod-projectID", \
-        PROD_PROJECT_ID:str = 'prod-projectID', \
-        REGION:str = "us-central1", \
-        BUCKET_URI:str = "bucket_uri", \
-        DATA_PATH:str = "data", \
-        KFP_COMPONENTS_PATH:str = "components", \
-        SRC:str = "src", \
-        BUILD:str = "build", \
-        TRAINING_FILE:str = 'adult.data.csv', \
-        EVAL_FILE:str = 'adult.test.csv', \
-        DATASET_ID:str = 'census_dataset', \
-        TRAINING_TABLE_ID:str = 'census_train_table', \
-        EVAL_TABLE_ID:str = 'census_eval_table', \
-        RUNNER:str = "DataflowRunner", \
-        DATAFLOW_SUBNET:str = "https://www.googleapis.com/compute/v1/projects/prj-n-shared-restricted-wooh/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1", 
-        JOB_NAME:str = "census-ingest", \
-        SERVICE_ACCOUNT:str = "1053774269887-compute@developer.gserviceaccount.com", \
-        PROD_SERVICE_ACCOUNT: str = "941180056038-compute@developer.gserviceaccount.com"
-        ):
+    def __init__(self,
+                 PROJECT_ID: str = "non-prod-projectID",
+                 PROD_PROJECT_ID: str = 'prod-projectID',
+                 REGION: str = "us-central1",
+                 BUCKET_URI: str = "bucket_uri",
+                 DATA_PATH: str = "data",
+                 KFP_COMPONENTS_PATH: str = "components",
+                 SRC: str = "src",
+                 BUILD: str = "build",
+                 TRAINING_FILE: str = 'adult.data.csv',
+                 EVAL_FILE: str = 'adult.test.csv',
+                 DATASET_ID: str = 'census_dataset',
+                 TRAINING_TABLE_ID: str = 'census_train_table',
+                 EVAL_TABLE_ID: str = 'census_eval_table',
+                 RUNNER: str = "DataflowRunner",
+                 DATAFLOW_SUBNET: str = "https://www.googleapis.com/compute/v1/projects/prj-n-shared-restricted-wooh/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1",
+                 JOB_NAME: str = "census-ingest",
+                 SERVICE_ACCOUNT: str = "1053774269887-compute@developer.gserviceaccount.com",
+                 PROD_SERVICE_ACCOUNT: str = "941180056038-compute@developer.gserviceaccount.com"
+                 ):
 
         self.timestamp = datetime.now().strftime("%d_%H_%M_%S")
         self.PROJECT_ID = PROJECT_ID
         self.PROD_PROJECT_ID = PROD_PROJECT_ID
-        self.REGION = REGION 
+        self.REGION = REGION
         self.BUCKET_URI = BUCKET_URI
         self.DATA_PATH = DATA_PATH
 
         DAGS_FOLDER = os.environ.get("DAGS_FOLDER", "./")
         COMMON_FOLDER = os.path.join(DAGS_FOLDER, "common")
-        self.yaml_file_path = os.path.join(COMMON_FOLDER, "vertex-ai-pipeline/pipeline_package.yaml")
+        self.yaml_file_path = os.path.join(
+            COMMON_FOLDER, "vertex-ai-pipeline/pipeline_package.yaml")
 
         self.KFP_COMPONENTS_PATH = KFP_COMPONENTS_PATH
         self.SRC = SRC
@@ -63,36 +80,36 @@ class vertex_ai_pipeline:
         self.TRAINING_TABLE_ID = 'census_train_table'
         self.EVAL_TABLE_ID = 'census_eval_table'
         self.RUNNER = "DataflowRunner"
-        self.JOB_NAME="census-ingest"
+        self.JOB_NAME = "census-ingest"
         self.SERVICE_ACCOUNT = SERVICE_ACCOUNT
         self.PROD_SERVICE_ACCOUNT = PROD_SERVICE_ACCOUNT
 
         self.create_bq_dataset_query = f"""
         CREATE SCHEMA IF NOT EXISTS {self.DATASET_ID}
         """
-        self.data_config={
-         "train_data_url": self.TRAINING_URL,
-         "eval_data_url": self.EVAL_URL,
-         "bq_dataset": self.DATASET_ID,
-         "bq_train_table": TRAINING_TABLE_ID,
-         "bq_eval_table": EVAL_TABLE_ID,
+        self.data_config = {
+            "train_data_url": self.TRAINING_URL,
+            "eval_data_url": self.EVAL_URL,
+            "bq_dataset": self.DATASET_ID,
+            "bq_train_table": TRAINING_TABLE_ID,
+            "bq_eval_table": EVAL_TABLE_ID,
         }
 
-        self.dataflow_config={
-                        "job_name": JOB_NAME,
-                        "python_file_path": f'{BUCKET_URI}/src/ingest_pipeline.py',
-                        "temp_location": f'{BUCKET_URI}/temp_dataflow',
-                        "runner": RUNNER,
-                        "subnet": DATAFLOW_SUBNET
+        self.dataflow_config = {
+            "job_name": JOB_NAME,
+            "python_file_path": f'{BUCKET_URI}/src/ingest_pipeline.py',
+            "temp_location": f'{BUCKET_URI}/temp_dataflow',
+            "runner": RUNNER,
+            "subnet": DATAFLOW_SUBNET
         }
-        self.train_config={
-                     'lr': 0.01, 
-                     'epochs': 5, 
-                     'base_train_dir': f'{BUCKET_URI}/training', 
-                     'tb_log_dir': f'{BUCKET_URI}/tblogs',
+        self.train_config = {
+            'lr': 0.01,
+            'epochs': 5,
+            'base_train_dir': f'{BUCKET_URI}/training',
+            'tb_log_dir': f'{BUCKET_URI}/tblogs',
         }
 
-        self.deployment_config={
+        self.deployment_config = {
             'image': 'us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest',
             'model_name': "income_bracket_predictor_prod",
             'endpoint_name': "census_income_endpoint_prod",
@@ -105,9 +122,9 @@ class vertex_ai_pipeline:
             "prod_service_account": self.PROD_SERVICE_ACCOUNT
         }
 
-        self.monitoring_config={
-            'email': 'my.email@myorg.com', 
-            'name': 'census_monitoring'  
+        self.monitoring_config = {
+            'email': 'my.email@myorg.com',
+            'name': 'census_monitoring'
         }
 
         self.pipelineroot = f'{BUCKET_URI}/pipelineroot'
@@ -154,16 +171,17 @@ class vertex_ai_pipeline:
             },
             enable_caching=False,
         )
-        
+
         return pipeline.run(service_account=self.SERVICE_ACCOUNT)
-    
+
 
 if __name__ == "__main__":
     pipeline = vertex_ai_pipeline(
-        PROJECT_ID="prj-n-bu3machine-learning-brk1", \ # Replace with your non-prod project Id
-        PROD_PROJECT_ID='prj-p-bu3machine-learning-skc4', \ # Replace with your prod project Id
+        # Replace with your non-prod project Id
+        PROJECT_ID="prj-n-bu3machine-learning-brk1", \
+        PROD_PROJECT_ID='prj-p-bu3machine-learning-skc4', \  # Replace with your prod project Id
         REGION="us-central1", \
-        BUCKET_URI="gs://bkt-n-ml-storage-akdv", \ # Replace with your bucket in non-prod
+        BUCKET_URI="gs://bkt-n-ml-storage-akdv", \  # Replace with your bucket in non-prod
         DATA_PATH="data", \
         KFP_COMPONENTS_PATH="components", \
         SRC="src", \
@@ -182,5 +200,5 @@ if __name__ == "__main__":
         # Replace with the compute default service account of your prod project
         PROD_SERVICE_ACCOUNT="941180056038-compute@developer.gserviceaccount.com"
     )
-    
+
     pipeline.execute()
