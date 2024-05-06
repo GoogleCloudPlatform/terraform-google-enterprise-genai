@@ -23,3 +23,9 @@ variable "private_service_connect_ip" {
   type        = string
   description = "Google Private Service Connect IP Address."
 }
+
+variable "private_visibility_config_networks" {
+  description = "List of VPC self links that can see this zone."
+  default     = []
+  type        = list(string)
+}
