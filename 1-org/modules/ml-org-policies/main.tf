@@ -146,7 +146,7 @@ module "restrict_non_cmek_services" {
   folder_id        = var.folder_id
   policy_for       = local.policy_for
   policy_type      = "list"
-  deny_list_length = length(var.restricted_tls_versions)
+  deny_list_length = length(var.restricted_non_cmek_services)
   deny             = var.restricted_non_cmek_services
   constraint       = "constraints/gcp.restrictNonCmekServices"
 }

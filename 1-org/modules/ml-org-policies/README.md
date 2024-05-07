@@ -10,7 +10,7 @@ This module configure [Organization Policies](https://cloud.google.com/resource-
 - Restrict public IP access on new Vertex AI Workbench notebooks and instances (`constraints/ainotebooks.restrictPublicIp`)
 - Require automatic scheduled upgrades on new Vertex AI Workbench user-managed notebooks and instances (`constraints/ainotebooks.requireAutoUpgradeSchedule`)
 - Require VPC Connector (Cloud Functions) (`constraints/cloudfunctions.requireVPCConnector`)
-- Allowed Integrations (Cloud Build) (`constraints/cloudbuild.allowedIntegrations`)
+- Allowed Integrations (Cloud Build), controls which external services can invoke build triggers (`constraints/cloudbuild.allowedIntegrations`)
 - Restrict TLS Versions (`constraints/gcp.restrictTLSVersion`)
 - Restrict which projects may supply KMS CryptoKeys for CMEK (`constraints/gcp.restrictCmekCryptoKeyProjects`)
 - Restrict which services may create resources without CMEK (`constraints/gcp.restrictNonCmekServices`)
