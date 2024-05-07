@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
-// Create two keyrings in two geographic regions
-
 module "kms_keyrings" {
   for_each = toset(var.keyring_regions)
   source   = "terraform-google-modules/kms/google"
   version  = "~> 2.1"
 
-  project_id      = module.org_kms.project_id
+  project_id      = var.project_id
   keyring         = var.keyring_name
   location        = each.key
   prevent_destroy = "false"
+}
 
-  depends_on = [module.org_kms]
+resource "google_project_iam_member" "kms_admins" {
+  for_each = toset(var.keyring_admins)
+  project  = var.project_id
+  role     = "roles/cloudkms.admin"
+  member   = each.value
 }

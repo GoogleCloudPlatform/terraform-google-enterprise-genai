@@ -47,18 +47,6 @@ module "env_logs" {
 
 }
 
-// Create keys for this project
-
-resource "google_kms_crypto_key" "logging_keys" {
-  for_each        = module.kms_keyrings
-  name            = module.env_logs.project_id
-  key_ring        = module.kms_keyrings[each.key].keyring
-  rotation_period = var.gcs_logging_key_rotation_period
-  lifecycle {
-    prevent_destroy = false
-  }
-}
-
 // Create Bucket for this project
 resource "google_storage_bucket" "log_bucket" {
   name                        = "${var.gcs_bucket_prefix}-${module.env_logs.project_id}"
@@ -77,7 +65,5 @@ resource "google_storage_bucket" "log_bucket" {
 
   encryption {
     default_kms_key_name = google_kms_crypto_key.logging_keys[var.gcs_logging_bucket_location].id
-
   }
-  depends_on = [module.kms_keyrings]
 }
