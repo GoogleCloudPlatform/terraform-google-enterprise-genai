@@ -18,6 +18,7 @@ variable "keyring_name" {
   type        = string
   default     = "sample-keyring"
 }
+
 variable "keyring_regions" {
   description = "Regions to create keyrings in"
   type        = list(string)
