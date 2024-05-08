@@ -25,7 +25,21 @@ variable "private_service_connect_ip" {
 }
 
 variable "private_visibility_config_networks" {
-  description = "List of VPC self links that can see this zone."
-  default     = []
   type        = list(string)
+  default     = []
+  description = "List of VPC self links that can see this zone."
+}
+
+variable "zone_names" {
+  type = object({
+    notebooks_googleusercontent_zone = string
+    kernels_googleusercontent_zone   = string
+    notebooks_cloudgoogle_zone       = string
+  })
+  description = <<EOT
+  Defines the names of each zone created in the module:
+  - "notebooks_googleusercontent_zone" corresponds to "notebooks.googleusercontent.com." domain zone name.
+  - "kernels_googleusercontent_zone" corresponds to "kernels.googleusercontent.com." domain zone name.
+  - "notebooks_cloudgoogle_zone" corresponds to "notebooks.cloud.google.com." domain zone name.
+  EOT
 }

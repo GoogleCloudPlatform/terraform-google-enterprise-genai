@@ -18,10 +18,6 @@ data "google_netblock_ip_ranges" "private_apis" {
   range_type = "private-googleapis"
 }
 
-data "google_project" "project" {
-  project_id = var.project_id
-}
-
 locals {
   cidr_block = data.google_netblock_ip_ranges.private_apis.cidr_blocks_ipv4[0]
 
@@ -32,9 +28,6 @@ locals {
 
   # Generate a list of IP addresses
   google_private_ip_addresses = [for i in range(pow(2, 32 - local.cidr_prefix)) : cidrhost(local.cidr_block, i)]
-
-  project_labels          = data.google_project.project.labels
-  project_suffix_env_code = contains(keys(local.project_labels), "env_code") ? local.project_labels.env_code : ""
 }
 
 /***********************************************
@@ -46,7 +39,7 @@ module "notebooks" {
   version     = "~> 5.0"
   project_id  = var.project_id
   type        = "private"
-  name        = "dz-${local.project_suffix_env_code}-shared-restricted-notebooks"
+  name        = var.zone_names.notebooks_cloudgoogle_zone
   domain      = "notebooks.cloud.google.com."
   description = "Private DNS zone to configure notebooks - cloud.google.com"
 
@@ -69,11 +62,12 @@ module "notebooks" {
 }
 
 module "notebooks-googleusercontent" {
-  source      = "terraform-google-modules/cloud-dns/google"
-  version     = "~> 5.0"
+  source  = "terraform-google-modules/cloud-dns/google"
+  version = "~> 5.0"
+
   project_id  = var.project_id
   type        = "private"
-  name        = "dz-${local.project_suffix_env_code}-shared-restricted-notebooks-googleusercontent"
+  name        = var.zone_names.notebooks_googleusercontent_zone
   domain      = "notebooks.googleusercontent.com."
   description = "Private DNS zone to configure notebooks - googleusercontent.com"
 
@@ -100,7 +94,7 @@ module "kernels-googleusercontent" {
   version     = "~> 5.0"
   project_id  = var.project_id
   type        = "private"
-  name        = "dz-${local.project_suffix_env_code}-shared-restricted-kernels-googleusercontent"
+  name        = var.zone_names.kernels_googleusercontent_zone
   domain      = "kernels.googleusercontent.com."
   description = "Private DNS zone to configure remote kernels for workbench"
 
