@@ -18,12 +18,11 @@ module "kms_keyrings" {
   for_each = toset(var.keyring_regions)
 
   source  = "terraform-google-modules/kms/google"
-  version = "~> 2.1"
+  version = "~> 2.3"
 
-  project_id      = var.project_id
-  keyring         = var.keyring_name
-  location        = each.key
-  prevent_destroy = "false"
+  project_id = var.project_id
+  keyring    = var.keyring_name
+  location   = each.key
 }
 
 resource "google_project_iam_member" "kms_admins" {
