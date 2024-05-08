@@ -37,6 +37,7 @@ locals {
 module "notebooks" {
   source      = "terraform-google-modules/cloud-dns/google"
   version     = "~> 5.0"
+
   project_id  = var.project_id
   type        = "private"
   name        = var.zone_names.notebooks_cloudgoogle_zone
@@ -92,6 +93,7 @@ module "notebooks-googleusercontent" {
 module "kernels-googleusercontent" {
   source      = "terraform-google-modules/cloud-dns/google"
   version     = "~> 5.0"
+
   project_id  = var.project_id
   type        = "private"
   name        = var.zone_names.kernels_googleusercontent_zone
