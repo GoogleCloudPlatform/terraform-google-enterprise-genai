@@ -67,10 +67,8 @@ resource "google_storage_bucket" "log_bucket" {
   }
 
   encryption {
-    default_kms_key_name = module.kms_keyring.keys_by_region[var.gcs_logging_bucket_location][local.logging_key_name]
+    default_kms_key_name = google_kms_crypto_key_iam_member.gcs_logging_key.crypto_key_id #module.kms_keyring.keys_by_region[var.gcs_logging_bucket_location][local.logging_key_name]
   }
-
-  depends_on = [google_kms_crypto_key_iam_member.gcs_logging_key]
 }
 
 /******************************************
@@ -84,9 +82,7 @@ resource "google_storage_bucket_iam_member" "bucket_logging" {
 }
 
 resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
-  for_each = toset(module.kms_keyring.key_rings)
-
-  crypto_key_id = each.value
+  crypto_key_id = module.kms_keyring.keys_by_region[var.gcs_logging_bucket_location][local.logging_key_name]
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${data.google_storage_project_service_account.gcs_logging_account.email_address}"
 }
