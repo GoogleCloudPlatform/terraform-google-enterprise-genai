@@ -67,3 +67,13 @@ resource "google_storage_bucket" "log_bucket" {
     default_kms_key_name = module.kms[var.gcs_logging_bucket_location].keys[local.logging_key_name] #google_kms_crypto_key.logging_keys[var.gcs_logging_bucket_location].id
   }
 }
+
+/******************************************
+  Logging Bucket - IAM
+*****************************************/
+
+resource "google_storage_bucket_iam_member" "bucket_logging" {
+  bucket = google_storage_bucket.log_bucket.name
+  role   = "roles/storage.objectCreator"
+  member = "group:cloud-storage-analytics@google.com"
+}

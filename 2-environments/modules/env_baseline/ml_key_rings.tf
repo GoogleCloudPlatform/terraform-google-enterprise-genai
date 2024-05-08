@@ -21,6 +21,10 @@ locals {
   ]
 }
 
+data "google_storage_project_service_account" "gcs_logging_account" {
+  project = module.env_logs.project_id
+}
+
 // Create keyring and keys for this project
 module "kms" {
   for_each = toset(var.keyring_regions)
@@ -34,6 +38,10 @@ module "kms" {
   keys            = [local.logging_key_name]
   prevent_destroy = var.kms_prevent_destroy
 }
+
+/******************************************
+  KMS - IAM
+*****************************************/
 
 resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
   for_each = module.kms
