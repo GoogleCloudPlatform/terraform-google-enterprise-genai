@@ -64,6 +64,6 @@ resource "google_storage_bucket" "log_bucket" {
   }
 
   encryption {
-    default_kms_key_name = google_kms_crypto_key.logging_keys[var.gcs_logging_bucket_location].id
+    default_kms_key_name = module.kms[var.gcs_logging_bucket_location].keys[local.logging_key_name] #google_kms_crypto_key.logging_keys[var.gcs_logging_bucket_location].id
   }
 }

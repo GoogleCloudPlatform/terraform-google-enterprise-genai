@@ -52,7 +52,7 @@ output "assured_workload_resources" {
 
 output "key_rings" {
   description = "Keyring Names created"
-  value       = module.kms_keyring.key_rings
+  value       = values(module.kms)[*].keyring
 }
 
 output "env_logs_project_id" {
