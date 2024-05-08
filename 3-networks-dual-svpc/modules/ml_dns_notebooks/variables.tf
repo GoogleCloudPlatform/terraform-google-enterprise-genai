@@ -15,31 +15,31 @@
  */
 
 variable "project_id" {
-  type        = string
   description = "Project ID of the project in which Cloud DNS configurations will be made."
+  type        = string
 }
 
 variable "private_service_connect_ip" {
-  type        = string
   description = "Google Private Service Connect IP Address."
+  type        = string
 }
 
 variable "private_visibility_config_networks" {
+  description = "List of VPC self links that can see this zone."
   type        = list(string)
   default     = []
-  description = "List of VPC self links that can see this zone."
 }
 
 variable "zone_names" {
-  type = object({
-    notebooks_googleusercontent_zone = string
-    kernels_googleusercontent_zone   = string
-    notebooks_cloudgoogle_zone       = string
-  })
   description = <<EOT
   Defines the names of each zone created in the module:
   - "notebooks_googleusercontent_zone" corresponds to "notebooks.googleusercontent.com." domain zone name.
   - "kernels_googleusercontent_zone" corresponds to "kernels.googleusercontent.com." domain zone name.
   - "notebooks_cloudgoogle_zone" corresponds to "notebooks.cloud.google.com." domain zone name.
   EOT
+  type = object({
+    notebooks_googleusercontent_zone = string
+    kernels_googleusercontent_zone   = string
+    notebooks_cloudgoogle_zone       = string
+  })
 }
