@@ -15,6 +15,7 @@
  */
 module "kms_keyring" {
   source = "../ml_kms_keyring"
+
   keyring_admins = [
     "serviceAccount:${local.projects_step_terraform_service_account_email}"
   ]
