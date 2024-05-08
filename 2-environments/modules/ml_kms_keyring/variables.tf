@@ -15,7 +15,7 @@
  */
 
 variable "keyring_name" {
-  description = "Name to be used for KMS Keyring"
+  description = "Name to be used for Cloud Key Management Service (KMS) Keyring"
   type        = string
   default     = "sample-keyring"
 }
@@ -37,4 +37,10 @@ variable "keyring_admins" {
 variable "project_id" {
   description = "Project where the resource will be created"
   type        = string
+}
+
+variable "prevent_destroy" {
+  description = "Wether to prevent keyring destruction. Must be set to true if the user wants to avoid accidental terraform deletions."
+  type        = string
+  default     = "false"
 }

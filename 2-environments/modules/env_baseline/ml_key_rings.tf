@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Create two keyrings in two geographic regions
 module "kms_keyring" {
   source = "../ml_kms_keyring"
 
@@ -22,15 +24,17 @@ module "kms_keyring" {
   project_id      = module.env_kms.project_id
   keyring_regions = var.keyring_regions
   keyring_name    = var.keyring_name
+  prevent_destroy = tostring(var.kms_prevent_destroy)
 }
 
 // Create keys for this project
 resource "google_kms_crypto_key" "logging_keys" {
-  for_each        = toset(module.kms_keyring.key_rings)
+  for_each = toset(module.kms_keyring.key_rings)
+
   name            = module.env_logs.project_id
   key_ring        = each.value
   rotation_period = var.gcs_logging_key_rotation_period
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = var.kms_prevent_destroy
   }
 }
