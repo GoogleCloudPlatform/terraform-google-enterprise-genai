@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 variable "keyring_name" {
   description = "Name to be used for KMS Keyring"
   type        = string
