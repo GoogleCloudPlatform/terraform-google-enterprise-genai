@@ -1,4 +1,4 @@
-# ML DNS Notebooks
+# Machine Learning Cloud DNS Notebooks Service Endpoints module
 
 Configures the service endpoints to use a custom Private Service Connect IP.
 
