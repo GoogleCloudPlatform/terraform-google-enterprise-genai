@@ -2,9 +2,9 @@
 
 Configures the service endpoints to use a custom Private Service Connect IP.
 
-- *.notebooks.cloud.google.com
-- *.notebooks.googleusercontent.com
-- *.kernels.googleusercontent.com
+- `*.notebooks.cloud.google.com`
+- `*.notebooks.googleusercontent.com`
+- `*.kernels.googleusercontent.com`
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
