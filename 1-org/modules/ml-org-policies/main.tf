@@ -55,10 +55,16 @@ locals {
     "cloudfunctions.requireVPCConnector"
   ])
 
+  vertex_vpc_networks_format = {
+    "organization" = "under:organizations/%s",
+    "folder"       = "under:folders/%s",
+    "project"      = "under:projects/%s"
+  }
+
   access_scope                = var.folder_id != "" ? ["under:folders/${var.folder_id}"] : ["under:organizations/${var.org_id}"]
   policy_for                  = var.folder_id != "" ? "folder" : "organization"
-  under_format                = var.allowed_vertex_vpc_networks == "organization" ? "under:organizations/%s" : var.allowed_vertex_vpc_networks == "folder" ? "under:folders/%s" : "under:projects/%s"
-  allowed_vertex_vpc_networks = [for id in var.allowed_vertex_vpc_networks.parent_ids : format(local.under_format, id)]
+  under_format                = lookup(local.vertex_vpc_networks_format, var.allowed_vertex_vpc_networks.parent_type, "%s")
+  allowed_vertex_vpc_networks = [for id in var.allowed_vertex_vpc_networks.ids : format(local.under_format, id)]
 }
 
 module "ml_organization_policies_type_boolean" {

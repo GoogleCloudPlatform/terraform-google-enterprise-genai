@@ -21,12 +21,12 @@ module "ml_organization_policies" {
   folder_id = local.folder_id
 
   allowed_locations = [
-    "us-locations"
+    "in:us-locations"
   ]
 
   allowed_vertex_vpc_networks = {
     parent_type = "project"
-    parent_ids  = [for instance in module.base_restricted_environment_network : instance.restricted_shared_vpc_project_id],
+    ids         = [for instance in module.base_restricted_environment_network : instance.restricted_shared_vpc_project_id],
   }
 
   allowed_vertex_images = [

@@ -48,18 +48,25 @@ EOT
 variable "allowed_vertex_vpc_networks" {
   description = <<EOT
   Restrict VPC networks on new Vertex AI Workbench instances Organization Policy.
-  This list defines the projects id that contains the VPC networks a user can select when creating new Vertex AI Workbench instances.
-  - parent_type: one of organization, folder, or project.
-  - parent_id: list of ID of the parent type.
+  This list defines the parent resources IDs that contains the VPC networks or VPC networks themselves
+  that a user can select when creating new Vertex AI Workbench instances.
+  VPC network resource format id `projects/PROJECT_ID/global/networks/NETWORK_NAME`.
+  - parent_type: one of organization, folder, project, or network.
+  - ids: list of IDs of organization, folder, project or network full names.
 EOT
   type = object({
     parent_type = string
-    parent_ids  = list(string)
+    ids         = list(string)
   })
 
   validation {
-    condition     = contains(["project", "folder", "organization"], var.allowed_vertex_vpc_networks.parent_type)
-    error_message = "The allowed_vertex_vpc_networks.parent_type value must be one of: organization, folder, or project."
+    condition     = contains(["network", "project", "folder", "organization"], var.allowed_vertex_vpc_networks.parent_type)
+    error_message = "The allowed_vertex_vpc_networks.parent_type value must be one of: organization, folder, project, or network."
+  }
+
+  validation {
+    condition     = var.allowed_vertex_vpc_networks.parent_type == "network" ? length([for net in var.allowed_vertex_vpc_networks.ids : net if can(regex("^projects/.+/global/networks/.+$", net))]) == length(var.allowed_vertex_vpc_networks.ids) : true
+    error_message = "The allowed_vertex_vpc_networks.ids format must be `projects/PROJECT_ID/global/networks/NETWORK_NAME` for network type."
   }
 }
 
@@ -67,9 +74,11 @@ variable "allowed_locations" {
   description = <<EOT
   Google Cloud Platform - Resource Location Restriction Organization Policy.
   Defines the set of locations where location-based Google Cloud resources can be created.
+  See https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations#location_types
+  for information regarding entries format.
   EOT
   type        = list(string)
-  default     = ["us-locations"]
+  default     = ["in:us-locations"]
 }
 
 variable "restricted_services" {
