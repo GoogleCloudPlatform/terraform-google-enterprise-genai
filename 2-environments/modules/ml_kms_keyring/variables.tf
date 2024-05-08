@@ -30,8 +30,8 @@ variable "keyring_regions" {
 }
 
 variable "keyring_admins" {
+  description = "IAM members that shall be granted admin on the keyring. Format needs to specify member type, i.e. 'serviceAccount:', 'user:', or 'group:'"
   type        = list(string)
-  description = "IAM members that shall be granted admin on the keyring. Format need to specify member type, i.e. 'serviceAccount:', 'user:', 'group:'"
 }
 
 variable "project_id" {
