@@ -38,3 +38,15 @@ variable "project_id" {
   description = "Project where the resource will be created"
   type        = string
 }
+
+variable "keys" {
+  description = "Key names."
+  type        = list(string)
+  default     = []
+}
+
+variable "kms_prevent_destroy" {
+  description = "Wether to prevent keyring and keys destruction. Must be set to true if the user wants to avoid accidental terraform deletions."
+  type        = bool
+  default     = false
+}

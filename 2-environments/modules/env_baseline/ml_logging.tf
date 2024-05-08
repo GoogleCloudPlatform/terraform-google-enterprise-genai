@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+data "google_storage_project_service_account" "gcs_logging_account" {
+  project = module.env_logs.project_id
+}
+
 /******************************************
   Project for Environment Logging
 *****************************************/
@@ -54,7 +58,6 @@ resource "google_storage_bucket" "log_bucket" {
   project                     = module.env_logs.project_id
   uniform_bucket_level_access = true
 
-
   dynamic "retention_policy" {
     for_each = var.gcs_logging_retention_period != null ? [var.gcs_logging_retention_period] : []
     content {
@@ -64,10 +67,10 @@ resource "google_storage_bucket" "log_bucket" {
   }
 
   encryption {
-    default_kms_key_name = module.kms[var.gcs_logging_bucket_location].keys[local.logging_key_name] #google_kms_crypto_key.logging_keys[var.gcs_logging_bucket_location].id
+    default_kms_key_name = module.kms_keyring.keys_by_region[var.gcs_logging_bucket_location][local.logging_key_name]
   }
 
-  depends_on = [ google_kms_crypto_key_iam_member.gcs_logging_key ]
+  depends_on = [google_kms_crypto_key_iam_member.gcs_logging_key]
 }
 
 /******************************************
@@ -78,4 +81,12 @@ resource "google_storage_bucket_iam_member" "bucket_logging" {
   bucket = google_storage_bucket.log_bucket.name
   role   = "roles/storage.objectCreator"
   member = "group:cloud-storage-analytics@google.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
+  for_each = toset(module.kms_keyring.key_rings)
+
+  crypto_key_id = each.value
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_logging_account.email_address}"
 }

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
+locals {
+  kms_keys_by_region = zipmap(keys(module.kms_keyrings), [for region in keys(module.kms_keyrings) : { for k, v in module.kms_keyrings[region].keys : k => v }])
+}
+
 module "kms_keyrings" {
   for_each = toset(var.keyring_regions)
 
   source  = "terraform-google-modules/kms/google"
   version = "~> 2.3"
 
-  project_id = var.project_id
-  keyring    = var.keyring_name
-  location   = each.key
+  project_id      = var.project_id
+  keyring         = var.keyring_name
+  location        = each.key
+  keys            = var.keys
+  prevent_destroy = var.kms_prevent_destroy
 }
 
 resource "google_project_iam_member" "kms_admins" {

@@ -18,3 +18,8 @@ output "key_rings" {
   description = "Keyring Names created"
   value       = values(module.kms_keyrings)[*].keyring
 }
+
+output "keys_by_region" {
+  description = "Map of key name => key selflink, indexed by region"
+  value       = local.kms_keys_by_region
+}
