@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// Creates a keyring for each region (us-central1, us-east4)
 module "kms_keyring" {
   source = "../../modules/ml_kms_keyring"
 

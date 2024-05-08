@@ -18,7 +18,7 @@ locals {
   logging_key_name = module.env_logs.project_id
 }
 
-// Create keyring and keys for this project
+// Creates a keyring with logging key for each region (us-central1, us-east4)
 module "kms_keyring" {
   source = "../ml_kms_keyring"
 
