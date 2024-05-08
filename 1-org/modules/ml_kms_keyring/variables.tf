@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 variable "keyring_name" {
   description = "Name to be used for KMS Keyring"
   type        = string
   default     = "sample-keyring"
 }
+
 variable "keyring_regions" {
   description = "Regions to create keyrings in"
   type        = list(string)
@@ -26,10 +28,12 @@ variable "keyring_regions" {
     "us-east4"
   ]
 }
+
 variable "keyring_admins" {
-  type        = list(string)
   description = "IAM members that shall be granted admin on the keyring. Format need to specify member type, i.e. 'serviceAccount:', 'user:', 'group:'"
+  type        = list(string)
 }
+
 variable "project_id" {
   description = "Project where the resource will be created"
   type        = string

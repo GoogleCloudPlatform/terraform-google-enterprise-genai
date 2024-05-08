@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 module "kms_keyrings" {
   for_each = toset(var.keyring_regions)
+
   source   = "terraform-google-modules/kms/google"
   version  = "~> 2.1"
 
@@ -26,6 +28,7 @@ module "kms_keyrings" {
 
 resource "google_project_iam_member" "kms_admins" {
   for_each = toset(var.keyring_admins)
+
   project  = var.project_id
   role     = "roles/cloudkms.admin"
   member   = each.value
