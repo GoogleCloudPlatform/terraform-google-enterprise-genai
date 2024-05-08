@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 module "kms_keyrings" {
   for_each = toset(var.keyring_regions)
   source   = "terraform-google-modules/kms/google"
