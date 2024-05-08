@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 module "kms_keyring" {
   source = "../../modules/ml_kms_keyring"
+
   keyring_admins = [
     "serviceAccount:${local.projects_step_terraform_service_account_email}"
   ]
