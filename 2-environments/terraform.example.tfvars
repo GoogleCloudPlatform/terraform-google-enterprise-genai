@@ -21,3 +21,4 @@ remote_state_bucket = "REMOTE_STATE_BUCKET"
 
 // uncomment if you want to enable kms key destruction
 // kms_prevent_destroy = false
+
