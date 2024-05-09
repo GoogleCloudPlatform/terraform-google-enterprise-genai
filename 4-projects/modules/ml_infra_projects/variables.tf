@@ -164,3 +164,13 @@ variable "cloud_source_artifacts_repo_name" {
   description = "Name to give the could source repository for Artifacts"
   type        = string
 }
+
+variable "artifacts_infra_pipeline_sa" {
+  description = "Artifacts SA to be used by the Infra Pipeline CloudBuild trigger"
+  type        = string
+}
+
+variable "service_catalog_infra_pipeline_sa" {
+  description = "Service Catalog SA to be used by the Infra Pipeline CloudBuild trigger"
+  type        = string
+}
