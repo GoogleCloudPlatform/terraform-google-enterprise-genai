@@ -1,14 +1,10 @@
-# terraform-example-foundation
-
-This example repository shows how the CFT Terraform modules can build a secure Google Cloud foundation, following the [Google Cloud security foundations guide](https://cloud.google.com/architecture/security-foundations).
-The supplied structure and code is intended to form a starting point for building your own foundation with pragmatic defaults that you can customize to meet your own requirements. Currently, the step 0 is manually executed.
-From step 1 onwards, the Terraform code is deployed by using either Google Cloud Build (default) or Jenkins.
-Cloud Build has been chosen by default to allow you to quickly get started without having to deploy a CI/CD tool, although it is worth noting the code can easily be executed by your preferred tool.
+# terraform-google-enterprise-genai
 
 ## Overview
 
-This repo contains several distinct Terraform projects, each within their own directory that must be applied separately, but in sequence.
-Each of these Terraform projects are to be layered on top of each other, and run in the following order.
+This repository serves as a example for configuring an environment for the development and deployment of Machine Learning applications using the Vertex AI platform on Google Cloud. It seamlessly integrates the Cloud Foundation Toolkit (CFT) and implements robust security measures, drawing heavily from the [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) codebase.
+
+The repo is separated in distinct Terraform projects, each within their own directory that must be applied separately, but in sequence.
 
 ### [0. bootstrap](./0-bootstrap/)
 
@@ -81,6 +77,8 @@ example-organization
     └── prj-p-shared-restricted
 ```
 
+Specific to this repository, it will also configure Machine Learning Organization Policies.
+
 #### Logs
 
 Among the four projects created under the common folder, two projects (`prj-c-logging`, `prj-c-billing-logs`) are used for logging.
@@ -145,6 +143,8 @@ example-organization
     └── prj-p-secrets
 ```
 
+Specific to this repository, it will also create organization and environment level Cloud Key Management Service (KMS) keyrings on this step.
+
 #### Monitoring
 
 Under the environment folder, a project is created per environment (`development`, `non-production`, and `production`), which is intended to be used as a [Cloud Monitoring workspace](https://cloud.google.com/monitoring/workspaces) for all projects in that environment.
@@ -180,11 +180,7 @@ This step focuses on creating a [Shared VPC](https://cloud.google.com/architectu
 
 Usage instructions are available for the networks step in the [README](./3-networks-dual-svpc/README.md).
 
-### [3. networks-hub-and-spoke](./3-networks-hub-and-spoke/)
-
-This step configures the same network resources that the step 3-networks-dual-svpc does, but this time it makes use of the architecture based on the [hub-and-spoke](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke) reference network model.
-
-Usage instructions are available for the networks step in the [README](./3-networks-hub-and-spoke/README.md).
+On this repository, it will also configure a private DNS zone for workbench instances to use either `private.googleapis.com` or `restricted.googleapis.com`.
 
 ### [4. projects](./4-projects/)
 
@@ -194,140 +190,29 @@ Running this code as-is should generate a structure as shown below:
 ```
 example-organization/
 └── fldr-development
-    └── fldr-bu1-development
-        ├── prj-d-env-bu1kms
-        ├── prj-d-bu1sample-floating
-        ├── prj-d-bu1sample-base
-        ├── prj-d-bu1sample-restrict
-        ├── prj-d-bu1sample-peering
-    └── fldr-bu2-development
-        ├── prj-d-env-bu2kms
-        ├── prj-d-sample-bu2floating
-        ├── prj-d-sample-bu2base
-        ├── prj-d-sample-bu2restrict
-        └── prj-d-sample-bu2peering
+    └── prj-d-bu3machine-learning
 └── fldr-non-production
-    └── fldr-bu1-non-production
-        ├── prj-n-env-bu1kms
-        ├── prj-n-bu1sample-floating
-        ├── prj-n-bu1sample-base
-        ├── prj-n-bu1sample-restrict
-        ├── prj-n-bu1sample-peering
-    └── fldr-bu2-non-production
-        ├── prj-n-env-bu2kms
-        ├── prj-n-sample-bu2floating
-        ├── prj-n-sample-bu2base
-        ├── prj-n-sample-bu2restrict
-        └── prj-n-sample-bu2peering
+    └── prj-n-bu3machine-learning
 └── fldr-production
-    └── fldr-bu1-production
-        ├── prj-p-env-bu1kms
-        ├── prj-p-bu1sample-floating
-        ├── prj-p-bu1sample-base
-        ├── prj-p-bu1sample-restrict
-        ├── prj-p-bu1sample-peering
-    └── fldr-bu2-production
+    └── prj-p-bu3machine-learning
         ├── prj-p-env-bu2kms
         ├── prj-p-sample-bu2floating
         ├── prj-p-sample-bu2base
         ├── prj-p-sample-bu2restrict
         └── prj-p-sample-bu2peering
 └── fldr-common
-    ├── prj-bu1-c-infra-pipeline
-    └── prj-bu2-c-infra-pipeline
+    ├── prj-c-bu3artifacts
+    ├── prj-c-bu3infra-pipeline
+    └── prj-c-bu3service-catalog
 ```
-
-The code in this step includes two options for creating projects.
-The first is the standard projects module which creates a project per environment, and the second creates a standalone project for one environment.
-If relevant for your use case, there are also two optional submodules which can be used to create a subnet per project, and a dedicated private DNS zone per project.
 
 Usage instructions are available for the projects step in the [README](./4-projects/README.md).
 
 ### [5. app-infra](./5-app-infra/)
 
-The purpose of this step is to deploy a simple [Compute Engine](https://cloud.google.com/compute/) instance in one of the business unit projects using the infra pipeline set up in 4-projects.
+The purpose of this step is to execute a series of steps necessary to deploy and run a Machine Learning Application.
 
 Usage instructions are available for the app-infra step in the [README](./5-app-infra/README.md).
-
-### Final view
-
-After all steps above have been executed, your Google Cloud organization should represent the structure shown below, with projects being the lowest nodes in the tree.
-
-```
-example-organization
-└── fldr-common
-    ├── prj-c-logging
-    ├── prj-c-billing-logs
-    ├── prj-c-scc
-    ├── prj-c-secrets
-    ├── prj-bu1-c-infra-pipeline
-    └── prj-bu2-c-infra-pipeline
-└── fldr-network
-    ├── prj-c-base-net-hub
-    ├── prj-c-dns-hub
-    ├── prj-c-interconnect
-    ├── prj-c-restricted-net-hub
-    ├── prj-d-shared-base
-    ├── prj-d-shared-restricted
-    ├── prj-n-shared-base
-    ├── prj-n-shared-restricted
-    ├── prj-p-shared-base
-    └── prj-p-shared-restricted
-└── fldr-development
-    ├── prj-d-monitoring
-    ├── prj-d-secrets
-    ├── prj-d-shared-base
-    └── prj-d-shared-restricted
-    └── fldr-bu1-development
-        ├── prj-d-env-bu1kms
-        ├── prj-d-bu1sample-floating
-        ├── prj-d-bu1sample-base
-        ├── prj-d-bu1sample-restrict
-        ├── prj-d-bu1sample-peering
-    └── fldr-bu2-development
-        ├── prj-d-env-bu2kms
-        ├── prj-d-sample-bu2floating
-        ├── prj-d-sample-bu2base
-        ├── prj-d-sample-bu2restrict
-        └── prj-d-sample-bu2peering
-└── fldr-non-production
-    ├── prj-n-monitoring
-    ├── prj-n-secrets
-    ├── prj-n-shared-base
-    └── prj-n-shared-restricted
-    └── fldr-bu1-non-production
-        ├── prj-n-env-bu1kms
-        ├── prj-n-bu1sample-floating
-        ├── prj-n-bu1sample-base
-        ├── prj-n-bu1sample-restrict
-        ├── prj-n-bu1sample-peering
-    └── fldr-bu2-non-production
-        ├── prj-n-env-bu2kms
-        ├── prj-n-sample-bu2floating
-        ├── prj-n-sample-bu2base
-        ├── prj-n-sample-bu2restrict
-        └── prj-n-sample-bu2peering
-└── fldr-production
-    ├── prj-p-monitoring
-    ├── prj-p-secrets
-    ├── prj-p-shared-base
-    └── prj-p-shared-restricted
-    └── fldr-bu1-production
-        ├── prj-p-env-bu1kms
-        ├── prj-p-bu1sample-floating
-        ├── prj-p-bu1sample-base
-        ├── prj-p-bu1sample-restrict
-        ├── prj-p-bu1sample-peering
-    └── fldr-bu2-production
-        ├── prj-p-env-bu2kms
-        ├── prj-p-sample-bu2floating
-        ├── prj-p-sample-bu2base
-        ├── prj-p-sample-bu2restrict
-        └── prj-p-sample-bu2peering
-└── fldr-bootstrap
-    ├── prj-b-cicd
-    └── prj-b-seed
-```
 
 ### Branching strategy
 
@@ -346,22 +231,3 @@ The [Scorecard bundle](https://github.com/GoogleCloudPlatform/policy-library/blo
 See the [policy-library documentation](https://github.com/GoogleCloudPlatform/policy-library/blob/master/docs/index.md) if you need to add more constraints from the [samples folder](https://github.com/GoogleCloudPlatform/policy-library/tree/master/samples) in your configuration based in your type of workload.
 
 Step 1-org has [instructions](./1-org/README.md#deploying-with-cloud-build) on the creation of the shared repository to host these policies.
-
-### Optional Variables
-
-Some variables used to deploy the steps have default values, check those **before deployment** to ensure they match your requirements. For more information, there are tables of inputs and outputs for the Terraform modules, each with a detailed description of their variables. Look for variables marked as **not required** in the section **Inputs** of these READMEs:
-
-- Step 0-bootstrap: If you are using Cloud Build in the [CI/CD Pipeline](/docs/GLOSSARY.md#foundation-cicd-pipeline), check the main [README](./0-bootstrap/README.md#Inputs) of the step. If you are using Jenkins, check the [README](./0-bootstrap/modules/jenkins-agent/README.md#Inputs) of the module `jenkins-agent`.
-- Step 1-org: The [README](./1-org/envs/shared/README.md#Inputs) of the environment `shared`.
-- Step 2-environments: The READMEs of the environments [development](./2-environments/envs/development/README.md#Inputs), [non-production](./2-environments/envs/non-production/README.md#Inputs), and [production](./2-environments/envs/production/README.md#Inputs)
-- Step 3-networks-dual-svpc: The READMEs of the environments [shared](./3-networks-dual-svpc/envs/shared/README.md#inputs), [development](./3-networks-dual-svpc/envs/development/README.md#Inputs), [non-production](./3-networks/envs/non-production/README.md#Inputs), and [production](./3-networks/envs/production/README.md#Inputs)
-- Step 3-networks-hub-and-spoke: The READMEs of the environments [shared](./3-networks-hub-and-spoke/envs/shared/README.md#inputs), [development](./3-networks-hub-and-spoke/envs/development/README.md#Inputs), [non-production](./3-networks/envs/non-production/README.md#Inputs), and [production](./3-networks/envs/production/README.md#Inputs)
-- Step 4-projects: The READMEs of the environments [shared](./4-projects/business_unit_1/shared/README.md#inputs), [development](./4-projects/business_unit_1/development/README.md#Inputs), [non-production](./4-projects/business_unit_1/non-production/README.md#Inputs), and [production](./4-projects/business_unit_1/production/README.md#Inputs)
-
-## Errata summary
-
-Refer to the [errata summary](./ERRATA.md) for an overview of the delta between the example foundation repository and the [Google Cloud security foundations guide](https://cloud.google.com/architecture/security-foundations).
-
-## Contributing
-
-Refer to the [contribution guidelines](./CONTRIBUTING.md) for information on contributing to this module.
