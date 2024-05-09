@@ -23,7 +23,7 @@
 #   ]
 # }
 module "app_cloudbuild_project" {
-  source = "../single_project"
+  source = "../ml_single_project"
 
   org_id              = local.org_id
   billing_account     = local.billing_account

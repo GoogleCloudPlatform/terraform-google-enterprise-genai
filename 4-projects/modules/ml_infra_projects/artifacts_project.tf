@@ -27,16 +27,15 @@ locals {
 
 }
 module "app_infra_artifacts_project" {
-  source = "../../modules/single_project"
-  # count  = local.enable_cloudbuild_deploy ? 1 : 0
+  source = "../ml_single_project"
 
-  org_id              = local.org_id
-  billing_account     = local.billing_account
-  folder_id           = local.common_folder_name
-  environment         = "common"
+  org_id              = var.org_id
+  billing_account     = var.billing_account
+  folder_id           = var.folder_id
+  environment         = var.environment
   project_budget      = var.project_budget
-  project_prefix      = local.project_prefix
-  key_rings           = local.shared_kms_key_ring
+  project_prefix      = var.project_prefix
+  key_rings           = var.key_rings
   remote_state_bucket = var.remote_state_bucket
   activate_apis = [
     "artifactregistry.googleapis.com",
@@ -51,46 +50,35 @@ module "app_infra_artifacts_project" {
   # Metadata
   project_suffix    = "artifacts"
   application_name  = "app-infra-artifacts"
-  billing_code      = "1234"
-  primary_contact   = "example@example.com"
-  secondary_contact = "example2@example.com"
-  business_code     = "bu3"
+  billing_code      = var.billing_code
+  primary_contact   = var.primary_contact
+  secondary_contact = var.secondary_contact
+  business_code     = var.business_code
 }
 
-# resource "google_kms_crypto_key" "ml_key" {
-#   for_each        = toset(local.shared_kms_key_ring)
-#   name            = module.app_infra_artifacts_project[0].project_name
-#   key_ring        = each.key
-#   rotation_period = var.key_rotation_period
-#   lifecycle {
-#     prevent_destroy = false
-#   }
-# }
-
 resource "google_kms_crypto_key_iam_member" "ml_key" {
-  for_each      = module.app_infra_cloudbuild_project[0].kms_keys
+  for_each      = module.app_infra_artifacts_project.kms_keys
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
-  member        = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-artifact-publish"]}"
+  member        = "serviceAccount:${module.infra_pipelines.terraform_service_accounts["bu3-artifact-publish"]}"
 }
 
 resource "google_project_iam_member" "artifact_tf_sa_roles" {
   for_each = toset(local.artifact_tf_sa_roles)
-  project  = module.app_infra_artifacts_project[0].project_id
+  project  = module.app_infra_artifacts_project.project_id
   role     = each.key
-  member   = "serviceAccount:${module.infra_pipelines[0].terraform_service_accounts["bu3-artifact-publish"]}"
+  member   = "serviceAccount:${module.infra_pipelines.terraform_service_accounts["bu3-artifact-publish"]}"
 }
 
 // Add Service Agent for Cloud Build
 resource "google_project_iam_member" "artifact_cloudbuild_agent" {
-  project = module.app_infra_artifacts_project[0].project_id
+  project = module.app_infra_artifacts_project.project_id
   role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${module.app_infra_artifacts_project[0].project_number}@cloudbuild.gserviceaccount.com"
+  member  = "serviceAccount:${module.app_infra_artifacts_project.project_number}@cloudbuild.gserviceaccount.com"
 }
 
 // Add Repository for Artifact repo
-
 resource "google_sourcerepo_repository" "artifact_repo" {
-  project = module.app_infra_artifacts_project[0].project_id
+  project = module.app_infra_artifacts_project.project_id
   name    = var.cloud_source_artifacts_repo_name
 }
