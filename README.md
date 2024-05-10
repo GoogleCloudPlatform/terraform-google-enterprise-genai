@@ -18,3 +18,18 @@ The repo is separated in distinct Terraform projects, each within their own dire
     * Will create a Machine Learning project for each environment.
 * [5. app-infra](./5-app-infra/)
     * The purpose of this step is to execute a series of steps necessary to deploy and run a Machine Learning Application.
+
+Additional steps were added to provide an example Machine Learning application:
+
+* [6. ml-pipeline](./6-ml-pipeline/)
+    * This additional step, adds an interactive coding and experimentation, deploying the Vertex Workbench for data scientists.
+    * The step will guide you through creating a ML pipeline using a notebook on Google Vertex AI Workbench Instance.
+    * After promoting the ML pipeline, it is triggered by Cloud Build upon staging branch merges, trains and deploys a model using the census income dataset.
+    * Model deployment and monitoring occur in the prod environment. 
+    * Following successful pipeline runs, a new model version is deployed for A/B testing.
+
+* [7. composer](./7-composer/)
+    * Used for code reference
+
+* [7. vertexpipeline](./7-vertexpipeline/)
+    * Used for code reference, will be used for creating the Machine Learning pipeline.
