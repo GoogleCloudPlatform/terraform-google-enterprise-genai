@@ -137,3 +137,8 @@ variable "gcs_logging_key_rotation_period" {
   default     = "7776000s"
 }
 
+variable "kms_prevent_destroy" {
+  description = "Wheter to prevent keyring and keys destruction. Must be set to false if the user wants to disable accidental terraform deletions protection."
+  type        = bool
+  default     = true
+}

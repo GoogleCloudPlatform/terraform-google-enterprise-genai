@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+// Creates a keyring for each region (us-central1, us-east4)
+module "kms_keyring" {
+  source = "../../modules/ml_kms_keyring"
 
-monitoring_workspace_users = "gcp-monitoring-admins@example.com"
-
-remote_state_bucket = "REMOTE_STATE_BUCKET"
-
-// uncomment if you want to enable kms key destruction
-// kms_prevent_destroy = false
-
+  keyring_admins = [
+    "serviceAccount:${local.projects_step_terraform_service_account_email}"
+  ]
+  project_id      = module.org_kms.project_id
+  keyring_regions = var.keyring_regions
+  keyring_name    = var.keyring_name
+}

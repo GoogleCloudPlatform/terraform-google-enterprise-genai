@@ -23,24 +23,3 @@ resource "google_project_iam_member" "monitoring_editor" {
   role    = "roles/monitoring.editor"
   member  = "group:${var.monitoring_workspace_users}"
 }
-
-/******************************************
-  Logging Bucket - IAM
-*****************************************/
-
-resource "google_storage_bucket_iam_member" "bucket_logging" {
-  bucket = google_storage_bucket.log_bucket.name
-  role   = "roles/storage.objectCreator"
-  member = "group:cloud-storage-analytics@google.com"
-}
-
-data "google_storage_project_service_account" "gcs_logging_account" {
-  project = module.env_logs.project_id
-}
-
-resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
-  for_each      = google_kms_crypto_key.logging_keys
-  crypto_key_id = google_kms_crypto_key.logging_keys[each.key].id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_logging_account.email_address}"
-}
