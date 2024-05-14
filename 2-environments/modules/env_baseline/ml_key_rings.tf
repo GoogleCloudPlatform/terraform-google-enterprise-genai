@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
+locals {
+  logging_key_name = module.env_logs.project_id
+}
 
-// Create two keyrings in two geographic regions
+// Creates a keyring with logging key for each region (us-central1, us-east4)
+module "kms_keyring" {
+  source = "../ml_kms_keyring"
 
-module "kms_keyrings" {
-  for_each = toset(var.keyring_regions)
-  source   = "terraform-google-modules/kms/google"
-  version  = "~> 2.1"
-
-  project_id      = module.org_kms.project_id
-  keyring         = var.keyring_name
-  location        = each.key
-  prevent_destroy = "false"
-
-  depends_on = [module.org_kms]
+  keyring_admins = [
+    "serviceAccount:${local.projects_step_terraform_service_account_email}"
+  ]
+  project_id          = module.env_kms.project_id
+  keyring_regions     = var.keyring_regions
+  keyring_name        = var.keyring_name
+  keys                = [local.logging_key_name]
+  kms_prevent_destroy = var.kms_prevent_destroy
 }

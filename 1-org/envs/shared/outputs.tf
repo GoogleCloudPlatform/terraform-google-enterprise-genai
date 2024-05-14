@@ -156,5 +156,5 @@ output "cai_monitoring_topic" {
 
 output "key_rings" {
   description = "Keyring Names created"
-  value       = values(module.kms_keyrings)[*].keyring
+  value       = module.kms_keyring.key_rings
 }

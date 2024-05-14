@@ -125,13 +125,6 @@ module "org_kms" {
   budget_alert_spend_basis    = var.project_budget.org_kms_budget_alert_spend_basis
 }
 
-resource "google_project_iam_member" "kms_sa_base" {
-
-  project = module.org_kms.project_id
-  role    = "roles/cloudkms.admin"
-  member  = "serviceAccount:${local.projects_step_terraform_service_account_email}"
-}
-
 /******************************************
   Project for Org-wide Secrets
 *****************************************/

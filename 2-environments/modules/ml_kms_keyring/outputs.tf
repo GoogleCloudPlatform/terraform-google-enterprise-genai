@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = values(module.kms_keyrings)[*].keyring
+}
 
-monitoring_workspace_users = "gcp-monitoring-admins@example.com"
-
-remote_state_bucket = "REMOTE_STATE_BUCKET"
-
-// uncomment if you want to enable kms key destruction
-// kms_prevent_destroy = false
-
+output "keys_by_region" {
+  description = "Map of key name => key selflink, indexed by region"
+  value       = local.kms_keys_by_region
+}
