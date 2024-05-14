@@ -48,12 +48,13 @@ module "app_infra_artifacts_project" {
     "sourcerepo.googleapis.com",
   ]
   # Metadata
-  project_suffix    = "artifacts"
-  application_name  = "app-infra-artifacts"
-  billing_code      = var.billing_code
-  primary_contact   = var.primary_contact
-  secondary_contact = var.secondary_contact
-  business_code     = var.business_code
+  project_suffix             = "artifacts"
+  application_name           = "app-infra-artifacts"
+  billing_code               = var.billing_code
+  primary_contact            = var.primary_contact
+  secondary_contact          = var.secondary_contact
+  business_code              = var.business_code
+  environment_kms_project_id = var.environment_kms_project_id
 }
 
 resource "google_kms_crypto_key_iam_member" "ml_key" {

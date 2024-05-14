@@ -167,6 +167,11 @@ variable "remote_state_bucket" {
 
 variable "default_service_account" {
   description = "Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`."
+  type        = string
   default     = "disable"
+}
+
+variable "environment_kms_project_id" {
+  description = "Environment level KMS Project ID."
   type        = string
 }
