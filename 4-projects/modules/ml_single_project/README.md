@@ -12,6 +12,7 @@
 | default\_service\_account | Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`. | `string` | `"disable"` | no |
 | enable\_cloudbuild\_deploy | Enable infra deployment using Cloud Build | `bool` | `false` | no |
 | environment | The environment the single project belongs to | `string` | n/a | yes |
+| environment\_kms\_project\_id | Environment level KMS Project ID. | `string` | n/a | yes |
 | folder\_id | The folder id where project will be created | `string` | n/a | yes |
 | key\_rings | Keyrings to attach project key to | `list(string)` | n/a | yes |
 | key\_rotation\_period | Rotation period in seconds to be used for KMS Key | `string` | `"7776000s"` | no |
