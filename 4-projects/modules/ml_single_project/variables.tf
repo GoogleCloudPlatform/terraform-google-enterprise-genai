@@ -68,7 +68,7 @@ variable "activate_apis" {
 }
 
 variable "environment" {
-  description = "The environment the single project belongs to"
+  description = "The environment the project belongs to"
   type        = string
 }
 
