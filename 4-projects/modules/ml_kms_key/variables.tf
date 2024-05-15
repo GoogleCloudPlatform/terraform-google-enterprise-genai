@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-locals {
-  env_code = element(split("", var.environment), 0)
+variable "key_rings" {
+  description = "Keyrings to attach project key to."
+  type        = list(string)
+}
+
+variable "project_name" {
+  description = "Project Name."
+  type        = string
+}
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key."
+  type        = string
+  default     = "7776000s"
+}
+
+variable "prevent_destroy" {
+  description = "Prevent Key destruction."
+  type        = bool
 }

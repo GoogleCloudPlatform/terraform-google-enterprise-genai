@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  env_code = element(split("", var.environment), 0)
+terraform {
+  required_version = ">= 1.3"
 }

@@ -40,6 +40,6 @@ output "project_name" {
 }
 
 output "kms_keys" {
-  description = "keys created for the project"
-  value       = { for k, v in google_kms_crypto_key.kms_keys : split("/", k)[3] => v }
+  description = "Keys created for the project."
+  value       = module.kms_keys.kms_keys
 }

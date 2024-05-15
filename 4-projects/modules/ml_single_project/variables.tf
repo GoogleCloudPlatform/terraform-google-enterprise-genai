@@ -180,3 +180,8 @@ variable "project_name" {
   description = "Project Name."
   type        = string
 }
+
+variable "prevent_destroy" {
+  description = "Prevent Key destruction."
+  type        = bool
+}

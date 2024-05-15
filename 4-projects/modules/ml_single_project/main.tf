@@ -123,14 +123,12 @@ resource "google_compute_subnetwork_iam_member" "account_role_to_vpc_subnets" {
 }
 
 // Add key for project
-resource "google_kms_crypto_key" "kms_keys" {
-  for_each        = toset(var.key_rings)
-  name            = module.project.project_name
-  key_ring        = each.key
-  rotation_period = var.key_rotation_period
-  lifecycle {
-    prevent_destroy = false
-  }
+module "kms_keys" {
+  source              = "../ml_kms_key"
+  key_rings           = var.key_rings
+  key_rotation_period = var.key_rotation_period
+  project_name        = module.project.project_name
+  prevent_destroy     = var.prevent_destroy
 }
 
 // Add crypto key viewer role to kms environment project

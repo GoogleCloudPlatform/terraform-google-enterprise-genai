@@ -179,3 +179,8 @@ variable "environment_kms_project_id" {
   description = "Environment level KMS Project ID."
   type        = string
 }
+
+variable "prevent_destroy" {
+  description = "Prevent Project Key destruction."
+  type        = bool
+}

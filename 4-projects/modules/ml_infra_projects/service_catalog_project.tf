@@ -55,6 +55,7 @@ module "app_service_catalog_project" {
   business_code              = var.business_code
   environment_kms_project_id = var.environment_kms_project_id
   project_name               = "${var.project_prefix}-${local.env_code}-${var.business_code}${local.service_catalog_project_suffix}"
+  prevent_destroy            = var.prevent_destroy
 }
 
 resource "google_kms_crypto_key_iam_member" "sc_key" {

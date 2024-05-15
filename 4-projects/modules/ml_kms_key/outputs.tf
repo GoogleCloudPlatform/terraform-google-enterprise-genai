@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-locals {
-  env_code = element(split("", var.environment), 0)
+output "kms_keys" {
+  description = "Keys created for the project."
+  value       = local.output_keys
 }
