@@ -14,7 +14,7 @@ Create and manage a Google Cloud project with various configurations and roles r
 | billing\_account | The ID of the billing account to associated this project with | `string` | n/a | yes |
 | billing\_code | The code that's used to provide chargeback information | `string` | n/a | yes |
 | business\_code | The code that describes which business unit owns the project | `string` | `"abcd"` | no |
-| default\_service\_account | Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`. | `string` | `"disable"` | no |
+| default\_service\_account | Project default service account setting: can be one of `delete`, `depriviledge`, `keep` or `disable`. | `string` | `"disable"` | no |
 | enable\_cloudbuild\_deploy | Enable infra deployment using Cloud Build | `bool` | `false` | no |
 | environment | The environment the single project belongs to | `string` | n/a | yes |
 | environment\_kms\_project\_id | Environment level KMS Project ID. | `string` | n/a | yes |
@@ -44,9 +44,9 @@ Create and manage a Google Cloud project with various configurations and roles r
 |------|-------------|
 | enabled\_apis | VPC Service Control services. |
 | kms\_keys | Keys created for the project. |
-| project\_id | Project sample project id. |
+| project\_id | Project ID. |
 | project\_name | Name of the Project. |
-| project\_number | Project sample project number. |
+| project\_number | Project number. |
 | sa | Project SA email |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
