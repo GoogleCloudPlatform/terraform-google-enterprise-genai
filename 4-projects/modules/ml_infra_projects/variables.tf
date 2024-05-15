@@ -189,3 +189,15 @@ variable "service_catalog_project_suffix" {
   type        = string
   default     = "service-catalog"
 }
+
+variable "service_catalog_application_name" {
+  description = "Service Catalog application name metadata."
+  type        = string
+  default     = "app-infra-catalog"
+}
+
+variable "artifacts_application_name" {
+  description = "Artifacts application name metadata."
+  type        = string
+  default     = "app-infra-artifacts"
+}

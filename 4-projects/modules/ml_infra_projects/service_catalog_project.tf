@@ -47,7 +47,7 @@ module "app_service_catalog_project" {
   ]
   # Metadata
   project_suffix             = var.service_catalog_project_suffix
-  application_name           = "app-infra-ml"
+  application_name           = var.service_catalog_application_name
   billing_code               = var.billing_code
   primary_contact            = var.primary_contact
   secondary_contact          = var.secondary_contact

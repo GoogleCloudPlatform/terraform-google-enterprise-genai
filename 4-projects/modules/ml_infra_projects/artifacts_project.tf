@@ -49,7 +49,7 @@ module "app_infra_artifacts_project" {
   ]
   # Metadata
   project_suffix             = var.artifacts_project_suffix
-  application_name           = "app-infra-artifacts"
+  application_name           = var.artifacts_application_name
   billing_code               = var.billing_code
   primary_contact            = var.primary_contact
   secondary_contact          = var.secondary_contact
