@@ -1,3 +1,7 @@
+# Machine Learning Single Project
+
+Create and manage a Google Cloud project with various configurations and roles required for application infrastructure and pipeline service accounts. It includes the setup of IAM roles, VPC networking, KMS keys, and budget alerts. The module leverages the terraform-google-modules/project-factory/google module for project creation and management.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
