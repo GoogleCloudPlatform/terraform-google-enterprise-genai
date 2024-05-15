@@ -177,3 +177,15 @@ variable "prevent_destroy" {
   description = "Prevent Project Key destruction."
   type        = bool
 }
+
+variable "artifacts_project_suffix" {
+  description = "Artifacts Project Suffix."
+  type        = string
+  default     = "artifacts"
+}
+
+variable "service_catalog_project_suffix" {
+  description = "Service Catalog Project Suffix."
+  type        = string
+  default     = "service-catalog"
+}
