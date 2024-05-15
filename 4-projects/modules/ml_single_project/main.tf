@@ -15,7 +15,8 @@
  */
 
 locals {
-  env_code = element(split("", var.environment), 0)
+  enabled_apis = distinct(concat(var.activate_apis, ["billingbudgets.googleapis.com"]))
+  env_code     = element(split("", var.environment), 0)
   source_repos = setintersection(
     toset(keys(var.app_infra_pipeline_service_accounts)),
     toset(keys(var.sa_roles))
@@ -56,7 +57,7 @@ module "project" {
 
   random_project_id        = true
   random_project_id_length = 4
-  activate_apis            = distinct(concat(var.activate_apis, ["billingbudgets.googleapis.com"]))
+  activate_apis            = local.enabled_apis
   name                     = var.project_name
   org_id                   = var.org_id
   billing_account          = var.billing_account

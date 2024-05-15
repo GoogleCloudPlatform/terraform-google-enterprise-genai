@@ -31,7 +31,7 @@ output "project_number" {
 
 output "enabled_apis" {
   description = "VPC Service Control services."
-  value       = distinct(concat(var.activate_apis, ["billingbudgets.googleapis.com"]))
+  value       = local.enabled_apis
 }
 
 output "project_name" {
