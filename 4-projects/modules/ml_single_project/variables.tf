@@ -175,3 +175,8 @@ variable "environment_kms_project_id" {
   description = "Environment level KMS Project ID."
   type        = string
 }
+
+variable "project_name" {
+  description = "Project Name."
+  type        = string
+}

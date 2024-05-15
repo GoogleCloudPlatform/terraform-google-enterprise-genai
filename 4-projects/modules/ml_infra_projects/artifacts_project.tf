@@ -15,6 +15,7 @@
  */
 
 locals {
+  artifacts_project_suffix = "artifacts"
   artifact_tf_sa_roles = [
     "roles/artifactregistry.admin",
     "roles/cloudbuild.builds.editor",
@@ -48,13 +49,14 @@ module "app_infra_artifacts_project" {
     "sourcerepo.googleapis.com",
   ]
   # Metadata
-  project_suffix             = "artifacts"
+  project_suffix             = local.artifacts_project_suffix
   application_name           = "app-infra-artifacts"
   billing_code               = var.billing_code
   primary_contact            = var.primary_contact
   secondary_contact          = var.secondary_contact
   business_code              = var.business_code
   environment_kms_project_id = var.environment_kms_project_id
+  project_name               = "${var.project_prefix}-${local.env_code}-${var.business_code}${local.artifacts_project_suffix}"
 }
 
 resource "google_kms_crypto_key_iam_member" "ml_key" {

@@ -15,6 +15,7 @@
  */
 
 locals {
+  service_catalog_project_suffix = "service-catalog"
   service_catalog_tf_sa_roles = [
     "roles/cloudbuild.builds.editor",
     "roles/iam.serviceAccountAdmin",
@@ -46,13 +47,14 @@ module "app_service_catalog_project" {
     "sourcerepo.googleapis.com",
   ]
   # Metadata
-  project_suffix             = "service-catalog"
+  project_suffix             = local.service_catalog_project_suffix
   application_name           = "app-infra-ml"
   billing_code               = var.billing_code
   primary_contact            = var.primary_contact
   secondary_contact          = var.secondary_contact
   business_code              = var.business_code
   environment_kms_project_id = var.environment_kms_project_id
+  project_name               = "${var.project_prefix}-${local.env_code}-${var.business_code}${local.service_catalog_project_suffix}"
 }
 
 resource "google_kms_crypto_key_iam_member" "sc_key" {
