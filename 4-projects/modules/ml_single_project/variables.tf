@@ -73,7 +73,7 @@ variable "environment" {
 }
 
 variable "vpc_type" {
-  description = "The type of VPC to attach the project to. Possible options are base or restricted."
+  description = "The type of VPC to attach the project to. Possible options are `base` or `restricted`."
   type        = string
   default     = ""
 }
