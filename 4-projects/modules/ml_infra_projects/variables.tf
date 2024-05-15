@@ -70,7 +70,6 @@ variable "remote_state_bucket" {
 variable "business_code" {
   description = "The code that describes which business unit owns the project."
   type        = string
-  default     = "abcd"
 }
 
 variable "billing_code" {
@@ -85,12 +84,6 @@ variable "primary_contact" {
 
 variable "secondary_contact" {
   description = "The secondary email contact for the project."
-  type        = string
-  default     = ""
-}
-
-variable "vpc_type" {
-  description = "The type of VPC to attach the project to. Possible options are base or restricted."
   type        = string
   default     = ""
 }
@@ -150,7 +143,7 @@ variable "key_rotation_period" {
 }
 
 variable "default_service_account" {
-  description = "Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`."
+  description = "Project default service account setting: can be one of `delete`, `depriviledge`, `keep` or `disable`."
   default     = "disable"
   type        = string
 }
