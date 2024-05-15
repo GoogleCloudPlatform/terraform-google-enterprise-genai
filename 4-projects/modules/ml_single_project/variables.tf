@@ -15,7 +15,7 @@
  */
 
 variable "org_id" {
-  description = "The organization id for the associated services"
+  description = "The Organization ID"
   type        = string
 }
 
@@ -68,12 +68,12 @@ variable "activate_apis" {
 }
 
 variable "environment" {
-  description = "The environment the single project belongs to"
+  description = "The environment the project belongs to"
   type        = string
 }
 
 variable "vpc_type" {
-  description = "The type of VPC to attach the project to. Possible options are base or restricted."
+  description = "The type of VPC to attach the project to. Possible options are `base` or `restricted`."
   type        = string
   default     = ""
 }
