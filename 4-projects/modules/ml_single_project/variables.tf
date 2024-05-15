@@ -15,17 +15,17 @@
  */
 
 variable "org_id" {
-  description = "The Organization ID"
+  description = "The Organization ID."
   type        = string
 }
 
 variable "folder_id" {
-  description = "The folder id where project will be created"
+  description = "The folder id where project will be created."
   type        = string
 }
 
 variable "billing_account" {
-  description = "The ID of the billing account to associated this project with"
+  description = "The ID of the billing account to associated this project with."
   type        = string
 }
 
@@ -35,40 +35,40 @@ variable "project_suffix" {
 }
 
 variable "application_name" {
-  description = "The name of application where GCP resources relate"
+  description = "The name of application where GCP resources relate."
   type        = string
 }
 
 variable "billing_code" {
-  description = "The code that's used to provide chargeback information"
+  description = "The code that's used to provide chargeback information."
   type        = string
 }
 
 variable "primary_contact" {
-  description = "The primary email contact for the project"
+  description = "The primary email contact for the project."
   type        = string
 }
 
 variable "secondary_contact" {
-  description = "The secondary email contact for the project"
+  description = "The secondary email contact for the project."
   type        = string
   default     = ""
 }
 
 variable "business_code" {
-  description = "The code that describes which business unit owns the project"
+  description = "The code that describes which business unit owns the project."
   type        = string
   default     = "abcd"
 }
 
 variable "activate_apis" {
-  description = "The api to activate for the GCP project"
+  description = "The api to activate for the GCP project."
   type        = list(string)
   default     = []
 }
 
 variable "environment" {
-  description = "The environment the project belongs to"
+  description = "The environment the project belongs to."
   type        = string
 }
 
@@ -79,7 +79,7 @@ variable "vpc_type" {
 }
 
 variable "shared_vpc_host_project_id" {
-  description = "Shared VPC host project ID"
+  description = "Shared VPC host project ID."
   type        = string
   default     = ""
 }
@@ -91,19 +91,19 @@ variable "shared_vpc_subnets" {
 }
 
 variable "vpc_service_control_attach_enabled" {
-  description = "Whether the project will be attached to a VPC Service Control Perimeter"
+  description = "Whether the project will be attached to a VPC Service Control Perimeter."
   type        = bool
   default     = false
 }
 
 variable "vpc_service_control_perimeter_name" {
-  description = "The name of a VPC Service Control Perimeter to add the created project to"
+  description = "The name of a VPC Service Control Perimeter to add the created project to."
   type        = string
   default     = null
 }
 
 variable "vpc_service_control_sleep_duration" {
-  description = "The duration to sleep in seconds before adding the project to a shared VPC after the project is added to the VPC Service Control Perimeter"
+  description = "The duration to sleep in seconds before adding the project to a shared VPC after the project is added to the VPC Service Control Perimeter."
   type        = string
   default     = "5s"
 }
@@ -144,19 +144,19 @@ variable "sa_roles" {
 }
 
 variable "enable_cloudbuild_deploy" {
-  description = "Enable infra deployment using Cloud Build"
+  description = "Enable infra deployment using Cloud Build."
   type        = bool
   default     = false
 }
 
 variable "key_rotation_period" {
-  description = "Rotation period in seconds to be used for KMS Key"
+  description = "Rotation period in seconds to be used for KMS Key."
   type        = string
   default     = "7776000s"
 }
 
 variable "key_rings" {
-  description = "Keyrings to attach project key to"
+  description = "Keyrings to attach project key to."
   type        = list(string)
 }
 

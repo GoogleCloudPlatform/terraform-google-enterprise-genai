@@ -20,26 +20,26 @@ output "service_catalog_project_id" {
 }
 
 output "common_artifacts_project_id" {
-  description = "App Infra Artifacts Project ID"
+  description = "App Infra Artifacts Project ID."
   value       = try(module.app_infra_artifacts_project.project_id, "")
 }
 
 output "service_catalog_repo_name" {
-  description = "The name of the Service Catalog repository"
+  description = "The name of the Service Catalog repository."
   value       = google_sourcerepo_repository.service_catalog.name
 }
 
 output "service_catalog_repo_id" {
-  description = "ID of the Service Catalog repository"
+  description = "ID of the Service Catalog repository."
   value       = google_sourcerepo_repository.service_catalog.id
 }
 
 output "artifacts_repo_name" {
-  description = "The name of the Artifacts repository"
+  description = "The name of the Artifacts repository."
   value       = google_sourcerepo_repository.artifact_repo.name
 }
 
 output "artifacts_repo_id" {
-  description = "ID of the Artifacts repository"
+  description = "ID of the Artifacts repository."
   value       = google_sourcerepo_repository.artifact_repo.id
 }

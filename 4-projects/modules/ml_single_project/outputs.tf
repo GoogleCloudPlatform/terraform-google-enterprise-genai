@@ -20,7 +20,7 @@ output "project_id" {
 }
 
 output "sa" {
-  description = "Project SA email"
+  description = "Project SA email."
   value       = module.project.service_account_email
 }
 
