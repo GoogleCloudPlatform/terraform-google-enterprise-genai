@@ -35,7 +35,7 @@ output "enabled_apis" {
 }
 
 output "project_name" {
-  description = "Name of the Project."
+  description = "Project Name."
   value       = module.project.project_name
 }
 
