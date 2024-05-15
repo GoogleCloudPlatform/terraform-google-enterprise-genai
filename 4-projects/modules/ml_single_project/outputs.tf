@@ -15,7 +15,7 @@
  */
 
 output "project_id" {
-  description = "Project sample project id."
+  description = "Project ID."
   value       = module.project.project_id
 }
 
