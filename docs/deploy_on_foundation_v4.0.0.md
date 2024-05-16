@@ -18,4 +18,17 @@
 
 - choose business unit to deploy
 - deploy ml infra projects (common folder)
+- create infra pipeline
 - deploy ml envs on business unit
+
+# 5-appinfra
+
+- create service catalog and artifacts build triggers
+- trigger service catalog and artifacts custom builds
+- adjust vpc-sc to your environment
+
+# 6-mlpipeline
+
+- trigger ml infra pipeline, which will create some resources on development environment for the machine learning project
+- on dev env run the notebook and adjust it to your environment
+- promote the test application to prod and test the deployed model
