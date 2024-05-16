@@ -1,0 +1,192 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# PIPELINE DEFINITION
+# Name: create-monitoring
+# Inputs:
+#    bq_data_uri: str
+#    bucket_name: str
+#    email: str
+#    encryption: str
+#    endpoint: system.Model
+#    monitoring_name: str
+#    project_id: str
+#    region: str
+#    service_account: str
+components:
+  comp-create-monitoring:
+    executorLabel: exec-create-monitoring
+    inputDefinitions:
+      artifacts:
+        endpoint:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        bq_data_uri:
+          parameterType: STRING
+        bucket_name:
+          parameterType: STRING
+        email:
+          parameterType: STRING
+        encryption:
+          parameterType: STRING
+        monitoring_name:
+          parameterType: STRING
+        project_id:
+          parameterType: STRING
+        region:
+          parameterType: STRING
+        service_account:
+          parameterType: STRING
+deploymentSpec:
+  executors:
+    exec-create-monitoring:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - create_monitoring
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef create_monitoring(\n    monitoring_name: str,\n    project_id:\
+          \ str,\n    region: str,\n    endpoint: Input[Model],\n    bq_data_uri:\
+          \ str,\n    bucket_name: str,\n    email: str,\n    encryption: str,\n \
+          \   service_account: str,\n):\n    from google.cloud.aiplatform import model_monitoring\n\
+          \    from google.cloud import aiplatform\n    from google.cloud import bigquery\n\
+          \    from google.cloud import storage\n    from collections import OrderedDict\n\
+          \    import time\n    import yaml\n    def ordered_dict_representer(self,\
+          \ value):  # can be a lambda if that's what you prefer\n        return self.represent_mapping('tag:yaml.org,2002:map',\
+          \ value.items())\n    yaml.add_representer(OrderedDict, ordered_dict_representer)\n\
+          \n    aiplatform.init(service_account=service_account)\n    list_monitors\
+          \ = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'(state=\"JOB_STATE_SUCCEEDED\"\
+          \ OR state=\"JOB_STATE_RUNNING\") AND display_name=\"{monitoring_name}\"\
+          ', project=project_id)\n    if len(list_monitors) == 0:\n        alerting_config\
+          \ = model_monitoring.EmailAlertConfig(\n            user_emails=[email],\
+          \ enable_logging=True\n        )\n        # schedule config\n        MONITOR_INTERVAL\
+          \ = 1\n        schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)\n\
+          \        # sampling strategy\n        SAMPLE_RATE = 0.5 \n        logging_sampling_strategy\
+          \ = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)\n     \
+          \   # drift config\n        DRIFT_THRESHOLD_VALUE = 0.05\n        DRIFT_THRESHOLDS\
+          \ = {\n            \"capital_gain\": DRIFT_THRESHOLD_VALUE,\n          \
+          \  \"capital_loss\": DRIFT_THRESHOLD_VALUE,\n        }\n        drift_config\
+          \ = model_monitoring.DriftDetectionConfig(drift_thresholds=DRIFT_THRESHOLDS)\n\
+          \        # Skew config\n        DATASET_BQ_URI = bq_data_uri\n        TARGET\
+          \ = \"income_bracket\"\n        SKEW_THRESHOLD_VALUE = 0.5\n        SKEW_THRESHOLDS\
+          \ = {\n            \"capital_gain\": SKEW_THRESHOLD_VALUE,\n           \
+          \ \"capital_loss\": SKEW_THRESHOLD_VALUE,\n        }\n        skew_config\
+          \ = model_monitoring.SkewDetectionConfig(\n            data_source=DATASET_BQ_URI,\
+          \ skew_thresholds=SKEW_THRESHOLDS, target_field=TARGET\n        )\n    \
+          \    # objective config out of skew and drift configs\n        objective_config\
+          \ = model_monitoring.ObjectiveConfig(\n            skew_detection_config=skew_config,\n\
+          \            drift_detection_config=drift_config,\n            explanation_config=None,\n\
+          \        )\n\n        bqclient = bigquery.Client()\n        table = bigquery.TableReference.from_string(DATASET_BQ_URI[5:])\n\
+          \        bq_table = bqclient.get_table(table)\n        schema = bq_table.schema\n\
+          \        schemayaml = OrderedDict({\n            \"type\": \"object\",\n\
+          \            \"properties\": {},\n            \"required\": []\n       \
+          \ })\n        for feature in schema:\n            if feature.name in [\"\
+          income_bracket\"]:\n                continue\n            if feature.field_type\
+          \ == \"STRING\":\n                f_type = \"string\"\n            else:\n\
+          \                f_type = \"number\"\n            schemayaml['properties'][feature.name]\
+          \ = {\"type\": f_type}\n            if feature.name not in [\"fnlwgt\",\
+          \ \"education_num\"]:\n                schemayaml['required'].append(feature.name)\n\
+          \n        with open(\"monitoring_schema.yaml\", \"w\") as yaml_file:\n \
+          \           yaml.dump(schemayaml, yaml_file, default_flow_style=False)\n\
+          \        storage_client = storage.Client()\n        bucket = storage_client.bucket(bucket_name)\n\
+          \        blob = bucket.blob(\"monitoring_schema.yaml\")\n        blob.upload_from_filename(\"\
+          monitoring_schema.yaml\")\n\n        monitoring_job = aiplatform.ModelDeploymentMonitoringJob.create(\n\
+          \            display_name=monitoring_name,\n            project=project_id,\n\
+          \            location=region,\n            endpoint=endpoint.metadata['resourceName'],\n\
+          \            logging_sampling_strategy=logging_sampling_strategy,\n    \
+          \        schedule_config=schedule_config,\n            alert_config=alerting_config,\n\
+          \            objective_configs=objective_config,\n            analysis_instance_schema_uri=f\"\
+          gs://{bucket_name}/monitoring_schema.yaml\",\n            encryption_spec_key_name=encryption,\n\
+          \        )\n\n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+pipelineInfo:
+  name: create-monitoring
+root:
+  dag:
+    tasks:
+      create-monitoring:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-create-monitoring
+        inputs:
+          artifacts:
+            endpoint:
+              componentInputArtifact: endpoint
+          parameters:
+            bq_data_uri:
+              componentInputParameter: bq_data_uri
+            bucket_name:
+              componentInputParameter: bucket_name
+            email:
+              componentInputParameter: email
+            encryption:
+              componentInputParameter: encryption
+            monitoring_name:
+              componentInputParameter: monitoring_name
+            project_id:
+              componentInputParameter: project_id
+            region:
+              componentInputParameter: region
+            service_account:
+              componentInputParameter: service_account
+        taskInfo:
+          name: create-monitoring
+  inputDefinitions:
+    artifacts:
+      endpoint:
+        artifactType:
+          schemaTitle: system.Model
+          schemaVersion: 0.0.1
+    parameters:
+      bq_data_uri:
+        parameterType: STRING
+      bucket_name:
+        parameterType: STRING
+      email:
+        parameterType: STRING
+      encryption:
+        parameterType: STRING
+      monitoring_name:
+        parameterType: STRING
+      project_id:
+        parameterType: STRING
+      region:
+        parameterType: STRING
+      service_account:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.7.0

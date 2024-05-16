@@ -1,0 +1,215 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# PIPELINE DEFINITION
+# Name: custom-train-model
+# Inputs:
+#    batch_size: int [Default: 32.0]
+#    dataset: str
+#    epochs: int [Default: 5.0]
+#    lr: float [Default: 0.01]
+#    project: str
+#    table: str
+#    tb_log_dir: str
+# Outputs:
+#    model: system.Model
+components:
+  comp-custom-train-model:
+    executorLabel: exec-custom-train-model
+    inputDefinitions:
+      parameters:
+        batch_size:
+          defaultValue: 32.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        dataset:
+          parameterType: STRING
+        epochs:
+          defaultValue: 5.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        lr:
+          defaultValue: 0.01
+          isOptional: true
+          parameterType: NUMBER_DOUBLE
+        project:
+          parameterType: STRING
+        table:
+          parameterType: STRING
+        tb_log_dir:
+          parameterType: STRING
+    outputDefinitions:
+      artifacts:
+        model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+deploymentSpec:
+  executors:
+    exec-custom-train-model:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - custom_train_model
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef custom_train_model(\n    project: str,\n    table: str,\n   \
+          \ dataset: str,\n    tb_log_dir: str,\n    model: Output[Model],\n    epochs:\
+          \ int = 5,\n    batch_size: int = 32,\n    lr: float = 0.01, # not used\
+          \ here but can be passed to an optimizer\n):\n\n    from tensorflow.python.framework\
+          \ import ops\n    from tensorflow.python.framework import dtypes\n    from\
+          \ tensorflow_io.bigquery import BigQueryClient\n    from tensorflow_io.bigquery\
+          \ import BigQueryReadSession\n    from tensorflow import feature_column\n\
+          \    from google.cloud import bigquery\n\n    import tensorflow as tf\n\
+          \    CSV_SCHEMA = [\n      bigquery.SchemaField(\"age\", \"FLOAT64\"),\n\
+          \      bigquery.SchemaField(\"workclass\", \"STRING\"),\n      bigquery.SchemaField(\"\
+          fnlwgt\", \"FLOAT64\"),\n      bigquery.SchemaField(\"education\", \"STRING\"\
+          ),\n      bigquery.SchemaField(\"education_num\", \"FLOAT64\"),\n      bigquery.SchemaField(\"\
+          marital_status\", \"STRING\"),\n      bigquery.SchemaField(\"occupation\"\
+          , \"STRING\"),\n      bigquery.SchemaField(\"relationship\", \"STRING\"\
+          ),\n      bigquery.SchemaField(\"race\", \"STRING\"),\n      bigquery.SchemaField(\"\
+          gender\", \"STRING\"),\n      bigquery.SchemaField(\"capital_gain\", \"\
+          FLOAT64\"),\n      bigquery.SchemaField(\"capital_loss\", \"FLOAT64\"),\n\
+          \      bigquery.SchemaField(\"hours_per_week\", \"FLOAT64\"),\n      bigquery.SchemaField(\"\
+          native_country\", \"STRING\"),\n      bigquery.SchemaField(\"income_bracket\"\
+          , \"STRING\"),\n  ]\n\n    UNUSED_COLUMNS = [\"fnlwgt\", \"education_num\"\
+          ]\n    def transform_row(row_dict):\n        # Trim all string tensors\n\
+          \        trimmed_dict = { column:\n                      (tf.strings.strip(tensor)\
+          \ if tensor.dtype == 'string' else tensor) \n                      for (column,tensor)\
+          \ in row_dict.items()\n                      }\n        # Extract feature\
+          \ column\n        income_bracket = trimmed_dict.pop('income_bracket')\n\
+          \        # Convert feature column to 0.0/1.0\n        income_bracket_float\
+          \ = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), \n     \
+          \                lambda: tf.constant(1.0), \n                     lambda:\
+          \ tf.constant(0.0))\n        return (trimmed_dict, income_bracket_float)\n\
+          \n    def read_bigquery(table_name, dataset=dataset):\n        tensorflow_io_bigquery_client\
+          \ = BigQueryClient()\n        read_session = tensorflow_io_bigquery_client.read_session(\n\
+          \          \"projects/\" + project,\n          project, table, dataset,\n\
+          \          list(field.name for field in CSV_SCHEMA \n               if not\
+          \ field.name in UNUSED_COLUMNS),\n          list(dtypes.double if field.field_type\
+          \ == 'FLOAT64' \n               else dtypes.string for field in CSV_SCHEMA\n\
+          \               if not field.name in UNUSED_COLUMNS),\n          requested_streams=2)\n\
+          \n        dataset = read_session.parallel_read_rows()\n        transformed_ds\
+          \ = dataset.map(transform_row)\n        return transformed_ds\n\n    training_ds\
+          \ = read_bigquery(table).shuffle(10000).batch(batch_size)\n\n\n\n    feature_columns\
+          \ = []\n    def get_categorical_feature_values(column):\n        query =\
+          \ 'SELECT DISTINCT TRIM({}) FROM `{}`.{}.{}'.format(column, project, dataset,\
+          \ table)\n        client = bigquery.Client(project=project)\n        dataset_ref\
+          \ = client.dataset(dataset)\n        job_config = bigquery.QueryJobConfig()\n\
+          \        query_job = client.query(query, job_config=job_config)\n      \
+          \  result = query_job.to_dataframe()\n        return result.values[:,0]\n\
+          \n    # numeric cols\n    for header in ['capital_gain', 'capital_loss',\
+          \ 'hours_per_week']:\n        feature_columns.append(feature_column.numeric_column(header))\n\
+          \n    # categorical cols\n    for header in ['workclass', 'marital_status',\
+          \ 'occupation', 'relationship',\n                   'race', 'native_country',\
+          \ 'education']:\n        categorical_feature = feature_column.categorical_column_with_vocabulary_list(\n\
+          \            header, get_categorical_feature_values(header))\n        categorical_feature_one_hot\
+          \ = feature_column.indicator_column(categorical_feature)\n        feature_columns.append(categorical_feature_one_hot)\n\
+          \n    # bucketized cols\n    age = feature_column.numeric_column('age')\n\
+          \    age_buckets = feature_column.bucketized_column(age, boundaries=[18,\
+          \ 25, 30, 35, 40, 45, 50, 55, 60, 65])\n    feature_columns.append(age_buckets)\n\
+          \n    feature_layer = tf.keras.layers.DenseFeatures(feature_columns)\n\n\
+          \n    Dense = tf.keras.layers.Dense\n    keras_model = tf.keras.Sequential(\n\
+          \      [\n        feature_layer,\n          Dense(100, activation=tf.nn.relu,\
+          \ kernel_initializer='uniform'),\n          Dense(75, activation=tf.nn.relu),\n\
+          \          Dense(50, activation=tf.nn.relu),\n          Dense(25, activation=tf.nn.relu),\n\
+          \          Dense(1, activation=tf.nn.sigmoid)\n      ])\n\n    tensorboard\
+          \ = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)\n    # Compile Keras\
+          \ model\n    keras_model.compile(loss='binary_crossentropy', metrics=['accuracy'])\n\
+          \    keras_model.fit(training_ds, epochs=epochs, callbacks=[tensorboard])\n\
+          \    keras_model.save(model.path)\n\n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+pipelineInfo:
+  name: custom-train-model
+root:
+  dag:
+    outputs:
+      artifacts:
+        model:
+          artifactSelectors:
+          - outputArtifactKey: model
+            producerSubtask: custom-train-model
+    tasks:
+      custom-train-model:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-custom-train-model
+        inputs:
+          parameters:
+            batch_size:
+              componentInputParameter: batch_size
+            dataset:
+              componentInputParameter: dataset
+            epochs:
+              componentInputParameter: epochs
+            lr:
+              componentInputParameter: lr
+            project:
+              componentInputParameter: project
+            table:
+              componentInputParameter: table
+            tb_log_dir:
+              componentInputParameter: tb_log_dir
+        taskInfo:
+          name: custom-train-model
+  inputDefinitions:
+    parameters:
+      batch_size:
+        defaultValue: 32.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      dataset:
+        parameterType: STRING
+      epochs:
+        defaultValue: 5.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      lr:
+        defaultValue: 0.01
+        isOptional: true
+        parameterType: NUMBER_DOUBLE
+      project:
+        parameterType: STRING
+      table:
+        parameterType: STRING
+      tb_log_dir:
+        parameterType: STRING
+  outputDefinitions:
+    artifacts:
+      model:
+        artifactType:
+          schemaTitle: system.Model
+          schemaVersion: 0.0.1
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.7.0
