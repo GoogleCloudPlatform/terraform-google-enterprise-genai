@@ -23,11 +23,11 @@ import (
 
 const (
 	size            = 70
-	readmeURL       = "https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/%s/README.md"
+	readmeURL       = "https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/%s/README.md"
 	cloudBuildURL   = "https://console.cloud.google.com/cloud-build/builds;region=%s?project=%s"
 	buildErrorURL   = "https://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s"
 	quotaURL        = "https://support.google.com/code/contact/billing_quota_increase"
-	troubleQuotaURL = "https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/TROUBLESHOOTING.md#billing-quota-exceeded"
+	troubleQuotaURL = "https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/docs/TROUBLESHOOTING.md#billing-quota-exceeded"
 	groupAdminURL   = "https://cloud.google.com/identity/docs/how-to/setup#assigning_an_admin_role_to_the_service_account"
 )
 

@@ -50,7 +50,7 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-example-foundation README](https://github.com/terraform-google-modules/terraform-example-foundation)
+[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai)
 file.
 
 ## Purpose(s)
@@ -111,7 +111,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
 The pipeline can be accessed by navigating to the project name created in step-4:
 
 ```bash
-terraform -chdir="../terraform-example-foundation/4-projects/business_unit_3/shared/" output -raw service_catalog_project_id
+terraform -chdir="../terraform-google-enterprise-genai/4-projects/business_unit_3/shared/" output -raw service_catalog_project_id
 ```
 ## Prerequisites
 
@@ -133,7 +133,7 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 ### Deploying with Cloud Build
 
 1. Clone the `gcp-policies` repo based on the Terraform output from the `0-bootstrap` step.
-Clone the repo at the same level of the `terraform-example-foundation` folder, the following instructions assume this layout.
+Clone the repo at the same level of the `terraform-google-enterprise-genai` folder, the following instructions assume this layout.
 Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get the Cloud Build Project ID.
 
    ```bash
@@ -153,7 +153,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd gcp-policies-app-infra
    git checkout -b main
 
-   cp -RT ../terraform-example-foundation/policy-library/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ .
    ```
 
 1. Commit changes and push your main branch to the new repo.
@@ -185,9 +185,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd bu3-service-catalog
    git checkout -b plan
 
-   cp -RT ../terraform-example-foundation/5-app-infra/projects/service-catalog/ .
-   cp ../terraform-example-foundation/build/cloudbuild-tf-* .
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/service-catalog/ .
+   cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -200,7 +200,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
@@ -253,7 +253,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos` folder.
    ```shell
    cd service-catalog
-   cp -RT ../terraform-example-foundation/5-app-infra/source_repos/service-catalog/ .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
    ```
 
 1. Commit changes and push main branch to the new repo.
@@ -268,10 +268,10 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 ### Run Terraform locally
 
-1. The next instructions assume that you are at the same level of the `terraform-example-foundation` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
+1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
-   cd terraform-example-foundation/5-app-infra/projects/service-catalog
+   cd terraform-google-enterprise-genai/5-app-infra/projects/service-catalog
    cp ../../../build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```

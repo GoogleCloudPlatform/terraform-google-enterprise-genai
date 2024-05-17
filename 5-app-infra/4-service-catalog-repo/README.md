@@ -60,7 +60,7 @@ This repo provides a number of the [Google Service Catalog](https://cloud.google
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/4-service-catalog-repo` folder.
    ```shell
    cd service-catalog
-   cp -RT ../terraform-example-foundation/5-app-infra/4-service-catalog-repo/ .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/4-service-catalog-repo/ .
    ```
 
 1. Commit changes and push main branch to the new repo.

@@ -25,11 +25,11 @@ import (
 
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/gcp"
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/msg"
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/stages"
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/steps"
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/utils"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/gcp"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/msg"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/stages"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/steps"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/utils"
 )
 
 var (

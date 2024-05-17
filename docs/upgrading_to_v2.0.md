@@ -2,7 +2,7 @@
 
 Before moving forward with adopting components of V2, please review the list of
 breaking changes below. You can find a list of all changes in the
-[Changelog](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/CHANGELOG.md).
+[Changelog](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/CHANGELOG.md).
 
 **Note:** There is no in-place upgrade path from v1 to v2.
 

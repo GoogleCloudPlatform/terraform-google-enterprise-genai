@@ -50,7 +50,7 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-example-foundation README](https://github.com/terraform-google-modules/terraform-example-foundation)
+[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai)
 file.
 
 ## Purpose
@@ -76,7 +76,7 @@ each folder under `images` has the full name and tag of the image that must be b
 Once pushed, the pipeline can be accessed by navigating to the project name created in step-4:
 
 ```bash
-terraform -chdir="../terraform-example-foundation/4-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
+terraform -chdir="../terraform-google-enterprise-genai/4-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
 ```
 
 ## Prerequisites
@@ -112,9 +112,9 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
    cd bu3-artifact-publish
    git checkout -b plan
 
-   cp -RT ../terraform-example-foundation/5-app-infra/1-artifact-publish/ .
-   cp ../terraform-example-foundation/build/cloudbuild-tf-* .
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/1-artifact-publish/ .
+   cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -127,7 +127,7 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
@@ -169,10 +169,10 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
 ### Run Terraform locally
 
-1. The next instructions assume that you are at the same level of the `terraform-example-foundation` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
+1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
-   cd terraform-example-foundation/5-app-infra/projects/artifact-publish
+   cd terraform-google-enterprise-genai/5-app-infra/projects/artifact-publish
    cp ../../../build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
