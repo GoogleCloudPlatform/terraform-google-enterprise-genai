@@ -122,6 +122,30 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
                 "cloudkms.googleapis.com" = {
                 "methods" = ["*"]
                 }
+                "iam.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudresourcemanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "pubsub.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "secretmanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "aiplatform.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "composer.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudbuild.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "bigquery.googleapis.com" = {
+                "methods" = ["*"]
+                }
             }
             }
         },

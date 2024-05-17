@@ -112,6 +112,30 @@ Once there, select the perimeter that is associated with the environment (eg. `d
                 "cloudkms.googleapis.com" = {
                 "methods" = ["*"]
                 }
+                "iam.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudresourcemanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "pubsub.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "secretmanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "aiplatform.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "composer.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudbuild.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "bigquery.googleapis.com" = {
+                "methods" = ["*"]
+                }
             }
             }
         },
