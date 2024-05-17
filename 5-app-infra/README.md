@@ -88,97 +88,9 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
  * your development environment logging bucket service account: `"serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"`
  * your development environment service acount for cloudbuild: `"serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"`
 
- In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes:
+ In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include the changes mentioned in <a href="./5-vpc-sc/README.md#ingress-policies">Ingress Policies section</a>.
 
-    ```
-    ingress_policies = [
-        // users
-        {
-            "from" = {
-            "identity_type" = "ANY_IDENTITY"
-            "sources" = {
-                "access_level" = "accessPolicies/270868347751/accessLevels/alp_d_shared_restricted_members_556e"
-            }
-            },
-            "to" = {
-            "resources" = [
-                "projects/[prj-[your-environment-shared-restricted-project-number]",
-                "projects/[prj-[your-environment-kms-project-number]",
-                "projects/[prj-[your-environment-bu3machine-learning-number]",
-            ]
-            "operations" = {
-                "compute.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "dns.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "logging.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "storage.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "cloudkms.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "iam.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "cloudresourcemanager.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "pubsub.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "secretmanager.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "aiplatform.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "composer.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "cloudbuild.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "bigquery.googleapis.com" = {
-                "methods" = ["*"]
-                }
-            }
-            }
-        },
-    ]
-    ```
-
-for your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
-
-    ```
-    egress_policies = [
-        // notebooks
-        {
-            "from" = {
-            "identity_type" = ""
-            "identities" = [
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
-            ]
-            },
-            "to" = {
-            "resources" = ["projects/[prj-d-kms-project-number]"]
-            "operations" = {
-                "compute.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "cloudkms.googleapis.com" = {
-                "methods" = ["*"]
-                }
-            }
-            }
-        },
-    ]
-    ```
+For your DEVELOPMENT.AUTO.TFVARS file, also include the egress policy mentioned in <a href="./5-vpc-sc/README.md#egress-policies">Egress Policies section</a>.
 
 Please note that this will cover some but not ALL the policies that will be needed.  During deployment there will be violations that will occur which come from unknown google projects outside the scope of your organization.  It will be the responsibility of the operator(s) deploying this process to view logs about the errors and make adjustments accordingly.  Most notably, this was observed for Service Catalog.  There will be an instance where an egress policy to be added for `cloudbuild.googleapis.com` access:
 
