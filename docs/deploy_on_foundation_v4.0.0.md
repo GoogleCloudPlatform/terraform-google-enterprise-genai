@@ -234,7 +234,9 @@ A logging project will be created in every environment (`development`, `non-prod
 
 You must disable the contraint, assign the permission on the bucket and then apply the contraint again. This step-by-step presents you with two different options and only one of them should be executed.
 
-The first and the recommended option is making the intervention using `gcloud` cli, as described in **Option 1**. **Option 2** is an alternative to `gcloud` cli and relies on Google Cloud Console.
+The first and the recommended option is making the intervention using `gcloud` cli, as described in **Option 1**.
+
+**Option 2** is an alternative to `gcloud` cli and relies on Google Cloud Console.
 
 ### Option 1: Use `gcloud` cli to disable/enable organization policy constraint
 
