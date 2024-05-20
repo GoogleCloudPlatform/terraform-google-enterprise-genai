@@ -33,3 +33,7 @@ Additional steps were added to provide an example Machine Learning application:
 
 * [7. vertexpipeline](./7-vertexpipeline/)
     * Used for code reference, will be used for creating the Machine Learning pipeline.
+
+## Deploying on top of existing foundation instance
+
+You can deploy this codebase on top of existing foundation by following the tutorial in [`docs/deploy_on_foundation_v4.0.0.md`](./docs/deploy_on_foundation_v4.0.0.md)
