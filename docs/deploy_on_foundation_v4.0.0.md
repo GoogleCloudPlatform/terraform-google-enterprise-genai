@@ -396,10 +396,10 @@ resource "google_storage_bucket_iam_member" "bucket_logging" {
 ```
 
 2. Under `IAM & Admin`, select `Organization Policies`.  Search for "Domain Restricted Sharing"
-![list-policy](../imgs/list-policy.png)
+![list-policy](../2-environments/imgs/list-policy.png)
 
 3. Select 'Manage Policy'.  This directs you to the Domain Restricted Sharing Edit Policy page.  It will be set at 'Inherit parent's policy'.  Change this to 'Google-managed default'
-![edit-policy](../imgs/edit-policy.png)
+![edit-policy](../2-environments/imgs/edit-policy.png)
 
 4. Follow the instructions on checking out `development`, `non-production` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
 
