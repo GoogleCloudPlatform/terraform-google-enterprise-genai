@@ -28,10 +28,10 @@ Additional steps were added to provide an example Machine Learning application:
     * Model deployment and monitoring occur in the prod environment.
     * Following successful pipeline runs, a new model version is deployed for A/B testing.
 
-* [7. composer](./7-composer/)
+* [composer](./composer/)
     * Used for code reference.
 
-* [7. vertexpipeline](./7-vertexpipeline/)
+* [vertexpipeline](./vertexpipeline/)
     * Used for code reference, will be used for creating the Machine Learning pipeline.
 
 ## Deploying on top of existing foundation instance
