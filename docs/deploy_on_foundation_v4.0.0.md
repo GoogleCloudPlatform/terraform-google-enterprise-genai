@@ -673,7 +673,9 @@ module "ml_dns_vertex_ai" {
 
 After making these modifications to the step, you can follow the README.md procedure for `3-networks-dual-svpc` step on foundation.
 
-- FIREWALL MODIFICATIONS
+- Add projects to regular_service_perimeter
+- Create firewall rules to allow all ingress from specific ranges
+- Enable NAT
 
 # 4-projects: Create Service Catalog and Artifacts Shared projects and Machine Learning Projects
 
