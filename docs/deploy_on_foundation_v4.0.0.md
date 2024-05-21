@@ -4,6 +4,235 @@
 
 To deploy a simple machine learning application, you must first have a [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) instance set up. The following steps will guide you through the additional configurations required on top of the foundation.
 
+# Requirements
+
+## Code
+
+- [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) deployed until at least step `4-projects`.
+- You must have role **Service Account User** (`roles/iam.serviceAccountUser`) on the [Terraform Service Accounts](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#terraform-service-accounts) created in the foundation [Seed Project](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#seed-project).
+  The Terraform Service Accounts have the permissions to deploy each step of the foundation. Service Accounts:
+  - `sa-terraform-bootstrap@<SEED_PROJECT_ID>.iam.gserviceaccount.com`.
+  - `sa-terraform-env@<SEED_PROJECT_ID>.iam.gserviceaccount.com`
+  - `sa-terraform-net@<SEED_PROJECT_ID>.iam.gserviceaccount.com`
+  - `sa-terraform-proj@<SEED_PROJECT_ID>.iam.gserviceaccount.com`
+
+## Software
+
+Install the following dependencies:
+
+- [Google Cloud SDK](https://cloud.google.com/sdk/install) version 469.0.0 or later.
+- [Terraform](https://www.terraform.io/downloads.html) version 1.7.5 or later.
+
+## Google Cloud SDK Configuration
+
+Terraform must have Application Default Credentials configured, to configure it run:
+
+```bash
+gcloud auth application-default login
+```
+
+# Directory Layout and Terraform Initialization
+
+For these instructions we assume that:
+
+- The foundation was deployed using Cloud Build.
+- Every repository, excluding the policies repositories, should be on the `production` branch and `terraform init` should be executed in each one.
+- The following layout should exists in your local environment since you will need to make changes in these steps.
+If you do not have this layout, please checkout the source repositories for the foundation steps following this layout.
+
+    ```text
+    gcp-bootstrap
+    gcp-environments
+    gcp-networks
+    gcp-org
+    gcp-policies
+    gcp-policies-app-infra
+    gcp-projects
+    ```
+
+- Also checkout the [terraform-google-enterprise-genai](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai) repository at the same level.
+
+The final layout should look like this:
+
+    ```text
+    gcp-bootstrap
+    gcp-environments
+    gcp-networks
+    gcp-org
+    gcp-policies
+    gcp-policies-app-infra
+    gcp-projects
+    terraform-google-enterprise-genai
+    ```
+
+# Policies
+
+## Update `gcloud terraform vet` policies
+
+the first step is to update the `gcloud terraform vet` policies constraints to allow usage of the APIs needed by the Blueprint.
+The constraints are located in the two policies repositories:
+
+- `gcp-policies`
+- `gcp-policies-app-infra`
+
+All changes below must be made to both repositories:
+
+- Create file `cmek_settings.yaml` on `policies/constraints` path with the following content:
+
+```yaml
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+apiVersion: constraints.gatekeeper.sh/v1alpha1
+kind: GCPCMEKSettingsConstraintV1
+metadata:
+  name: cmek_rotation
+  annotations:
+    description: Checks multiple CMEK key settings (protection level, algorithm, purpose,
+      rotation period).
+spec:
+  severity: high
+  match:
+    ancestries:
+    - "organizations/**"
+  parameters:
+    # Optionally specify the required key rotation period.  Default is 90 days
+    # Valid time units are  "ns", "us", "ms", "s", "m", "h"
+    # This is 90 days
+    rotation_period: 2160h
+    algorithm: GOOGLE_SYMMETRIC_ENCRYPTION
+    purpose: ENCRYPT_DECRYPT
+    protection_level: SOFTWARE
+```
+
+- Create file `network_enable_firewall_logs.yaml` on `policies/constraints` path with the following content:
+
+```yaml
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: constraints.gatekeeper.sh/v1alpha1
+kind: GCPNetworkEnableFirewallLogsConstraintV1
+metadata:
+  name: enable-network-firewall-logs
+  annotations:
+    description: Ensure Firewall logs is enabled for every firewall in VPC Network
+    bundles.validator.forsetisecurity.org/healthcare-baseline-v1: security
+spec:
+  severity: high
+  match:
+    ancestries:
+    - "organizations/**"
+  parameters: {}
+```
+
+- Create file `require_dnssec.yaml` file on `policies/constraints` path with the following content:
+
+```yaml
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+apiVersion: constraints.gatekeeper.sh/v1alpha1
+kind: GCPDNSSECConstraintV1
+metadata:
+  name: require_dnssec
+  annotations:
+    description: Checks that DNSSEC is enabled for a Cloud DNS managed zone.
+spec:
+  severity: high
+  parameters: {}
+```
+
+- Create file `storage_logging.yaml` on `policies/constraints` path with the following content:
+
+```yaml
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+apiVersion: constraints.gatekeeper.sh/v1alpha1
+kind: GCPStorageLoggingConstraintV1
+metadata:
+  name: storage_logging
+  annotations:
+    description: Ensure storage logs are delivered to a separate bucket
+spec:
+  severity: high
+  match:
+    ancestries:
+    - "organizations/**"
+    excludedAncestries: [] # optional, default is no exclusions
+  parameters: {}
+```
+
+- On `serviceusage_allow_basic_apis.yaml` add the following apis:
+
+```yaml
+     - "aiplatform.googleapis.com"
+     - "bigquerymigration.googleapis.com"
+     - "bigquerystorage.googleapis.com"
+     - "containerregistry.googleapis.com"
+     - "dataflow.googleapis.com"
+     - "dataform.googleapis.com"
+     - "deploymentmanager.googleapis.com"
+     - "notebooks.googleapis.com"
+     - "composer.googleapis.com"
+     - "containerscanning.googleapis.com"
+```
+
+Add files to tracked on git:
+
+```
+git add policies/constraints/*.yaml
+```
+
+Commit changes on `gcp-policies` and `gcp-policies-app-infra` repositories, and push the code.
+
 # 1-org: Create Machine Learning Organization Policies and Organization Level Keys
 
 This step corresponds to modifications made to `1-org` step on foundation.
@@ -443,6 +672,8 @@ module "ml_dns_vertex_ai" {
 ```
 
 After making these modifications to the step, you can follow the README.md procedure for `3-networks-dual-svpc` step on foundation.
+
+- FIREWALL MODIFICATIONS
 
 # 4-projects: Create Service Catalog and Artifacts Shared projects and Machine Learning Projects
 
