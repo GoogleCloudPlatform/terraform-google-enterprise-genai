@@ -1,0 +1,1507 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# PIPELINE DEFINITION
+# Name: census-income-pipeline
+# Inputs:
+#    base_train_dir: str [Default: 'gs://bkt-d-vertexpipe-test-dev/training']
+#    batch_size: int [Default: 32.0]
+#    bq_dataset: str [Default: 'census_dataset']
+#    bq_eval_table: str [Default: 'census_eval_table']
+#    bq_train_table: str [Default: 'census_train_table']
+#    bucket_name: str
+#    create_bq_dataset_query: str
+#    dataflow_subnet: str
+#    dataflow_temp_location: str [Default: 'gs://bkt-d-vertexpipe-test-dev/temp_dataflow']
+#    deployed_model_name: str [Default: 'income_bracket_predictor']
+#    deployment_image: str [Default: 'us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest']
+#    deployment_project: str
+#    encryption: str
+#    endpoint_name: str [Default: 'census_endpoint']
+#    epochs: int [Default: 5.0]
+#    eval_data_url: str [Default: 'gs://bkt-d-vertexpipe-test-dev/data/adult.test.csv']
+#    job_name: str [Default: 'census-ingest']
+#    lr: float [Default: 0.01]
+#    max_nodes: int [Default: 4.0]
+#    min_nodes: int [Default: 2.0]
+#    model_dir: str
+#    monitoring_email: str
+#    monitoring_name: str
+#    prod_service_account: str
+#    project: str
+#    python_file_path: str [Default: 'gs://bkt-d-vertexpipe-test-dev/src/ingest_pipeline.py']
+#    region: str
+#    runner: str [Default: 'DataflowRunner']
+#    service_account: str
+#    tb_log_dir: str [Default: 'gs://bkt-d-vertexpipe-test-dev/tblogs']
+#    traffic_split: int [Default: 25.0]
+#    train_data_url: str [Default: 'gs://bkt-d-vertexpipe-test-dev/data/adult.data.csv']
+# Outputs:
+#    custom-eval-model-metrics: system.Metrics
+components:
+  comp-bigquery-query-job:
+    executorLabel: exec-bigquery-query-job
+    inputDefinitions:
+      parameters:
+        encryption_spec_key_name:
+          defaultValue: ''
+          description: Describes the Cloud KMS encryption key that will be used to
+            protect destination BigQuery table. The BigQuery Service Account associated
+            with your project requires access to this encryption key. If encryption_spec_key_name
+            are both specified in here and in job_configuration_query, the value in
+            here will override the other one.
+          isOptional: true
+          parameterType: STRING
+        job_configuration_query:
+          defaultValue: {}
+          description: A json formatted string describing the rest of the job configuration.  For
+            more details, see https://cloud.google.com/bigquery/docs/reference/rest/v2/Job#JobConfigurationQuery
+          isOptional: true
+          parameterType: STRUCT
+        labels:
+          defaultValue: {}
+          description: 'The labels associated with this job. You can use these to
+            organize and group your jobs. Label keys and values can be no longer than
+            63 characters, can only containlowercase letters, numeric characters,
+            underscores and dashes. International characters are allowed. Label values
+            are optional. Label keys must start with a letter and each label in the
+            list must have a different key.
+
+            Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.'
+          isOptional: true
+          parameterType: STRUCT
+        location:
+          defaultValue: us-central1
+          description: Location for creating the BigQuery job. If not set, default
+            to `US` multi-region.  For more details, see https://cloud.google.com/bigquery/docs/locations#specifying_your_location
+          isOptional: true
+          parameterType: STRING
+        project:
+          defaultValue: '{{$.pipeline_google_cloud_project_id}}'
+          description: Project to run the BigQuery query job. Defaults to the project
+            in which the PipelineJob is run.
+          isOptional: true
+          parameterType: STRING
+        query:
+          defaultValue: ''
+          description: SQL query text to execute. Only standard SQL is supported.  If
+            query are both specified in here and in job_configuration_query, the value
+            in here will override the other one.
+          isOptional: true
+          parameterType: STRING
+        query_parameters:
+          defaultValue: []
+          description: jobs.query parameters for standard SQL queries.  If query_parameters
+            are both specified in here and in job_configuration_query, the value in
+            here will override the other one.
+          isOptional: true
+          parameterType: LIST
+    outputDefinitions:
+      artifacts:
+        destination_table:
+          artifactType:
+            schemaTitle: google.BQTable
+            schemaVersion: 0.0.1
+          description: Describes the table where the query results should be stored.
+            This property must be set for large results that exceed the maximum response
+            size. For queries that produce anonymous (cached) results, this field
+            will be populated by BigQuery.
+      parameters:
+        gcp_resources:
+          description: Serialized gcp_resources proto tracking the BigQuery job. For
+            more details, see https://github.com/kubeflow/pipelines/blob/master/components/google-cloud/google_cloud_pipeline_components/proto/README.md.
+          parameterType: STRING
+  comp-build-dataflow-args:
+    executorLabel: exec-build-dataflow-args
+    inputDefinitions:
+      parameters:
+        bq_dataset:
+          parameterType: STRING
+        bq_project:
+          parameterType: STRING
+        bq_table:
+          parameterType: STRING
+        job_name:
+          parameterType: STRING
+        runner:
+          parameterType: STRING
+        subnet:
+          parameterType: STRING
+        url:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: LIST
+  comp-build-dataflow-args-2:
+    executorLabel: exec-build-dataflow-args-2
+    inputDefinitions:
+      parameters:
+        bq_dataset:
+          parameterType: STRING
+        bq_project:
+          parameterType: STRING
+        bq_table:
+          parameterType: STRING
+        job_name:
+          parameterType: STRING
+        runner:
+          parameterType: STRING
+        subnet:
+          parameterType: STRING
+        url:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: LIST
+  comp-condition-1:
+    dag:
+      tasks:
+        create-monitoring:
+          cachingOptions:
+            enableCache: true
+          componentRef:
+            name: comp-create-monitoring
+          dependentTasks:
+          - deploy-model
+          inputs:
+            artifacts:
+              endpoint:
+                taskOutputArtifact:
+                  outputArtifactKey: vertex_endpoint
+                  producerTask: deploy-model
+            parameters:
+              bq_data_uri:
+                runtimeValue:
+                  constant: bq://{{$.inputs.parameters['pipelinechannel--project']}}.{{$.inputs.parameters['pipelinechannel--bq_dataset']}}.{{$.inputs.parameters['pipelinechannel--bq_train_table']}}
+              bucket_name:
+                componentInputParameter: pipelinechannel--bucket_name
+              email:
+                componentInputParameter: pipelinechannel--monitoring_email
+              encryption:
+                componentInputParameter: pipelinechannel--encryption
+              monitoring_name:
+                componentInputParameter: pipelinechannel--monitoring_name
+              pipelinechannel--bq_dataset:
+                componentInputParameter: pipelinechannel--bq_dataset
+              pipelinechannel--bq_train_table:
+                componentInputParameter: pipelinechannel--bq_train_table
+              pipelinechannel--project:
+                componentInputParameter: pipelinechannel--project
+              project_id:
+                componentInputParameter: pipelinechannel--deployment_project
+              region:
+                componentInputParameter: pipelinechannel--region
+              service_account:
+                componentInputParameter: pipelinechannel--service_account
+          taskInfo:
+            name: create-monitoring
+        deploy-model:
+          cachingOptions:
+            enableCache: true
+          componentRef:
+            name: comp-deploy-model
+          inputs:
+            artifacts:
+              model:
+                componentInputArtifact: pipelinechannel--custom-train-model-model
+            parameters:
+              encryption:
+                componentInputParameter: pipelinechannel--encryption
+              endpoint_name:
+                componentInputParameter: pipelinechannel--endpoint_name
+              max_nodes:
+                componentInputParameter: pipelinechannel--max_nodes
+              min_nodes:
+                componentInputParameter: pipelinechannel--min_nodes
+              model_dir:
+                componentInputParameter: pipelinechannel--model_dir
+              model_name:
+                componentInputParameter: pipelinechannel--deployed_model_name
+              project_id:
+                componentInputParameter: pipelinechannel--deployment_project
+              region:
+                componentInputParameter: pipelinechannel--region
+              service_account:
+                componentInputParameter: pipelinechannel--prod_service_account
+              serving_container_image_uri:
+                componentInputParameter: pipelinechannel--deployment_image
+              split:
+                componentInputParameter: pipelinechannel--traffic_split
+          taskInfo:
+            name: deploy-model
+    inputDefinitions:
+      artifacts:
+        pipelinechannel--custom-train-model-model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        pipelinechannel--bq_dataset:
+          parameterType: STRING
+        pipelinechannel--bq_train_table:
+          parameterType: STRING
+        pipelinechannel--bucket_name:
+          parameterType: STRING
+        pipelinechannel--custom-eval-model-dep_decision:
+          parameterType: STRING
+        pipelinechannel--deployed_model_name:
+          parameterType: STRING
+        pipelinechannel--deployment_image:
+          parameterType: STRING
+        pipelinechannel--deployment_project:
+          parameterType: STRING
+        pipelinechannel--encryption:
+          parameterType: STRING
+        pipelinechannel--endpoint_name:
+          parameterType: STRING
+        pipelinechannel--max_nodes:
+          parameterType: NUMBER_INTEGER
+        pipelinechannel--min_nodes:
+          parameterType: NUMBER_INTEGER
+        pipelinechannel--model_dir:
+          parameterType: STRING
+        pipelinechannel--monitoring_email:
+          parameterType: STRING
+        pipelinechannel--monitoring_name:
+          parameterType: STRING
+        pipelinechannel--prod_service_account:
+          parameterType: STRING
+        pipelinechannel--project:
+          parameterType: STRING
+        pipelinechannel--region:
+          parameterType: STRING
+        pipelinechannel--service_account:
+          parameterType: STRING
+        pipelinechannel--traffic_split:
+          parameterType: NUMBER_INTEGER
+  comp-create-monitoring:
+    executorLabel: exec-create-monitoring
+    inputDefinitions:
+      artifacts:
+        endpoint:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        bq_data_uri:
+          parameterType: STRING
+        bucket_name:
+          parameterType: STRING
+        email:
+          parameterType: STRING
+        encryption:
+          parameterType: STRING
+        monitoring_name:
+          parameterType: STRING
+        project_id:
+          parameterType: STRING
+        region:
+          parameterType: STRING
+        service_account:
+          parameterType: STRING
+  comp-custom-eval-model:
+    executorLabel: exec-custom-eval-model
+    inputDefinitions:
+      artifacts:
+        model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        batch_size:
+          defaultValue: 32.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        dataset:
+          parameterType: STRING
+        model_dir:
+          parameterType: STRING
+        project:
+          parameterType: STRING
+        table:
+          parameterType: STRING
+        tb_log_dir:
+          parameterType: STRING
+    outputDefinitions:
+      artifacts:
+        metrics:
+          artifactType:
+            schemaTitle: system.Metrics
+            schemaVersion: 0.0.1
+      parameters:
+        dep_decision:
+          parameterType: STRING
+  comp-custom-train-model:
+    executorLabel: exec-custom-train-model
+    inputDefinitions:
+      parameters:
+        base_output_directory:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
+        batch_size:
+          defaultValue: 32.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        dataset:
+          parameterType: STRING
+        display_name:
+          defaultValue: custom-train-model
+          isOptional: true
+          parameterType: STRING
+        enable_web_access:
+          defaultValue: false
+          isOptional: true
+          parameterType: BOOLEAN
+        encryption_spec_key_name:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
+        epochs:
+          defaultValue: 5.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        labels:
+          defaultValue: {}
+          isOptional: true
+          parameterType: STRUCT
+        location:
+          defaultValue: us-central1
+          isOptional: true
+          parameterType: STRING
+        lr:
+          defaultValue: 0.01
+          isOptional: true
+          parameterType: NUMBER_DOUBLE
+        network:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
+        project:
+          parameterType: STRING
+        reserved_ip_ranges:
+          defaultValue: []
+          isOptional: true
+          parameterType: LIST
+        restart_job_on_worker_restart:
+          defaultValue: false
+          isOptional: true
+          parameterType: BOOLEAN
+        service_account:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
+        table:
+          parameterType: STRING
+        tb_log_dir:
+          parameterType: STRING
+        tensorboard:
+          defaultValue: ''
+          isOptional: true
+          parameterType: STRING
+        timeout:
+          defaultValue: 604800s
+          isOptional: true
+          parameterType: STRING
+        worker_pool_specs:
+          defaultValue:
+          - container_spec:
+              args:
+              - --executor_input
+              - '{{$.json_escape[1]}}'
+              - --function_to_execute
+              - custom_train_model
+              command:
+              - sh
+              - -c
+              - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip\
+                \ || python3 -m ensurepip --user || apt-get install python3-pip\n\
+                fi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet\
+                \ --no-warn-script-location 'kfp==2.7.0' '--no-deps' 'typing-extensions>=3.7.4,<5;\
+                \ python_version<\"3.9\"' && \"$0\" \"$@\"\n"
+              - sh
+              - -ec
+              - 'program_path=$(mktemp -d)
+
+
+                printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+                _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+                '
+              - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing\
+                \ import *\n\ndef custom_train_model(\n    project: str,\n    table:\
+                \ str,\n    dataset: str,\n    tb_log_dir: str,\n    model: Output[Model],\n\
+                \    epochs: int = 5,\n    batch_size: int = 32,\n    lr: float =\
+                \ 0.01, # not used here but can be passed to an optimizer\n):\n\n\
+                \    from tensorflow.python.framework import ops\n    from tensorflow.python.framework\
+                \ import dtypes\n    from tensorflow_io.bigquery import BigQueryClient\n\
+                \    from tensorflow_io.bigquery import BigQueryReadSession\n    from\
+                \ tensorflow import feature_column\n    from google.cloud import bigquery\n\
+                \n    import tensorflow as tf\n    CSV_SCHEMA = [\n      bigquery.SchemaField(\"\
+                age\", \"FLOAT64\"),\n      bigquery.SchemaField(\"workclass\", \"\
+                STRING\"),\n      bigquery.SchemaField(\"fnlwgt\", \"FLOAT64\"),\n\
+                \      bigquery.SchemaField(\"education\", \"STRING\"),\n      bigquery.SchemaField(\"\
+                education_num\", \"FLOAT64\"),\n      bigquery.SchemaField(\"marital_status\"\
+                , \"STRING\"),\n      bigquery.SchemaField(\"occupation\", \"STRING\"\
+                ),\n      bigquery.SchemaField(\"relationship\", \"STRING\"),\n  \
+                \    bigquery.SchemaField(\"race\", \"STRING\"),\n      bigquery.SchemaField(\"\
+                gender\", \"STRING\"),\n      bigquery.SchemaField(\"capital_gain\"\
+                , \"FLOAT64\"),\n      bigquery.SchemaField(\"capital_loss\", \"FLOAT64\"\
+                ),\n      bigquery.SchemaField(\"hours_per_week\", \"FLOAT64\"),\n\
+                \      bigquery.SchemaField(\"native_country\", \"STRING\"),\n   \
+                \   bigquery.SchemaField(\"income_bracket\", \"STRING\"),\n  ]\n\n\
+                \    UNUSED_COLUMNS = [\"fnlwgt\", \"education_num\"]\n    def transform_row(row_dict):\n\
+                \        # Trim all string tensors\n        trimmed_dict = { column:\n\
+                \                      (tf.strings.strip(tensor) if tensor.dtype ==\
+                \ 'string' else tensor) \n                      for (column,tensor)\
+                \ in row_dict.items()\n                      }\n        # Extract\
+                \ feature column\n        income_bracket = trimmed_dict.pop('income_bracket')\n\
+                \        # Convert feature column to 0.0/1.0\n        income_bracket_float\
+                \ = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), \n\
+                \                     lambda: tf.constant(1.0), \n               \
+                \      lambda: tf.constant(0.0))\n        return (trimmed_dict, income_bracket_float)\n\
+                \n    def read_bigquery(table_name, dataset=dataset):\n        tensorflow_io_bigquery_client\
+                \ = BigQueryClient()\n        read_session = tensorflow_io_bigquery_client.read_session(\n\
+                \          \"projects/\" + project,\n          project, table, dataset,\n\
+                \          list(field.name for field in CSV_SCHEMA \n            \
+                \   if not field.name in UNUSED_COLUMNS),\n          list(dtypes.double\
+                \ if field.field_type == 'FLOAT64' \n               else dtypes.string\
+                \ for field in CSV_SCHEMA\n               if not field.name in UNUSED_COLUMNS),\n\
+                \          requested_streams=2)\n\n        dataset = read_session.parallel_read_rows()\n\
+                \        transformed_ds = dataset.map(transform_row)\n        return\
+                \ transformed_ds\n\n    training_ds = read_bigquery(table).shuffle(10000).batch(batch_size)\n\
+                \n\n\n    feature_columns = []\n    def get_categorical_feature_values(column):\n\
+                \        query = 'SELECT DISTINCT TRIM({}) FROM `{}`.{}.{}'.format(column,\
+                \ project, dataset, table)\n        client = bigquery.Client(project=project)\n\
+                \        dataset_ref = client.dataset(dataset)\n        job_config\
+                \ = bigquery.QueryJobConfig()\n        query_job = client.query(query,\
+                \ job_config=job_config)\n        result = query_job.to_dataframe()\n\
+                \        return result.values[:,0]\n\n    # numeric cols\n    for\
+                \ header in ['capital_gain', 'capital_loss', 'hours_per_week']:\n\
+                \        feature_columns.append(feature_column.numeric_column(header))\n\
+                \n    # categorical cols\n    for header in ['workclass', 'marital_status',\
+                \ 'occupation', 'relationship',\n                   'race', 'native_country',\
+                \ 'education']:\n        categorical_feature = feature_column.categorical_column_with_vocabulary_list(\n\
+                \            header, get_categorical_feature_values(header))\n   \
+                \     categorical_feature_one_hot = feature_column.indicator_column(categorical_feature)\n\
+                \        feature_columns.append(categorical_feature_one_hot)\n\n \
+                \   # bucketized cols\n    age = feature_column.numeric_column('age')\n\
+                \    age_buckets = feature_column.bucketized_column(age, boundaries=[18,\
+                \ 25, 30, 35, 40, 45, 50, 55, 60, 65])\n    feature_columns.append(age_buckets)\n\
+                \n    feature_layer = tf.keras.layers.DenseFeatures(feature_columns)\n\
+                \n\n    Dense = tf.keras.layers.Dense\n    keras_model = tf.keras.Sequential(\n\
+                \      [\n        feature_layer,\n          Dense(100, activation=tf.nn.relu,\
+                \ kernel_initializer='uniform'),\n          Dense(75, activation=tf.nn.relu),\n\
+                \          Dense(50, activation=tf.nn.relu),\n          Dense(25,\
+                \ activation=tf.nn.relu),\n          Dense(1, activation=tf.nn.sigmoid)\n\
+                \      ])\n\n    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)\n\
+                \    # Compile Keras model\n    keras_model.compile(loss='binary_crossentropy',\
+                \ metrics=['accuracy'])\n    keras_model.fit(training_ds, epochs=epochs,\
+                \ callbacks=[tensorboard])\n    keras_model.save(model.path)\n\n"
+              env: []
+              image_uri: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+            disk_spec:
+              boot_disk_size_gb: 100.0
+              boot_disk_type: pd-ssd
+            machine_spec:
+              machine_type: n1-standard-4
+            replica_count: 1.0
+          isOptional: true
+          parameterType: LIST
+    outputDefinitions:
+      artifacts:
+        model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        gcp_resources:
+          parameterType: STRING
+  comp-dataflow-python:
+    executorLabel: exec-dataflow-python
+    inputDefinitions:
+      parameters:
+        args:
+          defaultValue: []
+          description: The list of args to pass to the Python file. Can include additional
+            parameters for the Dataflow Runner.
+          isOptional: true
+          parameterType: LIST
+        location:
+          defaultValue: us-central1
+          description: Location of the Dataflow job. If not set, defaults to `'us-central1'`.
+          isOptional: true
+          parameterType: STRING
+        project:
+          defaultValue: '{{$.pipeline_google_cloud_project_id}}'
+          description: Project to create the Dataflow job. Defaults to the project
+            in which the PipelineJob is run.
+          isOptional: true
+          parameterType: STRING
+        python_module_path:
+          description: The GCS path to the Python file to run.
+          parameterType: STRING
+        requirements_file_path:
+          defaultValue: ''
+          description: The GCS path to the pip requirements file.
+          isOptional: true
+          parameterType: STRING
+        temp_location:
+          description: A GCS path for Dataflow to stage temporary job files created
+            during the execution of the pipeline.
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        gcp_resources:
+          description: Serialized gcp_resources proto tracking the Dataflow job. For
+            more details, see https://github.com/kubeflow/pipelines/blob/master/components/google-cloud/google_cloud_pipeline_components/proto/README.md.
+          parameterType: STRING
+  comp-dataflow-python-2:
+    executorLabel: exec-dataflow-python-2
+    inputDefinitions:
+      parameters:
+        args:
+          defaultValue: []
+          description: The list of args to pass to the Python file. Can include additional
+            parameters for the Dataflow Runner.
+          isOptional: true
+          parameterType: LIST
+        location:
+          defaultValue: us-central1
+          description: Location of the Dataflow job. If not set, defaults to `'us-central1'`.
+          isOptional: true
+          parameterType: STRING
+        project:
+          defaultValue: '{{$.pipeline_google_cloud_project_id}}'
+          description: Project to create the Dataflow job. Defaults to the project
+            in which the PipelineJob is run.
+          isOptional: true
+          parameterType: STRING
+        python_module_path:
+          description: The GCS path to the Python file to run.
+          parameterType: STRING
+        requirements_file_path:
+          defaultValue: ''
+          description: The GCS path to the pip requirements file.
+          isOptional: true
+          parameterType: STRING
+        temp_location:
+          description: A GCS path for Dataflow to stage temporary job files created
+            during the execution of the pipeline.
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        gcp_resources:
+          description: Serialized gcp_resources proto tracking the Dataflow job. For
+            more details, see https://github.com/kubeflow/pipelines/blob/master/components/google-cloud/google_cloud_pipeline_components/proto/README.md.
+          parameterType: STRING
+  comp-deploy-model:
+    executorLabel: exec-deploy-model
+    inputDefinitions:
+      artifacts:
+        model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        encryption:
+          parameterType: STRING
+        endpoint_name:
+          parameterType: STRING
+        max_nodes:
+          parameterType: NUMBER_INTEGER
+        min_nodes:
+          parameterType: NUMBER_INTEGER
+        model_dir:
+          parameterType: STRING
+        model_name:
+          parameterType: STRING
+        project_id:
+          parameterType: STRING
+        region:
+          parameterType: STRING
+        service_account:
+          parameterType: STRING
+        serving_container_image_uri:
+          parameterType: STRING
+        split:
+          parameterType: NUMBER_INTEGER
+    outputDefinitions:
+      artifacts:
+        vertex_endpoint:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+        vertex_model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+  comp-wait-gcp-resources:
+    executorLabel: exec-wait-gcp-resources
+    inputDefinitions:
+      parameters:
+        gcp_resources:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        gcp_resources:
+          parameterType: STRING
+  comp-wait-gcp-resources-2:
+    executorLabel: exec-wait-gcp-resources-2
+    inputDefinitions:
+      parameters:
+        gcp_resources:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        gcp_resources:
+          parameterType: STRING
+deploymentSpec:
+  executors:
+    exec-bigquery-query-job:
+      container:
+        args:
+        - --type
+        - BigqueryQueryJob
+        - --project
+        - '{{$.inputs.parameters[''project'']}}'
+        - --location
+        - '{{$.inputs.parameters[''location'']}}'
+        - --payload
+        - '{"Concat": ["{", "\"configuration\": {", "\"query\": ", "{{$.inputs.parameters[''job_configuration_query'']}}",
+          ", \"labels\": ", "{{$.inputs.parameters[''labels'']}}", "}", "}"]}'
+        - --job_configuration_query_override
+        - '{"Concat": ["{", "\"query\": \"", "{{$.inputs.parameters[''query'']}}",
+          "\"", ", \"query_parameters\": ", "{{$.inputs.parameters[''query_parameters'']}}",
+          ", \"destination_encryption_configuration\": {", "\"kmsKeyName\": \"", "{{$.inputs.parameters[''encryption_spec_key_name'']}}",
+          "\"}", "}"]}'
+        - --gcp_resources
+        - '{{$.outputs.parameters[''gcp_resources''].output_file}}'
+        - --executor_input
+        - '{{$}}'
+        command:
+        - python3
+        - -u
+        - -m
+        - google_cloud_pipeline_components.container.v1.bigquery.query_job.launcher
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
+    exec-build-dataflow-args:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - build_dataflow_args
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef build_dataflow_args(\n    bq_dataset: str,\n    url: str,\n \
+          \   bq_table: str,\n    job_name: str,\n    runner: str,\n    bq_project:\
+          \ str,\n    subnet: str,\n) -> list:\n    return [\n        \"--job_name\"\
+          ,\n        job_name,\n        \"--runner\",\n        runner,\n        \"\
+          --url\",\n        url,\n        \"--bq-dataset\",\n        bq_dataset,\n\
+          \        \"--bq-table\",\n        bq_table,\n        \"--bq-project\",\n\
+          \        bq_project,\n        \"--subnetwork\",\n        subnet,\n     \
+          \   \"--no_use_public_ips\",\n        \"--worker_zone\",\n        \"us-central1-c\"\
+          ,\n    ]\n\n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+    exec-build-dataflow-args-2:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - build_dataflow_args
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef build_dataflow_args(\n    bq_dataset: str,\n    url: str,\n \
+          \   bq_table: str,\n    job_name: str,\n    runner: str,\n    bq_project:\
+          \ str,\n    subnet: str,\n) -> list:\n    return [\n        \"--job_name\"\
+          ,\n        job_name,\n        \"--runner\",\n        runner,\n        \"\
+          --url\",\n        url,\n        \"--bq-dataset\",\n        bq_dataset,\n\
+          \        \"--bq-table\",\n        bq_table,\n        \"--bq-project\",\n\
+          \        bq_project,\n        \"--subnetwork\",\n        subnet,\n     \
+          \   \"--no_use_public_ips\",\n        \"--worker_zone\",\n        \"us-central1-c\"\
+          ,\n    ]\n\n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+    exec-create-monitoring:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - create_monitoring
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef create_monitoring(\n    monitoring_name: str,\n    project_id:\
+          \ str,\n    region: str,\n    endpoint: Input[Model],\n    bq_data_uri:\
+          \ str,\n    bucket_name: str,\n    email: str,\n    encryption: str,\n \
+          \   service_account: str,\n):\n    from google.cloud.aiplatform import model_monitoring\n\
+          \    from google.cloud import aiplatform\n    from google.cloud import bigquery\n\
+          \    from google.cloud import storage\n    from collections import OrderedDict\n\
+          \    import time\n    import yaml\n    def ordered_dict_representer(self,\
+          \ value):  # can be a lambda if that's what you prefer\n        return self.represent_mapping('tag:yaml.org,2002:map',\
+          \ value.items())\n    yaml.add_representer(OrderedDict, ordered_dict_representer)\n\
+          \n    aiplatform.init(service_account=service_account)\n    list_monitors\
+          \ = aiplatform.ModelDeploymentMonitoringJob.list(filter=f'(state=\"JOB_STATE_SUCCEEDED\"\
+          \ OR state=\"JOB_STATE_RUNNING\") AND display_name=\"{monitoring_name}\"\
+          ', project=project_id)\n    if len(list_monitors) == 0:\n        alerting_config\
+          \ = model_monitoring.EmailAlertConfig(\n            user_emails=[email],\
+          \ enable_logging=True\n        )\n        # schedule config\n        MONITOR_INTERVAL\
+          \ = 1\n        schedule_config = model_monitoring.ScheduleConfig(monitor_interval=MONITOR_INTERVAL)\n\
+          \        # sampling strategy\n        SAMPLE_RATE = 0.5 \n        logging_sampling_strategy\
+          \ = model_monitoring.RandomSampleConfig(sample_rate=SAMPLE_RATE)\n     \
+          \   # drift config\n        DRIFT_THRESHOLD_VALUE = 0.05\n        DRIFT_THRESHOLDS\
+          \ = {\n            \"capital_gain\": DRIFT_THRESHOLD_VALUE,\n          \
+          \  \"capital_loss\": DRIFT_THRESHOLD_VALUE,\n        }\n        drift_config\
+          \ = model_monitoring.DriftDetectionConfig(drift_thresholds=DRIFT_THRESHOLDS)\n\
+          \        # Skew config\n        DATASET_BQ_URI = bq_data_uri\n        TARGET\
+          \ = \"income_bracket\"\n        SKEW_THRESHOLD_VALUE = 0.5\n        SKEW_THRESHOLDS\
+          \ = {\n            \"capital_gain\": SKEW_THRESHOLD_VALUE,\n           \
+          \ \"capital_loss\": SKEW_THRESHOLD_VALUE,\n        }\n        skew_config\
+          \ = model_monitoring.SkewDetectionConfig(\n            data_source=DATASET_BQ_URI,\
+          \ skew_thresholds=SKEW_THRESHOLDS, target_field=TARGET\n        )\n    \
+          \    # objective config out of skew and drift configs\n        objective_config\
+          \ = model_monitoring.ObjectiveConfig(\n            skew_detection_config=skew_config,\n\
+          \            drift_detection_config=drift_config,\n            explanation_config=None,\n\
+          \        )\n\n        bqclient = bigquery.Client()\n        table = bigquery.TableReference.from_string(DATASET_BQ_URI[5:])\n\
+          \        bq_table = bqclient.get_table(table)\n        schema = bq_table.schema\n\
+          \        schemayaml = OrderedDict({\n            \"type\": \"object\",\n\
+          \            \"properties\": {},\n            \"required\": []\n       \
+          \ })\n        for feature in schema:\n            if feature.name in [\"\
+          income_bracket\"]:\n                continue\n            if feature.field_type\
+          \ == \"STRING\":\n                f_type = \"string\"\n            else:\n\
+          \                f_type = \"number\"\n            schemayaml['properties'][feature.name]\
+          \ = {\"type\": f_type}\n            if feature.name not in [\"fnlwgt\",\
+          \ \"education_num\"]:\n                schemayaml['required'].append(feature.name)\n\
+          \n        with open(\"monitoring_schema.yaml\", \"w\") as yaml_file:\n \
+          \           yaml.dump(schemayaml, yaml_file, default_flow_style=False)\n\
+          \        storage_client = storage.Client()\n        bucket = storage_client.bucket(bucket_name)\n\
+          \        blob = bucket.blob(\"monitoring_schema.yaml\")\n        blob.upload_from_filename(\"\
+          monitoring_schema.yaml\")\n\n        monitoring_job = aiplatform.ModelDeploymentMonitoringJob.create(\n\
+          \            display_name=monitoring_name,\n            project=project_id,\n\
+          \            location=region,\n            endpoint=endpoint.metadata['resourceName'],\n\
+          \            logging_sampling_strategy=logging_sampling_strategy,\n    \
+          \        schedule_config=schedule_config,\n            alert_config=alerting_config,\n\
+          \            objective_configs=objective_config,\n            analysis_instance_schema_uri=f\"\
+          gs://{bucket_name}/monitoring_schema.yaml\",\n            encryption_spec_key_name=encryption,\n\
+          \        )\n\n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+    exec-custom-eval-model:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - custom_eval_model
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef custom_eval_model(\n    model_dir: str,\n    project: str,\n\
+          \    table: str,\n    dataset: str,\n    tb_log_dir: str,\n    model: Input[Model],\n\
+          \    metrics: Output[Metrics],\n    batch_size: int = 32,\n)-> NamedTuple(\"\
+          Outputs\", [(\"dep_decision\", str)]):\n    from tensorflow.python.framework\
+          \ import ops\n    from tensorflow.python.framework import dtypes\n    from\
+          \ tensorflow_io.bigquery import BigQueryClient\n    from tensorflow_io.bigquery\
+          \ import BigQueryReadSession\n    from tensorflow import feature_column\n\
+          \    from google.cloud import bigquery\n\n\n    import tensorflow as tf\n\
+          \    CSV_SCHEMA = [\n      bigquery.SchemaField(\"age\", \"FLOAT64\"),\n\
+          \      bigquery.SchemaField(\"workclass\", \"STRING\"),\n      bigquery.SchemaField(\"\
+          fnlwgt\", \"FLOAT64\"),\n      bigquery.SchemaField(\"education\", \"STRING\"\
+          ),\n      bigquery.SchemaField(\"education_num\", \"FLOAT64\"),\n      bigquery.SchemaField(\"\
+          marital_status\", \"STRING\"),\n      bigquery.SchemaField(\"occupation\"\
+          , \"STRING\"),\n      bigquery.SchemaField(\"relationship\", \"STRING\"\
+          ),\n      bigquery.SchemaField(\"race\", \"STRING\"),\n      bigquery.SchemaField(\"\
+          gender\", \"STRING\"),\n      bigquery.SchemaField(\"capital_gain\", \"\
+          FLOAT64\"),\n      bigquery.SchemaField(\"capital_loss\", \"FLOAT64\"),\n\
+          \      bigquery.SchemaField(\"hours_per_week\", \"FLOAT64\"),\n      bigquery.SchemaField(\"\
+          native_country\", \"STRING\"),\n      bigquery.SchemaField(\"income_bracket\"\
+          , \"STRING\"),\n  ]\n\n    UNUSED_COLUMNS = [\"fnlwgt\", \"education_num\"\
+          ]\n    def transform_row(row_dict):\n        # Trim all string tensors\n\
+          \        trimmed_dict = { column:\n                      (tf.strings.strip(tensor)\
+          \ if tensor.dtype == 'string' else tensor) \n                      for (column,tensor)\
+          \ in row_dict.items()\n                      }\n        # Extract feature\
+          \ column\n        income_bracket = trimmed_dict.pop('income_bracket')\n\
+          \        # Convert feature column to 0.0/1.0\n        income_bracket_float\
+          \ = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), \n     \
+          \                lambda: tf.constant(1.0), \n                     lambda:\
+          \ tf.constant(0.0))\n        return (trimmed_dict, income_bracket_float)\n\
+          \n    def read_bigquery(table_name, dataset=dataset):\n        tensorflow_io_bigquery_client\
+          \ = BigQueryClient()\n        read_session = tensorflow_io_bigquery_client.read_session(\n\
+          \          \"projects/\" + project,\n          project, table, dataset,\n\
+          \          list(field.name for field in CSV_SCHEMA \n               if not\
+          \ field.name in UNUSED_COLUMNS),\n          list(dtypes.double if field.field_type\
+          \ == 'FLOAT64' \n               else dtypes.string for field in CSV_SCHEMA\n\
+          \               if not field.name in UNUSED_COLUMNS),\n          requested_streams=2)\n\
+          \n        dataset = read_session.parallel_read_rows()\n        transformed_ds\
+          \ = dataset.map(transform_row)\n        return transformed_ds\n\n    eval_ds\
+          \ = read_bigquery(table).batch(batch_size)\n    keras_model = tf.keras.models.load_model(model.path)\n\
+          \    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)\n\
+          \    loss, accuracy = keras_model.evaluate(eval_ds, callbacks=[tensorboard])\n\
+          \    metrics.log_metric(\"accuracy\", accuracy)\n    # Deploy the model\
+          \ only if its accuracy is higher than 80 percent\n    if accuracy > 0.8:\n\
+          \        dep_decision = \"true\"\n        keras_model.save(model_dir)\n\
+          \    else:\n        dep_decision = \"false\"\n    return (dep_decision,)\n\
+          \n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+    exec-custom-train-model:
+      container:
+        args:
+        - --type
+        - CustomJob
+        - --payload
+        - '{"display_name": "{{$.inputs.parameters[''display_name'']}}", "job_spec":
+          {"worker_pool_specs": {{$.inputs.parameters[''worker_pool_specs'']}}, "scheduling":
+          {"timeout": "{{$.inputs.parameters[''timeout'']}}", "restart_job_on_worker_restart":
+          {{$.inputs.parameters[''restart_job_on_worker_restart'']}}}, "service_account":
+          "{{$.inputs.parameters[''service_account'']}}", "tensorboard": "{{$.inputs.parameters[''tensorboard'']}}",
+          "enable_web_access": {{$.inputs.parameters[''enable_web_access'']}}, "network":
+          "{{$.inputs.parameters[''network'']}}", "reserved_ip_ranges": {{$.inputs.parameters[''reserved_ip_ranges'']}},
+          "base_output_directory": {"output_uri_prefix": "{{$.inputs.parameters[''base_output_directory'']}}"}},
+          "labels": {{$.inputs.parameters[''labels'']}}, "encryption_spec": {"kms_key_name":
+          "{{$.inputs.parameters[''encryption_spec_key_name'']}}"}}'
+        - --project
+        - '{{$.inputs.parameters[''project'']}}'
+        - --location
+        - '{{$.inputs.parameters[''location'']}}'
+        - --gcp_resources
+        - '{{$.outputs.parameters[''gcp_resources''].output_file}}'
+        command:
+        - python3
+        - -u
+        - -m
+        - google_cloud_pipeline_components.container.v1.custom_job.launcher
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
+    exec-dataflow-python:
+      container:
+        args:
+        - --project
+        - '{{$.inputs.parameters[''project'']}}'
+        - --location
+        - '{{$.inputs.parameters[''location'']}}'
+        - --python_module_path
+        - '{{$.inputs.parameters[''python_module_path'']}}'
+        - --temp_location
+        - '{{$.inputs.parameters[''temp_location'']}}'
+        - --requirements_file_path
+        - '{{$.inputs.parameters[''requirements_file_path'']}}'
+        - --args
+        - '{{$.inputs.parameters[''args'']}}'
+        - --gcp_resources
+        - '{{$.outputs.parameters[''gcp_resources''].output_file}}'
+        command:
+        - python3
+        - -u
+        - -m
+        - google_cloud_pipeline_components.container.v1.dataflow.dataflow_launcher
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
+    exec-dataflow-python-2:
+      container:
+        args:
+        - --project
+        - '{{$.inputs.parameters[''project'']}}'
+        - --location
+        - '{{$.inputs.parameters[''location'']}}'
+        - --python_module_path
+        - '{{$.inputs.parameters[''python_module_path'']}}'
+        - --temp_location
+        - '{{$.inputs.parameters[''temp_location'']}}'
+        - --requirements_file_path
+        - '{{$.inputs.parameters[''requirements_file_path'']}}'
+        - --args
+        - '{{$.inputs.parameters[''args'']}}'
+        - --gcp_resources
+        - '{{$.outputs.parameters[''gcp_resources''].output_file}}'
+        command:
+        - python3
+        - -u
+        - -m
+        - google_cloud_pipeline_components.container.v1.dataflow.dataflow_launcher
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
+    exec-deploy-model:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - deploy_model
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef deploy_model(\n        serving_container_image_uri: str,\n  \
+          \      model_name: str,\n        model_dir: str,\n        endpoint_name:\
+          \ str,\n        project_id: str,\n        region: str,\n        split: int,\n\
+          \        min_nodes: int,\n        max_nodes: int,\n        encryption: str,\n\
+          \        service_account: str,\n        model: Input[Model],\n        vertex_model:\
+          \ Output[Model],\n        vertex_endpoint: Output[Model]\n):\n    from google.cloud\
+          \ import aiplatform    \n    aiplatform.init(service_account=service_account)\n\
+          \    def create_endpoint():\n        endpoints = aiplatform.Endpoint.list(\n\
+          \        filter=f'display_name=\"{endpoint_name}\"',\n        order_by='create_time\
+          \ desc',\n        project=project_id,\n        location=region,\n      \
+          \  )\n        if len(endpoints) > 0:\n            endpoint = endpoints[0]\
+          \ # most recently created\n        else:\n            endpoint = aiplatform.Endpoint.create(\n\
+          \                display_name=endpoint_name,\n                project=project_id,\n\
+          \                location=region,\n                encryption_spec_key_name=encryption\n\
+          \        )\n        return endpoint\n\n    endpoint = create_endpoint()\n\
+          \n\n    def upload_model():\n        listed_model = aiplatform.Model.list(\n\
+          \        filter=f'display_name=\"{model_name}\"',\n        project=project_id,\n\
+          \        location=region,\n        )\n        if len(listed_model) > 0:\n\
+          \            model_version = listed_model[0]\n            model_upload =\
+          \ aiplatform.Model.upload(\n                    display_name=model_name,\n\
+          \                    parent_model=model_version.resource_name,\n       \
+          \             artifact_uri=model_dir,\n                    serving_container_image_uri=serving_container_image_uri,\n\
+          \                    location=region,\n                    project=project_id,\n\
+          \                    encryption_spec_key_name=encryption\n            )\n\
+          \        else:\n            model_upload = aiplatform.Model.upload(\n  \
+          \                  display_name=model_name,\n                    artifact_uri=model_dir,\n\
+          \                    serving_container_image_uri=serving_container_image_uri,\n\
+          \                    location=region,\n                    project=project_id,\n\
+          \                    encryption_spec_key_name=encryption,\n\n          \
+          \  )\n        return model_upload\n\n    uploaded_model = upload_model()\n\
+          \n    # Save data to the output params\n    vertex_model.uri = uploaded_model.resource_name\n\
+          \    def deploy_to_endpoint(model, endpoint):\n        deployed_models =\
+          \ endpoint.list_models()\n        if len(deployed_models) > 0:\n       \
+          \     latest_model_id = deployed_models[-1].id\n            print(\"your\
+          \ objects properties:\", deployed_models[0].create_time.__dir__())\n   \
+          \         model_deploy = uploaded_model.deploy(\n                # machine_type=\"\
+          n1-standard-4\",\n                endpoint=endpoint,\n                traffic_split={\"\
+          0\": 25, latest_model_id: 75},\n                deployed_model_display_name=model_name,\n\
+          \                min_replica_count=min_nodes,\n                max_replica_count=max_nodes,\n\
+          \                encryption_spec_key_name=encryption,\n                service_account=service_account\n\
+          \            )\n        else:\n            model_deploy = uploaded_model.deploy(\n\
+          \            # machine_type=\"n1-standard-4\",\n            endpoint=endpoint,\n\
+          \            traffic_split={\"0\": 100},\n            min_replica_count=min_nodes,\n\
+          \            max_replica_count=max_nodes,\n            deployed_model_display_name=model_name,\n\
+          \            encryption_spec_key_name=encryption,\n            service_account=service_account\n\
+          \        )\n        return model_deploy.resource_name\n\n    vertex_endpoint.uri\
+          \ = deploy_to_endpoint(vertex_model, endpoint)\n    vertex_endpoint.metadata['resourceName']=endpoint.resource_name\n\
+          \n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+    exec-wait-gcp-resources:
+      container:
+        args:
+        - --type
+        - Wait
+        - --project
+        - ''
+        - --location
+        - ''
+        - --payload
+        - '{{$.inputs.parameters[''gcp_resources'']}}'
+        - --gcp_resources
+        - '{{$.outputs.parameters[''gcp_resources''].output_file}}'
+        command:
+        - python3
+        - -u
+        - -m
+        - google_cloud_pipeline_components.container.v1.wait_gcp_resources.launcher
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
+    exec-wait-gcp-resources-2:
+      container:
+        args:
+        - --type
+        - Wait
+        - --project
+        - ''
+        - --location
+        - ''
+        - --payload
+        - '{{$.inputs.parameters[''gcp_resources'']}}'
+        - --gcp_resources
+        - '{{$.outputs.parameters[''gcp_resources''].output_file}}'
+        command:
+        - python3
+        - -u
+        - -m
+        - google_cloud_pipeline_components.container.v1.wait_gcp_resources.launcher
+        image: gcr.io/ml-pipeline/google-cloud-pipeline-components:2.10.0
+pipelineInfo:
+  name: census-income-pipeline
+root:
+  dag:
+    outputs:
+      artifacts:
+        custom-eval-model-metrics:
+          artifactSelectors:
+          - outputArtifactKey: metrics
+            producerSubtask: custom-eval-model
+    tasks:
+      bigquery-query-job:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-bigquery-query-job
+        inputs:
+          parameters:
+            location:
+              componentInputParameter: region
+            project:
+              componentInputParameter: project
+            query:
+              componentInputParameter: create_bq_dataset_query
+        taskInfo:
+          name: bigquery-query-job
+      build-dataflow-args:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-build-dataflow-args
+        dependentTasks:
+        - bigquery-query-job
+        inputs:
+          parameters:
+            bq_dataset:
+              componentInputParameter: bq_dataset
+            bq_project:
+              componentInputParameter: project
+            bq_table:
+              componentInputParameter: bq_train_table
+            job_name:
+              runtimeValue:
+                constant: '{{$.inputs.parameters[''pipelinechannel--job_name'']}}train'
+            pipelinechannel--job_name:
+              componentInputParameter: job_name
+            runner:
+              componentInputParameter: runner
+            subnet:
+              componentInputParameter: dataflow_subnet
+            url:
+              componentInputParameter: train_data_url
+        taskInfo:
+          name: build-dataflow-args
+      build-dataflow-args-2:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-build-dataflow-args-2
+        dependentTasks:
+        - bigquery-query-job
+        inputs:
+          parameters:
+            bq_dataset:
+              componentInputParameter: bq_dataset
+            bq_project:
+              componentInputParameter: project
+            bq_table:
+              componentInputParameter: bq_eval_table
+            job_name:
+              runtimeValue:
+                constant: '{{$.inputs.parameters[''pipelinechannel--job_name'']}}eval'
+            pipelinechannel--job_name:
+              componentInputParameter: job_name
+            runner:
+              componentInputParameter: runner
+            subnet:
+              componentInputParameter: dataflow_subnet
+            url:
+              componentInputParameter: eval_data_url
+        taskInfo:
+          name: build-dataflow-args-2
+      condition-1:
+        componentRef:
+          name: comp-condition-1
+        dependentTasks:
+        - custom-eval-model
+        - custom-train-model
+        inputs:
+          artifacts:
+            pipelinechannel--custom-train-model-model:
+              taskOutputArtifact:
+                outputArtifactKey: model
+                producerTask: custom-train-model
+          parameters:
+            pipelinechannel--bq_dataset:
+              componentInputParameter: bq_dataset
+            pipelinechannel--bq_train_table:
+              componentInputParameter: bq_train_table
+            pipelinechannel--bucket_name:
+              componentInputParameter: bucket_name
+            pipelinechannel--custom-eval-model-dep_decision:
+              taskOutputParameter:
+                outputParameterKey: dep_decision
+                producerTask: custom-eval-model
+            pipelinechannel--deployed_model_name:
+              componentInputParameter: deployed_model_name
+            pipelinechannel--deployment_image:
+              componentInputParameter: deployment_image
+            pipelinechannel--deployment_project:
+              componentInputParameter: deployment_project
+            pipelinechannel--encryption:
+              componentInputParameter: encryption
+            pipelinechannel--endpoint_name:
+              componentInputParameter: endpoint_name
+            pipelinechannel--max_nodes:
+              componentInputParameter: max_nodes
+            pipelinechannel--min_nodes:
+              componentInputParameter: min_nodes
+            pipelinechannel--model_dir:
+              componentInputParameter: model_dir
+            pipelinechannel--monitoring_email:
+              componentInputParameter: monitoring_email
+            pipelinechannel--monitoring_name:
+              componentInputParameter: monitoring_name
+            pipelinechannel--prod_service_account:
+              componentInputParameter: prod_service_account
+            pipelinechannel--project:
+              componentInputParameter: project
+            pipelinechannel--region:
+              componentInputParameter: region
+            pipelinechannel--service_account:
+              componentInputParameter: service_account
+            pipelinechannel--traffic_split:
+              componentInputParameter: traffic_split
+        taskInfo:
+          name: deploy_decision
+        triggerPolicy:
+          condition: inputs.parameter_values['pipelinechannel--custom-eval-model-dep_decision']
+            == 'true'
+      custom-eval-model:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-custom-eval-model
+        dependentTasks:
+        - custom-train-model
+        - wait-gcp-resources-2
+        inputs:
+          artifacts:
+            model:
+              taskOutputArtifact:
+                outputArtifactKey: model
+                producerTask: custom-train-model
+          parameters:
+            batch_size:
+              componentInputParameter: batch_size
+            dataset:
+              componentInputParameter: bq_dataset
+            model_dir:
+              componentInputParameter: model_dir
+            project:
+              componentInputParameter: project
+            table:
+              componentInputParameter: bq_eval_table
+            tb_log_dir:
+              componentInputParameter: tb_log_dir
+        taskInfo:
+          name: custom-eval-model
+      custom-train-model:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-custom-train-model
+        dependentTasks:
+        - wait-gcp-resources
+        inputs:
+          parameters:
+            base_output_directory:
+              componentInputParameter: base_train_dir
+            batch_size:
+              componentInputParameter: batch_size
+            dataset:
+              componentInputParameter: bq_dataset
+            epochs:
+              componentInputParameter: epochs
+            location:
+              componentInputParameter: region
+            lr:
+              componentInputParameter: lr
+            project:
+              componentInputParameter: project
+            table:
+              componentInputParameter: bq_train_table
+            tb_log_dir:
+              componentInputParameter: tb_log_dir
+        taskInfo:
+          name: custom-train-model
+      dataflow-python:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-dataflow-python
+        dependentTasks:
+        - build-dataflow-args
+        inputs:
+          parameters:
+            args:
+              taskOutputParameter:
+                outputParameterKey: Output
+                producerTask: build-dataflow-args
+            location:
+              componentInputParameter: region
+            pipelinechannel--dataflow_temp_location:
+              componentInputParameter: dataflow_temp_location
+            project:
+              componentInputParameter: project
+            python_module_path:
+              componentInputParameter: python_file_path
+            temp_location:
+              runtimeValue:
+                constant: '{{$.inputs.parameters[''pipelinechannel--dataflow_temp_location'']}}/train'
+        taskInfo:
+          name: dataflow-python
+      dataflow-python-2:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-dataflow-python-2
+        dependentTasks:
+        - build-dataflow-args-2
+        inputs:
+          parameters:
+            args:
+              taskOutputParameter:
+                outputParameterKey: Output
+                producerTask: build-dataflow-args-2
+            location:
+              componentInputParameter: region
+            pipelinechannel--dataflow_temp_location:
+              componentInputParameter: dataflow_temp_location
+            project:
+              componentInputParameter: project
+            python_module_path:
+              componentInputParameter: python_file_path
+            temp_location:
+              runtimeValue:
+                constant: '{{$.inputs.parameters[''pipelinechannel--dataflow_temp_location'']}}/eval'
+        taskInfo:
+          name: dataflow-python-2
+      wait-gcp-resources:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-wait-gcp-resources
+        dependentTasks:
+        - dataflow-python
+        inputs:
+          parameters:
+            gcp_resources:
+              taskOutputParameter:
+                outputParameterKey: gcp_resources
+                producerTask: dataflow-python
+        taskInfo:
+          name: wait-gcp-resources
+      wait-gcp-resources-2:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-wait-gcp-resources-2
+        dependentTasks:
+        - dataflow-python-2
+        inputs:
+          parameters:
+            gcp_resources:
+              taskOutputParameter:
+                outputParameterKey: gcp_resources
+                producerTask: dataflow-python-2
+        taskInfo:
+          name: wait-gcp-resources-2
+  inputDefinitions:
+    parameters:
+      base_train_dir:
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/training
+        isOptional: true
+        parameterType: STRING
+      batch_size:
+        defaultValue: 32.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      bq_dataset:
+        defaultValue: census_dataset
+        isOptional: true
+        parameterType: STRING
+      bq_eval_table:
+        defaultValue: census_eval_table
+        isOptional: true
+        parameterType: STRING
+      bq_train_table:
+        defaultValue: census_train_table
+        isOptional: true
+        parameterType: STRING
+      bucket_name:
+        parameterType: STRING
+      create_bq_dataset_query:
+        parameterType: STRING
+      dataflow_subnet:
+        parameterType: STRING
+      dataflow_temp_location:
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/temp_dataflow
+        isOptional: true
+        parameterType: STRING
+      deployed_model_name:
+        defaultValue: income_bracket_predictor
+        isOptional: true
+        parameterType: STRING
+      deployment_image:
+        defaultValue: us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest
+        isOptional: true
+        parameterType: STRING
+      deployment_project:
+        parameterType: STRING
+      encryption:
+        parameterType: STRING
+      endpoint_name:
+        defaultValue: census_endpoint
+        isOptional: true
+        parameterType: STRING
+      epochs:
+        defaultValue: 5.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      eval_data_url:
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/data/adult.test.csv
+        isOptional: true
+        parameterType: STRING
+      job_name:
+        defaultValue: census-ingest
+        isOptional: true
+        parameterType: STRING
+      lr:
+        defaultValue: 0.01
+        isOptional: true
+        parameterType: NUMBER_DOUBLE
+      max_nodes:
+        defaultValue: 4.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      min_nodes:
+        defaultValue: 2.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      model_dir:
+        parameterType: STRING
+      monitoring_email:
+        parameterType: STRING
+      monitoring_name:
+        parameterType: STRING
+      prod_service_account:
+        parameterType: STRING
+      project:
+        parameterType: STRING
+      python_file_path:
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/src/ingest_pipeline.py
+        isOptional: true
+        parameterType: STRING
+      region:
+        parameterType: STRING
+      runner:
+        defaultValue: DataflowRunner
+        isOptional: true
+        parameterType: STRING
+      service_account:
+        parameterType: STRING
+      tb_log_dir:
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/tblogs
+        isOptional: true
+        parameterType: STRING
+      traffic_split:
+        defaultValue: 25.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      train_data_url:
+        defaultValue: gs://bkt-d-vertexpipe-test-dev/data/adult.data.csv
+        isOptional: true
+        parameterType: STRING
+  outputDefinitions:
+    artifacts:
+      custom-eval-model-metrics:
+        artifactType:
+          schemaTitle: system.Metrics
+          schemaVersion: 0.0.1
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.7.0

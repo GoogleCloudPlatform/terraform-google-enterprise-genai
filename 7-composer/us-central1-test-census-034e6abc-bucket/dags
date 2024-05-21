@@ -1,0 +1,63 @@
+from datetime import timedelta, datetime
+from airflow import DAG
+from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmptyDatasetOperator
+from airflow.providers.apache.beam.operators.beam import BeamRunPythonPipelineOperator
+
+REGION                  = "us-central1"
+BUCKET_URI              = "gs://testairflowpipe"
+PROJECT_ID              = "majid-test-407120"
+DATASET_ID              = 'census_dataset_composer'
+TRAINING_TABLE_ID       = 'census_train_table_composer'
+EVAL_TABLE_ID           = 'census_eval_table_composer'
+RUNNER                  = "DataflowRunner"
+REGION                  = "us-central1"
+JOB_NAME                = "census-ingest-composer"
+default_kms_key_name="projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3machine-learning"
+
+default_args = {
+    'owner'           : 'airflow',
+    'depends_on_past' : False,
+    'start_date'      : datetime(2023, 1, 1),
+    'email_on_failure': False,
+    'email_on_retry'  : False,
+    'retries'         : 1,
+    'retry_delay'     : timedelta(minutes=5),
+}
+
+dag = DAG(
+    'census_dag',
+    default_args=default_args,
+    description='census pipeline built with airlfow',
+    schedule_interval=timedelta(days=1),  # Set the schedule interval (e.g., daily)
+    catchup=False,
+)
+
+# bqOperator = BigQueryCreateEmptyDatasetOperator(
+#     task_id = "bqtask",
+#     dataset_id=DATASET_ID,
+#     project_id=PROJECT_ID,
+#     location=REGION,
+#     dataset_reference={"defaultEncryptionConfiguration":{"kmsKeyName": default_kms_key_name}},
+#     dag=dag,
+# )
+
+start_python_job = BeamRunPythonPipelineOperator(
+    runner="DataflowRunner",
+    task_id="ingest_census_data",
+    py_file=f"{BUCKET_URI}/dataflow_src/ingest_pipeline.py",
+    py_options=["--url", f"{BUCKET_URI}/data/adult.data.csv", "--bq-dataset", DATASET_ID, "--bq-table", TRAINING_TABLE_ID, "--bq-project", PROJECT_ID],
+    pipeline_options={
+        "output": BUCKET_URI,
+        "tempLocation": f"{BUCKET_URI}/dataflow_temp",
+        "stagingLocation": f"{BUCKET_URI}/dataflow_stage"
+    },
+    py_requirements=["apache-beam[gcp]==2.52.0"],
+    py_interpreter="python3",
+    py_system_site_packages=False,
+    dataflow_config={
+        "job_name": "ingest_census_data",
+        "location": REGION,
+        "wait_until_finished": False,
+    },
+    dag=dag
+)

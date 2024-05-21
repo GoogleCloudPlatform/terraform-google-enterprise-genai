@@ -1,0 +1,216 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# PIPELINE DEFINITION
+# Name: custom-eval-model
+# Inputs:
+#    batch_size: int [Default: 32.0]
+#    dataset: str
+#    model: system.Model
+#    model_dir: str
+#    project: str
+#    table: str
+#    tb_log_dir: str
+# Outputs:
+#    custom-eval-model-metrics: system.Metrics
+#    dep_decision: str
+#    metrics: system.Metrics
+components:
+  comp-custom-eval-model:
+    executorLabel: exec-custom-eval-model
+    inputDefinitions:
+      artifacts:
+        model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        batch_size:
+          defaultValue: 32.0
+          isOptional: true
+          parameterType: NUMBER_INTEGER
+        dataset:
+          parameterType: STRING
+        model_dir:
+          parameterType: STRING
+        project:
+          parameterType: STRING
+        table:
+          parameterType: STRING
+        tb_log_dir:
+          parameterType: STRING
+    outputDefinitions:
+      artifacts:
+        metrics:
+          artifactType:
+            schemaTitle: system.Metrics
+            schemaVersion: 0.0.1
+      parameters:
+        dep_decision:
+          parameterType: STRING
+deploymentSpec:
+  executors:
+    exec-custom-eval-model:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - custom_eval_model
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef custom_eval_model(\n    model_dir: str,\n    project: str,\n\
+          \    table: str,\n    dataset: str,\n    tb_log_dir: str,\n    model: Input[Model],\n\
+          \    metrics: Output[Metrics],\n    batch_size: int = 32,\n)-> NamedTuple(\"\
+          Outputs\", [(\"dep_decision\", str)]):\n    from tensorflow.python.framework\
+          \ import ops\n    from tensorflow.python.framework import dtypes\n    from\
+          \ tensorflow_io.bigquery import BigQueryClient\n    from tensorflow_io.bigquery\
+          \ import BigQueryReadSession\n    from tensorflow import feature_column\n\
+          \    from google.cloud import bigquery\n\n\n    import tensorflow as tf\n\
+          \    CSV_SCHEMA = [\n      bigquery.SchemaField(\"age\", \"FLOAT64\"),\n\
+          \      bigquery.SchemaField(\"workclass\", \"STRING\"),\n      bigquery.SchemaField(\"\
+          fnlwgt\", \"FLOAT64\"),\n      bigquery.SchemaField(\"education\", \"STRING\"\
+          ),\n      bigquery.SchemaField(\"education_num\", \"FLOAT64\"),\n      bigquery.SchemaField(\"\
+          marital_status\", \"STRING\"),\n      bigquery.SchemaField(\"occupation\"\
+          , \"STRING\"),\n      bigquery.SchemaField(\"relationship\", \"STRING\"\
+          ),\n      bigquery.SchemaField(\"race\", \"STRING\"),\n      bigquery.SchemaField(\"\
+          gender\", \"STRING\"),\n      bigquery.SchemaField(\"capital_gain\", \"\
+          FLOAT64\"),\n      bigquery.SchemaField(\"capital_loss\", \"FLOAT64\"),\n\
+          \      bigquery.SchemaField(\"hours_per_week\", \"FLOAT64\"),\n      bigquery.SchemaField(\"\
+          native_country\", \"STRING\"),\n      bigquery.SchemaField(\"income_bracket\"\
+          , \"STRING\"),\n  ]\n\n    UNUSED_COLUMNS = [\"fnlwgt\", \"education_num\"\
+          ]\n    def transform_row(row_dict):\n        # Trim all string tensors\n\
+          \        trimmed_dict = { column:\n                      (tf.strings.strip(tensor)\
+          \ if tensor.dtype == 'string' else tensor) \n                      for (column,tensor)\
+          \ in row_dict.items()\n                      }\n        # Extract feature\
+          \ column\n        income_bracket = trimmed_dict.pop('income_bracket')\n\
+          \        # Convert feature column to 0.0/1.0\n        income_bracket_float\
+          \ = tf.cond(tf.equal(tf.strings.strip(income_bracket), '>50K'), \n     \
+          \                lambda: tf.constant(1.0), \n                     lambda:\
+          \ tf.constant(0.0))\n        return (trimmed_dict, income_bracket_float)\n\
+          \n    def read_bigquery(table_name, dataset=dataset):\n        tensorflow_io_bigquery_client\
+          \ = BigQueryClient()\n        read_session = tensorflow_io_bigquery_client.read_session(\n\
+          \          \"projects/\" + project,\n          project, table, dataset,\n\
+          \          list(field.name for field in CSV_SCHEMA \n               if not\
+          \ field.name in UNUSED_COLUMNS),\n          list(dtypes.double if field.field_type\
+          \ == 'FLOAT64' \n               else dtypes.string for field in CSV_SCHEMA\n\
+          \               if not field.name in UNUSED_COLUMNS),\n          requested_streams=2)\n\
+          \n        dataset = read_session.parallel_read_rows()\n        transformed_ds\
+          \ = dataset.map(transform_row)\n        return transformed_ds\n\n    eval_ds\
+          \ = read_bigquery(table).batch(batch_size)\n    keras_model = tf.keras.models.load_model(model.path)\n\
+          \    tensorboard = tf.keras.callbacks.TensorBoard(log_dir=tb_log_dir)\n\
+          \    loss, accuracy = keras_model.evaluate(eval_ds, callbacks=[tensorboard])\n\
+          \    metrics.log_metric(\"accuracy\", accuracy)\n    # Deploy the model\
+          \ only if its accuracy is higher than 80 percent\n    if accuracy > 0.8:\n\
+          \        dep_decision = \"true\"\n        keras_model.save(model_dir)\n\
+          \    else:\n        dep_decision = \"false\"\n    return (dep_decision,)\n\
+          \n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+pipelineInfo:
+  name: custom-eval-model
+root:
+  dag:
+    outputs:
+      artifacts:
+        custom-eval-model-metrics:
+          artifactSelectors:
+          - outputArtifactKey: metrics
+            producerSubtask: custom-eval-model
+        metrics:
+          artifactSelectors:
+          - outputArtifactKey: metrics
+            producerSubtask: custom-eval-model
+      parameters:
+        dep_decision:
+          valueFromParameter:
+            outputParameterKey: dep_decision
+            producerSubtask: custom-eval-model
+    tasks:
+      custom-eval-model:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-custom-eval-model
+        inputs:
+          artifacts:
+            model:
+              componentInputArtifact: model
+          parameters:
+            batch_size:
+              componentInputParameter: batch_size
+            dataset:
+              componentInputParameter: dataset
+            model_dir:
+              componentInputParameter: model_dir
+            project:
+              componentInputParameter: project
+            table:
+              componentInputParameter: table
+            tb_log_dir:
+              componentInputParameter: tb_log_dir
+        taskInfo:
+          name: custom-eval-model
+  inputDefinitions:
+    artifacts:
+      model:
+        artifactType:
+          schemaTitle: system.Model
+          schemaVersion: 0.0.1
+    parameters:
+      batch_size:
+        defaultValue: 32.0
+        isOptional: true
+        parameterType: NUMBER_INTEGER
+      dataset:
+        parameterType: STRING
+      model_dir:
+        parameterType: STRING
+      project:
+        parameterType: STRING
+      table:
+        parameterType: STRING
+      tb_log_dir:
+        parameterType: STRING
+  outputDefinitions:
+    artifacts:
+      custom-eval-model-metrics:
+        artifactType:
+          schemaTitle: system.Metrics
+          schemaVersion: 0.0.1
+      metrics:
+        artifactType:
+          schemaTitle: system.Metrics
+          schemaVersion: 0.0.1
+    parameters:
+      dep_decision:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.7.0

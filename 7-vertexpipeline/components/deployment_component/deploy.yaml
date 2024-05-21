@@ -1,0 +1,241 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# PIPELINE DEFINITION
+# Name: deploy-model
+# Inputs:
+#    encryption: str
+#    endpoint_name: str
+#    max_nodes: int
+#    min_nodes: int
+#    model: system.Model
+#    model_dir: str
+#    model_name: str
+#    project_id: str
+#    region: str
+#    service_account: str
+#    serving_container_image_uri: str
+#    split: int
+# Outputs:
+#    vertex_endpoint: system.Model
+#    vertex_model: system.Model
+components:
+  comp-deploy-model:
+    executorLabel: exec-deploy-model
+    inputDefinitions:
+      artifacts:
+        model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+      parameters:
+        encryption:
+          parameterType: STRING
+        endpoint_name:
+          parameterType: STRING
+        max_nodes:
+          parameterType: NUMBER_INTEGER
+        min_nodes:
+          parameterType: NUMBER_INTEGER
+        model_dir:
+          parameterType: STRING
+        model_name:
+          parameterType: STRING
+        project_id:
+          parameterType: STRING
+        region:
+          parameterType: STRING
+        service_account:
+          parameterType: STRING
+        serving_container_image_uri:
+          parameterType: STRING
+        split:
+          parameterType: NUMBER_INTEGER
+    outputDefinitions:
+      artifacts:
+        vertex_endpoint:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+        vertex_model:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+deploymentSpec:
+  executors:
+    exec-deploy-model:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - deploy_model
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.7.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef deploy_model(\n        serving_container_image_uri: str,\n  \
+          \      model_name: str,\n        model_dir: str,\n        endpoint_name:\
+          \ str,\n        project_id: str,\n        region: str,\n        split: int,\n\
+          \        min_nodes: int,\n        max_nodes: int,\n        encryption: str,\n\
+          \        service_account: str,\n        model: Input[Model],\n        vertex_model:\
+          \ Output[Model],\n        vertex_endpoint: Output[Model]\n):\n    from google.cloud\
+          \ import aiplatform    \n    aiplatform.init(service_account=service_account)\n\
+          \    def create_endpoint():\n        endpoints = aiplatform.Endpoint.list(\n\
+          \        filter=f'display_name=\"{endpoint_name}\"',\n        order_by='create_time\
+          \ desc',\n        project=project_id,\n        location=region,\n      \
+          \  )\n        if len(endpoints) > 0:\n            endpoint = endpoints[0]\
+          \ # most recently created\n        else:\n            endpoint = aiplatform.Endpoint.create(\n\
+          \                display_name=endpoint_name,\n                project=project_id,\n\
+          \                location=region,\n                encryption_spec_key_name=encryption\n\
+          \        )\n        return endpoint\n\n    endpoint = create_endpoint()\n\
+          \n\n    def upload_model():\n        listed_model = aiplatform.Model.list(\n\
+          \        filter=f'display_name=\"{model_name}\"',\n        project=project_id,\n\
+          \        location=region,\n        )\n        if len(listed_model) > 0:\n\
+          \            model_version = listed_model[0]\n            model_upload =\
+          \ aiplatform.Model.upload(\n                    display_name=model_name,\n\
+          \                    parent_model=model_version.resource_name,\n       \
+          \             artifact_uri=model_dir,\n                    serving_container_image_uri=serving_container_image_uri,\n\
+          \                    location=region,\n                    project=project_id,\n\
+          \                    encryption_spec_key_name=encryption\n            )\n\
+          \        else:\n            model_upload = aiplatform.Model.upload(\n  \
+          \                  display_name=model_name,\n                    artifact_uri=model_dir,\n\
+          \                    serving_container_image_uri=serving_container_image_uri,\n\
+          \                    location=region,\n                    project=project_id,\n\
+          \                    encryption_spec_key_name=encryption,\n\n          \
+          \  )\n        return model_upload\n\n    uploaded_model = upload_model()\n\
+          \n    # Save data to the output params\n    vertex_model.uri = uploaded_model.resource_name\n\
+          \    def deploy_to_endpoint(model, endpoint):\n        deployed_models =\
+          \ endpoint.list_models()\n        if len(deployed_models) > 0:\n       \
+          \     latest_model_id = deployed_models[-1].id\n            print(\"your\
+          \ objects properties:\", deployed_models[0].create_time.__dir__())\n   \
+          \         model_deploy = uploaded_model.deploy(\n                # machine_type=\"\
+          n1-standard-4\",\n                endpoint=endpoint,\n                traffic_split={\"\
+          0\": 25, latest_model_id: 75},\n                deployed_model_display_name=model_name,\n\
+          \                min_replica_count=min_nodes,\n                max_replica_count=max_nodes,\n\
+          \                encryption_spec_key_name=encryption,\n                service_account=service_account\n\
+          \            )\n        else:\n            model_deploy = uploaded_model.deploy(\n\
+          \            # machine_type=\"n1-standard-4\",\n            endpoint=endpoint,\n\
+          \            traffic_split={\"0\": 100},\n            min_replica_count=min_nodes,\n\
+          \            max_replica_count=max_nodes,\n            deployed_model_display_name=model_name,\n\
+          \            encryption_spec_key_name=encryption,\n            service_account=service_account\n\
+          \        )\n        return model_deploy.resource_name\n\n    vertex_endpoint.uri\
+          \ = deploy_to_endpoint(vertex_model, endpoint)\n    vertex_endpoint.metadata['resourceName']=endpoint.resource_name\n\
+          \n"
+        image: us-central1-docker.pkg.dev/prj-c-bu3artifacts-5wdo/c-publish-artifacts/vertexpipeline:v2
+pipelineInfo:
+  name: deploy-model
+root:
+  dag:
+    outputs:
+      artifacts:
+        vertex_endpoint:
+          artifactSelectors:
+          - outputArtifactKey: vertex_endpoint
+            producerSubtask: deploy-model
+        vertex_model:
+          artifactSelectors:
+          - outputArtifactKey: vertex_model
+            producerSubtask: deploy-model
+    tasks:
+      deploy-model:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-deploy-model
+        inputs:
+          artifacts:
+            model:
+              componentInputArtifact: model
+          parameters:
+            encryption:
+              componentInputParameter: encryption
+            endpoint_name:
+              componentInputParameter: endpoint_name
+            max_nodes:
+              componentInputParameter: max_nodes
+            min_nodes:
+              componentInputParameter: min_nodes
+            model_dir:
+              componentInputParameter: model_dir
+            model_name:
+              componentInputParameter: model_name
+            project_id:
+              componentInputParameter: project_id
+            region:
+              componentInputParameter: region
+            service_account:
+              componentInputParameter: service_account
+            serving_container_image_uri:
+              componentInputParameter: serving_container_image_uri
+            split:
+              componentInputParameter: split
+        taskInfo:
+          name: deploy-model
+  inputDefinitions:
+    artifacts:
+      model:
+        artifactType:
+          schemaTitle: system.Model
+          schemaVersion: 0.0.1
+    parameters:
+      encryption:
+        parameterType: STRING
+      endpoint_name:
+        parameterType: STRING
+      max_nodes:
+        parameterType: NUMBER_INTEGER
+      min_nodes:
+        parameterType: NUMBER_INTEGER
+      model_dir:
+        parameterType: STRING
+      model_name:
+        parameterType: STRING
+      project_id:
+        parameterType: STRING
+      region:
+        parameterType: STRING
+      service_account:
+        parameterType: STRING
+      serving_container_image_uri:
+        parameterType: STRING
+      split:
+        parameterType: NUMBER_INTEGER
+  outputDefinitions:
+    artifacts:
+      vertex_endpoint:
+        artifactType:
+          schemaTitle: system.Model
+          schemaVersion: 0.0.1
+      vertex_model:
+        artifactType:
+          schemaTitle: system.Model
+          schemaVersion: 0.0.1
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.7.0
