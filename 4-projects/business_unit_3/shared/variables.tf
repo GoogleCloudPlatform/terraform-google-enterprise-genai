@@ -87,3 +87,9 @@ variable "cloud_source_artifacts_repo_name" {
   description = "Name to give the could source repository for Artifacts"
   type        = string
 }
+
+variable "prevent_destroy" {
+  description = "Prevent Project Key destruction."
+  type        = bool
+  default     = true
+}
