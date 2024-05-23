@@ -679,11 +679,546 @@ After making these modifications to the step, you can follow the README.md proce
 
 # 4-projects: Create Service Catalog and Artifacts Shared projects and Machine Learning Projects
 
-- choose business unit to deploy
-- deploy ml infra projects (common folder)
-- create infra pipeline
-- deploy ml envs on business unit
+First of all you should choose a Business Unit to deploy this application, in the case of this tutorial we are using `ml_business_unit` as an example.
 
+## Create Machine Learning Business Unit (ML_BU)
+
+ ```bash
+   #copy the business_unit_1 folder and it's contents to a new folder ml_business_unit
+   cp -r  business_unit_1 ml_business_unit
+
+   # search all files under the folder `ml_business_unit` and replace strings for business_unit_1 with strings for ml_business_unit
+   grep -rl bu1 ml_business_unit/ | xargs sed -i 's/bu1/ml_bu/g'
+   grep -rl business_unit_1 ml_business_unit/ | xargs sed -i 's/business_unit_1/ml_business_unit/g'
+   ```
+
+## Infra Pipeline Modifications
+
+- Open `ml_business_unit/shared/variables.tf` and add the following variables:
+
+```terraform
+variable "location_gcs" {
+  description = "Case-Sensitive Location for GCS Bucket"
+  type        = string
+  default     = "US"
+}
+
+variable "location_kms" {
+  description = "Case-Sensitive Location for KMS Keyring"
+  type        = string
+  default     = "us"
+}
+
+variable "keyring_name" {
+  description = "Name to be used for KMS Keyring"
+  type        = string
+  default     = "sample-keyring"
+}
+
+variable "gcs_bucket_prefix" {
+  description = "Name prefix to be used for GCS Bucket"
+  type        = string
+  default     = "bkt"
+}
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+
+variable "cloud_source_service_catalog_repo_name" {
+  description = "Name to give the cloud source repository for Service Catalog"
+  type        = string
+}
+
+variable "cloud_source_artifacts_repo_name" {
+  description = "Name to give the could source repository for Artifacts"
+  type        = string
+}
+
+variable "prevent_destroy" {
+  description = "Prevent Project Key destruction."
+  type        = bool
+  default     = true
+}
+```
+
+- Open `ml_business_unit/shared/example_infra_pipeline.tf` and replace its content with:
+
+```terraform
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+locals {
+  repo_names = [
+    "ml_bu-artifact-publish",
+    "ml_bu-service-catalog",
+    "ml_bu-machine-learning",
+  ]
+}
+
+module "app_infra_cloudbuild_project" {
+  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//4-projects/modules/single_project?ref=fe3b1b453906d781d22743782afc92664d517b69"
+  count  = local.enable_cloudbuild_deploy ? 1 : 0
+
+  org_id              = local.org_id
+  billing_account     = local.billing_account
+  folder_id           = local.common_folder_name
+  environment         = "common"
+  project_budget      = var.project_budget
+  project_prefix      = local.project_prefix
+  key_rings           = local.shared_kms_key_ring
+  remote_state_bucket = var.remote_state_bucket
+  activate_apis = [
+    "cloudbuild.googleapis.com",
+    "sourcerepo.googleapis.com",
+    "cloudkms.googleapis.com",
+    "iam.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "serviceusage.googleapis.com",
+    "bigquery.googleapis.com",
+  ]
+  # Metadata
+  project_suffix    = "infra-pipeline"
+  application_name  = "app-infra-pipelines"
+  billing_code      = "1234"
+  primary_contact   = "example@example.com"
+  secondary_contact = "example2@example.com"
+  business_code     = "ml_bu"
+}
+
+module "infra_pipelines" {
+  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//4-projects/modules/infra_pipelines?ref=fe3b1b453906d781d22743782afc92664d517b69"
+  count  = local.enable_cloudbuild_deploy ? 1 : 0
+
+  org_id                      = local.org_id
+  cloudbuild_project_id       = module.app_infra_cloudbuild_project[0].project_id
+  cloud_builder_artifact_repo = local.cloud_builder_artifact_repo
+  remote_tfstate_bucket       = local.projects_remote_bucket_tfstate
+  billing_account             = local.billing_account
+  default_region              = var.default_region
+  app_infra_repos             = local.repo_names
+  private_worker_pool_id      = local.cloud_build_private_worker_pool_id
+}
+
+resource "google_kms_key_ring_iam_member" "key_ring" {
+  for_each    = { for k in flatten([for kms in local.shared_kms_key_ring : [for name, email in module.infra_pipelines[0].terraform_service_accounts : { key = "${kms}--${name}", kms = kms, email = email }]]) : k.key => k }
+  key_ring_id = each.value.kms
+  role        = "roles/cloudkms.admin"
+  member      = "serviceAccount:${each.value.email}"
+}
+
+/**
+ * When Jenkins CICD is used for deployment this resource
+ * is created to terraform validation works.
+ * Without this resource, this module creates zero resources
+ * and it breaks terraform validation throwing the error below:
+ * ERROR: [Terraform plan json does not contain resource_changes key]
+ */
+resource "null_resource" "jenkins_cicd" {
+  count = !local.enable_cloudbuild_deploy ? 1 : 0
+}
+```
+
+- On `ml_business_unit/shared/outputs.tf` add the following outputs:
+
+```terraform
+output "service_catalog_project_id" {
+  description = "Service Catalog Project ID."
+  value       = module.ml_infra_project.service_catalog_project_id
+}
+
+output "common_artifacts_project_id" {
+  description = "App Infra Artifacts Project ID"
+  value       = module.ml_infra_project.common_artifacts_project_id
+}
+
+output "service_catalog_repo_name" {
+  description = "The name of the Service Catalog repository"
+  value       = module.ml_infra_project.service_catalog_repo_name
+}
+
+output "service_catalog_repo_id" {
+  description = "ID of the Service Catalog repository"
+  value       = module.ml_infra_project.service_catalog_repo_id
+}
+
+output "artifacts_repo_name" {
+  description = "The name of the Artifacts repository"
+  value       = module.ml_infra_project.artifacts_repo_name
+}
+
+output "artifacts_repo_id" {
+  description = "ID of the Artifacts repository"
+  value       = module.ml_infra_project.artifacts_repo_id
+}
+```
+
+- Open `ml_business_unit/shared/remote.tf` and replace it with the following content:
+
+```terraform
+/**
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+locals {
+  org_id                             = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
+  parent_folder                      = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
+  parent                             = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
+  location_gcs                       = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
+  billing_account                    = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
+  common_folder_name                 = data.terraform_remote_state.org.outputs.common_folder_name
+  common_kms_project_id              = data.terraform_remote_state.org.outputs.org_kms_project_id
+  default_region                     = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
+  project_prefix                     = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
+  folder_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
+  projects_remote_bucket_tfstate     = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
+  cloud_build_private_worker_pool_id = try(data.terraform_remote_state.bootstrap.outputs.cloud_build_private_worker_pool_id, "")
+  cloud_builder_artifact_repo        = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
+  enable_cloudbuild_deploy           = local.cloud_builder_artifact_repo != ""
+  shared_kms_key_ring                = data.terraform_remote_state.org.outputs.key_rings
+}
+
+data "terraform_remote_state" "bootstrap" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/bootstrap/state"
+  }
+}
+
+data "terraform_remote_state" "org" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/org/state"
+  }
+}
+```
+
+- Create `ml_infra_projects.tf` file on `ml_business_unit/shared` with the following content:
+
+```terraform
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+module "ml_infra_project" {
+  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//4-projects/modules/ml_infra_projects?ref=fe3b1b453906d781d22743782afc92664d517b69"
+
+  org_id                                 = local.org_id
+  folder_id                              = local.common_folder_name
+  billing_account                        = local.billing_account
+  environment                            = "common"
+  key_rings                              = local.shared_kms_key_ring
+  business_code                          = "ml_bu"
+  billing_code                           = "1234"
+  primary_contact                        = "example@example.com"
+  secondary_contact                      = "example2@example.com"
+  cloud_source_artifacts_repo_name       = var.cloud_source_artifacts_repo_name
+  cloud_source_service_catalog_repo_name = var.cloud_source_service_catalog_repo_name
+  remote_state_bucket                    = var.remote_state_bucket
+  artifacts_infra_pipeline_sa            = module.infra_pipelines[0].terraform_service_accounts["ml_bu-artifact-publish"]
+  service_catalog_infra_pipeline_sa      = module.infra_pipelines[0].terraform_service_accounts["ml_bu-service-catalog"]
+  environment_kms_project_id             = ""
+  prevent_destroy                        = var.prevent_destroy
+}
+```
+
+## Modify Environments for Machine Learning Business Unit
+
+Perform these modifications for `development`, `non-production` and `production` subfolders on `ml_business_unit`.
+
+1. Edit `main.tf` and replace it's contents with the following:
+
+```terraform
+/**
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+module "bu_folder" {
+  source              = "../../modules/env_folders"
+  business_code       = local.business_code
+  remote_state_bucket = var.remote_state_bucket
+  env                 = var.env
+}
+
+module "ml_env" {
+  source = "../../modules/ml_env"
+
+  env                  = var.env
+  business_code        = local.business_code
+  business_unit        = local.business_unit
+  remote_state_bucket  = var.remote_state_bucket
+  location_gcs         = var.location_gcs
+  tfc_org_name         = var.tfc_org_name
+  business_unit_folder = module.bu_folder.business_unit_folder
+}
+```
+
+2. Edit `outputs.tf` and replace it's contents with the following:
+
+```terraform
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+output "machine_learning_project_id" {
+  description = "Project machine learning project."
+  value       = module.ml_env.machine_learning_project_id
+}
+
+output "machine_learning_project_number" {
+  description = "Project number of machine learning project."
+  value       = module.ml_env.machine_learning_project_number
+}
+
+output "machine_learning_kms_keys" {
+  description = "Key ID for the machine learning project."
+  value       = module.ml_env.machine_learning_kms_keys
+}
+
+output "enable_cloudbuild_deploy" {
+  description = "Enable infra deployment using Cloud Build."
+  value       = local.enable_cloudbuild_deploy
+}
+```
+
+3. Edit `variables.tf` and replace it's contents with the following:
+
+```terraform
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+variable "env" {
+  description = "The environment this deployment belongs to (ie. development)"
+  type        = string
+}
+variable "default_region" {
+  description = "Default region to create resources where applicable."
+  type        = string
+  default     = "us-central1"
+}
+
+variable "remote_state_bucket" {
+  description = "Backend bucket to load Terraform Remote State Data from previous steps."
+  type        = string
+}
+
+variable "location_kms" {
+  description = "Case-Sensitive Location for KMS Keyring (Should be same region as the GCS Bucket)"
+  type        = string
+  default     = "us"
+}
+
+variable "location_gcs" {
+  description = "Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring)"
+  type        = string
+  default     = "US"
+}
+
+variable "peering_module_depends_on" {
+  description = "List of modules or resources peering module depends on."
+  type        = list(any)
+  default     = []
+}
+
+variable "tfc_org_name" {
+  description = "Name of the TFC organization."
+  type        = string
+  default     = ""
+}
+
+variable "project_budget" {
+  description = <<EOT
+  Budget configuration.
+  budget_amount: The amount to use as the budget.
+  alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
+  alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
+  alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
+  EOT
+  type = object({
+    budget_amount        = optional(number, 1000)
+    alert_spent_percents = optional(list(number), [1.2])
+    alert_pubsub_topic   = optional(string, null)
+    alert_spend_basis    = optional(string, "FORECASTED_SPEND")
+  })
+  default = {}
+}
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+```
+
+4. Create `locals.tf` file with the following code:
+
+```terraform
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+locals {
+  repo_name     = "bu3-composer"
+  business_code = "bu3"
+  business_unit = "business_unit_3"
+}
+```
+
+5. Create `remote.tf` file with the following content:
+
+```terraform
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+locals {
+  org_id                             = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
+  parent_folder                      = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
+  parent                             = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
+  location_gcs                       = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
+  billing_account                    = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
+  common_folder_name                 = data.terraform_remote_state.org.outputs.common_folder_name
+  common_kms_project_id              = data.terraform_remote_state.org.outputs.org_kms_project_id
+  default_region                     = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
+  project_prefix                     = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
+  folder_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
+  projects_remote_bucket_tfstate     = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
+  cloud_build_private_worker_pool_id = try(data.terraform_remote_state.bootstrap.outputs.cloud_build_private_worker_pool_id, "")
+  cloud_builder_artifact_repo        = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
+  enable_cloudbuild_deploy           = local.cloud_builder_artifact_repo != ""
+  environment_kms_key_ring           = data.terraform_remote_state.environments_env.outputs.key_rings
+}
+
+data "terraform_remote_state" "bootstrap" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/bootstrap/state"
+  }
+}
+
+data "terraform_remote_state" "org" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/org/state"
+  }
+}
+
+data "terraform_remote_state" "environments_env" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/environments/${var.env}"
+  }
+}
+```
 # 5-appinfra
 
 - create service catalog and artifacts build triggers
