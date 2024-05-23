@@ -80,6 +80,8 @@ You can find the `sources.access_level` information by going to `Security` in yo
 Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
 
 
+## Ingress Policies
+
     ```
     ingress_policies = [
         // users
@@ -112,13 +114,39 @@ Once there, select the perimeter that is associated with the environment (eg. `d
                 "cloudkms.googleapis.com" = {
                 "methods" = ["*"]
                 }
+                "iam.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudresourcemanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "pubsub.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "secretmanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "aiplatform.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "composer.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudbuild.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "bigquery.googleapis.com" = {
+                "methods" = ["*"]
+                }
             }
             }
         },
     ]
     ```
 
-for your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
+## Egress Policies
+
+For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
 
 ```bash
 egress_policies = [
