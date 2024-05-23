@@ -4,9 +4,9 @@
 
 To deploy a simple machine learning application, you must first have a [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) instance set up. The following steps will guide you through the additional configurations required on top of the foundation.
 
-# Requirements
+## Requirements
 
-## Code
+### Code
 
 - [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) deployed until at least step `4-projects`.
 - You must have role **Service Account User** (`roles/iam.serviceAccountUser`) on the [Terraform Service Accounts](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#terraform-service-accounts) created in the foundation [Seed Project](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#seed-project).
@@ -16,14 +16,14 @@ To deploy a simple machine learning application, you must first have a [terrafor
   - `sa-terraform-net@<SEED_PROJECT_ID>.iam.gserviceaccount.com`
   - `sa-terraform-proj@<SEED_PROJECT_ID>.iam.gserviceaccount.com`
 
-## Software
+### Software
 
 Install the following dependencies:
 
 - [Google Cloud SDK](https://cloud.google.com/sdk/install) version 469.0.0 or later.
 - [Terraform](https://www.terraform.io/downloads.html) version 1.7.5 or later.
 
-## Google Cloud SDK Configuration
+### Google Cloud SDK Configuration
 
 Terraform must have Application Default Credentials configured, to configure it run:
 
@@ -31,7 +31,7 @@ Terraform must have Application Default Credentials configured, to configure it 
 gcloud auth application-default login
 ```
 
-# Directory Layout and Terraform Initialization
+## Directory Layout and Terraform Initialization
 
 For these instructions we assume that:
 
@@ -65,9 +65,9 @@ gcp-projects
 terraform-google-enterprise-genai
 ```
 
-# Policies
+## Policies
 
-## Update `gcloud terraform vet` policies
+### Update `gcloud terraform vet` policies
 
 the first step is to update the `gcloud terraform vet` policies constraints to allow usage of the APIs needed by the Blueprint.
 The constraints are located in the two policies repositories:
@@ -233,7 +233,7 @@ git add policies/constraints/*.yaml
 
 Commit changes on `gcp-policies` and `gcp-policies-app-infra` repositories, and push the code.
 
-# 1-org: Create Machine Learning Organization Policies and Organization Level Keys
+## 1-org: Create Machine Learning Organization Policies and Organization Level Keys
 
 This step corresponds to modifications made to `1-org` step on foundation.
 
@@ -308,6 +308,7 @@ module "ml_organization_policies" {
   ]
 }
 ```
+
 - Create `ml_key_rings.tf` file on `1-org/envs/shared` with the following content:
 
 ```terraform
@@ -325,7 +326,7 @@ module "kms_keyring" {
 
 After making these modifications to the step, you can follow the README.md procedure for `1-org` step on foundation.
 
-# 2-environment: Create environment level logging keys, logging project and logging bucket
+## 2-environment: Create environment level logging keys, logging project and logging bucket
 
 - Create `ml_key_rings.tf` file on `2-environments/modules/env_baseline` path with the following content:
 
@@ -457,7 +458,7 @@ resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
 }
 ```
 
-## `N.B.` Read this before continuing further!!
+### `N.B.` Read this before continuing further!!
 
 A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
 
@@ -467,11 +468,11 @@ The first and the recommended option is making the intervention using `gcloud` c
 
 **Option 2** is an alternative to `gcloud` cli and relies on Google Cloud Console.
 
-### Option 1: Use `gcloud` cli to disable/enable organization policy constraint
+#### Option 1: Use `gcloud` cli to disable/enable organization policy constraint
 
 You will be doing this procedure for each environment (`development`, `non-production` & `production`)
 
-#### `development` environment configuration
+##### `development` environment configuration
 
 1. Configure the following variable below with the value of `gcp-environments` repository path.
 
@@ -518,7 +519,7 @@ gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member
 gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
 ```
 
-#### `non-production` environment configuration
+##### `non-production` environment configuration
 
 1. Configure the following variable below with the value of `gcp-environments` repository path.
 
@@ -565,7 +566,7 @@ gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member
 gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
 ```
 
-#### `production` environment configuration
+##### `production` environment configuration
 
 1. Configure the following variable below with the value of `gcp-environments` repository path.
 
@@ -612,7 +613,7 @@ gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member
 gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
 ```
 
-### Option 2: Use Google Cloud Console to disable/enable organization policy constraint
+#### Option 2: Use Google Cloud Console to disable/enable organization policy constraint
 
 1. On `ml_logging.tf` locate the following lines and uncomment them:
 
@@ -636,7 +637,7 @@ resource "google_storage_bucket_iam_member" "bucket_logging" {
 
 After making these modifications, you can follow the README.md procedure for `2-environment` step on foundation, make sure you **change the organization policy after running the steps on foundation**.
 
-# 3-network: Configure private DNS zone for Vertex Workbench Instances
+## 3-network: Configure private DNS zone for Vertex Workbench Instances
 
 - Create a file named `ml_dns_notebooks.tf` on path `modules/base_env` with the follwing content:
 
@@ -677,11 +678,11 @@ After making these modifications to the step, you can follow the README.md proce
 - Create firewall rules to allow all ingress from specific ranges
 - Enable NAT
 
-# 4-projects: Create Service Catalog and Artifacts Shared projects and Machine Learning Projects
+## 4-projects: Create Service Catalog and Artifacts Shared projects and Machine Learning Projects
 
 First of all you should choose a Business Unit to deploy this application, in the case of this tutorial we are using `ml_business_unit` as an example.
 
-## Create Machine Learning Business Unit (ML_BU)
+### Create Machine Learning Business Unit (ML_BU)
 
  ```bash
    #copy the business_unit_1 folder and it's contents to a new folder ml_business_unit
@@ -692,7 +693,7 @@ First of all you should choose a Business Unit to deploy this application, in th
    grep -rl business_unit_1 ml_business_unit/ | xargs sed -i 's/business_unit_1/ml_business_unit/g'
    ```
 
-## Infra Pipeline Modifications
+### Infra Pipeline Modifications
 
 - Open `ml_business_unit/shared/variables.tf` and add the following variables:
 
@@ -966,7 +967,7 @@ module "ml_infra_project" {
 }
 ```
 
-## Modify Environments for Machine Learning Business Unit
+### Modify Environments for Machine Learning Business Unit
 
 Perform these modifications for `development`, `non-production` and `production` subfolders on `ml_business_unit`.
 
@@ -1219,13 +1220,13 @@ data "terraform_remote_state" "environments_env" {
   }
 }
 ```
-# 5-appinfra
+## 5-appinfra
 
 - create service catalog and artifacts build triggers
 - trigger service catalog and artifacts custom builds
 - adjust vpc-sc to your environment
 
-# 6-mlpipeline
+## 6-mlpipeline
 
 - trigger ml infra pipeline, which will create some resources on development environment for the machine learning project
 - on dev env run the notebook and adjust it to your environment
