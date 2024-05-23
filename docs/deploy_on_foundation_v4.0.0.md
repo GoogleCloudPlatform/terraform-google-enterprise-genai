@@ -1,6 +1,6 @@
 # Deploying on top of existing Foundation v.4.0.0
 
-# Overview
+## Overview
 
 To deploy a simple machine learning application, you must first have a [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) instance set up. The following steps will guide you through the additional configurations required on top of the foundation.
 
@@ -227,7 +227,7 @@ spec:
 
 Add files to tracked on git:
 
-```
+```bash
 git add policies/constraints/*.yaml
 ```
 
@@ -458,7 +458,7 @@ resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
 }
 ```
 
-### `N.B.` Read this before continuing further!!
+### `N.B.` Read this before continuing further
 
 A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
 
@@ -476,162 +476,165 @@ You will be doing this procedure for each environment (`development`, `non-produ
 
 1. Configure the following variable below with the value of `gcp-environments` repository path.
 
-```bash
-export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
-```
+    ```bash
+    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
+    ```
 
-Make sure your git is checked out to the development branch by running `git checkout development` on `GCP_ENVIRONMENTS_PATH`.
+    Make sure your git is checked out to the development branch by running `git checkout development` on `GCP_ENVIRONMENTS_PATH`.
 
-```bash
-(cd $GCP_ENVIRONMENTS_PATH && git checkout development)
-```
+    ```bash
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout development)
+    ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
-```bash
-export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_bucket_name)
-export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_project_id)
-```
+    ```bash
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_project_id)
+    ```
 
 3. Validate the variable values.
 
-```bash
-echo env_log_project_id=$ENV_LOG_PROJECT_ID
-echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
-```
+    ```bash
+    echo env_log_project_id=$ENV_LOG_PROJECT_ID
+    echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
+    ```
 
 4. Reset your org policy for the logging project by running the following command.
 
-```bash
-gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
-```
+    ```bash
+    gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
 
 5. Assign `roles/storage.objectCreator` role to `cloud-storage-analytics@google.com` group.
 
-```bash
-gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
-```
-> Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
+    ```bash
+    gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
+    ```
+
+    > Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
 
 6. Delete the change made on the first step to the organization policy, this will make the project inherit parent policies.
 
-```bash
-gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
-```
+    ```bash
+    gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
 
 ##### `non-production` environment configuration
 
 1. Configure the following variable below with the value of `gcp-environments` repository path.
 
-```bash
-export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
-```
+    ```bash
+    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
+    ```
 
-Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
+    Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
 
-```bash
-(cd $GCP_ENVIRONMENTS_PATH && git checkout non-production)
-```
+    ```bash
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production)
+    ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
-```bash
-export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
-export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
-```
+    ```bash
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
+    ```
 
 3. Validate the variable values.
 
-```bash
-echo env_log_project_id=$ENV_LOG_PROJECT_ID
-echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
-```
+    ```bash
+    echo env_log_project_id=$ENV_LOG_PROJECT_ID
+    echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
+    ```
 
 4. Reset your org policy for the logging project by running the following command.
 
-```bash
-gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
-```
+    ```bash
+    gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
 
 5. Assign `roles/storage.objectCreator` role to `cloud-storage-analytics@google.com` group.
 
-```bash
-gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
-```
-> Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
+    ```bash
+    gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
+    ```
+
+    > Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
 
 6. Delete the change made on the first step to the organization policy, this will make the project inherit parent policies.
 
-```bash
-gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
-```
+    ```bash
+    gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
 
 ##### `production` environment configuration
 
 1. Configure the following variable below with the value of `gcp-environments` repository path.
 
-```bash
-export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
-```
+    ```bash
+    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
+    ```
 
-Make sure your git is checked out to the `production` branch by running `git checkout production` on `GCP_ENVIRONMENTS_PATH`.
+    Make sure your git is checked out to the `production` branch by running `git checkout production` on `GCP_ENVIRONMENTS_PATH`.
 
-```bash
-(cd $GCP_ENVIRONMENTS_PATH && git checkout production)
-```
+    ```bash
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout production)
+    ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
-```bash
-export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_bucket_name)
-export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_project_id)
-```
+    ```bash
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_project_id)
+    ```
 
 3. Validate the variable values.
 
-```bash
-echo env_log_project_id=$ENV_LOG_PROJECT_ID
-echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
-```
+    ```bash
+    echo env_log_project_id=$ENV_LOG_PROJECT_ID
+    echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
+    ```
 
 4. Reset your org policy for the logging project by running the following command.
 
-```bash
-gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
-```
+    ```bash
+    gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
 
 5. Assign `roles/storage.objectCreator` role to `cloud-storage-analytics@google.com` group.
 
-```bash
-gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
-```
-> Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
+    ```bash
+    gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
+    ```
+
+    > Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
 
 6. Delete the change made on the first step to the organization policy, this will make the project inherit parent policies.
 
-```bash
-gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
-```
+    ```bash
+    gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
 
 #### Option 2: Use Google Cloud Console to disable/enable organization policy constraint
 
 1. On `ml_logging.tf` locate the following lines and uncomment them:
 
-```terraform
-resource "google_storage_bucket_iam_member" "bucket_logging" {
-  bucket = google_storage_bucket.log_bucket.name
-  role   = "roles/storage.objectCreator"
-  member = "group:cloud-storage-analytics@google.com"
-}
-```
+    ```terraform
+    resource "google_storage_bucket_iam_member" "bucket_logging" {
+      bucket = google_storage_bucket.log_bucket.name
+      role   = "roles/storage.objectCreator"
+      member = "group:cloud-storage-analytics@google.com"
+    }
+    ```
 
 2. Under `IAM & Admin`, select `Organization Policies`.  Search for "Domain Restricted Sharing".
 
-![list-policy](../2-environments/imgs/list-policy.png)
+    ![list-policy](../2-environments/imgs/list-policy.png)
 
 3. Select 'Manage Policy'.  This directs you to the Domain Restricted Sharing Edit Policy page.  It will be set at 'Inherit parent's policy'.  Change this to 'Google-managed default'.
 
-![edit-policy](../2-environments/imgs/edit-policy.png)
+    ![edit-policy](../2-environments/imgs/edit-policy.png)
 
 4. Follow the instructions on checking out `development`, `non-production` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
 
@@ -973,253 +976,254 @@ Perform these modifications for `development`, `non-production` and `production`
 
 1. Edit `main.tf` and replace it's contents with the following:
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+    ```terraform
+    /**
+    * Copyright 2024 Google LLC
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *      http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    */
 
-module "bu_folder" {
-  source              = "../../modules/env_folders"
-  business_code       = local.business_code
-  remote_state_bucket = var.remote_state_bucket
-  env                 = var.env
-}
+    module "bu_folder" {
+      source              = "../../modules/env_folders"
+      business_code       = local.business_code
+      remote_state_bucket = var.remote_state_bucket
+      env                 = var.env
+    }
 
-module "ml_env" {
-  source = "../../modules/ml_env"
+    module "ml_env" {
+      source = "../../modules/ml_env"
 
-  env                  = var.env
-  business_code        = local.business_code
-  business_unit        = local.business_unit
-  remote_state_bucket  = var.remote_state_bucket
-  location_gcs         = var.location_gcs
-  tfc_org_name         = var.tfc_org_name
-  business_unit_folder = module.bu_folder.business_unit_folder
-}
-```
+      env                  = var.env
+      business_code        = local.business_code
+      business_unit        = local.business_unit
+      remote_state_bucket  = var.remote_state_bucket
+      location_gcs         = var.location_gcs
+      tfc_org_name         = var.tfc_org_name
+      business_unit_folder = module.bu_folder.business_unit_folder
+    }
+    ```
 
 2. Edit `outputs.tf` and replace it's contents with the following:
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+    ```terraform
+    /**
+    * Copyright 2024 Google LLC
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *      http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    */
 
-output "machine_learning_project_id" {
-  description = "Project machine learning project."
-  value       = module.ml_env.machine_learning_project_id
-}
+    output "machine_learning_project_id" {
+      description = "Project machine learning project."
+      value       = module.ml_env.machine_learning_project_id
+    }
 
-output "machine_learning_project_number" {
-  description = "Project number of machine learning project."
-  value       = module.ml_env.machine_learning_project_number
-}
+    output "machine_learning_project_number" {
+      description = "Project number of machine learning project."
+      value       = module.ml_env.machine_learning_project_number
+    }
 
-output "machine_learning_kms_keys" {
-  description = "Key ID for the machine learning project."
-  value       = module.ml_env.machine_learning_kms_keys
-}
+    output "machine_learning_kms_keys" {
+      description = "Key ID for the machine learning project."
+      value       = module.ml_env.machine_learning_kms_keys
+    }
 
-output "enable_cloudbuild_deploy" {
-  description = "Enable infra deployment using Cloud Build."
-  value       = local.enable_cloudbuild_deploy
-}
-```
+    output "enable_cloudbuild_deploy" {
+      description = "Enable infra deployment using Cloud Build."
+      value       = local.enable_cloudbuild_deploy
+    }
+    ```
 
 3. Edit `variables.tf` and replace it's contents with the following:
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+    ```terraform
+    /**
+    * Copyright 2024 Google LLC
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *      http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    */
 
-variable "env" {
-  description = "The environment this deployment belongs to (ie. development)"
-  type        = string
-}
-variable "default_region" {
-  description = "Default region to create resources where applicable."
-  type        = string
-  default     = "us-central1"
-}
+    variable "env" {
+      description = "The environment this deployment belongs to (ie. development)"
+      type        = string
+    }
+    variable "default_region" {
+      description = "Default region to create resources where applicable."
+      type        = string
+      default     = "us-central1"
+    }
 
-variable "remote_state_bucket" {
-  description = "Backend bucket to load Terraform Remote State Data from previous steps."
-  type        = string
-}
+    variable "remote_state_bucket" {
+      description = "Backend bucket to load Terraform Remote State Data from previous steps."
+      type        = string
+    }
 
-variable "location_kms" {
-  description = "Case-Sensitive Location for KMS Keyring (Should be same region as the GCS Bucket)"
-  type        = string
-  default     = "us"
-}
+    variable "location_kms" {
+      description = "Case-Sensitive Location for KMS Keyring (Should be same region as the GCS Bucket)"
+      type        = string
+      default     = "us"
+    }
 
-variable "location_gcs" {
-  description = "Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring)"
-  type        = string
-  default     = "US"
-}
+    variable "location_gcs" {
+      description = "Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring)"
+      type        = string
+      default     = "US"
+    }
 
-variable "peering_module_depends_on" {
-  description = "List of modules or resources peering module depends on."
-  type        = list(any)
-  default     = []
-}
+    variable "peering_module_depends_on" {
+      description = "List of modules or resources peering module depends on."
+      type        = list(any)
+      default     = []
+    }
 
-variable "tfc_org_name" {
-  description = "Name of the TFC organization."
-  type        = string
-  default     = ""
-}
+    variable "tfc_org_name" {
+      description = "Name of the TFC organization."
+      type        = string
+      default     = ""
+    }
 
-variable "project_budget" {
-  description = <<EOT
-  Budget configuration.
-  budget_amount: The amount to use as the budget.
-  alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
-  alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
-  alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
-  EOT
-  type = object({
-    budget_amount        = optional(number, 1000)
-    alert_spent_percents = optional(list(number), [1.2])
-    alert_pubsub_topic   = optional(string, null)
-    alert_spend_basis    = optional(string, "FORECASTED_SPEND")
-  })
-  default = {}
-}
+    variable "project_budget" {
+      description = <<EOT
+      Budget configuration.
+      budget_amount: The amount to use as the budget.
+      alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
+      alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
+      alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
+      EOT
+      type = object({
+        budget_amount        = optional(number, 1000)
+        alert_spent_percents = optional(list(number), [1.2])
+        alert_pubsub_topic   = optional(string, null)
+        alert_spend_basis    = optional(string, "FORECASTED_SPEND")
+      })
+      default = {}
+    }
 
-variable "key_rotation_period" {
-  description = "Rotation period in seconds to be used for KMS Key"
-  type        = string
-  default     = "7776000s"
-}
-```
+    variable "key_rotation_period" {
+      description = "Rotation period in seconds to be used for KMS Key"
+      type        = string
+      default     = "7776000s"
+    }
+    ```
 
 4. Create `locals.tf` file with the following code:
 
-```terraform
-# Copyright 2024 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-locals {
-  repo_name     = "bu3-composer"
-  business_code = "bu3"
-  business_unit = "business_unit_3"
-}
-```
+    ```terraform
+    # Copyright 2024 Google LLC
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #     https://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+    #
+    locals {
+      repo_name     = "bu3-composer"
+      business_code = "bu3"
+      business_unit = "business_unit_3"
+    }
+    ```
 
 5. Create `remote.tf` file with the following content:
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+    ```terraform
+    /**
+    * Copyright 2024 Google LLC
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *      http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    */
 
-locals {
-  org_id                             = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
-  parent_folder                      = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
-  parent                             = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
-  location_gcs                       = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
-  billing_account                    = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
-  common_folder_name                 = data.terraform_remote_state.org.outputs.common_folder_name
-  common_kms_project_id              = data.terraform_remote_state.org.outputs.org_kms_project_id
-  default_region                     = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
-  project_prefix                     = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
-  folder_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
-  projects_remote_bucket_tfstate     = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
-  cloud_build_private_worker_pool_id = try(data.terraform_remote_state.bootstrap.outputs.cloud_build_private_worker_pool_id, "")
-  cloud_builder_artifact_repo        = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
-  enable_cloudbuild_deploy           = local.cloud_builder_artifact_repo != ""
-  environment_kms_key_ring           = data.terraform_remote_state.environments_env.outputs.key_rings
-}
+    locals {
+      org_id                             = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
+      parent_folder                      = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
+      parent                             = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
+      location_gcs                       = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
+      billing_account                    = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
+      common_folder_name                 = data.terraform_remote_state.org.outputs.common_folder_name
+      common_kms_project_id              = data.terraform_remote_state.org.outputs.org_kms_project_id
+      default_region                     = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
+      project_prefix                     = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
+      folder_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
+      projects_remote_bucket_tfstate     = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
+      cloud_build_private_worker_pool_id = try(data.terraform_remote_state.bootstrap.outputs.cloud_build_private_worker_pool_id, "")
+      cloud_builder_artifact_repo        = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
+      enable_cloudbuild_deploy           = local.cloud_builder_artifact_repo != ""
+      environment_kms_key_ring           = data.terraform_remote_state.environments_env.outputs.key_rings
+    }
 
-data "terraform_remote_state" "bootstrap" {
-  backend = "gcs"
+    data "terraform_remote_state" "bootstrap" {
+      backend = "gcs"
 
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/bootstrap/state"
-  }
-}
+      config = {
+        bucket = var.remote_state_bucket
+        prefix = "terraform/bootstrap/state"
+      }
+    }
 
-data "terraform_remote_state" "org" {
-  backend = "gcs"
+    data "terraform_remote_state" "org" {
+      backend = "gcs"
 
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/org/state"
-  }
-}
+      config = {
+        bucket = var.remote_state_bucket
+        prefix = "terraform/org/state"
+      }
+    }
 
-data "terraform_remote_state" "environments_env" {
-  backend = "gcs"
+    data "terraform_remote_state" "environments_env" {
+      backend = "gcs"
 
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/environments/${var.env}"
-  }
-}
-```
+      config = {
+        bucket = var.remote_state_bucket
+        prefix = "terraform/environments/${var.env}"
+      }
+    }
+    ```
+
 ## 5-appinfra
 
 - create service catalog and artifacts build triggers
