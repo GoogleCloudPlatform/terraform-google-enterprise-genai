@@ -80,7 +80,7 @@ All changes below must be made to both repositories:
 - Create file `cmek_settings.yaml` on `policies/constraints` path with the following content:
 
 ```yaml
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ spec:
 - Create file `network_enable_firewall_logs.yaml` on `policies/constraints` path with the following content:
 
 ```yaml
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ spec:
 - Create file `require_dnssec.yaml` file on `policies/constraints` path with the following content:
 
 ```yaml
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,7 +181,7 @@ spec:
 - Create file `storage_logging.yaml` on `policies/constraints` path with the following content:
 
 ```yaml
-# Copyright 2021 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -369,7 +369,7 @@ module "kms_keyring" {
 
 ```terraform
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -748,7 +748,7 @@ variable "prevent_destroy" {
 
 ```terraform
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -873,7 +873,7 @@ output "artifacts_repo_id" {
 
 ```terraform
 /**
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -974,7 +974,7 @@ Perform these modifications for `development`, `non-production` and `production`
 
 ```terraform
 /**
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
