@@ -1281,7 +1281,7 @@ You need to manually plan and apply only once the `ml_business_unit/shared`.
 ```bash
 cd ../gcp-projects
 
-git checkout -plan
+git checkout plan
 ```
 
 - Return to GenAI repository
@@ -1360,6 +1360,161 @@ This will create the artifacts and service catalog projects under `common` folde
 ### `development` branch on `gcp-projects`
 
 This will create the machine learning development environment. A Machine Learning project will be hosted under a folder.
+
+- Go to `gcp-projects` repository and checkout to `plan` branch.
+
+```bash
+cd ../gcp-projects
+
+git checkout development
+```
+
+- Return to GenAI repository
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy `ml_business_unit` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
+```
+
+- Add modules to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
+```
+
+- Go to `gcp-projects` repository.
+
+```bash
+cd ../gcp-projects
+```
+
+- Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.
+
+```bash
+export PROJECT_BACKEND=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw projects_gcs_bucket_tfstate)
+
+for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PROJECT_BACKEND/" $file; done
+```
+
+- Commit and push
+
+```bash
+git add .
+git commit -m "Initialize ML environment"
+
+git push origin development
+```
+
+### `non-production` branch on `gcp-projects`
+
+This will create the machine learning non-production environment. A Machine Learning project will be hosted under a folder.
+
+- Go to `gcp-projects` repository and checkout to `plan` branch.
+
+```bash
+cd ../gcp-projects
+
+git checkout non-production
+```
+
+- Return to GenAI repository
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy `ml_business_unit` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
+```
+
+- Add modules to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
+```
+
+- Go to `gcp-projects` repository.
+
+```bash
+cd ../gcp-projects
+```
+
+- Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.
+
+```bash
+export PROJECT_BACKEND=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw projects_gcs_bucket_tfstate)
+
+for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PROJECT_BACKEND/" $file; done
+```
+
+- Commit and push
+
+```bash
+git add .
+git commit -m "Initialize ML environment"
+
+git push origin non-production
+```
+
+### `production` branch on `gcp-projects`
+
+This will create the machine learning production environment. A Machine Learning project will be hosted under a folder.
+
+- Go to `gcp-projects` repository and checkout to `plan` branch.
+
+```bash
+cd ../gcp-projects
+
+git checkout production
+```
+
+- Return to GenAI repository
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy `ml_business_unit` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
+```
+
+- Add modules to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
+```
+
+- Go to `gcp-projects` repository.
+
+```bash
+cd ../gcp-projects
+```
+
+- Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.
+
+```bash
+export PROJECT_BACKEND=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw projects_gcs_bucket_tfstate)
+
+for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PROJECT_BACKEND/" $file; done
+```
+
+- Commit and push
+
+```bash
+git add .
+git commit -m "Initialize ML environment"
+
+git push origin production
+```
 
 ## 5-appinfra
 
