@@ -77,140 +77,33 @@ The constraints are located in the two policies repositories:
 
 All changes below must be made to both repositories:
 
-- Create file `cmek_settings.yaml` on `policies/constraints` path with the following content:
+Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
 
-```yaml
-# Copyright 2024 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+- Copy `cmek_settings.yaml` from this repository to the policies repository:
 
-apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPCMEKSettingsConstraintV1
-metadata:
-  name: cmek_rotation
-  annotations:
-    description: Checks multiple CMEK key settings (protection level, algorithm, purpose,
-      rotation period).
-spec:
-  severity: high
-  match:
-    ancestries:
-    - "organizations/**"
-  parameters:
-    # Optionally specify the required key rotation period.  Default is 90 days
-    # Valid time units are  "ns", "us", "ms", "s", "m", "h"
-    # This is 90 days
-    rotation_period: 2160h
-    algorithm: GOOGLE_SYMMETRIC_ENCRYPTION
-    purpose: ENCRYPT_DECRYPT
-    protection_level: SOFTWARE
+``` bash
+cp policy-library/policies/constraints/cmek_settings.yaml ../gcp-policies/policies/constraints/cmek_settings.yaml
 ```
 
-- Create file `network_enable_firewall_logs.yaml` on `policies/constraints` path with the following content:
+- Copy `network_enable_firewall_logs.yaml` from this repository to the policies repository:
 
-```yaml
-# Copyright 2024 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPNetworkEnableFirewallLogsConstraintV1
-metadata:
-  name: enable-network-firewall-logs
-  annotations:
-    description: Ensure Firewall logs is enabled for every firewall in VPC Network
-    bundles.validator.forsetisecurity.org/healthcare-baseline-v1: security
-spec:
-  severity: high
-  match:
-    ancestries:
-    - "organizations/**"
-  parameters: {}
+``` bash
+cp policy-library/policies/constraints/network_enable_firewall_logs.yaml ../gcp-policies/policies/constraints/network_enable_firewall_logs.yaml
 ```
 
-- Create file `require_dnssec.yaml` file on `policies/constraints` path with the following content:
+- Copy `require_dnssec.yaml` from this repository to the policies repository:
 
-```yaml
-# Copyright 2024 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPDNSSECConstraintV1
-metadata:
-  name: require_dnssec
-  annotations:
-    description: Checks that DNSSEC is enabled for a Cloud DNS managed zone.
-spec:
-  severity: high
-  parameters: {}
+``` bash
+cp policy-library/policies/constraints/require_dnssec.yaml ../gcp-policies/policies/constraints/require_dnssec.yaml
 ```
 
-- Create file `storage_logging.yaml` on `policies/constraints` path with the following content:
+- Copy `storage_logging.yaml` from this repository to the policies repository:
 
-```yaml
-# Copyright 2024 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPStorageLoggingConstraintV1
-metadata:
-  name: storage_logging
-  annotations:
-    description: Ensure storage logs are delivered to a separate bucket
-spec:
-  severity: high
-  match:
-    ancestries:
-    - "organizations/**"
-    excludedAncestries: [] # optional, default is no exclusions
-  parameters: {}
+``` bash
+cp policy-library/policies/constraints/storage_logging.yaml ../gcp-policies/policies/constraints/storage_logging.yaml
 ```
 
-- On `serviceusage_allow_basic_apis.yaml` add the following apis:
+- On `gcp-policies` and `gcp-policies-app-infra` change `serviceusage_allow_basic_apis.yaml` and add the following apis:
 
 ```yaml
      - "aiplatform.googleapis.com"
@@ -225,237 +118,204 @@ spec:
      - "containerscanning.googleapis.com"
 ```
 
-Add files to tracked on git:
+Add files to tracked on `gcp-policies` and `gcp-policies-app-infra` repositories, commit and push the code:
 
 ```bash
-git add policies/constraints/*.yaml
-```
+cd ../gcp-policies
 
-Commit changes on `gcp-policies` and `gcp-policies-app-infra` repositories, and push the code.
+git add policies/constraints/*.yaml
+git commit -m "Add ML policies constraints"
+git push origin $(git branch --show-current)
+
+cd ../gcp-policie-app-infra
+
+git add policies/constraints/*.yaml
+git commit -m "Add ML policies constraints"
+git push origin $(git branch --show-current)
+```
 
 ## 1-org: Create Machine Learning Organization Policies and Organization Level Keys
 
 This step corresponds to modifications made to `1-org` step on foundation.
 
-- Create `ml_ops_org_policy.tf` file on `1-org/envs/shared` path, with the following content:
+Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-module "ml_organization_policies" {
-  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//1-org/modules/ml-org-policies?ref=fe3b1b453906d781d22743782afc92664d517b69"
-
-  org_id    = local.organization_id
-  folder_id = local.folder_id
-
-  allowed_locations = [
-    "in:us-locations"
-  ]
-
-  allowed_vertex_vpc_networks = {
-    parent_type = "project"
-    ids         = [for instance in module.base_restricted_environment_network : instance.restricted_shared_vpc_project_id],
-  }
-
-  allowed_vertex_images = [
-    "ainotebooks-vm/deeplearning-platform-release/image-family/pytorch-1-13-cu113-notebooks",
-    "ainotebooks-vm/deeplearning-platform-release/image-family/pytorch-1-13-cu113-notebooks",
-    "ainotebooks-vm/deeplearning-platform-release/image-family/common-cu113-notebooks",
-    "ainotebooks-vm/deeplearning-platform-release/image-family/common-cpu-notebooks",
-    "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py310",
-    "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu113.py37",
-    "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/base-cu110.py310",
-    "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/tf2-cpu.2-12.py310",
-    "ainotebooks-container/us-docker.pkg.dev/deeplearning-platform-release/gcr.io/tf2-gpu.2-12.py310"
-  ]
-
-  restricted_services = [
-    "alloydb.googleapis.com"
-  ]
-
-  allowed_integrations = [
-    "github.com",
-    "source.developers.google.com"
-  ]
-
-  restricted_tls_versions = [
-    "TLS_VERSION_1",
-    "TLS_VERSION_1_1"
-  ]
-
-  restricted_non_cmek_services = [
-    "bigquery.googleapis.com",
-    "aiplatform.googleapis.com"
-  ]
-
-  allowed_vertex_access_modes = [
-    "single-user",
-    "service-account"
-  ]
-}
+```bash
+cd ../terraform-google-enterprise-genai
 ```
 
-- Create `ml_key_rings.tf` file on `1-org/envs/shared` with the following content:
+- Copy Machine Learning modules from this repo to `gcp-org` repository.
 
-```terraform
-module "kms_keyring" {
-  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//1-org/modules/ml_kms_keyring?ref=fe3b1b453906d781d22743782afc92664d517b69"
-
-  keyring_admins = [
-    "serviceAccount:${local.projects_step_terraform_service_account_email}"
-  ]
-  project_id      = module.org_kms.project_id
-  keyring_regions = var.keyring_regions
-  keyring_name    = var.keyring_name
-}
+```bash
+cp -r 1-org/modules/ml_kms_keyring ../gcp-org/modules
+cp -r 1-org/modules/ml-org-policies ../gcp-org/modules
 ```
 
-After making these modifications to the step, you can follow the README.md procedure for `1-org` step on foundation.
+- Create `ml_ops_org_policy.tf` file on `gcp-org/envs/shared` path:
+
+```bash
+cp docs/assets/terraform/1-org/ml_ops_org_policy.tf ../gcp-org/envs/shared
+```
+
+- Create `ml_key_rings.tf` file on `gcp-org/envs/shared` path:
+
+```bash
+cp docs/assets/terraform/1-org/ml_key_rings.tf ../gcp-org/envs/shared
+```
+
+Add files to git on `gcp-org`, commit and push code:
+
+```bash
+cd ../gcp-org
+
+git add envs/shared/ml_key_rings.tf
+git add envs/shared/ml_ops_org_policy.tf
+git add modules
+
+git commit -m "Add ML org policies and Org-level key"
+git push origin $(git branch --show-current)
+```
 
 ## 2-environment: Create environment level logging keys, logging project and logging bucket
 
-- Create `ml_key_rings.tf` file on `2-environments/modules/env_baseline` path with the following content:
+This step corresponds to modifications made to `2-environment` step on foundation.
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
 
-locals {
-  logging_key_name = module.env_logs.project_id
-}
-
-// Creates a keyring with logging key for each region (us-central1, us-east4)
-module "kms_keyring" {
-  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//2-environment/modules/ml_kms_keyring?ref=fe3b1b453906d781d22743782afc92664d517b69"
-
-  keyring_admins = [
-    "serviceAccount:${local.projects_step_terraform_service_account_email}"
-  ]
-  project_id          = module.env_kms.project_id
-  keyring_regions     = var.keyring_regions
-  keyring_name        = var.keyring_name
-  keys                = [local.logging_key_name]
-  kms_prevent_destroy = var.kms_prevent_destroy
-}
+```bash
+cd ../terraform-google-enterprise-genai
 ```
 
-- Create `ml_logging.tf` file on `2-environments/modules/env_baseline` path with the following content:
+### `development` branch
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+- Go to `gcp-environments` repository, and check out on `development` branch.
 
-data "google_storage_project_service_account" "gcs_logging_account" {
-  project = module.env_logs.project_id
-}
+```bash
+cd ../gcp-environemnts
 
-/******************************************
-  Project for Environment Logging
-*****************************************/
+git checkout development
+```
 
-module "env_logs" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "~> 14.0"
+- Return to `terraform-google-enterprise-genai` repo
 
-  random_project_id        = true
-  random_project_id_length = 4
-  default_service_account  = "deprivilege"
-  name                     = "${local.project_prefix}-${var.environment_code}-logging"
-  org_id                   = local.org_id
-  billing_account          = local.billing_account
-  folder_id                = google_folder.env.id
-  activate_apis            = ["logging.googleapis.com", "billingbudgets.googleapis.com", "storage.googleapis.com"]
+```bash
+cd ../terraform-google-enterprise-genai
+```
 
-  labels = {
-    environment       = var.env
-    application_name  = "env-logging"
-    billing_code      = "1234"
-    primary_contact   = "example1"
-    secondary_contact = "example2"
-    business_code     = "abcd"
-    env_code          = var.environment_code
-  }
-  budget_alert_pubsub_topic   = var.project_budget.logging_alert_pubsub_topic
-  budget_alert_spent_percents = var.project_budget.logging_alert_spent_percents
-  budget_amount               = var.project_budget.logging_budget_amount
-  budget_alert_spend_basis    = var.project_budget.logging_budget_alert_spend_basis
+- Copy Machine Learning modules from this repo to `gcp-environments` repository.
 
-}
+```bash
+cp -r 2-environments/modules/ml_kms_keyring ../gcp-environments/modules
+```
 
-// Create Bucket for this project
-resource "google_storage_bucket" "log_bucket" {
-  name                        = "${var.gcs_bucket_prefix}-${module.env_logs.project_id}"
-  location                    = var.gcs_logging_bucket_location
-  project                     = module.env_logs.project_id
-  uniform_bucket_level_access = true
+- Create `ml_key_rings.tf` file on `gcp-environments/modules/env_baseline` path:
 
-  dynamic "retention_policy" {
-    for_each = var.gcs_logging_retention_period != null ? [var.gcs_logging_retention_period] : []
-    content {
-      is_locked        = var.gcs_logging_retention_period.is_locked
-      retention_period = var.gcs_logging_retention_period.retention_period_days * 24 * 60 * 60
-    }
-  }
+```bash
+cp docs/assets/terraform/2-environments/ml_key_rings.tf ../gcp-environments/modules/env_baseline
+```
 
-  encryption {
-    default_kms_key_name = google_kms_crypto_key_iam_member.gcs_logging_key.crypto_key_id #module.kms_keyring.keys_by_region[var.gcs_logging_bucket_location][local.logging_key_name]
-  }
-}
+- Create `ml_logging.tf` file on `gcp-environments/modules/env_baseline` path:
 
-/******************************************
-  Logging Bucket - IAM
-*****************************************/
-# resource "google_storage_bucket_iam_member" "bucket_logging" {
-#   bucket = google_storage_bucket.log_bucket.name
-#   role   = "roles/storage.objectCreator"
-#   member = "group:cloud-storage-analytics@google.com"
-# }
+```bash
+cp docs/assets/terraform/2-environments/ml_logging.tf ../gcp-environments/modules/env_baseline
+```
 
-resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
-  crypto_key_id = module.kms_keyring.keys_by_region[var.gcs_logging_bucket_location][local.logging_key_name]
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_logging_account.email_address}"
-}
+Commit and push files to git repo
+
+```bash
+git add .
+
+git commit -m "Create env-level keys and env-level logging"
+
+git push origin development
+```
+
+### `non-production` branch
+
+- Go to `gcp-environments` repository, and check out on `non-production` branch.
+
+```bash
+cd ../gcp-environemnts
+
+git checkout non-production
+```
+
+- Return to `terraform-google-enterprise-genai` repo
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy Machine Learning modules from this repo to `gcp-environments` repository.
+
+```bash
+cp -r 2-environments/modules/ml_kms_keyring ../gcp-environments/modules
+```
+
+- Create `ml_key_rings.tf` file on `gcp-environments/modules/env_baseline` path:
+
+```bash
+cp docs/assets/terraform/2-environments/ml_key_rings.tf ../gcp-environments/modules/env_baseline
+```
+
+- Create `ml_logging.tf` file on `gcp-environments/modules/env_baseline` path:
+
+```bash
+cp docs/assets/terraform/2-environments/ml_logging.tf ../gcp-environments/modules/env_baseline
+```
+
+Commit and push files to git repo
+
+```bash
+git add .
+
+git commit -m "Create env-level keys and env-level logging"
+
+git push origin non-production
+```
+
+### `production` branch
+
+- Go to `gcp-environments` repository, and check out on `production` branch.
+
+```bash
+cd ../gcp-environemnts
+
+git checkout production
+```
+
+- Return to `terraform-google-enterprise-genai` repo
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy Machine Learning modules from this repo to `gcp-environments` repository.
+
+```bash
+cp -r 2-environments/modules/ml_kms_keyring ../gcp-environments/modules
+```
+
+- Create `ml_key_rings.tf` file on `gcp-environments/modules/env_baseline` path:
+
+```bash
+cp docs/assets/terraform/2-environments/ml_key_rings.tf ../gcp-environments/modules/env_baseline
+```
+
+- Create `ml_logging.tf` file on `gcp-environments/modules/env_baseline` path:
+
+```bash
+cp docs/assets/terraform/2-environments/ml_logging.tf ../gcp-environments/modules/env_baseline
+```
+
+Commit and push files to git repo
+
+```bash
+git add .
+
+git commit -m "Create env-level keys and env-level logging"
+
+git push origin production
 ```
 
 ### `N.B.` Read this before continuing further
@@ -640,9 +500,59 @@ You will be doing this procedure for each environment (`development`, `non-produ
 
 After making these modifications, you can follow the README.md procedure for `2-environment` step on foundation, make sure you **change the organization policy after running the steps on foundation**.
 
-## 3-network: Configure private DNS zone for Vertex Workbench Instances
+## 3-network: Configure private DNS zone for Vertex Workbench Instances, Enable NAT and Attach projects to perimeter
 
-- Create a file named `ml_dns_notebooks.tf` on path `modules/base_env` with the follwing content:
+This step corresponds to modifications made to `3-networks-dual-svpc` step on foundation.
+
+Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+### `development` branch on `gcp-networks`
+
+- Go to `gcp-networks` repository, and check out on `development` branch.
+
+```bash
+cd ../gcp-networks
+
+git checkout development
+```
+
+#### Private DNS zone configuration
+
+- Return to `terraform-google-enterprise-genai` repo
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy DNS notebook network module from this repo to `gcp-networks` repository.
+
+```bash
+cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
+```
+
+- Create a file named `ml_dns_notebooks.tf` on path `gcp-networks/modules/base_env`:
+
+```bash
+cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
+```
+
+Commit and push files to git repo
+
+```bash
+git add .
+
+git commit -m "Create DNS notebook configuration"
+
+git push origin development
+```
+
+#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules
+
+Create `gcp-networks/modules/base_env/data.tf` file with the following content:
 
 ```terraform
 /**
@@ -661,560 +571,47 @@ After making these modifications, you can follow the README.md procedure for `2-
  * limitations under the License.
  */
 
-module "ml_dns_vertex_ai" {
-  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//3-networks-dual-svpc/modules/ml_dns_notebooks?ref=fe3b1b453906d781d22743782afc92664d517b69"
 
-  project_id                         = local.restricted_project_id
-  private_service_connect_ip         = var.restricted_private_service_connect_ip
-  private_visibility_config_networks = [module.restricted_shared_vpc.network_self_link]
-  zone_names = {
-    kernels_googleusercontent_zone   = "dz-${var.environment_code}-shared-restricted-kernels-googleusercontent"
-    notebooks_googleusercontent_zone = "dz-${var.environment_code}-shared-restricted-notebooks-googleusercontent"
-    notebooks_cloudgoogle_zone       = "dz-${var.environment_code}-shared-restricted-notebooks"
-  }
+data "google_netblock_ip_ranges" "legacy_health_checkers" {
+  range_type = "legacy-health-checkers"
+}
+
+data "google_netblock_ip_ranges" "health_checkers" {
+  range_type = "health-checkers"
+}
+
+// Cloud IAP's TCP forwarding netblock
+data "google_netblock_ip_ranges" "iap_forwarders" {
+  range_type = "iap-forwarders"
 }
 ```
 
-After making these modifications to the step, you can follow the README.md procedure for `3-networks-dual-svpc` step on foundation.
-
-- Add projects to regular_service_perimeter
-- Create firewall rules to allow all ingress from specific ranges
-- Enable NAT
-
-## 4-projects: Create Service Catalog and Artifacts Shared projects and Machine Learning Projects
-
-First of all you should choose a Business Unit to deploy this application, in the case of this tutorial we are using `ml_business_unit` as an example.
-
-### Create Machine Learning Business Unit (ML_BU)
-
- ```bash
-   #copy the business_unit_1 folder and it's contents to a new folder ml_business_unit
-   cp -r  business_unit_1 ml_business_unit
-
-   # search all files under the folder `ml_business_unit` and replace strings for business_unit_1 with strings for ml_business_unit
-   grep -rl bu1 ml_business_unit/ | xargs sed -i 's/bu1/ml_bu/g'
-   grep -rl business_unit_1 ml_business_unit/ | xargs sed -i 's/business_unit_1/ml_business_unit/g'
-   ```
-
-### Infra Pipeline Modifications
-
-- Open `ml_business_unit/shared/variables.tf` and add the following variables:
+On `gcp-networks/modules/restricted_shared_vpc/variables.tf` add the following variables:
 
 ```terraform
-variable "location_gcs" {
-  description = "Case-Sensitive Location for GCS Bucket"
-  type        = string
-  default     = "US"
+variable "perimeter_projects" {
+  description = "A list of project numbers to be added to the service perimeter"
+  type        = list(number)
+  default     = []
 }
 
-variable "location_kms" {
-  description = "Case-Sensitive Location for KMS Keyring"
-  type        = string
-  default     = "us"
+variable "allow_all_egress_ranges" {
+  description = "List of network ranges to which all egress traffic will be allowed"
+  default     = null
 }
 
-variable "keyring_name" {
-  description = "Name to be used for KMS Keyring"
-  type        = string
-  default     = "sample-keyring"
-}
-
-variable "gcs_bucket_prefix" {
-  description = "Name prefix to be used for GCS Bucket"
-  type        = string
-  default     = "bkt"
-}
-
-variable "key_rotation_period" {
-  description = "Rotation period in seconds to be used for KMS Key"
-  type        = string
-  default     = "7776000s"
-}
-
-variable "cloud_source_service_catalog_repo_name" {
-  description = "Name to give the cloud source repository for Service Catalog"
-  type        = string
-}
-
-variable "cloud_source_artifacts_repo_name" {
-  description = "Name to give the could source repository for Artifacts"
-  type        = string
-}
-
-variable "prevent_destroy" {
-  description = "Prevent Project Key destruction."
-  type        = bool
-  default     = true
+variable "allow_all_ingress_ranges" {
+  description = "List of network ranges from which all ingress traffic will be allowed"
+  default     = null
 }
 ```
 
-- Open `ml_business_unit/shared/example_infra_pipeline.tf` and replace its content with:
+On `gcp-networks/modules/base_env/remote.tf`:
 
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-locals {
-  repo_names = [
-    "ml_bu-artifact-publish",
-    "ml_bu-service-catalog",
-    "ml_bu-machine-learning",
-  ]
-}
-
-module "app_infra_cloudbuild_project" {
-  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//4-projects/modules/single_project?ref=fe3b1b453906d781d22743782afc92664d517b69"
-  count  = local.enable_cloudbuild_deploy ? 1 : 0
-
-  org_id              = local.org_id
-  billing_account     = local.billing_account
-  folder_id           = local.common_folder_name
-  environment         = "common"
-  project_budget      = var.project_budget
-  project_prefix      = local.project_prefix
-  key_rings           = local.shared_kms_key_ring
-  remote_state_bucket = var.remote_state_bucket
-  activate_apis = [
-    "cloudbuild.googleapis.com",
-    "sourcerepo.googleapis.com",
-    "cloudkms.googleapis.com",
-    "iam.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "serviceusage.googleapis.com",
-    "bigquery.googleapis.com",
-  ]
-  # Metadata
-  project_suffix    = "infra-pipeline"
-  application_name  = "app-infra-pipelines"
-  billing_code      = "1234"
-  primary_contact   = "example@example.com"
-  secondary_contact = "example2@example.com"
-  business_code     = "ml_bu"
-}
-
-module "infra_pipelines" {
-  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//4-projects/modules/infra_pipelines?ref=fe3b1b453906d781d22743782afc92664d517b69"
-  count  = local.enable_cloudbuild_deploy ? 1 : 0
-
-  org_id                      = local.org_id
-  cloudbuild_project_id       = module.app_infra_cloudbuild_project[0].project_id
-  cloud_builder_artifact_repo = local.cloud_builder_artifact_repo
-  remote_tfstate_bucket       = local.projects_remote_bucket_tfstate
-  billing_account             = local.billing_account
-  default_region              = var.default_region
-  app_infra_repos             = local.repo_names
-  private_worker_pool_id      = local.cloud_build_private_worker_pool_id
-}
-
-resource "google_kms_key_ring_iam_member" "key_ring" {
-  for_each    = { for k in flatten([for kms in local.shared_kms_key_ring : [for name, email in module.infra_pipelines[0].terraform_service_accounts : { key = "${kms}--${name}", kms = kms, email = email }]]) : k.key => k }
-  key_ring_id = each.value.kms
-  role        = "roles/cloudkms.admin"
-  member      = "serviceAccount:${each.value.email}"
-}
-
-/**
- * When Jenkins CICD is used for deployment this resource
- * is created to terraform validation works.
- * Without this resource, this module creates zero resources
- * and it breaks terraform validation throwing the error below:
- * ERROR: [Terraform plan json does not contain resource_changes key]
- */
-resource "null_resource" "jenkins_cicd" {
-  count = !local.enable_cloudbuild_deploy ? 1 : 0
-}
-```
-
-- On `ml_business_unit/shared/outputs.tf` add the following outputs:
-
-```terraform
-output "service_catalog_project_id" {
-  description = "Service Catalog Project ID."
-  value       = module.ml_infra_project.service_catalog_project_id
-}
-
-output "common_artifacts_project_id" {
-  description = "App Infra Artifacts Project ID"
-  value       = module.ml_infra_project.common_artifacts_project_id
-}
-
-output "service_catalog_repo_name" {
-  description = "The name of the Service Catalog repository"
-  value       = module.ml_infra_project.service_catalog_repo_name
-}
-
-output "service_catalog_repo_id" {
-  description = "ID of the Service Catalog repository"
-  value       = module.ml_infra_project.service_catalog_repo_id
-}
-
-output "artifacts_repo_name" {
-  description = "The name of the Artifacts repository"
-  value       = module.ml_infra_project.artifacts_repo_name
-}
-
-output "artifacts_repo_id" {
-  description = "ID of the Artifacts repository"
-  value       = module.ml_infra_project.artifacts_repo_id
-}
-```
-
-- Open `ml_business_unit/shared/remote.tf` and replace it with the following content:
-
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-locals {
-  org_id                             = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
-  parent_folder                      = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
-  parent                             = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
-  location_gcs                       = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
-  billing_account                    = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
-  common_folder_name                 = data.terraform_remote_state.org.outputs.common_folder_name
-  common_kms_project_id              = data.terraform_remote_state.org.outputs.org_kms_project_id
-  default_region                     = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
-  project_prefix                     = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
-  folder_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
-  projects_remote_bucket_tfstate     = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
-  cloud_build_private_worker_pool_id = try(data.terraform_remote_state.bootstrap.outputs.cloud_build_private_worker_pool_id, "")
-  cloud_builder_artifact_repo        = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
-  enable_cloudbuild_deploy           = local.cloud_builder_artifact_repo != ""
-  shared_kms_key_ring                = data.terraform_remote_state.org.outputs.key_rings
-}
-
-data "terraform_remote_state" "bootstrap" {
-  backend = "gcs"
-
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/bootstrap/state"
-  }
-}
-
-data "terraform_remote_state" "org" {
-  backend = "gcs"
-
-  config = {
-    bucket = var.remote_state_bucket
-    prefix = "terraform/org/state"
-  }
-}
-```
-
-- Create `ml_infra_projects.tf` file on `ml_business_unit/shared` with the following content:
-
-```terraform
-/**
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-module "ml_infra_project" {
-  source = "git::https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git//4-projects/modules/ml_infra_projects?ref=fe3b1b453906d781d22743782afc92664d517b69"
-
-  org_id                                 = local.org_id
-  folder_id                              = local.common_folder_name
-  billing_account                        = local.billing_account
-  environment                            = "common"
-  key_rings                              = local.shared_kms_key_ring
-  business_code                          = "ml_bu"
-  billing_code                           = "1234"
-  primary_contact                        = "example@example.com"
-  secondary_contact                      = "example2@example.com"
-  cloud_source_artifacts_repo_name       = var.cloud_source_artifacts_repo_name
-  cloud_source_service_catalog_repo_name = var.cloud_source_service_catalog_repo_name
-  remote_state_bucket                    = var.remote_state_bucket
-  artifacts_infra_pipeline_sa            = module.infra_pipelines[0].terraform_service_accounts["ml_bu-artifact-publish"]
-  service_catalog_infra_pipeline_sa      = module.infra_pipelines[0].terraform_service_accounts["ml_bu-service-catalog"]
-  environment_kms_project_id             = ""
-  prevent_destroy                        = var.prevent_destroy
-}
-```
-
-### Modify Environments for Machine Learning Business Unit
-
-Perform these modifications for `development`, `non-production` and `production` subfolders on `ml_business_unit`.
-
-1. Edit `main.tf` and replace it's contents with the following:
+1. Add the env remote state, by adding the following terraform code to the file:
 
     ```terraform
-    /**
-    * Copyright 2024 Google LLC
-    *
-    * Licensed under the Apache License, Version 2.0 (the "License");
-    * you may not use this file except in compliance with the License.
-    * You may obtain a copy of the License at
-    *
-    *      http://www.apache.org/licenses/LICENSE-2.0
-    *
-    * Unless required by applicable law or agreed to in writing, software
-    * distributed under the License is distributed on an "AS IS" BASIS,
-    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    * See the License for the specific language governing permissions and
-    * limitations under the License.
-    */
-
-    module "bu_folder" {
-      source              = "../../modules/env_folders"
-      business_code       = local.business_code
-      remote_state_bucket = var.remote_state_bucket
-      env                 = var.env
-    }
-
-    module "ml_env" {
-      source = "../../modules/ml_env"
-
-      env                  = var.env
-      business_code        = local.business_code
-      business_unit        = local.business_unit
-      remote_state_bucket  = var.remote_state_bucket
-      location_gcs         = var.location_gcs
-      tfc_org_name         = var.tfc_org_name
-      business_unit_folder = module.bu_folder.business_unit_folder
-    }
-    ```
-
-2. Edit `outputs.tf` and replace it's contents with the following:
-
-    ```terraform
-    /**
-    * Copyright 2024 Google LLC
-    *
-    * Licensed under the Apache License, Version 2.0 (the "License");
-    * you may not use this file except in compliance with the License.
-    * You may obtain a copy of the License at
-    *
-    *      http://www.apache.org/licenses/LICENSE-2.0
-    *
-    * Unless required by applicable law or agreed to in writing, software
-    * distributed under the License is distributed on an "AS IS" BASIS,
-    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    * See the License for the specific language governing permissions and
-    * limitations under the License.
-    */
-
-    output "machine_learning_project_id" {
-      description = "Project machine learning project."
-      value       = module.ml_env.machine_learning_project_id
-    }
-
-    output "machine_learning_project_number" {
-      description = "Project number of machine learning project."
-      value       = module.ml_env.machine_learning_project_number
-    }
-
-    output "machine_learning_kms_keys" {
-      description = "Key ID for the machine learning project."
-      value       = module.ml_env.machine_learning_kms_keys
-    }
-
-    output "enable_cloudbuild_deploy" {
-      description = "Enable infra deployment using Cloud Build."
-      value       = local.enable_cloudbuild_deploy
-    }
-    ```
-
-3. Edit `variables.tf` and replace it's contents with the following:
-
-    ```terraform
-    /**
-    * Copyright 2024 Google LLC
-    *
-    * Licensed under the Apache License, Version 2.0 (the "License");
-    * you may not use this file except in compliance with the License.
-    * You may obtain a copy of the License at
-    *
-    *      http://www.apache.org/licenses/LICENSE-2.0
-    *
-    * Unless required by applicable law or agreed to in writing, software
-    * distributed under the License is distributed on an "AS IS" BASIS,
-    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    * See the License for the specific language governing permissions and
-    * limitations under the License.
-    */
-
-    variable "env" {
-      description = "The environment this deployment belongs to (ie. development)"
-      type        = string
-    }
-    variable "default_region" {
-      description = "Default region to create resources where applicable."
-      type        = string
-      default     = "us-central1"
-    }
-
-    variable "remote_state_bucket" {
-      description = "Backend bucket to load Terraform Remote State Data from previous steps."
-      type        = string
-    }
-
-    variable "location_kms" {
-      description = "Case-Sensitive Location for KMS Keyring (Should be same region as the GCS Bucket)"
-      type        = string
-      default     = "us"
-    }
-
-    variable "location_gcs" {
-      description = "Case-Sensitive Location for GCS Bucket (Should be same region as the KMS Keyring)"
-      type        = string
-      default     = "US"
-    }
-
-    variable "peering_module_depends_on" {
-      description = "List of modules or resources peering module depends on."
-      type        = list(any)
-      default     = []
-    }
-
-    variable "tfc_org_name" {
-      description = "Name of the TFC organization."
-      type        = string
-      default     = ""
-    }
-
-    variable "project_budget" {
-      description = <<EOT
-      Budget configuration.
-      budget_amount: The amount to use as the budget.
-      alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
-      alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
-      alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
-      EOT
-      type = object({
-        budget_amount        = optional(number, 1000)
-        alert_spent_percents = optional(list(number), [1.2])
-        alert_pubsub_topic   = optional(string, null)
-        alert_spend_basis    = optional(string, "FORECASTED_SPEND")
-      })
-      default = {}
-    }
-
-    variable "key_rotation_period" {
-      description = "Rotation period in seconds to be used for KMS Key"
-      type        = string
-      default     = "7776000s"
-    }
-    ```
-
-4. Create `locals.tf` file with the following code:
-
-    ```terraform
-    # Copyright 2024 Google LLC
-    #
-    # Licensed under the Apache License, Version 2.0 (the "License");
-    # you may not use this file except in compliance with the License.
-    # You may obtain a copy of the License at
-    #
-    #     https://www.apache.org/licenses/LICENSE-2.0
-    #
-    # Unless required by applicable law or agreed to in writing, software
-    # distributed under the License is distributed on an "AS IS" BASIS,
-    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    # See the License for the specific language governing permissions and
-    # limitations under the License.
-    #
-    locals {
-      repo_name     = "bu3-composer"
-      business_code = "bu3"
-      business_unit = "business_unit_3"
-    }
-    ```
-
-5. Create `remote.tf` file with the following content:
-
-    ```terraform
-    /**
-    * Copyright 2024 Google LLC
-    *
-    * Licensed under the Apache License, Version 2.0 (the "License");
-    * you may not use this file except in compliance with the License.
-    * You may obtain a copy of the License at
-    *
-    *      http://www.apache.org/licenses/LICENSE-2.0
-    *
-    * Unless required by applicable law or agreed to in writing, software
-    * distributed under the License is distributed on an "AS IS" BASIS,
-    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    * See the License for the specific language governing permissions and
-    * limitations under the License.
-    */
-
-    locals {
-      org_id                             = data.terraform_remote_state.bootstrap.outputs.common_config.org_id
-      parent_folder                      = data.terraform_remote_state.bootstrap.outputs.common_config.parent_folder
-      parent                             = data.terraform_remote_state.bootstrap.outputs.common_config.parent_id
-      location_gcs                       = try(data.terraform_remote_state.bootstrap.outputs.common_config.default_region, var.location_gcs)
-      billing_account                    = data.terraform_remote_state.bootstrap.outputs.common_config.billing_account
-      common_folder_name                 = data.terraform_remote_state.org.outputs.common_folder_name
-      common_kms_project_id              = data.terraform_remote_state.org.outputs.org_kms_project_id
-      default_region                     = data.terraform_remote_state.bootstrap.outputs.common_config.default_region
-      project_prefix                     = data.terraform_remote_state.bootstrap.outputs.common_config.project_prefix
-      folder_prefix                      = data.terraform_remote_state.bootstrap.outputs.common_config.folder_prefix
-      projects_remote_bucket_tfstate     = data.terraform_remote_state.bootstrap.outputs.projects_gcs_bucket_tfstate
-      cloud_build_private_worker_pool_id = try(data.terraform_remote_state.bootstrap.outputs.cloud_build_private_worker_pool_id, "")
-      cloud_builder_artifact_repo        = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
-      enable_cloudbuild_deploy           = local.cloud_builder_artifact_repo != ""
-      environment_kms_key_ring           = data.terraform_remote_state.environments_env.outputs.key_rings
-    }
-
-    data "terraform_remote_state" "bootstrap" {
-      backend = "gcs"
-
-      config = {
-        bucket = var.remote_state_bucket
-        prefix = "terraform/bootstrap/state"
-      }
-    }
-
-    data "terraform_remote_state" "org" {
-      backend = "gcs"
-
-      config = {
-        bucket = var.remote_state_bucket
-        prefix = "terraform/org/state"
-      }
-    }
-
-    data "terraform_remote_state" "environments_env" {
+    data "terraform_remote_state" "env" {
       backend = "gcs"
 
       config = {
@@ -1223,6 +620,746 @@ Perform these modifications for `development`, `non-production` and `production`
       }
     }
     ```
+
+2. Edit `locals` and add the following fields:
+
+    ```terraform
+    logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
+    kms_env_project_number       = data.terraform_remote_state.env.outputs.env_kms_project_number
+    ```
+
+3. The final result will contain existing locals and the added ones, it should look similar to the code below:
+
+    ```terraform
+    locals {
+      restricted_project_id        = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].restricted_shared_vpc_project_id
+      restricted_project_number    = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].restricted_shared_vpc_project_number
+      base_project_id              = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].base_shared_vpc_project_id
+      interconnect_project_number  = data.terraform_remote_state.org.outputs.interconnect_project_number
+      dns_hub_project_id           = data.terraform_remote_state.org.outputs.dns_hub_project_id
+      organization_service_account = data.terraform_remote_state.bootstrap.outputs.organization_step_terraform_service_account_email
+      networks_service_account     = data.terraform_remote_state.bootstrap.outputs.networks_step_terraform_service_account_email
+      projects_service_account     = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+      logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
+      kms_env_project_number       = data.terraform_remote_state.env.outputs.env_kms_project_number
+    }
+    ```
+
+##### Adding projects to service perimeter
+
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
+
+```terraform
+distinct(concat([var.project_number], var.perimeter_projects))
+```
+
+This shall result in a module similar to the code below:
+
+```terraform
+module "regular_service_perimeter" {
+  source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
+  version = "~> 4.0"
+
+  policy         = var.access_context_manager_policy_id
+  perimeter_name = local.perimeter_name
+  description    = "Default VPC Service Controls perimeter"
+  resources      = distinct(concat([var.project_number], var.perimeter_projects))
+  access_levels  = [module.access_level_members.name]
+
+  restricted_services     = var.restricted_services
+  vpc_accessible_services = ["RESTRICTED-SERVICES"]
+
+  ingress_policies = var.ingress_policies
+  egress_policies  = var.egress_policies
+
+  depends_on = [
+    time_sleep.wait_vpc_sc_propagation
+  ]
+}
+```
+
+##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules
+
+On `gcp-networks/modules/restricted_shared_vpc/firewall.tf` add the following firewall rules by adding the terraform code below to the file:
+
+```terraform
+resource "google_compute_firewall" "allow_all_egress" {
+  count = var.allow_all_egress_ranges != null ? 1 : 0
+
+  name      = "fw-${var.environment_code}-shared-base-1000-e-a-all-all-all"
+  network   = module.main.network_name
+  project   = var.project_id
+  direction = "EGRESS"
+  priority  = 1000
+
+  dynamic "log_config" {
+    for_each = var.firewall_enable_logging == true ? [{
+      metadata = "INCLUDE_ALL_METADATA"
+    }] : []
+
+    content {
+      metadata = log_config.value.metadata
+    }
+  }
+
+  allow {
+    protocol = "all"
+  }
+
+  destination_ranges = var.allow_all_egress_ranges
+}
+
+resource "google_compute_firewall" "allow_all_ingress" {
+  count = var.allow_all_ingress_ranges != null ? 1 : 0
+
+  name      = "fw-${var.environment_code}-shared-base-1000-i-a-all"
+  network   = module.main.network_name
+  project   = var.project_id
+  direction = "INGRESS"
+  priority  = 1000
+
+  dynamic "log_config" {
+    for_each = var.firewall_enable_logging == true ? [{
+      metadata = "INCLUDE_ALL_METADATA"
+    }] : []
+
+    content {
+      metadata = log_config.value.metadata
+    }
+  }
+
+  allow {
+    protocol = "all"
+  }
+
+  source_ranges = var.allow_all_ingress_ranges
+}
+```
+
+##### Changes to restricted shared VPC
+
+On `gcp-networks/modules/base_env/main.tf` edit the terraform module named **restricted_shared_vpc** and add the following fields to it:
+
+```terraform
+allow_all_ingress_ranges = concat(data.google_netblock_ip_ranges.health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.legacy_health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.iap_forwarders.cidr_blocks_ipv4)
+allow_all_egress_ranges  = ["0.0.0.0/0"]
+
+nat_enabled               = true
+nat_num_addresses_region1 = 1
+nat_num_addresses_region2 = 1
+
+perimeter_projects = [local.logging_env_project_number, local.kms_env_project_number]
+```
+
+Commit all changes and push to the current branch
+
+```bash
+git add .
+git commit -m "Create custom fw rules, enable nat, configure dns and service perimeter"
+
+git push origin development
+```
+
+### `non-production` branch on `gcp-networks`
+
+- Go to `gcp-networks` repository, and check out on `non-production` branch.
+
+```bash
+cd ../gcp-networks
+
+git checkout non-production
+```
+
+#### Private DNS zone configuration
+
+- Return to `terraform-google-enterprise-genai` repo
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy DNS notebook network module from this repo to `gcp-networks` repository.
+
+```bash
+cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
+```
+
+- Create a file named `ml_dns_notebooks.tf` on path `gcp-networks/modules/base_env`:
+
+```bash
+cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
+```
+
+Commit and push files to git repo
+
+```bash
+git add .
+
+git commit -m "Create DNS notebook configuration"
+
+git push origin non-production
+```
+
+#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules
+
+Create `gcp-networks/modules/base_env/data.tf` file with the following content:
+
+```terraform
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+data "google_netblock_ip_ranges" "legacy_health_checkers" {
+  range_type = "legacy-health-checkers"
+}
+
+data "google_netblock_ip_ranges" "health_checkers" {
+  range_type = "health-checkers"
+}
+
+// Cloud IAP's TCP forwarding netblock
+data "google_netblock_ip_ranges" "iap_forwarders" {
+  range_type = "iap-forwarders"
+}
+```
+
+On `gcp-networks/modules/restricted_shared_vpc/variables.tf` add the following variables:
+
+```terraform
+variable "perimeter_projects" {
+  description = "A list of project numbers to be added to the service perimeter"
+  type        = list(number)
+  default     = []
+}
+
+variable "allow_all_egress_ranges" {
+  description = "List of network ranges to which all egress traffic will be allowed"
+  default     = null
+}
+
+variable "allow_all_ingress_ranges" {
+  description = "List of network ranges from which all ingress traffic will be allowed"
+  default     = null
+}
+```
+
+On `gcp-networks/modules/base_env/remote.tf`:
+
+1. Add the env remote state, by adding the following terraform code to the file:
+
+    ```terraform
+    data "terraform_remote_state" "env" {
+      backend = "gcs"
+
+      config = {
+        bucket = var.remote_state_bucket
+        prefix = "terraform/environments/${var.env}"
+      }
+    }
+    ```
+
+2. Edit `locals` and add the following fields:
+
+    ```terraform
+    logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
+    kms_env_project_number       = data.terraform_remote_state.env.outputs.env_kms_project_number
+    ```
+
+3. The final result will contain existing locals and the added ones, it should look similar to the code below:
+
+    ```terraform
+    locals {
+      restricted_project_id        = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].restricted_shared_vpc_project_id
+      restricted_project_number    = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].restricted_shared_vpc_project_number
+      base_project_id              = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].base_shared_vpc_project_id
+      interconnect_project_number  = data.terraform_remote_state.org.outputs.interconnect_project_number
+      dns_hub_project_id           = data.terraform_remote_state.org.outputs.dns_hub_project_id
+      organization_service_account = data.terraform_remote_state.bootstrap.outputs.organization_step_terraform_service_account_email
+      networks_service_account     = data.terraform_remote_state.bootstrap.outputs.networks_step_terraform_service_account_email
+      projects_service_account     = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+      logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
+      kms_env_project_number       = data.terraform_remote_state.env.outputs.env_kms_project_number
+    }
+    ```
+
+##### Adding projects to service perimeter
+
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
+
+```terraform
+distinct(concat([var.project_number], var.perimeter_projects))
+```
+
+This shall result in a module similar to the code below:
+
+```terraform
+module "regular_service_perimeter" {
+  source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
+  version = "~> 4.0"
+
+  policy         = var.access_context_manager_policy_id
+  perimeter_name = local.perimeter_name
+  description    = "Default VPC Service Controls perimeter"
+  resources      = distinct(concat([var.project_number], var.perimeter_projects))
+  access_levels  = [module.access_level_members.name]
+
+  restricted_services     = var.restricted_services
+  vpc_accessible_services = ["RESTRICTED-SERVICES"]
+
+  ingress_policies = var.ingress_policies
+  egress_policies  = var.egress_policies
+
+  depends_on = [
+    time_sleep.wait_vpc_sc_propagation
+  ]
+}
+```
+
+##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules
+
+On `gcp-networks/modules/restricted_shared_vpc/firewall.tf` add the following firewall rules by adding the terraform code below to the file:
+
+```terraform
+resource "google_compute_firewall" "allow_all_egress" {
+  count = var.allow_all_egress_ranges != null ? 1 : 0
+
+  name      = "fw-${var.environment_code}-shared-base-1000-e-a-all-all-all"
+  network   = module.main.network_name
+  project   = var.project_id
+  direction = "EGRESS"
+  priority  = 1000
+
+  dynamic "log_config" {
+    for_each = var.firewall_enable_logging == true ? [{
+      metadata = "INCLUDE_ALL_METADATA"
+    }] : []
+
+    content {
+      metadata = log_config.value.metadata
+    }
+  }
+
+  allow {
+    protocol = "all"
+  }
+
+  destination_ranges = var.allow_all_egress_ranges
+}
+
+resource "google_compute_firewall" "allow_all_ingress" {
+  count = var.allow_all_ingress_ranges != null ? 1 : 0
+
+  name      = "fw-${var.environment_code}-shared-base-1000-i-a-all"
+  network   = module.main.network_name
+  project   = var.project_id
+  direction = "INGRESS"
+  priority  = 1000
+
+  dynamic "log_config" {
+    for_each = var.firewall_enable_logging == true ? [{
+      metadata = "INCLUDE_ALL_METADATA"
+    }] : []
+
+    content {
+      metadata = log_config.value.metadata
+    }
+  }
+
+  allow {
+    protocol = "all"
+  }
+
+  source_ranges = var.allow_all_ingress_ranges
+}
+```
+
+##### Changes to restricted shared VPC
+
+On `gcp-networks/modules/base_env/main.tf` edit the terraform module named **restricted_shared_vpc** and add the following fields to it:
+
+```terraform
+allow_all_ingress_ranges = concat(data.google_netblock_ip_ranges.health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.legacy_health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.iap_forwarders.cidr_blocks_ipv4)
+allow_all_egress_ranges  = ["0.0.0.0/0"]
+
+nat_enabled               = true
+nat_num_addresses_region1 = 1
+nat_num_addresses_region2 = 1
+
+perimeter_projects = [local.logging_env_project_number, local.kms_env_project_number]
+```
+
+Commit all changes and push to the current branch
+
+```bash
+git add .
+git commit -m "Create custom fw rules, enable nat, configure dns and service perimeter"
+
+git push origin non-production
+```
+
+### `production` branch on `gcp-networks`
+
+- Go to `gcp-networks` repository, and check out on `production` branch.
+
+```bash
+cd ../gcp-networks
+
+git checkout production
+```
+
+#### Private DNS zone configuration
+
+- Return to `terraform-google-enterprise-genai` repo
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy DNS notebook network module from this repo to `gcp-networks` repository.
+
+```bash
+cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
+```
+
+- Create a file named `ml_dns_notebooks.tf` on path `gcp-networks/modules/base_env`:
+
+```bash
+cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
+```
+
+Commit and push files to git repo
+
+```bash
+git add .
+
+git commit -m "Create DNS notebook configuration"
+
+git push origin production
+```
+
+#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules
+
+Create `gcp-networks/modules/base_env/data.tf` file with the following content:
+
+```terraform
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+data "google_netblock_ip_ranges" "legacy_health_checkers" {
+  range_type = "legacy-health-checkers"
+}
+
+data "google_netblock_ip_ranges" "health_checkers" {
+  range_type = "health-checkers"
+}
+
+// Cloud IAP's TCP forwarding netblock
+data "google_netblock_ip_ranges" "iap_forwarders" {
+  range_type = "iap-forwarders"
+}
+```
+
+On `gcp-networks/modules/restricted_shared_vpc/variables.tf` add the following variables:
+
+```terraform
+variable "perimeter_projects" {
+  description = "A list of project numbers to be added to the service perimeter"
+  type        = list(number)
+  default     = []
+}
+
+variable "allow_all_egress_ranges" {
+  description = "List of network ranges to which all egress traffic will be allowed"
+  default     = null
+}
+
+variable "allow_all_ingress_ranges" {
+  description = "List of network ranges from which all ingress traffic will be allowed"
+  default     = null
+}
+```
+
+On `gcp-networks/modules/base_env/remote.tf`:
+
+1. Add the env remote state, by adding the following terraform code to the file:
+
+    ```terraform
+    data "terraform_remote_state" "env" {
+      backend = "gcs"
+
+      config = {
+        bucket = var.remote_state_bucket
+        prefix = "terraform/environments/${var.env}"
+      }
+    }
+    ```
+
+2. Edit `locals` and add the following fields:
+
+    ```terraform
+    logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
+    kms_env_project_number       = data.terraform_remote_state.env.outputs.env_kms_project_number
+    ```
+
+3. The final result will contain existing locals and the added ones, it should look similar to the code below:
+
+    ```terraform
+    locals {
+      restricted_project_id        = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].restricted_shared_vpc_project_id
+      restricted_project_number    = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].restricted_shared_vpc_project_number
+      base_project_id              = data.terraform_remote_state.org.outputs.shared_vpc_projects[var.env].base_shared_vpc_project_id
+      interconnect_project_number  = data.terraform_remote_state.org.outputs.interconnect_project_number
+      dns_hub_project_id           = data.terraform_remote_state.org.outputs.dns_hub_project_id
+      organization_service_account = data.terraform_remote_state.bootstrap.outputs.organization_step_terraform_service_account_email
+      networks_service_account     = data.terraform_remote_state.bootstrap.outputs.networks_step_terraform_service_account_email
+      projects_service_account     = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+      logging_env_project_number   = data.terraform_remote_state.env.outputs.env_log_project_number
+      kms_env_project_number       = data.terraform_remote_state.env.outputs.env_kms_project_number
+    }
+    ```
+
+##### Adding projects to service perimeter
+
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
+
+```terraform
+distinct(concat([var.project_number], var.perimeter_projects))
+```
+
+This shall result in a module similar to the code below:
+
+```terraform
+module "regular_service_perimeter" {
+  source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
+  version = "~> 4.0"
+
+  policy         = var.access_context_manager_policy_id
+  perimeter_name = local.perimeter_name
+  description    = "Default VPC Service Controls perimeter"
+  resources      = distinct(concat([var.project_number], var.perimeter_projects))
+  access_levels  = [module.access_level_members.name]
+
+  restricted_services     = var.restricted_services
+  vpc_accessible_services = ["RESTRICTED-SERVICES"]
+
+  ingress_policies = var.ingress_policies
+  egress_policies  = var.egress_policies
+
+  depends_on = [
+    time_sleep.wait_vpc_sc_propagation
+  ]
+}
+```
+
+##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules
+
+On `gcp-networks/modules/restricted_shared_vpc/firewall.tf` add the following firewall rules by adding the terraform code below to the file:
+
+```terraform
+resource "google_compute_firewall" "allow_all_egress" {
+  count = var.allow_all_egress_ranges != null ? 1 : 0
+
+  name      = "fw-${var.environment_code}-shared-base-1000-e-a-all-all-all"
+  network   = module.main.network_name
+  project   = var.project_id
+  direction = "EGRESS"
+  priority  = 1000
+
+  dynamic "log_config" {
+    for_each = var.firewall_enable_logging == true ? [{
+      metadata = "INCLUDE_ALL_METADATA"
+    }] : []
+
+    content {
+      metadata = log_config.value.metadata
+    }
+  }
+
+  allow {
+    protocol = "all"
+  }
+
+  destination_ranges = var.allow_all_egress_ranges
+}
+
+resource "google_compute_firewall" "allow_all_ingress" {
+  count = var.allow_all_ingress_ranges != null ? 1 : 0
+
+  name      = "fw-${var.environment_code}-shared-base-1000-i-a-all"
+  network   = module.main.network_name
+  project   = var.project_id
+  direction = "INGRESS"
+  priority  = 1000
+
+  dynamic "log_config" {
+    for_each = var.firewall_enable_logging == true ? [{
+      metadata = "INCLUDE_ALL_METADATA"
+    }] : []
+
+    content {
+      metadata = log_config.value.metadata
+    }
+  }
+
+  allow {
+    protocol = "all"
+  }
+
+  source_ranges = var.allow_all_ingress_ranges
+}
+```
+
+##### Changes to restricted shared VPC
+
+On `gcp-networks/modules/base_env/main.tf` edit the terraform module named **restricted_shared_vpc** and add the following fields to it:
+
+```terraform
+allow_all_ingress_ranges = concat(data.google_netblock_ip_ranges.health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.legacy_health_checkers.cidr_blocks_ipv4, data.google_netblock_ip_ranges.iap_forwarders.cidr_blocks_ipv4)
+allow_all_egress_ranges  = ["0.0.0.0/0"]
+
+nat_enabled               = true
+nat_num_addresses_region1 = 1
+nat_num_addresses_region2 = 1
+
+perimeter_projects = [local.logging_env_project_number, local.kms_env_project_number]
+```
+
+Commit all changes and push to the current branch
+
+```bash
+git add .
+git commit -m "Create custom fw rules, enable nat, configure dns and service perimeter"
+
+git push origin production
+```
+
+## 4-projects: Create Service Catalog and Artifacts Shared projects and Machine Learning Projects
+
+This step corresponds to modifications made to `4-projects` step on foundation.
+
+Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+In this tutorial, we are using `ml_business_unit` as an example.
+
+You need to manually plan and apply only once the `ml_business_unit/shared`.
+
+### Manually applying `shared`
+
+- Go to `gcp-projects` repository and checkout to `plan` branch.
+
+```bash
+cd ../gcp-projects
+
+git checkout -plan
+```
+
+- Return to GenAI repository
+
+```bash
+cd ../terraform-google-enterprise-genai
+```
+
+- Copy `ml_business_unit` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
+```
+
+- Add modules to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
+```
+
+- Go to `gcp-projects` repository.
+
+```bash
+cd ../gcp-projects
+```
+
+- Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.
+
+```bash
+export PROJECT_BACKEND=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw projects_gcs_bucket_tfstate)
+
+for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PROJECT_BACKEND/" $file; done
+```
+
+- Retrieve projects step service account e-mail.
+
+```bash
+export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw projects_step_terraform_service_account_email)
+echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
+```
+
+- Retrieve cloud build project id
+
+```bash
+export CLOUD_BUILD_PROJECT_ID=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw cloudbuild_project_id)
+echo ${CLOUD_BUILD_PROJECT_ID}
+```
+
+- Log into gcloud using service account impersonation and then set your configuration:
+
+```bash
+gcloud auth application-default login --impersonate-service-account=${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
+```
+
+- Run `init` and `plan` and review output for environment shared.
+
+```bash
+./tf-wrapper.sh init shared
+./tf-wrapper.sh plan shared
+```
+
+- Run `validate` and check for violations.
+
+```bash
+./tf-wrapper.sh validate shared $(pwd)/../gcp-policies ${CLOUD_BUILD_PROJECT_ID}
+```
+
+- Run `apply` shared.
+
+```bash
+./tf-wrapper.sh apply shared
+```
+
+This will create the artifacts and service catalog projects under `common` folder and configure the Machine Learning business unit infra pipeline.
+
+### `development` branch on `gcp-projects`
+
+This will create the machine learning development environment. A Machine Learning project will be hosted under a folder.
 
 ## 5-appinfra
 
