@@ -352,9 +352,20 @@ output "env_log_project_number" {
   description = "Project Number of the environments log project"
   value       = module.env.env_logs_project_number
 }
+
 output "env_log_bucket_name" {
   description = "Name of environment log bucket"
   value       = module.env.env_log_bucket_name
+}
+
+output "env_kms_project_number" {
+  description = "Project Number for environment Cloud Key Management Service (KMS)."
+  value       = module.env.env_kms_project_number
+}
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.env.key_rings
 }
 ```
 
@@ -364,6 +375,11 @@ output "env_log_bucket_name" {
 output "key_rings" {
   description = "Keyring Names created"
   value       = module.kms_keyring.key_rings
+}
+
+output "env_kms_project_number" {
+  description = "Project number for environment Cloud Key Management Service (KMS)."
+  value       = module.env_kms.project_number
 }
 
 output "env_logs_project_id" {
@@ -548,9 +564,20 @@ output "env_log_project_number" {
   description = "Project Number of the environments log project"
   value       = module.env.env_logs_project_number
 }
+
 output "env_log_bucket_name" {
   description = "Name of environment log bucket"
   value       = module.env.env_log_bucket_name
+}
+
+output "env_kms_project_number" {
+  description = "Project Number for environment Cloud Key Management Service (KMS)."
+  value       = module.env.env_kms_project_number
+}
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.env.key_rings
 }
 ```
 
@@ -560,6 +587,11 @@ output "env_log_bucket_name" {
 output "key_rings" {
   description = "Keyring Names created"
   value       = module.kms_keyring.key_rings
+}
+
+output "env_kms_project_number" {
+  description = "Project number for environment Cloud Key Management Service (KMS)."
+  value       = module.env_kms.project_number
 }
 
 output "env_logs_project_id" {
@@ -744,9 +776,20 @@ output "env_log_project_number" {
   description = "Project Number of the environments log project"
   value       = module.env.env_logs_project_number
 }
+
 output "env_log_bucket_name" {
   description = "Name of environment log bucket"
   value       = module.env.env_log_bucket_name
+}
+
+output "env_kms_project_number" {
+  description = "Project Number for environment Cloud Key Management Service (KMS)."
+  value       = module.env.env_kms_project_number
+}
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.env.key_rings
 }
 ```
 
@@ -756,6 +799,11 @@ output "env_log_bucket_name" {
 output "key_rings" {
   description = "Keyring Names created"
   value       = module.kms_keyring.key_rings
+}
+
+output "env_kms_project_number" {
+  description = "Project number for environment Cloud Key Management Service (KMS)."
+  value       = module.env_kms.project_number
 }
 
 output "env_logs_project_id" {
