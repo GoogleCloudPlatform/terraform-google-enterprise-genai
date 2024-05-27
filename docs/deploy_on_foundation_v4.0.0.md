@@ -94,12 +94,6 @@ cp policy-library/policies/constraints/network_enable_firewall_logs.yaml ../gcp-
 cp policy-library/policies/constraints/require_dnssec.yaml ../gcp-policies/policies/constraints/require_dnssec.yaml
 ```
 
-- Copy `storage_logging.yaml` from this repository to the policies repository:
-
-``` bash
-cp policy-library/policies/constraints/storage_logging.yaml ../gcp-policies/policies/constraints/storage_logging.yaml
-```
-
 - On `gcp-policies` change `serviceusage_allow_basic_apis.yaml` and add the following apis:
 
 ```yaml
@@ -238,9 +232,161 @@ cp docs/assets/terraform/2-environments/ml_key_rings.tf ../gcp-environments/modu
 cp docs/assets/terraform/2-environments/ml_logging.tf ../gcp-environments/modules/env_baseline
 ```
 
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following variables:
+
+```terraform
+variable "keyring_name" {
+  description = "Name to be used for KMS Keyring"
+  type        = string
+  default     = "ml-env-keyring"
+}
+
+variable "keyring_regions" {
+  description = "Regions to create keyrings in"
+  type        = list(string)
+  default = [
+    "us-central1",
+    "us-east4"
+  ]
+}
+
+variable "kms_prevent_destroy" {
+  description = "Wheter to prevent keyring and keys destruction. Must be set to false if the user wants to disable accidental terraform deletions protection."
+  type        = bool
+  default     = true
+}
+
+variable "gcs_bucket_prefix" {
+  description = "Bucket Prefix"
+  type        = string
+  default     = "bkt"
+}
+
+variable "gcs_logging_bucket_location" {
+  description = "Location of environment logging bucket"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "gcs_logging_retention_period" {
+  description = "Retention configuration for environment logging bucket"
+  type = object({
+    is_locked             = bool
+    retention_period_days = number
+  })
+  default = null
+}
+
+variable "gcs_logging_key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+```
+
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following field to `project_budget` specification:
+
+```terraform
+logging_budget_amount                       = optional(number, 1000)
+logging_alert_spent_percents                = optional(list(number), [1.2])
+logging_alert_pubsub_topic                  = optional(string, null)
+logging_budget_alert_spend_basis            = optional(string, "FORECASTED_SPEND")
+```
+
+This will result in a variable similar to the variable specified below:
+
+```terraform
+variable "project_budget" {
+  description = <<EOT
+  Budget configuration for projects.
+  budget_amount: The amount to use as the budget.
+  alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
+  alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
+  alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
+  EOT
+  type = object({
+    base_network_budget_amount                  = optional(number, 1000)
+    base_network_alert_spent_percents           = optional(list(number), [1.2])
+    base_network_alert_pubsub_topic             = optional(string, null)
+    base_network_budget_alert_spend_basis       = optional(string, "FORECASTED_SPEND")
+    restricted_network_budget_amount            = optional(number, 1000)
+    restricted_network_alert_spent_percents     = optional(list(number), [1.2])
+    restricted_network_alert_pubsub_topic       = optional(string, null)
+    restricted_network_budget_alert_spend_basis = optional(string, "FORECASTED_SPEND")
+    monitoring_budget_amount                    = optional(number, 1000)
+    monitoring_alert_spent_percents             = optional(list(number), [1.2])
+    monitoring_alert_pubsub_topic               = optional(string, null)
+    monitoring_budget_alert_spend_basis         = optional(string, "FORECASTED_SPEND")
+    secret_budget_amount                        = optional(number, 1000)
+    secret_alert_spent_percents                 = optional(list(number), [1.2])
+    secret_alert_pubsub_topic                   = optional(string, null)
+    secret_budget_alert_spend_basis             = optional(string, "FORECASTED_SPEND")
+    kms_budget_amount                           = optional(number, 1000)
+    kms_alert_spent_percents                    = optional(list(number), [1.2])
+    kms_alert_pubsub_topic                      = optional(string, null)
+    kms_budget_alert_spend_basis                = optional(string, "FORECASTED_SPEND")
+    logging_budget_amount                       = optional(number, 1000)
+    logging_alert_spent_percents                = optional(list(number), [1.2])
+    logging_alert_pubsub_topic                  = optional(string, null)
+    logging_budget_alert_spend_basis            = optional(string, "FORECASTED_SPEND")
+  })
+  default = {}
+}
+```
+
+- On `gcp-environments/modules/env_baseline/remote.tf` add the following value to `locals`:
+
+```terraform
+projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+```
+
+- On `gcp-environments/envs/development/outputs.tf` add the following outputs:
+
+```terraform
+output "env_log_project_id" {
+  description = "Project ID of the environments log project"
+  value       = module.env.env_logs_project_id
+}
+
+output "env_log_project_number" {
+  description = "Project Number of the environments log project"
+  value       = module.env.env_logs_project_number
+}
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = module.env.env_log_bucket_name
+}
+```
+
+- On `gcp-environments/modules/env_baseline/outputs.tf` add the following outputs:
+
+```terraform
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.kms_keyring.key_rings
+}
+
+output "env_logs_project_id" {
+  description = "Project ID for environment logging."
+  value       = module.env_logs.project_id
+}
+
+output "env_logs_project_number" {
+  description = "Project number for environment logging."
+  value       = module.env_logs.project_number
+}
+
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = google_storage_bucket.log_bucket.name
+}
+```
+
 Commit and push files to git repo
 
 ```bash
+cd ../gcp-environments
+
 git add .
 
 git commit -m "Create env-level keys and env-level logging"
@@ -248,14 +394,14 @@ git commit -m "Create env-level keys and env-level logging"
 git push origin development
 ```
 
-### `non-production` branch
+### `nonproduction` branch
 
-- Go to `gcp-environments` repository, and check out on `non-production` branch.
+- Go to `gcp-environments` repository, and check out on `nonproduction` branch.
 
 ```bash
 cd ../gcp-environments
 
-git checkout non-production
+git checkout nonproduction
 ```
 
 - Return to `terraform-google-enterprise-genai` repo
@@ -282,14 +428,166 @@ cp docs/assets/terraform/2-environments/ml_key_rings.tf ../gcp-environments/modu
 cp docs/assets/terraform/2-environments/ml_logging.tf ../gcp-environments/modules/env_baseline
 ```
 
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following variables:
+
+```terraform
+variable "keyring_name" {
+  description = "Name to be used for KMS Keyring"
+  type        = string
+  default     = "ml-env-keyring"
+}
+
+variable "keyring_regions" {
+  description = "Regions to create keyrings in"
+  type        = list(string)
+  default = [
+    "us-central1",
+    "us-east4"
+  ]
+}
+
+variable "kms_prevent_destroy" {
+  description = "Wheter to prevent keyring and keys destruction. Must be set to false if the user wants to disable accidental terraform deletions protection."
+  type        = bool
+  default     = true
+}
+
+variable "gcs_bucket_prefix" {
+  description = "Bucket Prefix"
+  type        = string
+  default     = "bkt"
+}
+
+variable "gcs_logging_bucket_location" {
+  description = "Location of environment logging bucket"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "gcs_logging_retention_period" {
+  description = "Retention configuration for environment logging bucket"
+  type = object({
+    is_locked             = bool
+    retention_period_days = number
+  })
+  default = null
+}
+
+variable "gcs_logging_key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+```
+
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following field to `project_budget` specification:
+
+```terraform
+logging_budget_amount                       = optional(number, 1000)
+logging_alert_spent_percents                = optional(list(number), [1.2])
+logging_alert_pubsub_topic                  = optional(string, null)
+logging_budget_alert_spend_basis            = optional(string, "FORECASTED_SPEND")
+```
+
+This will result in a variable similar to the variable specified below:
+
+```terraform
+variable "project_budget" {
+  description = <<EOT
+  Budget configuration for projects.
+  budget_amount: The amount to use as the budget.
+  alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
+  alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
+  alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
+  EOT
+  type = object({
+    base_network_budget_amount                  = optional(number, 1000)
+    base_network_alert_spent_percents           = optional(list(number), [1.2])
+    base_network_alert_pubsub_topic             = optional(string, null)
+    base_network_budget_alert_spend_basis       = optional(string, "FORECASTED_SPEND")
+    restricted_network_budget_amount            = optional(number, 1000)
+    restricted_network_alert_spent_percents     = optional(list(number), [1.2])
+    restricted_network_alert_pubsub_topic       = optional(string, null)
+    restricted_network_budget_alert_spend_basis = optional(string, "FORECASTED_SPEND")
+    monitoring_budget_amount                    = optional(number, 1000)
+    monitoring_alert_spent_percents             = optional(list(number), [1.2])
+    monitoring_alert_pubsub_topic               = optional(string, null)
+    monitoring_budget_alert_spend_basis         = optional(string, "FORECASTED_SPEND")
+    secret_budget_amount                        = optional(number, 1000)
+    secret_alert_spent_percents                 = optional(list(number), [1.2])
+    secret_alert_pubsub_topic                   = optional(string, null)
+    secret_budget_alert_spend_basis             = optional(string, "FORECASTED_SPEND")
+    kms_budget_amount                           = optional(number, 1000)
+    kms_alert_spent_percents                    = optional(list(number), [1.2])
+    kms_alert_pubsub_topic                      = optional(string, null)
+    kms_budget_alert_spend_basis                = optional(string, "FORECASTED_SPEND")
+    logging_budget_amount                       = optional(number, 1000)
+    logging_alert_spent_percents                = optional(list(number), [1.2])
+    logging_alert_pubsub_topic                  = optional(string, null)
+    logging_budget_alert_spend_basis            = optional(string, "FORECASTED_SPEND")
+  })
+  default = {}
+}
+```
+
+- On `gcp-environments/modules/env_baseline/remote.tf` add the following value to `locals`:
+
+```terraform
+projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+```
+
+- On `gcp-environments/envs/nonproduction/outputs.tf` add the following outputs:
+
+```terraform
+output "env_log_project_id" {
+  description = "Project ID of the environments log project"
+  value       = module.env.env_logs_project_id
+}
+
+output "env_log_project_number" {
+  description = "Project Number of the environments log project"
+  value       = module.env.env_logs_project_number
+}
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = module.env.env_log_bucket_name
+}
+```
+
+- On `gcp-environments/modules/env_baseline/outputs.tf` add the following outputs:
+
+```terraform
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.kms_keyring.key_rings
+}
+
+output "env_logs_project_id" {
+  description = "Project ID for environment logging."
+  value       = module.env_logs.project_id
+}
+
+output "env_logs_project_number" {
+  description = "Project number for environment logging."
+  value       = module.env_logs.project_number
+}
+
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = google_storage_bucket.log_bucket.name
+}
+```
+
 Commit and push files to git repo
 
 ```bash
+cd ../gcp-environments
+
 git add .
 
 git commit -m "Create env-level keys and env-level logging"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
 ### `production` branch
@@ -326,9 +624,161 @@ cp docs/assets/terraform/2-environments/ml_key_rings.tf ../gcp-environments/modu
 cp docs/assets/terraform/2-environments/ml_logging.tf ../gcp-environments/modules/env_baseline
 ```
 
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following variables:
+
+```terraform
+variable "keyring_name" {
+  description = "Name to be used for KMS Keyring"
+  type        = string
+  default     = "ml-env-keyring"
+}
+
+variable "keyring_regions" {
+  description = "Regions to create keyrings in"
+  type        = list(string)
+  default = [
+    "us-central1",
+    "us-east4"
+  ]
+}
+
+variable "kms_prevent_destroy" {
+  description = "Wheter to prevent keyring and keys destruction. Must be set to false if the user wants to disable accidental terraform deletions protection."
+  type        = bool
+  default     = true
+}
+
+variable "gcs_bucket_prefix" {
+  description = "Bucket Prefix"
+  type        = string
+  default     = "bkt"
+}
+
+variable "gcs_logging_bucket_location" {
+  description = "Location of environment logging bucket"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "gcs_logging_retention_period" {
+  description = "Retention configuration for environment logging bucket"
+  type = object({
+    is_locked             = bool
+    retention_period_days = number
+  })
+  default = null
+}
+
+variable "gcs_logging_key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+```
+
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following field to `project_budget` specification:
+
+```terraform
+logging_budget_amount                       = optional(number, 1000)
+logging_alert_spent_percents                = optional(list(number), [1.2])
+logging_alert_pubsub_topic                  = optional(string, null)
+logging_budget_alert_spend_basis            = optional(string, "FORECASTED_SPEND")
+```
+
+This will result in a variable similar to the variable specified below:
+
+```terraform
+variable "project_budget" {
+  description = <<EOT
+  Budget configuration for projects.
+  budget_amount: The amount to use as the budget.
+  alert_spent_percents: A list of percentages of the budget to alert on when threshold is exceeded.
+  alert_pubsub_topic: The name of the Cloud Pub/Sub topic where budget related messages will be published, in the form of `projects/{project_id}/topics/{topic_id}`.
+  alert_spend_basis: The type of basis used to determine if spend has passed the threshold. Possible choices are `CURRENT_SPEND` or `FORECASTED_SPEND` (default).
+  EOT
+  type = object({
+    base_network_budget_amount                  = optional(number, 1000)
+    base_network_alert_spent_percents           = optional(list(number), [1.2])
+    base_network_alert_pubsub_topic             = optional(string, null)
+    base_network_budget_alert_spend_basis       = optional(string, "FORECASTED_SPEND")
+    restricted_network_budget_amount            = optional(number, 1000)
+    restricted_network_alert_spent_percents     = optional(list(number), [1.2])
+    restricted_network_alert_pubsub_topic       = optional(string, null)
+    restricted_network_budget_alert_spend_basis = optional(string, "FORECASTED_SPEND")
+    monitoring_budget_amount                    = optional(number, 1000)
+    monitoring_alert_spent_percents             = optional(list(number), [1.2])
+    monitoring_alert_pubsub_topic               = optional(string, null)
+    monitoring_budget_alert_spend_basis         = optional(string, "FORECASTED_SPEND")
+    secret_budget_amount                        = optional(number, 1000)
+    secret_alert_spent_percents                 = optional(list(number), [1.2])
+    secret_alert_pubsub_topic                   = optional(string, null)
+    secret_budget_alert_spend_basis             = optional(string, "FORECASTED_SPEND")
+    kms_budget_amount                           = optional(number, 1000)
+    kms_alert_spent_percents                    = optional(list(number), [1.2])
+    kms_alert_pubsub_topic                      = optional(string, null)
+    kms_budget_alert_spend_basis                = optional(string, "FORECASTED_SPEND")
+    logging_budget_amount                       = optional(number, 1000)
+    logging_alert_spent_percents                = optional(list(number), [1.2])
+    logging_alert_pubsub_topic                  = optional(string, null)
+    logging_budget_alert_spend_basis            = optional(string, "FORECASTED_SPEND")
+  })
+  default = {}
+}
+```
+
+- On `gcp-environments/modules/env_baseline/remote.tf` add the following value to `locals`:
+
+```terraform
+projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+```
+
+- On `gcp-environments/envs/production/outputs.tf` add the following outputs:
+
+```terraform
+output "env_log_project_id" {
+  description = "Project ID of the environments log project"
+  value       = module.env.env_logs_project_id
+}
+
+output "env_log_project_number" {
+  description = "Project Number of the environments log project"
+  value       = module.env.env_logs_project_number
+}
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = module.env.env_log_bucket_name
+}
+```
+
+- On `gcp-environments/modules/env_baseline/outputs.tf` add the following outputs:
+
+```terraform
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.kms_keyring.key_rings
+}
+
+output "env_logs_project_id" {
+  description = "Project ID for environment logging."
+  value       = module.env_logs.project_id
+}
+
+output "env_logs_project_number" {
+  description = "Project number for environment logging."
+  value       = module.env_logs.project_number
+}
+
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = google_storage_bucket.log_bucket.name
+}
+```
+
 Commit and push files to git repo
 
 ```bash
+cd ../gcp-environments
+
 git add .
 
 git commit -m "Create env-level keys and env-level logging"
@@ -340,11 +790,11 @@ git push origin production
 
 A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
 
-You must disable the contraint, assign the permission on the bucket and then apply the contraint again. This step-by-step presents you with two different options and only one of them should be executed.
+You must disable the contraint, assign the permission on the bucket and then apply the contraint again. This step-by-step presents you with two different options (`Option 1` and `Option 2`) and only one of them should be executed.
 
-The first and the recommended option is making the intervention using `gcloud` cli, as described in **Option 1**.
+The first and the recommended option is making the changes by using `gcloud` cli, as described in `Option 1`.
 
-**Option 2** is an alternative to `gcloud` cli and relies on Google Cloud Console.
+`Option 2` is an alternative to `gcloud` cli and relies on Google Cloud Console.
 
 #### Option 1: Use `gcloud` cli to disable/enable organization policy constraint
 
