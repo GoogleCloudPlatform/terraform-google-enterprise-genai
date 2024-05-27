@@ -46,7 +46,6 @@ If you do not have this layout, please checkout the source repositories for the 
     gcp-networks
     gcp-org
     gcp-policies
-    gcp-policies-app-infra
     gcp-projects
     ```
 
@@ -60,7 +59,6 @@ gcp-environments
 gcp-networks
 gcp-org
 gcp-policies
-gcp-policies-app-infra
 gcp-projects
 terraform-google-enterprise-genai
 ```
@@ -69,15 +67,14 @@ terraform-google-enterprise-genai
 
 ### Update `gcloud terraform vet` policies
 
-the first step is to update the `gcloud terraform vet` policies constraints to allow usage of the APIs needed by the Blueprint.
-The constraints are located in the two policies repositories:
+the first step is to update the `gcloud terraform vet` policies constraints to allow usage of the APIs needed by the Blueprint and add more policies.
+The constraints are located in the repository:
 
 - `gcp-policies`
-- `gcp-policies-app-infra`
 
 All changes below must be made to both repositories:
 
-Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
+**IMPORTANT:** Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
 
 - Copy `cmek_settings.yaml` from this repository to the policies repository:
 
@@ -103,7 +100,7 @@ cp policy-library/policies/constraints/require_dnssec.yaml ../gcp-policies/polic
 cp policy-library/policies/constraints/storage_logging.yaml ../gcp-policies/policies/constraints/storage_logging.yaml
 ```
 
-- On `gcp-policies` and `gcp-policies-app-infra` change `serviceusage_allow_basic_apis.yaml` and add the following apis:
+- On `gcp-policies` change `serviceusage_allow_basic_apis.yaml` and add the following apis:
 
 ```yaml
      - "aiplatform.googleapis.com"
@@ -118,16 +115,10 @@ cp policy-library/policies/constraints/storage_logging.yaml ../gcp-policies/poli
      - "containerscanning.googleapis.com"
 ```
 
-Add files to tracked on `gcp-policies` and `gcp-policies-app-infra` repositories, commit and push the code:
+Add files to tracked on `gcp-policies` repository, commit and push the code:
 
 ```bash
 cd ../gcp-policies
-
-git add policies/constraints/*.yaml
-git commit -m "Add ML policies constraints"
-git push origin $(git branch --show-current)
-
-cd ../gcp-policie-app-infra
 
 git add policies/constraints/*.yaml
 git commit -m "Add ML policies constraints"
@@ -138,7 +129,7 @@ git push origin $(git branch --show-current)
 
 This step corresponds to modifications made to `1-org` step on foundation.
 
-Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`
+**IMPORTANT:** Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/` and that `gcp-org` repository is checked out on `production` branch.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -163,6 +154,31 @@ cp docs/assets/terraform/1-org/ml_ops_org_policy.tf ../gcp-org/envs/shared
 cp docs/assets/terraform/1-org/ml_key_rings.tf ../gcp-org/envs/shared
 ```
 
+- Edit `gcp-org/envs/shared/remote.tf` and add the following value to `locals`:
+
+```terraform
+projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
+```
+
+- Edit `gcp-org/envs/shared/variables.tf` and add the following variables:
+
+```terraform
+variable "keyring_regions" {
+  description = "Regions to create keyrings in"
+  type        = list(string)
+  default = [
+    "us-central1",
+    "us-east4"
+  ]
+}
+
+variable "keyring_name" {
+  description = "Name to be used for KMS Keyring"
+  type        = string
+  default     = "ml-org-keyring"
+}
+```
+
 Add files to git on `gcp-org`, commit and push code:
 
 ```bash
@@ -170,10 +186,12 @@ cd ../gcp-org
 
 git add envs/shared/ml_key_rings.tf
 git add envs/shared/ml_ops_org_policy.tf
+git add envs/shared/remote.tf
+git add envs/shared/variables.tf
 git add modules
 
 git commit -m "Add ML org policies and Org-level key"
-git push origin $(git branch --show-current)
+git push origin production
 ```
 
 ## 2-environment: Create environment level logging keys, logging project and logging bucket
