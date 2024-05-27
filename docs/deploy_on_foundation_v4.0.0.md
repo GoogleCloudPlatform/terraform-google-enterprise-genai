@@ -856,17 +856,17 @@ You will be doing this procedure for each environment (`development`, `non-produ
     export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
     ```
 
-    Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
+    Make sure your git is checked out to the `non-production` branch by running `git checkout nonproduction` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout nonproduction)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
     ```bash
-    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
-    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_project_id)
     ```
 
 3. Validate the variable values.
@@ -946,6 +946,8 @@ You will be doing this procedure for each environment (`development`, `non-produ
 
 #### Option 2: Use Google Cloud Console to disable/enable organization policy constraint
 
+Proceed with these steps only if `Option 1` is not chosen.
+
 1. On `ml_logging.tf` locate the following lines and uncomment them:
 
     ```terraform
@@ -1011,6 +1013,8 @@ cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-network
 Commit and push files to git repo
 
 ```bash
+cd ../gcp-networks
+
 git add .
 
 git commit -m "Create DNS notebook configuration"
@@ -1235,7 +1239,7 @@ git push origin development
 ```bash
 cd ../gcp-networks
 
-git checkout non-production
+git checkout nonproduction
 ```
 
 #### Private DNS zone configuration (non-prod)
@@ -1887,7 +1891,7 @@ This will create the machine learning non-production environment. A Machine Lear
 ```bash
 cd ../gcp-projects
 
-git checkout non-production
+git checkout nonproduction
 ```
 
 - Return to GenAI repository
