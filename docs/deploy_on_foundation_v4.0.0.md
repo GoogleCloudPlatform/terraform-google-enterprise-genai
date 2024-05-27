@@ -209,7 +209,7 @@ cd ../terraform-google-enterprise-genai
 - Go to `gcp-environments` repository, and check out on `development` branch.
 
 ```bash
-cd ../gcp-environemnts
+cd ../gcp-environments
 
 git checkout development
 ```
@@ -253,7 +253,7 @@ git push origin development
 - Go to `gcp-environments` repository, and check out on `non-production` branch.
 
 ```bash
-cd ../gcp-environemnts
+cd ../gcp-environments
 
 git checkout non-production
 ```
@@ -297,7 +297,7 @@ git push origin non-production
 - Go to `gcp-environments` repository, and check out on `production` branch.
 
 ```bash
-cd ../gcp-environemnts
+cd ../gcp-environments
 
 git checkout production
 ```
