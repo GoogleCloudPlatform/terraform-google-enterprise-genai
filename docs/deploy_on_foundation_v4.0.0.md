@@ -213,7 +213,7 @@ cd ../gcp-environments
 git checkout development
 ```
 
-- Return to `terraform-google-enterprise-genai` repo
+- Return to `terraform-google-enterprise-genai` repo.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -403,7 +403,7 @@ output "env_log_bucket_name" {
 }
 ```
 
-Commit and push files to git repo
+- Commit and push files to git repo.
 
 ```bash
 cd ../gcp-environments
@@ -425,7 +425,7 @@ cd ../gcp-environments
 git checkout nonproduction
 ```
 
-- Return to `terraform-google-enterprise-genai` repo
+- Return to `terraform-google-enterprise-genai` repo.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -615,7 +615,7 @@ output "env_log_bucket_name" {
 }
 ```
 
-Commit and push files to git repo
+- Commit and push files to git repo.
 
 ```bash
 cd ../gcp-environments
@@ -637,7 +637,7 @@ cd ../gcp-environments
 git checkout production
 ```
 
-- Return to `terraform-google-enterprise-genai` repo
+- Return to `terraform-google-enterprise-genai` repo.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -827,7 +827,7 @@ output "env_log_bucket_name" {
 }
 ```
 
-Commit and push files to git repo
+- Commit and push files to git repo.
 
 ```bash
 cd ../gcp-environments
@@ -1045,7 +1045,7 @@ git checkout development
 
 #### Private DNS zone configuration (dev)
 
-- Return to `terraform-google-enterprise-genai` repo
+- Return to `terraform-google-enterprise-genai` repo.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -1063,7 +1063,7 @@ cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
 cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
 ```
 
-Commit and push files to git repo
+Commit and push files to git repo.
 
 ```bash
 cd ../gcp-networks
@@ -1276,7 +1276,7 @@ nat_num_addresses_region2 = 1
 perimeter_projects = [local.logging_env_project_number, local.kms_env_project_number]
 ```
 
-Commit all changes and push to the current branch
+Commit all changes and push to the current branch.
 
 ```bash
 git add .
@@ -1297,7 +1297,7 @@ git checkout nonproduction
 
 #### Private DNS zone configuration (non-production)
 
-- Return to `terraform-google-enterprise-genai` repo
+- Return to `terraform-google-enterprise-genai` repo.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -1315,7 +1315,7 @@ cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
 cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
 ```
 
-Commit and push files to git repo
+Commit and push files to git repo.
 
 ```bash
 cd ../gcp-networks
@@ -1528,7 +1528,7 @@ nat_num_addresses_region2 = 1
 perimeter_projects = [local.logging_env_project_number, local.kms_env_project_number]
 ```
 
-Commit all changes and push to the current branch
+Commit all changes and push to the current branch.
 
 ```bash
 git add .
@@ -1549,7 +1549,7 @@ git checkout production
 
 #### Private DNS zone configuration (production)
 
-- Return to `terraform-google-enterprise-genai` repo
+- Return to `terraform-google-enterprise-genai` repo.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -1567,7 +1567,7 @@ cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
 cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
 ```
 
-Commit and push files to git repo
+Commit and push files to git repo.
 
 ```bash
 cd ../gcp-networks
@@ -1780,7 +1780,7 @@ nat_num_addresses_region2 = 1
 perimeter_projects = [local.logging_env_project_number, local.kms_env_project_number]
 ```
 
-Commit all changes and push to the current branch
+Commit all changes and push to the current branch.
 
 ```bash
 git add .
@@ -1813,7 +1813,7 @@ cd ../gcp-projects
 git checkout plan
 ```
 
-- Return to GenAI repository
+- Return to GenAI repository.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -1937,7 +1937,7 @@ cd ../gcp-projects
 git checkout development
 ```
 
-- Return to GenAI repository
+- Return to GenAI repository.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -1994,7 +1994,7 @@ export PROJECT_BACKEND=$(terraform -chdir="../gcp-bootstrap/envs/shared" output 
 for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PROJECT_BACKEND/" $file; done
 ```
 
-- Commit and push
+- Commit and push.
 
 ```bash
 git add .
@@ -2015,7 +2015,7 @@ cd ../gcp-projects
 git checkout nonproduction
 ```
 
-- Return to GenAI repository
+- Return to GenAI repository.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -2072,7 +2072,7 @@ export PROJECT_BACKEND=$(terraform -chdir="../gcp-bootstrap/envs/shared" output 
 for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PROJECT_BACKEND/" $file; done
 ```
 
-- Commit and push
+- Commit and push.
 
 ```bash
 git add .
@@ -2093,7 +2093,7 @@ cd ../gcp-projects
 git checkout production
 ```
 
-- Return to GenAI repository
+- Return to GenAI repository.
 
 ```bash
 cd ../terraform-google-enterprise-genai
@@ -2150,7 +2150,7 @@ export PROJECT_BACKEND=$(terraform -chdir="../gcp-bootstrap/envs/shared" output 
 for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PROJECT_BACKEND/" $file; done
 ```
 
-- Commit and push
+- Commit and push.
 
 ```bash
 git add .
