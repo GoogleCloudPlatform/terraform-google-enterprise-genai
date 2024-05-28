@@ -173,16 +173,21 @@ variable "keyring_name" {
 }
 ```
 
+- Edit `gcp-org/envs/shared/outputs.tf` and add the following output:
+
+```terraform
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.kms_keyring.key_rings
+}
+```
+
 Add files to git on `gcp-org`, commit and push code:
 
 ```bash
 cd ../gcp-org
 
-git add envs/shared/ml_key_rings.tf
-git add envs/shared/ml_ops_org_policy.tf
-git add envs/shared/remote.tf
-git add envs/shared/variables.tf
-git add modules
+git add .
 
 git commit -m "Add ML org policies and Org-level key"
 git push origin production
@@ -1826,6 +1831,12 @@ cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
 cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
 ```
 
+- Add `tfvars` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects/modules
+```
+
 - Go to `gcp-projects` repository.
 
 ```bash
@@ -1847,11 +1858,29 @@ export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../gcp-bootstrap/e
 echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
 ```
 
-- Retrieve cloud build project id
+- Retrieve cloud build project id.
 
 ```bash
 export CLOUD_BUILD_PROJECT_ID=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw cloudbuild_project_id)
 echo ${CLOUD_BUILD_PROJECT_ID}
+```
+
+- Rename `auto.example.tfvars` to `auto.tfvars`.
+
+```bash
+mv common.auto.example.tfvars common.auto.tfvars
+mv shared.auto.example.tfvars shared.auto.tfvars
+mv development.auto.example.tfvars development.auto.tfvars
+mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
+mv production.auto.example.tfvars production.auto.tfvars
+```
+
+- Commit the changes.
+
+```bash
+git add .
+
+git commit -m "Create ML Business Unit"
 ```
 
 - Log into gcloud using service account impersonation and then set your configuration:
@@ -1880,6 +1909,12 @@ gcloud auth application-default login --impersonate-service-account=${GOOGLE_IMP
 ```
 
 This will create the artifacts and service catalog projects under `common` folder and configure the Machine Learning business unit infra pipeline.
+
+Push plan branch to remote.
+
+```bash
+git push origin plan
+```
 
 ### `development` branch on `gcp-projects`
 
@@ -1911,10 +1946,26 @@ cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
 cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
 ```
 
+- Add `tfvars` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects/modules
+```
+
 - Go to `gcp-projects` repository.
 
 ```bash
 cd ../gcp-projects
+```
+
+- Rename `auto.example.tfvars` to `auto.tfvars`.
+
+```bash
+mv common.auto.example.tfvars common.auto.tfvars
+mv shared.auto.example.tfvars shared.auto.tfvars
+mv development.auto.example.tfvars development.auto.tfvars
+mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
+mv production.auto.example.tfvars production.auto.tfvars
 ```
 
 - Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.

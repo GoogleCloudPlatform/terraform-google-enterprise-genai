@@ -187,7 +187,7 @@ variable "artifacts_project_suffix" {
 variable "service_catalog_project_suffix" {
   description = "Service Catalog Project Suffix."
   type        = string
-  default     = "service-catalog"
+  default     = "svc-catalog"
 }
 
 variable "service_catalog_application_name" {
