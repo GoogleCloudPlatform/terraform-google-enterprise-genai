@@ -32,12 +32,6 @@ Interconnect, and baseline firewall rules for each environment. It also sets
 up the global DNS hub.</td>
 </tr>
 <tr>
-<td><a href="../3-networks-hub-and-spoke">3-networks-hub-and-spoke</a></td>
-<td>Sets up base and restricted shared VPCs with all the default configuration
-found on step 3-networks-dual-svpc, but here the architecture will be based on the
-Hub and Spoke network model. It also sets up the global DNS hub</td>
-</tr>
-<tr>
 <td><a href="../4-projects">4-projects</a></td>
 <td>Sets up a folder structure, projects, and an application infrastructure pipeline for applications,
  which are connected as service projects to the shared VPC created in the previous stage.</td>
@@ -50,7 +44,7 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-example-foundation README](https://github.com/terraform-google-modules/terraform-example-foundation)
+[terraform-google-enterprise-genai README](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai)
 file.
 
 ## Purpose
@@ -65,14 +59,72 @@ When deploying/expanding upon each project, you will find your Cloud Build pipel
 
 The order of deployments for the machine-learning's project is as follows:
 
-* 0-gcp-polcies
 * 1-artifact-publish
-* 2-artifact-publish-repo
-* 3-service-catalog
+* 2-service-catalog
+* 3-artifact-publish-repo
 * 4-service-catalog-repo
 * 5-vpc-sc
-* 6-machine-learning
 * 7-machine-learning-post-deploy
+
+## Prerequisites
+
+1. 0-bootstrap executed successfully.
+1. 1-org executed successfully.
+1. 2-environments executed successfully.
+1. 3-networks executed successfully.
+1. 4-projects executed successfully.
+
+### Troubleshooting
+
+Please refer to [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into issues during this step.
+
+## Usage
+
+**Note:** If you are using MacOS, replace `cp -RT` with `cp -R` in the relevant
+commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
+
+### Deploying with Cloud Build
+
+1. Ensure you are in a neutral directory outside any other git related repositories.
+
+1. Clone the `gcp-policies` repo based on the Terraform output from the `0-bootstrap` step.
+Clone the repo at the same level of the `terraform-google-enterprise-genai` folder, the following instructions assume this layout.
+Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get the Cloud Build Project ID.
+
+   ```bash
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   echo ${INFRA_PIPELINE_PROJECT_ID}
+
+   gcloud source repos clone gcp-policies gcp-policies-app-infra --project=${INFRA_PIPELINE_PROJECT_ID}
+   ```
+
+   **Note:** `gcp-policies` repo has the same name as the repo created in step `1-org`. In order to prevent a collision, the previous command will clone this repo in the folder `gcp-policies-app-infra`.
+
+1. Navigate into the repo and copy contents of policy-library to new repo. All subsequent steps assume you are running them
+   from the gcp-policies-app-infra directory. If you run them from another directory,
+   adjust your copy paths accordingly.
+
+   ```bash
+   cd gcp-policies-app-infra
+   git checkout -b main
+
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ .
+   ```
+
+1. Commit changes and push your main branch to the new repo.
+
+   ```bash
+   git add .
+   git commit -m 'Initialize policy library repo'
+
+   git push --set-upstream origin main
+   ```
+
+1. Navigate out of the repo.
+
+   ```bash
+   cd ..
+   ```
 
 ## VPC-SC
 
@@ -111,3 +163,5 @@ Please note that this will cover some but not ALL the policies that will be need
         }
     },
     ```
+
+### Run Terraform locally
