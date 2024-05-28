@@ -1834,7 +1834,7 @@ cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
 - Add `tfvars` to the `gcp-projects` repository.
 
 ```bash
-cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects/modules
+cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects
 ```
 
 - Go to `gcp-projects` repository.
@@ -1871,8 +1871,17 @@ echo ${CLOUD_BUILD_PROJECT_ID}
 mv common.auto.example.tfvars common.auto.tfvars
 mv shared.auto.example.tfvars shared.auto.tfvars
 mv development.auto.example.tfvars development.auto.tfvars
-mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
+mv non-production.auto.example.tfvars non-production.auto.tfvars
 mv production.auto.example.tfvars production.auto.tfvars
+```
+
+- Update REMOTE_STATE_BUCKET value.
+
+```bash
+export remote_state_bucket=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw gcs_bucket_tfstate)
+echo "remote_state_bucket = ${remote_state_bucket}"
+
+sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
 ```
 
 - Commit the changes.
@@ -1949,7 +1958,7 @@ cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
 - Add `tfvars` to the `gcp-projects` repository.
 
 ```bash
-cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects/modules
+cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects
 ```
 
 - Go to `gcp-projects` repository.
@@ -1964,8 +1973,17 @@ cd ../gcp-projects
 mv common.auto.example.tfvars common.auto.tfvars
 mv shared.auto.example.tfvars shared.auto.tfvars
 mv development.auto.example.tfvars development.auto.tfvars
-mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
+mv non-production.auto.example.tfvars non-production.auto.tfvars
 mv production.auto.example.tfvars production.auto.tfvars
+```
+
+- Update REMOTE_STATE_BUCKET value.
+
+```bash
+export remote_state_bucket=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw gcs_bucket_tfstate)
+echo "remote_state_bucket = ${remote_state_bucket}"
+
+sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
 ```
 
 - Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.
@@ -1985,9 +2003,9 @@ git commit -m "Initialize ML environment"
 git push origin development
 ```
 
-### `non-production` branch on `gcp-projects`
+### `nonproduction` branch on `gcp-projects`
 
-This will create the machine learning non-production environment. A Machine Learning project will be hosted under a folder.
+This will create the machine learning nonproduction environment. A Machine Learning project will be hosted under a folder.
 
 - Go to `gcp-projects` repository and checkout to `plan` branch.
 
@@ -2015,10 +2033,35 @@ cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
 cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
 ```
 
+- Add `tfvars` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects
+```
+
 - Go to `gcp-projects` repository.
 
 ```bash
 cd ../gcp-projects
+```
+
+- Rename `auto.example.tfvars` to `auto.tfvars`.
+
+```bash
+mv common.auto.example.tfvars common.auto.tfvars
+mv shared.auto.example.tfvars shared.auto.tfvars
+mv development.auto.example.tfvars development.auto.tfvars
+mv non-production.auto.example.tfvars non-production.auto.tfvars
+mv production.auto.example.tfvars production.auto.tfvars
+```
+
+- Update REMOTE_STATE_BUCKET value.
+
+```bash
+export remote_state_bucket=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw gcs_bucket_tfstate)
+echo "remote_state_bucket = ${remote_state_bucket}"
+
+sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
 ```
 
 - Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.
@@ -2035,7 +2078,7 @@ for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PR
 git add .
 git commit -m "Initialize ML environment"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
 ### `production` branch on `gcp-projects`
@@ -2068,10 +2111,35 @@ cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
 cp -r docs/assets/terraform/4-projects/modules/* ../gcp-projects/modules
 ```
 
+- Add `tfvars` to the `gcp-projects` repository.
+
+```bash
+cp -r docs/assets/terraform/4-projects/*.example.tfvars ../gcp-projects
+```
+
 - Go to `gcp-projects` repository.
 
 ```bash
 cd ../gcp-projects
+```
+
+- Rename `auto.example.tfvars` to `auto.tfvars`.
+
+```bash
+mv common.auto.example.tfvars common.auto.tfvars
+mv shared.auto.example.tfvars shared.auto.tfvars
+mv development.auto.example.tfvars development.auto.tfvars
+mv non-production.auto.example.tfvars non-production.auto.tfvars
+mv production.auto.example.tfvars production.auto.tfvars
+```
+
+- Update REMOTE_STATE_BUCKET value.
+
+```bash
+export remote_state_bucket=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw gcs_bucket_tfstate)
+echo "remote_state_bucket = ${remote_state_bucket}"
+
+sed -i'' -e "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
 ```
 
 - Update project backend by retrieving it's value from `0-bootstrap` and applying it to `backend.tf`.
