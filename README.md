@@ -6,6 +6,8 @@ This repository serves as a example for configuring an environment for the devel
 
 The repo is separated in distinct Terraform projects, each within their own directory that must be applied separately, but in sequence, for more information about each step, please refer to [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0). Comparing to the foundation repository, the key differences from the steps in foundation to steps in these repository are:
 
+Alternatively, the user can follow steps on [`docs/deploy_on_foundation_v4.0.0.md`](./docs/deploy_on_foundation_v4.0.0.md), to deploy the codebase on top of an existing foundation instance.
+
 * [1. org](./1-org/)
     * Specific to this repository, it will also configure Machine Learning Organization Policies.
 * [2. environments](./2-environments/)
@@ -28,12 +30,8 @@ Additional steps were added to provide an example Machine Learning application:
     * Model deployment and monitoring occur in the prod environment.
     * Following successful pipeline runs, a new model version is deployed for A/B testing.
 
-* [composer](./composer/)
+* [7. composer](./7-composer/)
     * Used for code reference.
 
-* [vertexpipeline](./vertexpipeline/)
+* [7. vertexpipeline](./7-vertexpipeline/)
     * Used for code reference, will be used for creating the Machine Learning pipeline.
-
-## Deploying on top of existing foundation instance
-
-You can deploy this codebase on top of existing foundation by following the tutorial in [`docs/deploy_on_foundation_v4.0.0.md`](./docs/deploy_on_foundation_v4.0.0.md)
