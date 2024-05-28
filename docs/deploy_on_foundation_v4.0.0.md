@@ -1280,9 +1280,9 @@ git commit -m "Create custom fw rules, enable nat, configure dns and service per
 git push origin development
 ```
 
-### `non-production` branch on `gcp-networks`
+### `nonproduction` branch on `gcp-networks`
 
-- Go to `gcp-networks` repository, and check out on `non-production` branch.
+- Go to `gcp-networks` repository, and check out on `nonproduction` branch.
 
 ```bash
 cd ../gcp-networks
@@ -1290,7 +1290,7 @@ cd ../gcp-networks
 git checkout nonproduction
 ```
 
-#### Private DNS zone configuration (non-prod)
+#### Private DNS zone configuration (non-production)
 
 - Return to `terraform-google-enterprise-genai` repo
 
@@ -1313,14 +1313,16 @@ cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-network
 Commit and push files to git repo
 
 ```bash
+cd ../gcp-networks
+
 git add .
 
 git commit -m "Create DNS notebook configuration"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
-#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (non-prod)
+#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (non-production)
 
 Create `gcp-networks/modules/base_env/data.tf` file with the following content:
 
@@ -1415,7 +1417,7 @@ On `gcp-networks/modules/base_env/remote.tf`:
     }
     ```
 
-##### Adding projects to service perimeter (non-prod)
+##### Adding projects to service perimeter (non-production)
 
 On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
 
@@ -1448,7 +1450,7 @@ module "regular_service_perimeter" {
 }
 ```
 
-##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules (non-prod)
+##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules (non-production)
 
 On `gcp-networks/modules/restricted_shared_vpc/firewall.tf` add the following firewall rules by adding the terraform code below to the file:
 
@@ -1506,7 +1508,7 @@ resource "google_compute_firewall" "allow_all_ingress" {
 }
 ```
 
-##### Changes to restricted shared VPC (non-prod)
+##### Changes to restricted shared VPC (non-production)
 
 On `gcp-networks/modules/base_env/main.tf` edit the terraform module named **restricted_shared_vpc** and add the following fields to it:
 
@@ -1527,7 +1529,7 @@ Commit all changes and push to the current branch
 git add .
 git commit -m "Create custom fw rules, enable nat, configure dns and service perimeter"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
 ### `production` branch on `gcp-networks`
@@ -1540,7 +1542,7 @@ cd ../gcp-networks
 git checkout production
 ```
 
-#### Private DNS zone configuration (prod)
+#### Private DNS zone configuration (production)
 
 - Return to `terraform-google-enterprise-genai` repo
 
@@ -1563,6 +1565,8 @@ cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-network
 Commit and push files to git repo
 
 ```bash
+cd ../gcp-networks
+
 git add .
 
 git commit -m "Create DNS notebook configuration"
@@ -1570,7 +1574,7 @@ git commit -m "Create DNS notebook configuration"
 git push origin production
 ```
 
-#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (prod)
+#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (production)
 
 Create `gcp-networks/modules/base_env/data.tf` file with the following content:
 
@@ -1665,7 +1669,7 @@ On `gcp-networks/modules/base_env/remote.tf`:
     }
     ```
 
-##### Adding projects to service perimeter (prod)
+##### Adding projects to service perimeter (production)
 
 On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
 
@@ -1698,7 +1702,7 @@ module "regular_service_perimeter" {
 }
 ```
 
-##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules (prod)
+##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules (production)
 
 On `gcp-networks/modules/restricted_shared_vpc/firewall.tf` add the following firewall rules by adding the terraform code below to the file:
 
@@ -1756,7 +1760,7 @@ resource "google_compute_firewall" "allow_all_ingress" {
 }
 ```
 
-##### Changes to restricted shared VPC (prod)
+##### Changes to restricted shared VPC (production)
 
 On `gcp-networks/modules/base_env/main.tf` edit the terraform module named **restricted_shared_vpc** and add the following fields to it:
 
