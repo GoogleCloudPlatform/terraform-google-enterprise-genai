@@ -329,11 +329,11 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
-1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/modules/svc_ctlg_solutions_repo` folder.
+1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/modules/service_catalog_solutions` folder.
    
    ```bash
    cd service-catalog
-   cp -RT ../terraform-google-enterprise-genai/5-app-infra/modules/svc_ctlg_solutions_repo/ .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/modules/service_catalog_solutions/ .
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/assets/imgs/ .
    ```
 
