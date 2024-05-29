@@ -49,7 +49,7 @@ file.
 
 ## Purpose
 
-Folders `1-artifact-publish`, `3-serive-catalog` and `5-machine-learning` are projects that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully.  Folders `2-artifact-publish-repo` and `4-service-catalog-repo` are seperate cloud build repositories that have their own unique piplelines configured. These are used for building out in-house Docker images for your machine-learning pipelines and terraform modules that will be used in `notebooks` in your interactive (development) environment, as well as deployment modules for your operational (non-production, production) environments respectively.
+Inside the `projects` folder, the folders `artifact-publish` and `service-catalog` are projects that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully. Inside the `source_repos` folder, the folders `artifact-publish` and `service-catalog` are seperate cloud build repositories that have their own unique piplelines configured. These are used for building out in-house Docker images for your machine-learning pipelines and terraform modules that will be used in `notebooks` in your interactive (development) environment, as well as deployment modules for your operational (non-production, production) environments respectively.
 
 For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.
 
@@ -64,7 +64,6 @@ The order of deployments for the machine-learning's project is as follows:
 * 3-artifact-publish-repo
 * 4-service-catalog-repo
 * 5-vpc-sc
-* 7-machine-learning-post-deploy
 
 ## Prerequisites
 
@@ -216,7 +215,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd bu3-service-catalog
    git checkout -b plan
 
-   cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/service-catalog .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/service-catalog/ .
    cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
    cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
@@ -291,14 +290,14 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
 
-1. Enter the repo folder and copy over the artifact files from `5-app-infra/assets/artifact-publish/images` folder.
+1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
    
    ```bash
    cd publish-artifacts
    git checkout -b main
 
    git commit -m "Initialize Repository" --allow-empty
-   cp -RT ../terraform-google-enterprise-genai/5-app-infra/assets/artifact-publish/images/ .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/artifact-publish/ .
    ```
 
 1. Commit changes and push your main branch to the new repo.
@@ -329,12 +328,11 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
-1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/modules/service_catalog_solutions` folder.
+1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
    
    ```bash
    cd service-catalog
-   cp -RT ../terraform-google-enterprise-genai/5-app-infra/modules/service_catalog_solutions/ .
-   cp -RT ../terraform-google-enterprise-genai/5-app-infra/assets/imgs/ .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
    ```
 
 1. Commit changes and push main branch to the new repo.
