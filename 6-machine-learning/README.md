@@ -50,12 +50,10 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-example-foundation README](https://github.com/terraform-google-modules/terraform-example-foundation)
+[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai)
 file.
 
 ## Purpose
-
-
 
 ## Prerequisites
 
@@ -64,6 +62,7 @@ file.
 1. 2-environments executed successfully.
 1. 3-networks executed successfully.
 1. 4-projects executed successfully.
+1. 5-app-infra executed successfully.
 
 ### Troubleshooting
 
@@ -82,6 +81,7 @@ You will need a github repository set up for this step.  This repository houses 
       ├── hello_world.py
       └── strings.py
    ```
+
 Add in your dags in the `dags` folder.  Any changes to this folder will trigger a pipeline and place the dags in the appropriate composer environment depending on which branch it is pushed to (`development`, `non-production`, `production`)
 
 Have a github token for access to your repository ready, along with an [Application Installation Id](https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github#connecting_a_github_host_programmatically) and the remote uri to your repository.
@@ -95,7 +95,7 @@ Step 12 in "Deploying with Cloud Build" highlights the necessary steps needed to
 ### Deploying with Cloud Build
 
 1. Clone the `gcp-policies` repo based on the Terraform output from the `0-bootstrap` step.
-Clone the repo at the same level of the `terraform-example-foundation` folder, the following instructions assume this layout.
+Clone the repo at the same level of the `terraform-google-enterprise-genai` folder, the following instructions assume this layout.
 Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get the Cloud Build Project ID.
 
    ```bash
@@ -115,7 +115,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd gcp-policies-app-infra
    git checkout -b main
 
-   cp -RT ../terraform-example-foundation/policy-library/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ .
    ```
 
 1. Commit changes and push your main branch to the new repo.
@@ -147,9 +147,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd bu3-machine-learning
    git checkout -b plan
 
-   cp -RT ../terraform-example-foundation/5-app-infra/6-machine-learning/ .
-   cp ../terraform-example-foundation/build/cloudbuild-tf-* .
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp -RT ../terraform-google-enterprise-genai/6-machine-learning/ .
+   cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -171,7 +171,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
@@ -198,7 +198,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ## MacOS
    for i in `find . -name 'backend.tf'`; do sed -i "" "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
+
 1. Update `modules/base_env/main.tf` with the name of service catalog project id to complete the git fqdn for module sources:
+
    ```bash
    export service_catalog_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
 
@@ -208,17 +210,19 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ##MacOS
    sed -i "" "s/SERVICE-CATALOG-PROJECT-ID/${service_catalog_project_id}/" ./modules/base_env/main.tf
    ```
+
 1. Commit changes.
 
    ```bash
    git add .
    git commit -m 'Initialize repo'
    ```
+
 1. Composer will rely on DAG's from a github repository.  In `4-projects`, a secret 'github-api-token' was created to house your github's api access key.  We need to create a new version for this secret which will be used in the composer module which is called in the `base_env` folder.  Use the script below to add the secrets into each machine learnings respective environment:
    ```bash
    envs=(development non-production production)
    project_ids=()
-   github_token = "YOUR-GITHUB-TOKEN"
+   github_token="YOUR-GITHUB-TOKEN"
 
    for env in "${envs[@]}"; do
       output=$(terraform -chdir="../gcp-projects/business_unit_3/${env}" output -raw machine_learning_project_id)
@@ -229,6 +233,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
       echo -n $github_token | gcloud secrets versions add github-api-token --data-file=- --project=${project}
    done
    ```
+
 1. Push your plan branch to trigger a plan for all environments. Because the
    _plan_ branch is not a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing your _plan_
    branch triggers _terraform plan_ but not _terraform apply_. Review the plan output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
@@ -268,11 +273,11 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 ## Running Terraform locally
 
-1. The next instructions assume that you are at the same level of the `terraform-example-foundation` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
+1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
-   cd terraform-example-foundation/5-app-infra/projects/machine-learning
-   cp ../../../build/tf-wrapper.sh .
+   cd terraform-google-enterprise-genai/6-machine-learning
+   cp ../build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -292,6 +297,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
+
 1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
    ```bash
@@ -402,9 +408,10 @@ If you received any errors or made any changes to the Terraform config or `commo
 
 After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
 
-```bash
-unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
-```
+  ```bash
+  unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+  ```
+
 ## Post Deployment
 
 ### Big Query

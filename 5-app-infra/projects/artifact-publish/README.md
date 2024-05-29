@@ -228,6 +228,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Commit changes and push your main branch to the new repo.
+   
    ```bash
    git add .
    git commit -m 'Initialize Artifact Build Repo'
@@ -347,4 +348,3 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 ```bash
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 ```
-
