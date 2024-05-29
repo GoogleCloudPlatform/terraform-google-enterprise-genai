@@ -375,6 +375,31 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
    "serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"
    ```
 
+1. 
+
+   ```bash
+   export prj_c_bu3infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   echo "prj_c_bu3infra_pipeline_project_id = ${prj_c_bu3infra_pipeline_project_id}"
+
+   export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
+   echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
+
+   export backend_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw gcs_bucket_tfstate)
+   echo "remote_state_bucket = ${backend_bucket}"
+
+   output_prj_d_logging_project_number=$(gsutil cat gs://$backend_bucket/terraform/environments/development/default.tfstate)
+   project_d_logging_number=$(echo "$output_prj_d_logging_project_number" | jq -r '.outputs.env_log_project_number.value')
+   echo "project_d_logging_number = ${project_d_logging_number}"
+
+   export backend_bucket_projects=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   echo "backend_bucket_projects = ${backend_bucket_projects}"
+
+   output_prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate)
+
+   project_d_machine_learning_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
+   echo "project_d_machine_learning_number = ${project_d_machine_learning_number}"
+   ```
+
 
  In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
 
