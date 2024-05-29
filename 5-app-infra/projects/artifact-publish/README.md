@@ -204,6 +204,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 ## Post deployment
+
 1. `cd` out of the `artifacts-publish` repository.
 
 1. Grab the Artifact Project ID

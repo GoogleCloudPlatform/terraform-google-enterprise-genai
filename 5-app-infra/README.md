@@ -135,7 +135,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Navigate into the repo, change to non-main branch and copy contents of genAI to new repo.
-   All subsequent steps assume you are running them from the bu3-artifact-publisg directory.
+   All subsequent steps assume you are running them from the bu3-artifact-publish directory.
    If you run them from another directory, adjust your copy paths accordingly.
 
    ```bash
@@ -274,9 +274,8 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd ..
    ```
 
-#### ARTIFACT PUBLISH REPO
-
 1. Grab the Artifact Project ID
+   
    ```bash
    export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw common_artifacts_project_id)
    echo ${ARTIFACT_PROJECT_ID}
@@ -287,14 +286,15 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```bash
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
-1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
+
+1. Enter the repo folder and copy over the artifact files from `5-app-infra/assets/artifact-publish/images` folder.
    
    ```bash
    cd publish-artifacts
    git checkout -b main
 
    git commit -m "Initialize Repository" --allow-empty
-   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/artifact-publish/ .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/assets/artifact-publish/images/ .
    ```
 
 1. Commit changes and push your main branch to the new repo.
@@ -329,11 +329,12 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
-1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos` folder.
+1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/modules/svc_ctlg_solutions_repo` folder.
    
    ```bash
    cd service-catalog
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/modules/svc_ctlg_solutions_repo/ .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/assets/imgs/ .
    ```
 
 1. Commit changes and push main branch to the new repo.
@@ -400,6 +401,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
+
 1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
    ```bash
@@ -493,6 +495,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    ```
 
 1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
+
 1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
    ```bash

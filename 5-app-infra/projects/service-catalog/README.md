@@ -238,6 +238,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 ## Post deployment
+
 1. `cd` out of the `foundations` repository.
 
 1. Grab the Service Catalogs ID
