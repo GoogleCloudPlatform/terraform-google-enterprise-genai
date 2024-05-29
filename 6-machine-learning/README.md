@@ -86,7 +86,7 @@ Add in your dags in the `dags` folder.  Any changes to this folder will trigger 
 
 Have a github token for access to your repository ready, along with an [Application Installation Id](https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github#connecting_a_github_host_programmatically) and the remote uri to your repository.
 
-These environmental project inflations are closely tied to the `service-catalog` project that have already deployed.  By now, the `bu3-service-catalog` should have been inflated.   `service-catalog` contains modules that are being deployed in an interactive (development) environment. Since they already exist; they can be used as terraform modules for operational (non-production, production) environments.  This was done in order to avoid code redundancy. One area for all `machine-learning` deployments.
+These environmental project inflations are closely tied to the `service-catalog` project that have already deployed.  By now, the `bu3-service-catalog` should have been inflated.  `service-catalog` contains modules that are being deployed in an interactive (development) environment. Since they already exist; they can be used as terraform modules for operational (non-production, production) environments.  This was done in order to avoid code redundancy. One area for all `machine-learning` deployments.
 
 Under `modules/base_env/main.tf` you will notice all module calls are using `git` links as sources.  These links refer to the `service-catalog` cloud source repository we have already set up.
 
@@ -160,6 +160,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
+   
    ```bash
    GITHUB_APP_ID="YOUR-GITHUB-APP-ID-HERE"
    GITHUB_REMOTE_URI="YOUR-GITHUB-REMOTE-URI"
@@ -219,6 +220,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Composer will rely on DAG's from a github repository.  In `4-projects`, a secret 'github-api-token' was created to house your github's api access key.  We need to create a new version for this secret which will be used in the composer module which is called in the `base_env` folder.  Use the script below to add the secrets into each machine learnings respective environment:
+   
    ```bash
    envs=(development non-production production)
    project_ids=()
@@ -271,9 +273,10 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```bash
    cd ..
    ```
+
 ## Running Terraform locally
 
-1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
+1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `6-machine-learning` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
    cd terraform-google-enterprise-genai/6-machine-learning
@@ -288,6 +291,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Update `common.auto.tfvars` file with values from your environment.
+
 1. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
@@ -333,17 +337,17 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 We will now deploy each of our environments (development/production/non-production) using this script.
-When using Cloud Build or Jenkins as your CI/CD tool, each environment corresponds to a branch in the repository for the `5-app-infra` step. Only the corresponding environment is applied.
+When using Cloud Build or Jenkins as your CI/CD tool, each environment corresponds to a branch in the repository for the `6-machine-learning` step. Only the corresponding environment is applied.
 
 To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
 
 1. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
 
    ```bash
-   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo ${INFRA_PIPELINE_PROJECT_ID}
 
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
@@ -415,6 +419,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 ## Post Deployment
 
 ### Big Query
+
   In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance
   ```bash
    ml_project_dev=$(terraform -chdir="gcp-projects/business_unit_3/development" output -json)
@@ -433,6 +438,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 ### VPC-SC
 
 1. Now that machine learning's projects have all been inflated, please _return to gcp-projects_ and update COMMON.AUTO.TFVARS with this __additional__ information under `perimeter_additional_members`:
+    
     ```
     "serviceAccount:service-[prj-n-bu3machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
     "serviceAccount:[prj-n-bu3machine-learning-number]@cloudbuild.gserviceaccount.com",
@@ -440,7 +446,9 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
     "serviceAccount:[prj-p-bu3machine-learning-number]@cloudbuild.gserviceaccount.com",
     "serviceAccount:service-[prj-p-bu3machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
     ```
+
 2. optional - run the below command to generate a list of the above changes needed to COMMON.AUTO.TFVARS
+    
     ```bash
     ml_n=$(terraform -chdir="gcp-projects/business_unit_3/non-production" output -raw machine_learning_project_number)
     ml_p=$(terraform -chdir="gcp-projects/business_unit_3/production" output -raw machine_learning_project_number)
@@ -454,12 +462,13 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 1.  Many of the necessary service agents and permissions were deployed in all project environments for machine-learning.  Additional entries will be needed for each environment.
 
-1. Add in more agents to the  DEVELOPMENT.AUTO.TFVARS file under `egress_policies`.
+1. Add in more agents to the DEVELOPMENT.AUTO.TFVARS file under `egress_policies`.
 Notably:
 
    * "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
 
     This should be added under identities.  It should look like this::
+    
     ```
     egress_policies = [
           // notebooks
@@ -486,7 +495,9 @@ Notably:
           },
       ]
    ```
+
 1. Remain in DEVELOPMENT.AUTO.TFVARS and include this entry under `egress_policies`.  Ensure you replace all [project numbers] with their corresponding project:
+    
     ```
       // artifact Registry
       {
@@ -525,6 +536,7 @@ Notably:
     ```
 
 1. Under NON-PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
+    
     ```
     {
       "from" = {
@@ -602,6 +614,7 @@ Notably:
     ```
 
 1.  Under PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
+    
     ```
     {
       "from" = {
@@ -633,6 +646,7 @@ Notably:
     ```
 
 ## SERVICE CATALOG
+
 Once you have set up service catalog and attempt to deploy out terraform code, there is a high chance you will encounter this error:
 `Permission denied; please check you have the correct IAM permissions and APIs enabled.`
 This is  due to a VPC Service control error that until now, is impossible to add into the egress policy.  Go to `prj-d-bu3machine-learning` project and view the logs, filtering for ERRORS.  There will be a VPC Service Controls entry that has an `egressViolation`.  It should look something like the following:
@@ -646,7 +660,9 @@ egressViolations: [
    }
 ]
 ```
+
 we want the `unknown-project-number` here.  Add this into your `egress_policies` in `3-networks` under DEVELOPMENT.AUTO.TFVARS, NON-PRODUCTION.AUTO.TFVARS & PRODUCTION.AUTO.TFVARS
+
 ```
 // Service Catalog
   {
