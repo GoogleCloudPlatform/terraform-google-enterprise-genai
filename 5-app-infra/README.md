@@ -366,16 +366,14 @@ cd into gcp-networks
 
 Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
 
-In `common.auto.tfvars` update your `perimeter_additional_members` to include:
+1. In `common.auto.tfvars` update your `perimeter_additional_members` to include:
 
    ```
-   "serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"
-   "serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"
-   "serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"
-   "serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"
+   "serviceAccount:sa-tf-cb-bu3-machine-learning@[prj_c_bu3infra_pipeline_project_id].iam.gserviceaccount.com"
+   "serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com"
+   "serviceAccount:service-[project_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com"
+   "serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com"
    ```
-
-1. 
 
    ```bash
    export prj_c_bu3infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
@@ -387,21 +385,17 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
    export backend_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw gcs_bucket_tfstate)
    echo "remote_state_bucket = ${backend_bucket}"
 
-   output_prj_d_logging_project_number=$(gsutil cat gs://$backend_bucket/terraform/environments/development/default.tfstate)
-   project_d_logging_number=$(echo "$output_prj_d_logging_project_number" | jq -r '.outputs.env_log_project_number.value')
-   echo "project_d_logging_number = ${project_d_logging_number}"
-
    export backend_bucket_projects=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "backend_bucket_projects = ${backend_bucket_projects}"
 
-   output_prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate)
+   export project_d_logging_project_number=$(gsutil cat gs://$backend_bucket/terraform/environments/development/default.tfstate | jq -r '.outputs.env_log_project_number.value')
+   echo "project_d_logging_project_number = ${project_d_logging_project_number}"
 
-   project_d_machine_learning_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
-   echo "project_d_machine_learning_number = ${project_d_machine_learning_number}"
+   prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
+   echo "project_d_machine_learning_number = ${prj_d_machine_learning_project_number}"
    ```
 
-
- In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
+In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
 
 You can find the `sources.access_level` information by going to `Security` in your GCP Organization.
 Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
@@ -421,9 +415,9 @@ Once there, select the perimeter that is associated with the environment (eg. `d
          },
          "to" = {
          "resources" = [
-               "projects/prj-[your-environment-shared-restricted-project-number]",
-               "projects/prj-[your-environment-kms-project-number]",
-               "projects/prj-[your-environment-bu3machine-learning-number]",
+               "projects/[your-environment-shared-restricted-project-number]",
+               "projects/[your-environment-kms-project-number]",
+               "projects/[your-environment-bu3machine-learning-number]",
          ]
          "operations" = {
                "compute.googleapis.com" = {
