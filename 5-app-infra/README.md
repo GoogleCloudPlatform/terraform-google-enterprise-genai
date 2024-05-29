@@ -353,44 +353,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
-#### VPC-SC
-
-Be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
-As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `3-networks-dual-svpc` and _update_
-your ingress rules.
-
-Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, ###`non-production.auto.tfvars` & `production.auto.tfvars`.
-
-In `common.auto.tfvars` update your `perimeter_additional_members` to include:
- * the service acccount for bu3infra-pipeline: `"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"`
- * the service account for your cicd pipeline: `"serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"`
- * your development environment logging bucket service account: `"serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"`
- * your development environment service acount for cloudbuild: `"serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"`
-
- In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include the changes mentioned in <a href="./5-vpc-sc/README.md#ingress-policies">Ingress Policies section</a>.
-
-For your DEVELOPMENT.AUTO.TFVARS file, also include the egress policy mentioned in <a href="./5-vpc-sc/README.md#egress-policies">Egress Policies section</a>.
-
-Please note that this will cover some but not ALL the policies that will be needed.  During deployment there will be violations that will occur which come from unknown google projects outside the scope of your organization.  It will be the responsibility of the operator(s) deploying this process to view logs about the errors and make adjustments accordingly.  Most notably, this was observed for Service Catalog.  There will be an instance where an egress policy to be added for `cloudbuild.googleapis.com` access:
-
-    ```
-    // Service Catalog
-    {
-        "from" = {
-        "identity_type" = "ANY_IDENTITY"
-        "identities"    = []
-        },
-        "to" = {
-        "resources" = ["projects/[some random google project id]"]
-        "operations" = {
-            "cloudbuild.googleapis.com" = {
-            "methods" = ["*"]
-            }
-        }
-        }
-    },
-    ```
-
 ### Run Terraform locally
 
 #### ARTIFACT PUBLISH
@@ -597,3 +559,41 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 ```bash
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 ```
+
+#### VPC-SC
+
+Be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
+As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `3-networks-dual-svpc` and _update_
+your ingress rules.
+
+Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, ###`non-production.auto.tfvars` & `production.auto.tfvars`.
+
+In `common.auto.tfvars` update your `perimeter_additional_members` to include:
+ * the service acccount for bu3infra-pipeline: `"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"`
+ * the service account for your cicd pipeline: `"serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"`
+ * your development environment logging bucket service account: `"serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"`
+ * your development environment service acount for cloudbuild: `"serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"`
+
+ In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include the changes mentioned in <a href="./5-vpc-sc/README.md#ingress-policies">Ingress Policies section</a>.
+
+For your DEVELOPMENT.AUTO.TFVARS file, also include the egress policy mentioned in <a href="./5-vpc-sc/README.md#egress-policies">Egress Policies section</a>.
+
+Please note that this will cover some but not ALL the policies that will be needed.  During deployment there will be violations that will occur which come from unknown google projects outside the scope of your organization.  It will be the responsibility of the operator(s) deploying this process to view logs about the errors and make adjustments accordingly.  Most notably, this was observed for Service Catalog.  There will be an instance where an egress policy to be added for `cloudbuild.googleapis.com` access:
+
+    ```
+    // Service Catalog
+    {
+        "from" = {
+        "identity_type" = "ANY_IDENTITY"
+        "identities"    = []
+        },
+        "to" = {
+        "resources" = ["projects/[some random google project id]"]
+        "operations" = {
+            "cloudbuild.googleapis.com" = {
+            "methods" = ["*"]
+            }
+        }
+        }
+    },
+    ```
