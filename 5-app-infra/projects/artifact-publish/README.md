@@ -208,22 +208,27 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. `cd` out of the `artifacts-publish` repository.
 
 1. Grab the Artifact Project ID
-   ```shell
+
+   ```bash
    export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw common_artifacts_project_id)
    echo ${ARTIFACT_PROJECT_ID}
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
-   ```shell
+
+   ```bash
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
+
 1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos` folder.
-   ```shell
+
+   ```bash
    cd publish-artifacts
    cp -r ../ml-foundations/5-app-infra/source_repos/artifact-publish/* .
    ```
+
 1. Commit changes and push your main branch to the new repo.
-   ```shell
+   ```bash
    git add .
    git commit -m 'Initialize Artifact Build Repo'
 

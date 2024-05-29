@@ -274,6 +274,10 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd ..
    ```
 
+1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+
+## Post deployment
+
 1. Grab the Artifact Project ID
    
    ```bash
@@ -312,10 +316,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd ..
    ```
 
-1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
-
-#### SERVICE CATALOG REPO
-
 1. Grab the Service Catalogs ID
   
    ```bash
@@ -353,6 +353,128 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+
+## VPC-SC
+
+By now, `artifact-publish` and `service-catalog` have been deployed.  The projects inflated under `6-machine-learning` are set in a service perimiter for added security.  As such, several services and accounts must be given ingress and egress policies before `6-machine-learning` has been deployed.
+
+cd into gcp-networks
+
+  ```bash
+  cd ../gcp-networks
+  ```
+
+Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
+
+In `common.auto.tfvars` update your `perimeter_additional_members` to include:
+
+   ```
+   "serviceAccount:sa-tf-cb-bu3-machine-learning@[prj-c-bu3infra-pipeline-project-id].iam.gserviceaccount.com"
+   "serviceAccount:sa-terraform-env@[prj-b-seed-project-id].iam.gserviceaccount.com"
+   "serviceAccount:service-[prj-d-logging-project-number]@gs-project-accounts.iam.gserviceaccount.com"
+   "serviceAccount:[prj-d-machine-learning-project-number]@cloudbuild.gserviceaccount.com"
+   ```
+
+
+ In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
+
+You can find the `sources.access_level` information by going to `Security` in your GCP Organization.
+Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
+
+
+## Ingress Policies
+
+   ```
+   ingress_policies = [
+      // users
+      {
+         "from" = {
+         "identity_type" = "ANY_IDENTITY"
+         "sources" = {
+               "access_level" = "[YOUR_ACCESS_LEVEL]"
+         }
+         },
+         "to" = {
+         "resources" = [
+               "projects/prj-[your-environment-shared-restricted-project-number]",
+               "projects/prj-[your-environment-kms-project-number]",
+               "projects/prj-[your-environment-bu3machine-learning-number]",
+         ]
+         "operations" = {
+               "compute.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "dns.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "logging.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "storage.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "cloudkms.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "iam.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "cloudresourcemanager.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "pubsub.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "secretmanager.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "aiplatform.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "composer.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "cloudbuild.googleapis.com" = {
+               "methods" = ["*"]
+               }
+               "bigquery.googleapis.com" = {
+               "methods" = ["*"]
+               }
+         }
+         }
+      },
+   ]
+   ```
+
+## Egress Policies
+
+For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
+
+   ```
+   egress_policies = [
+      // notebooks
+      {
+         "from": {
+               "identity_type": "",
+               "identities": [
+                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
+                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com"
+               ]
+         },
+         "to": {
+               "resources": ["projects/[prj-d-kms-project-number]"],
+               "operations": {
+                  "compute.googleapis.com": {
+                     "methods": ["*"]
+                  },
+                  "cloudkms.googleapis.com": {
+                     "methods": ["*"]
+                  }
+               }
+         }
+      }
+   ]
+   ```
 
 ### Run Terraform locally
 
