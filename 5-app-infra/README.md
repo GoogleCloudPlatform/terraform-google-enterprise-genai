@@ -53,12 +53,6 @@ Inside the `projects` folder, the folders `artifact-publish` and `service-catalo
 
 For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.
 
-When viewing each folder under `projects`, consider them as seperate repositories which will be used to deploy out each respective project.  In the case of using Cloud Build (which is what this example is primarily based on), each folder will be placed in its own GCP cloud source repository for deployment.  There is a README placed in each project folder which will highlight the necessary steps to achieve deployment.
-
-When deploying/expanding upon each project, you will find your Cloud Build pipelines being executed in `prj-c-bu3infra-pipeline`.
-
-The order of deployments for the machine-learning's project is as follows:
-
 * 1-artifact-publish
 * 2-service-catalog
 * 3-artifact-publish-repo
@@ -104,7 +98,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    adjust your copy paths accordingly.
 
    ```bash
-   cd gcp-policies-app-infra
+   cd gcp-policies-app-infra/
    git checkout -b main
 
    cp -RT ../terraform-google-enterprise-genai/policy-library/ .
@@ -127,6 +121,30 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 #### ARTIFACT PUBLISH
 
+The purpose of this step is to deploy out an artifact registry to store custom docker images. A Cloud Build pipeline is also deployed out.  At the time of this writing, it is configured to attach itself to a Cloud Source Repository. The Cloud Build pipeline is responsible for building out a custom image that may be used in Machine Learning Workflows.  If you are in a situation where company policy requires no outside repositories to be accessed, custom images can be used to keep access to any image internally.
+
+Since every workflow will have access to these images, it is deployed in the `common` folder, and keeping with the foundations structure, is listed as `shared` under this Business Unit.  It will only need to be deployed once.
+
+The Pipeline is connected to a GitHub repository with a simple structure:
+
+   ```
+   ├── README.md
+   └── images
+      ├── tf2-cpu.2-13:0.1
+      │   └── Dockerfile
+      └── tf2-gpu.2-13:0.1
+         └── Dockerfile
+   ```
+for the purposes of this example, the pipeline is configured to monitor the `main` branch of this repository.
+
+each folder under `images` has the full name and tag of the image that must be built.  Once a change to the `main` branch is pushed, the pipeline will analyse which files have changed and build that image out and place it in the artifact repository.  For example, if there is a change to the Dockerfile in the `tf2-cpu-13:0.1` folder, or if the folder itself has been renamed, it will build out an image and tag it based on the folder name that the Dockerfile has been housed in.
+
+Once pushed, the pipeline can be accessed by navigating to the project name created in step-4:
+
+   ```bash
+   terraform -chdir="terraform-example-foundation/4-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
+   ```
+
 1. Clone the `bu3-artifact-publish` repo.
 
    ```bash
@@ -138,7 +156,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    If you run them from another directory, adjust your copy paths accordingly.
 
    ```bash
-   cd bu3-artifact-publish
+   cd bu3-artifact-publish/
    git checkout -b plan
 
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/artifact-publish/ .
@@ -200,6 +218,60 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 #### SERVICE-CATALOG
+
+This step has two main purposes:
+
+1. To deploy a pipeline and a bucket which is linked to a Google Cloud Repository that houses terraform modules for the use in Service Catalog.
+Although Service Catalog itself must be manually deployed, the modules which will be used can still be automated.
+
+2. To deploy infrastructure for operational environments (ie. `non-production` & `production`.)
+
+The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are.
+
+The repository has the structure (truncated for brevity):
+   ```
+   business_unit_3
+   ├── development
+   ├── non-production
+   ├── production
+   modules
+   ├── bucket
+   │   ├── README.md
+   │   ├── data.tf
+   │   ├── main.tf
+   │   ├── outputs.tf
+   │   ├── provider.tf
+   │   └── variables.tf
+   ├── composer
+   │   ├── README.md
+   │   ├── data.tf
+   │   ├── iam.roles.tf
+   │   ├── iam.users.tf
+   │   ├── locals.tf
+   │   ├── main.tf
+   │   ├── outputs.tf
+   │   ├── provider.tf
+   │   ├── terraform.tfvars.example
+   │   ├── variables.tf
+   │   └── vpc.tf
+   ├── cryptography
+   │   ├── README.md
+   │   ├── crypto_key
+   │   │   ├── main.tf
+   │   │   ├── outputs.tf
+   │   │   └── variables.tf
+   │   └── key_ring
+   │       ├── main.tf
+   │       ├── outputs.tf
+   │       └── variables.tf
+   ```
+
+Each folder under `modules` represents a terraform module.
+When there is a change in any of the terraform module folders, the pipeline will find whichever module has been changed since the last push, `tar.gz` that file and place it in a bucket for Service Catalog to access.
+
+This pipeline is listening to the `main` branch of this repository for changes in order for the modules to be uploaded to service catalog.
+
+The pipeline also listens for changes made to `plan`, `development`, `non-production` & `production` branches, this is used for deploying infrastructure to each project.
 
 1. Clone the `bu3-service-catalog` repo.
 
@@ -275,7 +347,8 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
-## Post deployment
+
+#### ARTIFACT PUCLISH REPO
 
 1. Grab the Artifact Project ID
    
@@ -315,6 +388,8 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd ..
    ```
 
+#### SERVICE CATALOG REPO
+
 1. Grab the Service Catalogs ID
   
    ```bash
@@ -331,7 +406,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
    
    ```bash
-   cd service-catalog
+   cd service-catalog/
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
    ```
 
@@ -352,7 +427,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
-## VPC-SC
+#### VPC-SC
 
 By now, `artifact-publish` and `service-catalog` have been deployed.  The projects inflated under `6-machine-learning` are set in a service perimiter for added security.  As such, several services and accounts must be given ingress and egress policies before `6-machine-learning` has been deployed.
 
@@ -500,7 +575,7 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
-   cd terraform-google-enterprise-genai/5-app-infra/projects/artifact-publish
+   cd terraform-google-enterprise-genai/5-app-infra/projects/artifact-publish/
    cp ../../../build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
@@ -613,7 +688,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
-   cd terraform-google-enterprise-genai/5-app-infra/projects/service-catalog
+   cd terraform-google-enterprise-genai/5-app-infra/projects/service-catalog/
    cp ../../../build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
@@ -698,9 +773,9 @@ If you received any errors or made any changes to the Terraform config or `commo
 
 After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
 
-```bash
-unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
-```
+   ```bash
+   unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+   ```
 
 #### VPC-SC
 
