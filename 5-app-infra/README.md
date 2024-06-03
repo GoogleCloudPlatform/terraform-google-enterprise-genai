@@ -49,7 +49,12 @@ file.
 
 ## Purpose
 
-Inside the `projects` folder, the folders `artifact-publish` and `service-catalog` are projects that will be _expanded_ upon.  In step 4, we have initiated the creation of these projects, enabled API's and assigned roles to various service accounts, service agents and cryptography keys that are needed for each respective project to operate successfully. Inside the `source_repos` folder, the folders `artifact-publish` and `service-catalog` are seperate cloud build repositories that have their own unique piplelines configured. These are used for building out in-house Docker images for your machine-learning pipelines and terraform modules that will be used in `notebooks` in your interactive (development) environment, as well as deployment modules for your operational (non-production, production) environments respectively.
+Inside the `projects` folder, the `artifact-publish` and `service-catalog` directories contain applications that will be further developed. These directories are Terraform repositories that house the configuration code for their respective applications. For instance, in the `projects/artifact-publish` directory, you will find code that configures the custom pipeline for the artifact-publish application.
+> Note: Remember that in step 4-projects, the Service Catalog and Artifacts projects were created under `common` folder.
+
+Inside the `source_repos` folder, the folders `artifact-publish` and `service-catalog` are seperate Cloud Build Repositories that have their own unique piplelines configured. These are used for building out in-house Docker images for your machine-learning pipelines and terraform modules that can be deployed through the Service Catalog Google Cloud Product.
+
+This repository contain examples using modules in `notebooks` in your interactive (development) environment, as well as deployment modules for your operational (non-production, production) environments respectively.
 
 For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.
 
