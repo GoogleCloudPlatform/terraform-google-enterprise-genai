@@ -61,10 +61,10 @@ For the purposes of this demonstration, we assume that you are using Cloud Build
 ## Prerequisites
 
 1. 0-bootstrap executed successfully.
-1. 1-org executed successfully.
-1. 2-environments executed successfully.
-1. 3-networks executed successfully.
-1. 4-projects executed successfully.
+2. 1-org executed successfully.
+3. 2-environments executed successfully.
+4. 3-networks executed successfully.
+5. 4-projects executed successfully.
 
 ### Troubleshooting
 
@@ -79,9 +79,9 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
 1. Ensure you are in a neutral directory outside any other git related repositories.
 
-1. Clone the `gcp-policies` repo based on the Terraform output from the `0-bootstrap` step.
+2. Clone the `gcp-policies` repo based on the Terraform output from the `4-projects` step.
 Clone the repo at the same level of the `terraform-google-enterprise-genai` folder, the following instructions assume this layout.
-Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get the Cloud Build Project ID.
+Run `terraform output cloudbuild_project_id` in the `4-projects` folder to get the Cloud Build Project ID.
 
    ```bash
    export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
@@ -92,7 +92,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
    **Note:** `gcp-policies` repo has the same name as the repo created in step `1-org`. In order to prevent a collision, the previous command will clone this repo in the folder `gcp-policies-app-infra`.
 
-1. Navigate into the repo and copy contents of policy-library to new repo. All subsequent steps assume you are running them
+3. Navigate into the repo and copy contents of policy-library to new repo. All subsequent steps assume you are running them
    from the gcp-policies-app-infra directory. If you run them from another directory,
    adjust your copy paths accordingly.
 
@@ -103,7 +103,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cp -RT ../terraform-google-enterprise-genai/policy-library/ .
    ```
 
-1. Commit changes and push your main branch to the new repo.
+4. Commit changes and push your main branch to the new repo.
 
    ```bash
    git add .
@@ -112,19 +112,19 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git push --set-upstream origin main
    ```
 
-1. Navigate out of the repo.
+5. Navigate out of the repo.
 
    ```bash
    cd ..
    ```
 
-#### ARTIFACT PUBLISH
+#### Artifacts Application
 
 The purpose of this step is to deploy out an artifact registry to store custom docker images. A Cloud Build pipeline is also deployed out. At the time of this writing, it is configured to attach itself to a Cloud Source Repository. The Cloud Build pipeline is responsible for building out a custom image that may be used in Machine Learning Workflows.  If you are in a situation where company policy requires no outside repositories to be accessed, custom images can be used to keep access to any image internally.
 
 Since every workflow will have access to these images, it is deployed in the `common` folder, and keeping with the foundations structure, is listed as `shared` under this Business Unit.  It will only need to be deployed once.
 
-The Pipeline is connected to a GitHub repository with a simple structure:
+The Pipeline is connected to a Google Cloud Source Repository with a simple structure:
 
    ```
    ├── README.md
@@ -138,7 +138,7 @@ for the purposes of this example, the pipeline is configured to monitor the `mai
 
 each folder under `images` has the full name and tag of the image that must be built.  Once a change to the `main` branch is pushed, the pipeline will analyse which files have changed and build that image out and place it in the artifact repository.  For example, if there is a change to the Dockerfile in the `tf2-cpu-13:0.1` folder, or if the folder itself has been renamed, it will build out an image and tag it based on the folder name that the Dockerfile has been housed in.
 
-Once pushed, the pipeline can be accessed by navigating to the project name created in step-4:
+Once pushed, the pipeline build logs can be accessed by navigating to the artifacts project name created in step-4:
 
    ```bash
    terraform -chdir="terraform-example-foundation/4-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
@@ -150,7 +150,7 @@ Once pushed, the pipeline can be accessed by navigating to the project name crea
    gcloud source repos clone bu3-artifact-publish --project=${INFRA_PIPELINE_PROJECT_ID}
    ```
 
-1. Navigate into the repo, change to non-main branch and copy contents of genAI to new repo.
+2. Navigate into the repo, change to non-main branch and copy contents of genAI to new repo.
    All subsequent steps assume you are running them from the bu3-artifact-publish directory.
    If you run them from another directory, adjust your copy paths accordingly.
 
@@ -164,13 +164,13 @@ Once pushed, the pipeline can be accessed by navigating to the project name crea
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
+3. Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
 
    ```bash
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+4. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
@@ -178,7 +178,7 @@ Once pushed, the pipeline can be accessed by navigating to the project name crea
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
 
-1. Update `backend.tf` with your bucket from the infra pipeline output.
+5. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
    export backend_bucket=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-artifact-publish"' --raw-output)
@@ -187,14 +187,14 @@ Once pushed, the pipeline can be accessed by navigating to the project name crea
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
 
-1. Commit changes.
+6. Commit changes.
 
    ```bash
    git add .
    git commit -m 'Initialize repo'
    ```
 
-1. Push your plan branch to trigger a plan for all environments. Because the
+7. Push your plan branch to trigger a plan for all environments. Because the
    _plan_ branch is not a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing your _plan_
    branch triggers _terraform plan_ but not _terraform apply_. Review the plan output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
@@ -202,7 +202,7 @@ Once pushed, the pipeline can be accessed by navigating to the project name crea
    git push --set-upstream origin plan
    ```
 
-1. Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+8. Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
    ```bash
@@ -210,13 +210,55 @@ Once pushed, the pipeline can be accessed by navigating to the project name crea
    git push origin shared
    ```
 
-1. `cd` out of the `bu3-artifacts-publish` repository.
+9. `cd` out of the `bu3-artifacts-publish` repository.
 
    ```bash
    cd ..
    ```
 
-#### SERVICE-CATALOG
+#### Configuring Cloud Source Repositorie of Artifact Application
+
+1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+
+1. Grab the Artifact Project ID
+   
+   ```bash
+   export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw common_artifacts_project_id)
+   echo ${ARTIFACT_PROJECT_ID}
+   ```
+
+1. Clone the freshly minted Cloud Source Repository that was created for this project.
+   
+   ```bash
+   gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
+   ```
+
+1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
+   
+   ```bash
+   cd publish-artifacts
+   git checkout -b main
+
+   git commit -m "Initialize Repository" --allow-empty
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/artifact-publish/ .
+   ```
+
+1. Commit changes and push your main branch to the new repo.
+
+   ```bash
+   git add .
+   git commit -m 'Build Images'
+
+   git push --set-upstream origin main
+   ```
+
+1. `cd` out of the `publish-artifacts` repository.
+   
+   ```bash
+   cd ..
+   ```
+
+#### Service Catalog Pipeline Configuration
 
 This step has two main purposes:
 
@@ -279,7 +321,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    gcloud source repos clone bu3-service-catalog --project=${INFRA_PIPELINE_PROJECT_ID}
    ```
 
-1. Navigate into the repo, change to non-main branch and copy contents of foundation to new repo.
+2. Navigate into the repo, change to non-main branch and copy contents of foundation to new repo.
    All subsequent steps assume you are running them from the bu3-service-catalog directory.
    If you run them from another directory, adjust your copy paths accordingly.
 
@@ -293,13 +335,13 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
+3. Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
 
    ```bash
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+4. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
@@ -307,7 +349,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
 
-1. Update `backend.tf` with your bucket from the infra pipeline output.
+5. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
    export backend_bucket=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-service-catalog"' --raw-output)
@@ -316,14 +358,14 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
 
-1. Commit changes.
+6. Commit changes.
 
    ```bash
    git add .
    git commit -m 'Initialize repo'
    ```
 
-1. Push your plan branch to trigger a plan for all environments. Because the
+7. Push your plan branch to trigger a plan for all environments. Because the
    _plan_ branch is not a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing your _plan_
    branch triggers _terraform plan_ but not _terraform apply_. Review the plan output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
@@ -331,7 +373,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    git push --set-upstream origin plan
    ```
 
-1. Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+8. Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
    ```bash
@@ -339,73 +381,35 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    git push origin shared
    ```
 
-1. `cd` out of the `bu3-service-catalog` repository.
+9. `cd` out of the `bu3-service-catalog` repository.
    
    ```bash
    cd ..
    ```
 
-1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
-
-1. Grab the Artifact Project ID
-   
-   ```bash
-   export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw common_artifacts_project_id)
-   echo ${ARTIFACT_PROJECT_ID}
-   ```
-
-1. Clone the freshly minted Cloud Source Repository that was created for this project.
-   
-   ```bash
-   gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
-   ```
-
-1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
-   
-   ```bash
-   cd publish-artifacts
-   git checkout -b main
-
-   git commit -m "Initialize Repository" --allow-empty
-   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/artifact-publish/ .
-   ```
-
-1. Commit changes and push your main branch to the new repo.
-
-   ```bash
-   git add .
-   git commit -m 'Build Images'
-
-   git push --set-upstream origin main
-   ```
-
-1. `cd` out of the `publish-artifacts` repository.
-   
-   ```bash
-   cd ..
-   ```
+#### Configuring Cloud Source Repositorie of Service Catalog Solutions Artifacts
 
 1. Grab the Service Catalogs ID
-  
+
    ```bash
    export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw service_catalog_project_id)
    echo ${SERVICE_CATALOG_PROJECT_ID}
    ```
 
-1. Clone the freshly minted Cloud Source Repository that was created for this project.
+2. Clone the freshly minted Cloud Source Repository that was created for this project.
    
    ```bash
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
-1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
+3. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
    
    ```bash
    cd service-catalog/
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
    ```
 
-1. Commit changes and push main branch to the new repo.
+4. Commit changes and push main branch to the new repo.
    
    ```bash
    git add .
@@ -414,155 +418,17 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    git push --set-upstream origin main
    ```
 
-1. `cd` out of the `service_catalog` repository.
+5. `cd` out of the `service_catalog` repository.
    
    ```bash
    cd ..
    ```
 
-1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
-
-#### VPC-SC
-
-By now, `artifact-publish` and `service-catalog` have been deployed.  The projects inflated under `6-machine-learning` are set in a service perimiter for added security.  As such, several services and accounts must be given ingress and egress policies before `6-machine-learning` has been deployed.
-
-cd into gcp-networks
-
-  ```bash
-  cd ../gcp-networks
-  ```
-
-Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
-
-1. In `common.auto.tfvars` update your `perimeter_additional_members` to include:
-
-   ```
-   "serviceAccount:sa-tf-cb-bu3-machine-learning@[prj_c_bu3infra_pipeline_project_id].iam.gserviceaccount.com"
-   "serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com"
-   "serviceAccount:service-[project_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com"
-   "serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com"
-   ```
-
-   ```bash
-   export prj_c_bu3infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
-   echo "prj_c_bu3infra_pipeline_project_id = ${prj_c_bu3infra_pipeline_project_id}"
-
-   export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
-   echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
-
-   export backend_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw gcs_bucket_tfstate)
-   echo "remote_state_bucket = ${backend_bucket}"
-
-   export backend_bucket_projects=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
-   echo "backend_bucket_projects = ${backend_bucket_projects}"
-
-   export project_d_logging_project_number=$(gsutil cat gs://$backend_bucket/terraform/environments/development/default.tfstate | jq -r '.outputs.env_log_project_number.value')
-   echo "project_d_logging_project_number = ${project_d_logging_project_number}"
-
-   prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
-   echo "project_d_machine_learning_number = ${prj_d_machine_learning_project_number}"
-   ```
-
-In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
-
-You can find the `sources.access_level` information by going to `Security` in your GCP Organization.
-Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
-
-## Ingress Policies
-
-   ```
-   ingress_policies = [
-      // users
-      {
-         "from" = {
-         "identity_type" = "ANY_IDENTITY"
-         "sources" = {
-               "access_level" = "[YOUR_ACCESS_LEVEL]"
-         }
-         },
-         "to" = {
-         "resources" = [
-               "projects/[your-environment-shared-restricted-project-number]",
-               "projects/[your-environment-kms-project-number]",
-               "projects/[your-environment-bu3machine-learning-number]",
-         ]
-         "operations" = {
-               "compute.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "dns.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "logging.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "storage.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "cloudkms.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "iam.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "cloudresourcemanager.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "pubsub.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "secretmanager.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "aiplatform.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "composer.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "cloudbuild.googleapis.com" = {
-               "methods" = ["*"]
-               }
-               "bigquery.googleapis.com" = {
-               "methods" = ["*"]
-               }
-         }
-         }
-      },
-   ]
-   ```
-
-## Egress Policies
-
-For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
-
-   ```
-   egress_policies = [
-      // notebooks
-      {
-         "from": {
-               "identity_type": "",
-               "identities": [
-                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
-                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com"
-               ]
-         },
-         "to": {
-               "resources": ["projects/[prj-d-kms-project-number]"],
-               "operations": {
-                  "compute.googleapis.com": {
-                     "methods": ["*"]
-                  },
-                  "cloudkms.googleapis.com": {
-                     "methods": ["*"]
-                  }
-               }
-         }
-      }
-   ]
-   ```
+6. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
 ### Run Terraform locally
+
+#### Artifacts Application
 
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
@@ -572,15 +438,15 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` files to `common.auto.tfvars`.
+2. Rename `common.auto.example.tfvars` files to `common.auto.tfvars`.
 
    ```bash
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. Update `common.auto.tfvars` file with values from your environment.
+3. Update `common.auto.tfvars` file with values from your environment.
 
-1. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
+4. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
@@ -588,7 +454,7 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
 
-1. Update `backend.tf` with your bucket from the infra pipeline output.
+5. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
    export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-artifact-publish"' --raw-output)
@@ -597,7 +463,7 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
 
-1. Update `backend.tf` with your bucket from the infra pipeline output.
+6. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
    export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-artifact-publish"' --raw-output)
@@ -606,9 +472,9 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
 
-1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
+7. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
 
-1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
+8. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
    ```bash
    member="user:$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")"
@@ -623,7 +489,7 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
    gcloud iam service-accounts add-iam-policy-binding ${terraform_sa} --project ${project_id} --member="${member}" --role="roles/iam.serviceAccountTokenCreator"
    ```
 
-1. Update `backend.tf` with your bucket from the infra pipeline output.
+9. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
    export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-artifact-publish"' --raw-output)
@@ -637,7 +503,7 @@ When using Cloud Build or Jenkins as your CI/CD tool, each environment correspon
 
 To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
 
-1. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
+10. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
 
    ```bash
    export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
@@ -647,20 +513,20 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
-1. Run `init` and `plan` and review output for environment shared (common).
+11. Run `init` and `plan` and review output for environment shared (common).
 
    ```bash
    ./tf-wrapper.sh init shared
    ./tf-wrapper.sh plan shared
    ```
 
-1. Run `validate` and check for violations.
+12.  Run `validate` and check for violations.
 
    ```bash
    ./tf-wrapper.sh validate shared $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
    ```
 
-1. Run `apply` shared.
+13. Run `apply` shared.
 
    ```bash
    ./tf-wrapper.sh apply shared
@@ -675,6 +541,8 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 ```
 
+#### Service Catalog Configuration
+
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
@@ -683,14 +551,15 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` files to `common.auto.tfvars`.
+2. Rename `common.auto.example.tfvars` files to `common.auto.tfvars`.
 
    ```bash
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. Update `common.auto.tfvars` file with values from your environment.
-1. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
+3. Update `common.auto.tfvars` file with values from your environment.
+
+4. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
@@ -698,9 +567,9 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
 
-1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
+5. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
 
-1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
+6. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
    ```bash
    member="user:$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")"
@@ -715,7 +584,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    gcloud iam service-accounts add-iam-policy-binding ${terraform_sa} --project ${project_id} --member="${member}" --role="roles/iam.serviceAccountTokenCreator"
    ```
 
-1. Update `backend.tf` with your bucket from the infra pipeline output.
+7. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
    export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-service-catalog"' --raw-output)
@@ -729,7 +598,7 @@ When using Cloud Build or Jenkins as your CI/CD tool, each environment correspon
 
 To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
 
-1. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
+8. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
 
    ```bash
    export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
@@ -739,20 +608,20 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
-1. Run `init` and `plan` and review output for environment shared (common).
+9. Run `init` and `plan` and review output for environment shared (common).
 
    ```bash
    ./tf-wrapper.sh init shared
    ./tf-wrapper.sh plan shared
    ```
 
-1. Run `validate` and check for violations.
+10. Run `validate` and check for violations.
 
    ```bash
    ./tf-wrapper.sh validate shared $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
    ```
 
-1. Run `apply` shared.
+11. Run `apply` shared.
 
    ```bash
    ./tf-wrapper.sh apply shared

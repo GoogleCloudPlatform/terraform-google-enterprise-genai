@@ -32,12 +32,6 @@ Interconnect, and baseline firewall rules for each environment. It also sets
 up the global DNS hub.</td>
 </tr>
 <tr>
-<td><a href="../3-networks-hub-and-spoke">3-networks-hub-and-spoke</a></td>
-<td>Sets up base and restricted shared VPCs with all the default configuration
-found on step 3-networks-dual-svpc, but here the architecture will be based on the
-Hub and Spoke network model. It also sets up the global DNS hub</td>
-</tr>
-<tr>
 <td><a href="../4-projects">4-projects</a></td>
 <td>Sets up a folder structure, projects, and an application infrastructure pipeline for applications,
  which are connected as service projects to the shared VPC created in the previous stage.</td>
