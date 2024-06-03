@@ -53,12 +53,6 @@ Inside the `projects` folder, the folders `artifact-publish` and `service-catalo
 
 For the purposes of this demonstration, we assume that you are using Cloud Build or manual deployment.
 
-* 1-artifact-publish
-* 2-service-catalog
-* 3-artifact-publish-repo
-* 4-service-catalog-repo
-* 5-vpc-sc
-
 ## Prerequisites
 
 1. 0-bootstrap executed successfully.
@@ -121,7 +115,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 #### ARTIFACT PUBLISH
 
-The purpose of this step is to deploy out an artifact registry to store custom docker images. A Cloud Build pipeline is also deployed out.  At the time of this writing, it is configured to attach itself to a Cloud Source Repository. The Cloud Build pipeline is responsible for building out a custom image that may be used in Machine Learning Workflows.  If you are in a situation where company policy requires no outside repositories to be accessed, custom images can be used to keep access to any image internally.
+The purpose of this step is to deploy out an artifact registry to store custom docker images. A Cloud Build pipeline is also deployed out. At the time of this writing, it is configured to attach itself to a Cloud Source Repository. The Cloud Build pipeline is responsible for building out a custom image that may be used in Machine Learning Workflows.  If you are in a situation where company policy requires no outside repositories to be accessed, custom images can be used to keep access to any image internally.
 
 Since every workflow will have access to these images, it is deployed in the `common` folder, and keeping with the foundations structure, is listed as `shared` under this Business Unit.  It will only need to be deployed once.
 
@@ -229,6 +223,7 @@ Although Service Catalog itself must be manually deployed, the modules which wil
 The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are.
 
 The repository has the structure (truncated for brevity):
+   
    ```
    business_unit_3
    ├── development
@@ -347,9 +342,6 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
-
-#### ARTIFACT PUCLISH REPO
-
 1. Grab the Artifact Project ID
    
    ```bash
@@ -387,8 +379,6 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```bash
    cd ..
    ```
-
-#### SERVICE CATALOG REPO
 
 1. Grab the Service Catalogs ID
   
@@ -472,7 +462,6 @@ In each respective environment folders, update your `development.auto.tfvars`, `
 
 You can find the `sources.access_level` information by going to `Security` in your GCP Organization.
 Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
-
 
 ## Ingress Policies
 
@@ -569,8 +558,6 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
    ```
 
 ### Run Terraform locally
-
-#### ARTIFACT PUBLISH
 
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
@@ -683,8 +670,6 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 ```
 
-#### SERVICE-CATALOG
-
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `5-app-infra` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
@@ -780,7 +765,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 #### VPC-SC
 
 Be aware that for the purposes of this machine learning project, there are several projects in each respective environment that have been placed within a `service perimeter`.
-As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations.  Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `3-networks-dual-svpc` and _update_
+As such, during your deployment process, you _will_ encounter deployment errors related to VPC-SC violations. Before continuing onto `5-app-infra/projects`, you will need to go _back_ into `3-networks-dual-svpc` and _update_
 your ingress rules.
 
 Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, ###`non-production.auto.tfvars` & `production.auto.tfvars`.
