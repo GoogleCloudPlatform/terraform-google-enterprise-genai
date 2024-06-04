@@ -52,11 +52,160 @@ file.
 ## Prerequisites
 
 1. 0-bootstrap executed successfully.
-1. 1-org executed successfully.
-1. 2-environments executed successfully.
-1. 3-networks executed successfully.
-1. 4-projects executed successfully.
-1. 5-app-infra executed successfully.
+2. 1-org executed successfully.
+3. 2-environments executed successfully.
+4. 3-networks executed successfully.
+5. 4-projects executed successfully.
+6. 5-app-infra executed successfully.
+7. The step bellow `VPC-SC` executed successfully.
+
+### VPC-SC
+
+By now, `artifact-publish` and `service-catalog` have been deployed. The projects inflated under `6-machine-learning` are set in a service perimiter for added security.  As such, several services and accounts must be given ingress and egress policies before `6-machine-learning` has been deployed.
+
+cd into gcp-networks
+
+  ```bash
+  cd gcp-networks/
+  ```
+
+Below, you can find the values that will need to be applied to `common.auto.tfvars` and your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars`.
+
+In `common.auto.tfvars` update your `perimeter_additional_members` to include:
+
+```
+"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj_c_bu3infra_pipeline_project_id].iam.gserviceaccount.com"
+"serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com"
+"serviceAccount:service-[prj_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com"
+"serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com"
+```
+
+```bash
+   export prj_c_bu3infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   echo "prj_c_bu3infra_pipeline_project_id = ${prj_c_bu3infra_pipeline_project_id}"
+
+  
+   export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
+   echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
+
+   export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
+   echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
+
+   export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
+   echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
+
+   export backend_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw gcs_bucket_tfstate)
+   echo "remote_state_bucket = ${backend_bucket}"
+
+   export backend_bucket_projects=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   echo "backend_bucket_projects = ${backend_bucket_projects}"
+
+   export project_d_logging_project_number=$(gsutil cat gs://$backend_bucket/terraform/environments/development/default.tfstate | jq -r '.outputs.env_log_project_number.value')
+   echo "project_d_logging_project_number = ${project_d_logging_project_number}"
+
+   prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
+   echo "project_d_machine_learning_number = ${prj_d_machine_learning_project_number}"
+```
+
+
+In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
+
+You can find the `sources.access_level` information by going to `Security` in your GCP Organization.
+Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
+
+#### Ingress Policies
+
+    ```
+    ingress_policies = [
+        // users
+        {
+            "from" = {
+            "identity_type" = "ANY_IDENTITY"
+            "sources" = {
+                "access_level" = "[YOUR_ACCESS_LEVEL]"
+            }
+            },
+            "to" = {
+            "resources" = [
+                "projects/[your-environment-shared-restricted-project-number]",
+                "projects/[your-environment-kms-project-number]",
+                "projects/[your-environment-bu3machine-learning-number]",
+            ]
+            "operations" = {
+                "compute.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "dns.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "logging.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "storage.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudkms.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "iam.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudresourcemanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "pubsub.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "secretmanager.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "aiplatform.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "composer.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudbuild.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "bigquery.googleapis.com" = {
+                "methods" = ["*"]
+                }
+            }
+            }
+        },
+    ]
+    ```
+
+#### Egress Policies
+
+For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
+
+```bash
+    egress_policies = [
+        // notebooks
+        {
+            "from" = {
+            "identity_type" = ""
+            "identities" = [
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
+                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
+            ]
+            },
+            "to" = {
+            "resources" = ["projects/[prj-d-kms-project-number]"]
+            "operations" = {
+                "compute.googleapis.com" = {
+                "methods" = ["*"]
+                }
+                "cloudkms.googleapis.com" = {
+                "methods" = ["*"]
+                }
+            }
+            }
+        },
+    ]
+```
 
 ### Troubleshooting
 
@@ -68,6 +217,7 @@ Please refer to [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into is
 commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
 You will need a github repository set up for this step.  This repository houses the DAG's for composer.  As of this writing, the structure is as follows:
+   
    ```
    .
    ├── README.md
