@@ -1,4 +1,4 @@
-# 5-app-infra
+# 6-machine-learning
 
 This repo is part of a multi-part guide that shows how to configure and deploy
 the example.com reference architecture described in
@@ -7,7 +7,7 @@ the example.com reference architecture described in
 <table>
 <tbody>
 <tr>
-<td><a href="../0-bootstrap">0-bootstrap</a></td>
+<td><a href="../0-bootstrap/">0-bootstrap</a></td>
 <td>Bootstraps a Google Cloud organization, creating all the required resources
 and permissions to start using the Cloud Foundation Toolkit (CFT). This
 step also configures a <a href="../docs/GLOSSARY.md#foundation-cicd-pipeline">CI/CD Pipeline</a> for foundations code in subsequent
@@ -37,7 +37,7 @@ up the global DNS hub.</td>
  which are connected as service projects to the shared VPC created in the previous stage.</td>
 </tr>
 <tr>
-<td>5-app-infra  6-machine-learning(this file)</td>
+<td>6-machine-learning(this file)</td>
 <td>Deploys modules based on the modules created in 3-service-catalog</td>
 </tr>
 </tbody>
@@ -48,6 +48,7 @@ For an overview of the architecture and the parts, see the
 file.
 
 ## Purpose
+
 
 ## Prerequisites
 
@@ -73,14 +74,14 @@ Below, you can find the values that will need to be applied to `common.auto.tfva
 
 In `common.auto.tfvars` update your `perimeter_additional_members` to include:
 
-```
-"serviceAccount:sa-tf-cb-bu3-machine-learning@[prj_c_bu3infra_pipeline_project_id].iam.gserviceaccount.com"
-"serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com"
-"serviceAccount:service-[prj_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com"
-"serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com"
-```
+  ```
+  "serviceAccount:sa-tf-cb-bu3-machine-learning@[prj_c_bu3infra_pipeline_project_id].iam.gserviceaccount.com"
+  "serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com"
+  "serviceAccount:service-[prj_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com"
+  "serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com"
+  ```
 
-```bash
+  ```bash
    export prj_c_bu3infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo "prj_c_bu3infra_pipeline_project_id = ${prj_c_bu3infra_pipeline_project_id}"
 
@@ -105,7 +106,7 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
 
    prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
    echo "project_d_machine_learning_number = ${prj_d_machine_learning_project_number}"
-```
+  ```
 
 
 In each respective environment folders, update your `development.auto.tfvars`, `non-production.auto.tfvars` & `production.auto.tfvars` to include these changes under `ingress_policies`
@@ -115,73 +116,73 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 
 #### Ingress Policies
 
-    ```
-    ingress_policies = [
-        // users
-        {
-            "from" = {
-            "identity_type" = "ANY_IDENTITY"
-            "sources" = {
-                "access_level" = "[YOUR_ACCESS_LEVEL]"
-            }
-            },
-            "to" = {
-            "resources" = [
-                "projects/[your-environment-shared-restricted-project-number]",
-                "projects/[your-environment-kms-project-number]",
-                "projects/[your-environment-bu3machine-learning-number]",
-            ]
-            "operations" = {
-                "compute.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "dns.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "logging.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "storage.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "cloudkms.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "iam.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "cloudresourcemanager.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "pubsub.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "secretmanager.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "aiplatform.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "composer.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "cloudbuild.googleapis.com" = {
-                "methods" = ["*"]
-                }
-                "bigquery.googleapis.com" = {
-                "methods" = ["*"]
-                }
-            }
-            }
-        },
-    ]
-    ```
+  ```
+  ingress_policies = [
+      // users
+      {
+          "from" = {
+          "identity_type" = "ANY_IDENTITY"
+          "sources" = {
+              "access_level" = "[YOUR_ACCESS_LEVEL]"
+          }
+          },
+          "to" = {
+          "resources" = [
+              "projects/[your-environment-shared-restricted-project-number]",
+              "projects/[your-environment-kms-project-number]",
+              "projects/[your-environment-bu3machine-learning-number]",
+          ]
+          "operations" = {
+              "compute.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "dns.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "logging.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "storage.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "cloudkms.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "iam.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "cloudresourcemanager.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "pubsub.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "secretmanager.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "aiplatform.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "composer.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "cloudbuild.googleapis.com" = {
+              "methods" = ["*"]
+              }
+              "bigquery.googleapis.com" = {
+              "methods" = ["*"]
+              }
+          }
+          }
+      },
+  ]
+  ```
 
 #### Egress Policies
 
 For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
 
-```bash
+  ```bash
     egress_policies = [
         // notebooks
         {
@@ -205,7 +206,7 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
             }
         },
     ]
-```
+  ```
 
 ### Troubleshooting
 
@@ -412,7 +413,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git push origin production
    ```
 
-1. cd out of this directory before continuting over to `7-machine-learning-post-deployment`
+1. cd out of this directory
 
    ```bash
    cd ..
