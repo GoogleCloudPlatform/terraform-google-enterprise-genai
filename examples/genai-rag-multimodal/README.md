@@ -37,5 +37,5 @@ The main modifications to the original example include:
 
 Once all the requirements are set up, you can begin by running and adjusting the notebook step-by-step.
 
-To run the notebook, open the Google Cloud Console on Vertex AI Workbench, open jupyterlab and upload the notebook to it.
+To run the notebook, open the Google Cloud Console on Vertex AI Workbench, open jupyterlab and upload the notebook (`multimodal_rag_langchain.ipynb`) to it.
 
