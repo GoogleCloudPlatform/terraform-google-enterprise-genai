@@ -1,5 +1,5 @@
-kms_key                   = "projects/prj-d-kms-cau3/locations/us-central1/keyRings/ml-env-keyring/cryptoKeys/prj-d-ml-machine-learning"
-network                   = "projects/prj-d-shared-restricted-83dn/global/networks/vpc-d-shared-restricted"
-subnet                    = "projects/prj-d-shared-restricted-83dn/regions/us-central1/subnetworks/sb-d-shared-restricted-us-central1"
-machine_learning_project  = "prj-d-ml-machine-learning-0v09"
-vector_search_vpc_project = "prj-d-shared-restricted-83dn"
+kms_key                   = <INSERT_VALUE_HERE>
+network                   = <INSERT_VALUE_HERE>
+subnet                    = <INSERT_VALUE_HERE>
+machine_learning_project  = <INSERT_VALUE_HERE>
+vector_search_vpc_project = <INSERT_VALUE_HERE>
