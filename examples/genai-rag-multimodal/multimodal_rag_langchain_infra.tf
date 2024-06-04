@@ -1,4 +1,22 @@
+/**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+data "google_project" "ml_project" {
+  project_id = var.machine_learning_project
+}
 
 resource "google_workbench_instance" "instance" {
   disable_proxy_access = false
@@ -76,8 +94,6 @@ resource "google_service_account" "notebook_runner" {
   project      = var.machine_learning_project
 }
 
-# IAM Roles
-
 resource "google_project_iam_member" "notebook_runner_roles" {
   for_each = toset([
     "roles/aiplatform.user"
@@ -91,4 +107,16 @@ resource "google_storage_bucket_iam_member" "notebook_runner_bucket_admin" {
   bucket = google_storage_bucket.vector_search_bucket.name
   role   = "roles/storage.admin"
   member = google_service_account.notebook_runner.member
+}
+
+# Service Agent Role Assignment - Allows creation of workbench instance when using var.kms_key
+
+resource "google_kms_crypto_key_iam_member" "service_agent_kms_key_binding" {
+  for_each = toset([
+    "serviceAccount:service-${data.google_project.ml_project.number}@compute-system.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.ml_project.number}@gcp-sa-notebooks.iam.gserviceaccount.com"
+  ])
+  crypto_key_id = var.kms_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = each.value
 }
