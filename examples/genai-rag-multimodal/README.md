@@ -39,3 +39,7 @@ Once all the requirements are set up, you can begin by running and adjusting the
 
 To run the notebook, open the Google Cloud Console on Vertex AI Workbench, open jupyterlab and upload the notebook (`multimodal_rag_langchain.ipynb`) to it.
 
+## Known Issues
+
+- Error: Error creating Instance: googleapi: Error 400: value_to_check(https://compute.googleapis.com/compute/v1/projects/...) is not found.
+    - When creating the VertexAI Workbench Instance through terraform you might face this issue. The issue is being tracked on this link: https://github.com/hashicorp/terraform-provider-google/issues/17904
