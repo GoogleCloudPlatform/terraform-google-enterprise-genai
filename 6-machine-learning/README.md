@@ -50,6 +50,7 @@ file.
 ## Purpose
 
 
+
 ## Prerequisites
 
 1. 0-bootstrap executed successfully.
@@ -118,6 +119,7 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 
   ```
   ingress_policies = [
+      
       // users
       {
           "from" = {
@@ -563,7 +565,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 ## Post Deployment
 
-### Big Query
+### BIG QUERY
 
   In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance
   ```bash
@@ -992,7 +994,8 @@ Here are step-by-step instructions to make a request to your model using `gcloud
     - You should get an output from 0 to 1, indicating the level of confidence of the binary classification based on the parameters above.
     Values closer to 1 means the individual is more likely to be included in the income_bracket greater than 50K.
 
-# Common errors
+#### Common errors
+
 - ***google.api_core.exceptions.ResourceExhausted: 429 The following quotas are exceeded: ```CustomModelServingCPUsPerProjectPerRegion 8: The following quotas are exceeded: CustomModelServingCPUsPerProjectPerRegion``` or similar error***:
 This is likely due to the fact that you have too many models uploaded and deployed in Vertex AI. To resolve the issue, you can either submit a quota increase request or undeploy and delete a few models to free up resources
 
