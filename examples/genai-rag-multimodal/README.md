@@ -25,33 +25,33 @@ The main modifications to the original example include:
 - Update the `terraform.tfvars` file with values from your environment.
   - The code below is an example using the Development environment host VPC network, the env-level kms key for the machine learning project and the machine learning project.
 
-        ```terraform
-        kms_key                   = "projects/prj-d-kms-cau3/locations/us-central1/keyRings/ml-env-keyring/cryptoKeys/prj-d-ml-machine-learning"
-        network                   = "projects/prj-d-shared-restricted-83dn/global/networks/vpc-d-shared-restricted"
-        subnet                    = "projects/prj-d-shared-restricted-83dn/regions/us-central1/subnetworks/sb-d-shared-restricted-us-central1"
-        machine_learning_project  = "prj-d-ml-machine-learning-0v09"
-        vector_search_vpc_project = "prj-d-shared-restricted-83dn"
-        ```
+    ```terraform
+    kms_key                   = "projects/prj-d-kms-cau3/locations/us-central1/keyRings/ml-env-keyring/cryptoKeys/prj-d-ml-machine-learning"
+    network                   = "projects/prj-d-shared-restricted-83dn/global/networks/vpc-d-shared-restricted"
+    subnet                    = "projects/prj-d-shared-restricted-83dn/regions/us-central1/subnetworks/sb-d-shared-restricted-us-central1"
+    machine_learning_project  = "prj-d-ml-machine-learning-0v09"
+    vector_search_vpc_project = "prj-d-shared-restricted-83dn"
+    ```
 
 ### Allow file download from Google Notebook Examples Bucket on VPC-SC Perimeter
 
 When running the Notebook, you will reach a step that downloads an example PDF file from a bucket, you need to add the egress rule below on the VPC-SC perimeter to allow the operation.
 
-    ```yaml
-    - egressFrom:
-        identities:
-        - serviceAccount:rag-notebook-runner@<INSERT_YOUR_MACHINE_LEARNING_PROJECT_ID_HERE>.iam.gserviceaccount.com
-    egressTo:
-        operations:
-        - methodSelectors:
-        - method: google.storage.buckets.list
-        - method: google.storage.buckets.get
-        - method: google.storage.objects.get
-        - method: google.storage.objects.list
-        serviceName: storage.googleapis.com
-        resources:
-        - projects/200612033880 # Google Cloud Example Project
-    ```
+```yaml
+- egressFrom:
+    identities:
+    - serviceAccount:rag-notebook-runner@<INSERT_YOUR_MACHINE_LEARNING_PROJECT_ID_HERE>.iam.gserviceaccount.com
+egressTo:
+    operations:
+    - methodSelectors:
+    - method: google.storage.buckets.list
+    - method: google.storage.buckets.get
+    - method: google.storage.objects.get
+    - method: google.storage.objects.list
+    serviceName: storage.googleapis.com
+    resources:
+    - projects/200612033880 # Google Cloud Example Project
+```
 
 ## Usage
 
