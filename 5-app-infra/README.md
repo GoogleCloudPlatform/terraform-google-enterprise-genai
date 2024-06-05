@@ -216,7 +216,7 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    cd ..
    ```
 
-#### Configuring Cloud Source Repositorie of Artifact Application
+#### Configuring Cloud Source Repository of Artifact Application
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
