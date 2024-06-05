@@ -16,4 +16,4 @@
 
 location_kms = "us"
 location_gcs = "US"
-env          = "non-production"
+env          = "nonproduction"
