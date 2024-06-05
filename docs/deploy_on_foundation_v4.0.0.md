@@ -2105,6 +2105,12 @@ cd ../terraform-google-enterprise-genai
 cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
 ```
 
+- Remove shared directory on `ml_business_unit` on the `gcp-projects` repository.
+
+```bash
+rm -rf ../gcp-projects/ml_business_unit/shared
+```
+
 - Add modules to the `gcp-projects` repository.
 
 ```bash
