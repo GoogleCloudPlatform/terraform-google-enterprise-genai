@@ -387,7 +387,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    cd ..
    ```
 
-#### Configuring Cloud Source Repositorie of Service Catalog Solutions Artifacts
+#### Configuring Cloud Source Repository of Service Catalog Solutions Pipeline
 
 1. Grab the Service Catalogs ID
 
