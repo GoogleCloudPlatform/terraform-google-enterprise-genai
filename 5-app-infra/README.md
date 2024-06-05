@@ -141,7 +141,7 @@ each folder under `images` has the full name and tag of the image that must be b
 Once pushed, the pipeline build logs can be accessed by navigating to the artifacts project name created in step-4:
 
    ```bash
-   terraform -chdir="terraform-example-foundation/4-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
+   terraform -chdir="gcp-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
    ```
 
 1. Clone the `bu3-artifact-publish` repo.
