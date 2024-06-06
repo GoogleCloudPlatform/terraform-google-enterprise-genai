@@ -4,6 +4,12 @@ variable "service_account_name" {
   default     = "rag-notebook-runner"
 }
 
+variable "vector_search_bucket_location" {
+  description = "Bucket Region"
+  type        = string
+  default     = "US-CENTRAL1"
+}
+
 variable "machine_learning_project" {
   description = "Machine Learning Project ID"
   type        = string

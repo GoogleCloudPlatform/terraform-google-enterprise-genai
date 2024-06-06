@@ -75,7 +75,8 @@ resource "random_string" "suffix" {
 
 resource "google_storage_bucket" "vector_search_bucket" {
   name                        = "vector-search-${random_string.suffix.result}"
-  location                    = "US"
+  location                    = var.vector_search_bucket_location
+  storage_class               = "REGIONAL"
   project                     = var.machine_learning_project
   uniform_bucket_level_access = true
 }
