@@ -76,3 +76,33 @@ sed -i "s:<INSERT_HOST_VPC_NETWORK>:$(terraform output -raw host_vpc_network):g"
 - `Error: Error creating Instance: googleapi: Error 400: value_to_check(https://compute.googleapis.com/compute/v1/projects/...) is not found`.
   - When creating the VertexAI Workbench Instance through terraform you might face this issue. The issue is being tracked on this [link](https://github.com/hashicorp/terraform-provider-google/issues/17904).
   - If you face this issue you will not be able to use terraform to create the instance, therefore, you will need to manually create it on Google Cloud Console using the same parameters.
+
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| instance\_location | Vertex Workbench Instance Location | `string` | `"us-central1-a"` | no |
+| kms\_key | The KMS key to use for disk encryption | `string` | n/a | yes |
+| machine\_learning\_project | Machine Learning Project ID | `string` | n/a | yes |
+| machine\_name | The name of the machine instance | `string` | `"rag-notebook-instance"` | no |
+| machine\_type | The type of machine to use for the instance | `string` | `"e2-standard-2"` | no |
+| network | The Host VPC network ID to connect the instance to | `string` | n/a | yes |
+| service\_account\_name | The name of the service account | `string` | `"rag-notebook-runner"` | no |
+| subnet | The subnet ID within the Host VPC network to use in Vertex Workbench and Private Service Connect | `string` | n/a | yes |
+| vector\_search\_address\_name | The name of the address to create | `string` | `"vector-search-endpoint"` | no |
+| vector\_search\_bucket\_location | Bucket Region | `string` | `"US-CENTRAL1"` | no |
+| vector\_search\_ip\_region | The region to create the address in | `string` | `"us-central1"` | no |
+| vector\_search\_vpc\_project | The project ID where the Host VPC network is located | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| host\_vpc\_network | This is the Self-link of the Host VPC network |
+| host\_vpc\_project\_id | This is the Project ID where the Host VPC network is located |
+| notebook\_project\_id | The Project ID where the notebook will be run on |
+| private\_endpoint\_ip\_address | The private IP address of the vector search endpoint |
+| vector\_search\_bucket\_name | The name of the bucket that Vector Search will use |
+
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
