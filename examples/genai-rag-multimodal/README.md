@@ -67,7 +67,7 @@ You can save some time adjusting the notebook by running the commands below:
 sed -i "s/<INSERT_PRIVATE_IP_VALUE_HERE>/$(terraform output -raw private_endpoint_ip_address)/g" multimodal_rag_langchain.ipynb
 sed -i "s/<INSERT_HOST_VPC_PROJECT_ID>/$(terraform output -raw host_vpc_project_id)/g" multimodal_rag_langchain.ipynb
 sed -i "s/<INSERT_NOTEBOOK_PROJECT_ID>/$(terraform output -raw notebook_project_id)/g" multimodal_rag_langchain.ipynb
-sed -i "s/<INSERT_BUCKET_NAME>/$(terraform output -raw vector_search_bucket_name)/g" multimodal_rag_langchain.ipynb 
+sed -i "s/<INSERT_BUCKET_NAME>/$(terraform output -raw vector_search_bucket_name)/g" multimodal_rag_langchain.ipynb
 sed -i "s:<INSERT_HOST_VPC_NETWORK>:$(terraform output -raw host_vpc_network):g" multimodal_rag_langchain.ipynb
 ```
 
@@ -106,3 +106,4 @@ sed -i "s:<INSERT_HOST_VPC_NETWORK>:$(terraform output -raw host_vpc_network):g"
 | vector\_search\_bucket\_name | The name of the bucket that Vector Search will use |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
