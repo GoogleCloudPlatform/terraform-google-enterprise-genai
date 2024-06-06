@@ -51,7 +51,7 @@ Hub and Spoke network model. It also sets up the global DNS hub.</td>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-example-foundation README](https://github.com/terraform-google-modules/terraform-example-foundation)
+[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai)
 file.
 
 ## Purpose
@@ -119,7 +119,7 @@ See [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into issues during 
 ## Deploying with Jenkins
 
 If you are using the `jenkins_bootstrap` sub-module, see
-[README-Jenkins](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README-Jenkins.md)
+[README-Jenkins](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README-Jenkins.md)
 for requirements and instructions on how to run the 0-bootstrap step. Using
 Jenkins requires a few manual steps, including configuring connectivity with
 your current Jenkins manager (controller) environment.
@@ -132,12 +132,12 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
 
 ## Deploying with Cloud Build
 
-1. Clone [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation) into your local environment and navigate to the `0-bootstrap` folder.
+1. Clone [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai) into your local environment and navigate to the `0-bootstrap` folder.
 
    ```bash
-   git clone https://github.com/terraform-google-modules/terraform-example-foundation.git
+   git clone https://github.com/terraform-google-modules/terraform-google-enterprise-genai.git
 
-   cd terraform-example-foundation/0-bootstrap
+   cd terraform-google-enterprise-genai/0-bootstrap
    ```
 
 1. Rename `terraform.example.tfvars` to `terraform.tfvars` and update the file with values from your environment:
@@ -223,7 +223,7 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
    ```
 
 1. (Optional) Run `terraform plan` to verify that state is configured correctly. You should see no changes from the previous state.
-1. Clone the policy repo and copy contents of policy-library to new repo. Clone the repo at the same level of the `terraform-example-foundation` folder.
+1. Clone the policy repo and copy contents of policy-library to new repo. Clone the repo at the same level of the `terraform-google-enterprise-genai` folder.
 
    ```bash
    cd ../..
@@ -232,7 +232,7 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
 
    cd gcp-policies
    git checkout -b main
-   cp -RT ../terraform-example-foundation/policy-library/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ .
    ```
 
 1. Commit changes and push your main branch to the policy repo.
@@ -258,9 +258,9 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
    git checkout -b plan
    mkdir -p envs/shared
 
-   cp -RT ../terraform-example-foundation/0-bootstrap/ ./envs/shared
-   cp ../terraform-example-foundation/build/cloudbuild-tf-* .
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp -RT ../terraform-google-enterprise-genai/0-bootstrap/ ./envs/shared
+   cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
 
    git add .

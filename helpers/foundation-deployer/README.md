@@ -29,11 +29,11 @@ Helper tool to deploy the Terraform example foundation.
 ### Prepare the deploy environment
 
 - Create a directory in the file system to host the Cloud Source repositories the will be created and a copy of the terraform example foundation.
-- Clone the `terraform-example-foundation` repository on this directory.
+- Clone the `terraform-google-enterprise-genai` repository on this directory.
 
     ```text
     deploy-directory/
-    └── terraform-example-foundation
+    └── terraform-google-enterprise-genai
     ```
 
 - Copy the file [global.tfvars.example](./global.tfvars.example) as `global.tfvars` to the same directory.
@@ -41,21 +41,21 @@ Helper tool to deploy the Terraform example foundation.
     ```text
     deploy-directory/
     └── global.tfvars
-    └── terraform-example-foundation
+    └── terraform-google-enterprise-genai
     ```
 
 - Update `global.tfvars` with values from your environment.
-- The `0-bootstrap` README [prerequisites](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
+- The `0-bootstrap` README [prerequisites](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
 - Variable `code_checkout_path` is the full path to `deploy-directory` directory.
-- Variable `foundation_code_path` is the full path to `terraform-example-foundation` directory.
+- Variable `foundation_code_path` is the full path to `terraform-google-enterprise-genai` directory.
 - See the READMEs for the stages for additional information:
-  - [0-bootstrap](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md)
-  - [1-org](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-org/README.md)
-  - [2-environments](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/2-environments/README.md)
-  - [3-networks-dual-svpc](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-dual-svpc)
-  - [3-networks-hub-and-spoke](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-hub-and-spoke)
-  - [4-projects](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/4-projects)
-  - [5-app-infra](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/5-app-infra)
+  - [0-bootstrap](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md)
+  - [1-org](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/1-org/README.md)
+  - [2-environments](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/2-environments/README.md)
+  - [3-networks-dual-svpc](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc)
+  - [3-networks-hub-and-spoke](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke)
+  - [4-projects](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects)
+  - [5-app-infra](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/5-app-infra)
 
 ### Location
 
@@ -132,7 +132,7 @@ Im addition to the variables declared in the file `global.tfvars` for configurin
     └── gcp-policies-app-infra
     └── gcp-projects
     └── global.tfvars
-    └── terraform-example-foundation
+    └── terraform-google-enterprise-genai
     ```
 
 ### Supported flags

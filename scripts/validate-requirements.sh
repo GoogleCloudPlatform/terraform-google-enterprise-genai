@@ -21,7 +21,7 @@
 # Expected versions of the installers
 TF_VERSION="1.3.0"
 # Version 393.0.0 due to terraform-tools 0.5.0 version that fixes the issue
-# mentioned in this PR https://github.com/terraform-google-modules/terraform-example-foundation/pull/729#discussion_r919427668
+# mentioned in this PR https://github.com/terraform-google-modules/terraform-google-enterprise-genai/pull/729#discussion_r919427668
 GCLOUD_SDK_VERSION="393.0.0"
 GIT_VERSION="2.28.0"
 
@@ -126,7 +126,7 @@ function validate_git(){
 
     if ! git config init.defaultBranch | grep "main" >/dev/null ; then
         echo "  git default branch must be configured as main."
-        echo "  See the instructions at https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/TROUBLESHOOTING.md#default-branch-setting ."
+        echo "  See the instructions at https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/docs/TROUBLESHOOTING.md#default-branch-setting ."
         ERRORS+=$'  git default branch must be configured as main.\n'
     fi
 }

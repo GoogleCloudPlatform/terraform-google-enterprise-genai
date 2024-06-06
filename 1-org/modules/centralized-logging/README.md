@@ -10,7 +10,7 @@ The following example exports audit logs from two folders to the same storage de
 
 ```hcl
 module "logs_export" {
-  source = "terraform-google-modules/terraform-example-foundation/google//1-org/modules/centralized-logging"
+  source = "terraform-google-modules/terraform-google-enterprise-genai/google//1-org/modules/centralized-logging"
 
   resources = {
     fldr1 = "<folder1_id>"
@@ -35,7 +35,7 @@ The following example exports all logs from three projects - including the loggi
 
 ```hcl
 module "logging_logbucket" {
-  source = "terraform-google-modules/terraform-example-foundation/google//1-org/modules/centralized-logging"
+  source = "terraform-google-modules/terraform-google-enterprise-genai/google//1-org/modules/centralized-logging"
 
   resources = {
     prj1 = "<log_destination_project_id>"

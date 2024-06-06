@@ -13,7 +13,7 @@ If you see other quota errors, see the [Quota documentation](https://cloud.googl
 
 ## What is a "named" branch?
 
-Certain branches in the terraform-example-foundation are considered to be
+Certain branches in the terraform-google-enterprise-genai are considered to be
 _named branches_. Pushing to a named branch causes the _apply_ command to be
 run. Pushing to branches other than the named branches does not run _apply_.
 

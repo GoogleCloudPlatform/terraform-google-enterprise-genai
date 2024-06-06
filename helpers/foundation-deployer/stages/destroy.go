@@ -23,9 +23,9 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/steps"
-	"github.com/terraform-google-modules/terraform-example-foundation/helpers/foundation-deployer/utils"
-	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/steps"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/utils"
+	"github.com/terraform-google-modules/terraform-google-enterprise-genai/test/integration/testutils"
 )
 
 const (
@@ -194,9 +194,9 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error
 	for _, g := range groupingUnits {
 		err := s.RunDestroyStep(fmt.Sprintf("%s.%s.apply-shared", sc.Repo, g), func() error {
 			options := &terraform.Options{
-				TerraformDir: filepath.Join(gcpPath, g, "shared"),
-				Logger:       c.Logger,
-				NoColor:      true,
+				TerraformDir:             filepath.Join(gcpPath, g, "shared"),
+				Logger:                   c.Logger,
+				NoColor:                  true,
 				RetryableTerraformErrors: testutils.RetryableTransientErrors,
 				MaxRetries:               2,
 				TimeBetweenRetries:       2 * time.Minute,

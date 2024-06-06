@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Define the root folder where you want to start the search and renaming
-root_folder="./terraform-example-foundation"
+root_folder="./terraform-google-enterprise-genai"
 
 # Use 'find' to locate all files named 'backend.tf'
 # in the specified folder and its subfolders, excluding directories that start with ".terraform"
