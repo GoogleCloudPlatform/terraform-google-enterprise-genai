@@ -202,12 +202,12 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    git push --set-upstream origin plan
    ```
 
-8. Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+8. Merge changes to production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
    ```bash
-   git checkout -b shared
-   git push origin shared
+   git checkout -b production
+   git push origin production
    ```
 
 9. `cd` out of the `bu3-artifacts-publish` repository.
@@ -373,12 +373,12 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    git push --set-upstream origin plan
    ```
 
-8. Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+8. Merge changes to production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
 
    ```bash
-   git checkout -b shared
-   git push origin shared
+   git checkout -b production
+   git push origin production
    ```
 
 9. `cd` out of the `bu3-service-catalog` repository.
@@ -407,12 +407,14 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```bash
    cd service-catalog/
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
+   git add img
+   git commit -m "Add img directory"
    ```
 
 4. Commit changes and push main branch to the new repo.
    
    ```bash
-   git add .
+   git add modules
    git commit -m 'Initialize Service Catalog Build Repo'
 
    git push --set-upstream origin main
