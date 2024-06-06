@@ -59,6 +59,18 @@ Once all the requirements are set up, you can begin by running and adjusting the
 
 To run the notebook, open the Google Cloud Console on Vertex AI Workbench, open jupyterlab and upload the notebook (`multimodal_rag_langchain.ipynb`) to it.
 
+### Optional: Use `terraform output` and bash command to fill in fields in the notebook
+
+You can save some time adjusting the notebook by running the commands below:
+
+```bash
+sed -i "s/<INSERT_PRIVATE_IP_VALUE_HERE>/$(terraform output -raw private_endpoint_ip_address)/g" multimodal_rag_langchain.ipynb
+sed -i "s/<INSERT_HOST_VPC_PROJECT_ID>/$(terraform output -raw host_vpc_project_id)/g" multimodal_rag_langchain.ipynb
+sed -i "s/<INSERT_NOTEBOOK_PROJECT_ID>/$(terraform output -raw notebook_project_id)/g" multimodal_rag_langchain.ipynb
+sed -i "s/<INSERT_BUCKET_NAME>/$(terraform output -raw vector_search_bucket_name)/g" multimodal_rag_langchain.ipynb 
+sed -i "s:<INSERT_HOST_VPC_NETWORK>:$(terraform output -raw host_vpc_network):g" multimodal_rag_langchain.ipynb
+```
+
 ## Known Issues
 
 - `Error: Error creating Instance: googleapi: Error 400: value_to_check(https://compute.googleapis.com/compute/v1/projects/...) is not found`.
