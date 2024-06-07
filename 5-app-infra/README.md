@@ -141,7 +141,7 @@ each folder under `images` has the full name and tag of the image that must be b
 Once pushed, the pipeline build logs can be accessed by navigating to the artifacts project name created in step-4:
 
    ```bash
-   terraform -chdir="terraform-example-foundation/4-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
+   terraform -chdir="gcp-projects/business_unit_3/shared/" output -raw common_artifacts_project_id
    ```
 
 1. Clone the `bu3-artifact-publish` repo.
@@ -216,7 +216,7 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    cd ..
    ```
 
-#### Configuring Cloud Source Repositorie of Artifact Application
+#### Configuring Cloud Source Repository of Artifact Application
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
 
@@ -387,7 +387,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    cd ..
    ```
 
-#### Configuring Cloud Source Repositorie of Service Catalog Solutions Artifacts
+#### Configuring Cloud Source Repository of Service Catalog Solutions Pipeline
 
 1. Grab the Service Catalogs ID
 
