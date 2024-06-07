@@ -1,4 +1,4 @@
-# 6-machine-learning
+# Vertex-ai-machine-learning-pipeline
 
 This repo is part of a multi-part guide that shows how to configure and deploy
 the example.com reference architecture described in
