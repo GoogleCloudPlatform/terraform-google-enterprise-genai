@@ -68,7 +68,7 @@ resource "google_workbench_instance" "instance" {
 }
 
 resource "random_string" "suffix" {
-  length  = 4
+  length  = 10
   special = false
   upper   = false
 }
