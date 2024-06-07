@@ -21,7 +21,7 @@ output "private_endpoint_ip_address" {
 
 output "host_vpc_project_id" {
   description = "This is the Project ID where the Host VPC network is located"
-  value       = var.vector_search_vpc_project
+  value       = google_compute_address.vector_search_static_ip.project
 }
 
 output "host_vpc_network" {
