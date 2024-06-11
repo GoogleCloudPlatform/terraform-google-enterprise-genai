@@ -61,10 +61,10 @@ For the purposes of this demonstration, we assume that you are using Cloud Build
 ## Prerequisites
 
 1. 0-bootstrap executed successfully.
-2. 1-org executed successfully.
-3. 2-environments executed successfully.
-4. 3-networks executed successfully.
-5. 4-projects executed successfully.
+1. 1-org executed successfully.
+1. 2-environments executed successfully.
+1. 3-networks executed successfully.
+1. 4-projects executed successfully.
 
 ### Troubleshooting
 
