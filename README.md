@@ -6,6 +6,8 @@ This repository serves as a example for configuring an environment for the devel
 
 The repo is separated in distinct Terraform projects, each within their own directory that must be applied separately, but in sequence, for more information about each step, please refer to [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/tree/v4.0.0). Comparing to the foundation repository, the key differences from the steps in foundation to steps in these repository are:
 
+Alternatively, the user can follow steps on [`docs/deploy_on_foundation_v4.0.0.md`](./docs/deploy_on_foundation_v4.0.0.md), to deploy the codebase on top of an existing foundation instance.
+
 * [1. org](./1-org/)
     * Specific to this repository, it will also configure Machine Learning Organization Policies.
 * [2. environments](./2-environments/)

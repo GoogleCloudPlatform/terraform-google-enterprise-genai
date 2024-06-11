@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPStorageLoggingConstraintV1
-metadata:
-  name: storage_logging
-  annotations:
-    description: Ensure storage logs are delivered to a separate bucket
-spec:
-  severity: high
-  match:
-    ancestries:
-    - "organizations/**"
-    excludedAncestries: [] # optional, default is no exclusions
-  parameters: {}
+locals {
+  repo_name     = "ml-composer"
+  business_code = "ml"
+  business_unit = "ml_business_unit"
+}
