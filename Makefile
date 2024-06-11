@@ -28,7 +28,7 @@ docker_test_lint:
 	docker run --rm -it \
 		-e ENABLE_PARALLEL=0 \
 		-e DISABLE_TFLINT=1 \
-		-e EXCLUDE_LINT_DIRS="\./5-app-infra/6-machine-learning|\./5-app-infra/projects/machine-learning" \
+		-e EXCLUDE_LINT_DIRS="\./5-app-infra/6-machine-learning|\./5-app-infra/projects/machine-learning|\./docs/assets/terraform" \
 		-v $(CURDIR):/workspace \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
 		/usr/local/bin/test_lint.sh
