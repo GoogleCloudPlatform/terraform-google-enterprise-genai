@@ -451,7 +451,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
 4. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   export remote_state_bucket=$(terraform -chdir="../../../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
@@ -595,7 +595,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 4. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   export remote_state_bucket=$(terraform -chdir="../../../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
@@ -608,10 +608,10 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    member="user:$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")"
    echo ${member}
 
-   project_id=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   project_id=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo ${project_id}
 
-   terraform_sa=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-service-catalog"' --raw-output)
+   terraform_sa=$(terraform -chdir="../../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-service-catalog"' --raw-output)
    echo ${terraform_sa}
 
    gcloud iam service-accounts add-iam-policy-binding ${terraform_sa} --project ${project_id} --member="${member}" --role="roles/iam.serviceAccountTokenCreator"
