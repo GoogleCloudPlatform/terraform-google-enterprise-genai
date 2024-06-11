@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-locals {
-  business_unit    = "business_unit_3"
-  business_code    = "bu3"
-  env              = "development"
-  environment_code = "d"
-}
+instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
+
+remote_state_bucket = "bkt-prj-b-seed-7c57-gcp-projects-tfstate"
+
+# github_ api_ token = "PUT IN TOKEN"
+
+# github_app_installation_id = "18685983"
+
+# github_remote_uri = "https://github.com/badal-io/ml-foundations-tf-modules.git"
 

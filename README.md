@@ -2,9 +2,9 @@
 
 ## Overview
 
-This repository serves as a example for configuring an environment for the development and deployment of Machine Learning applications using the Vertex AI platform on Google Cloud. It seamlessly integrates the Cloud Foundation Toolkit (CFT) and implements robust security measures, drawing heavily from the [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) codebase.
+This repository serves as a example for configuring an environment for the development and deployment of Machine Learning applications using the Vertex AI platform on Google Cloud. It seamlessly integrates the Cloud Foundation Toolkit (CFT) and implements robust security measures, drawing heavily from the [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/tree/v4.0.0) codebase.
 
-The repo is separated in distinct Terraform projects, each within their own directory that must be applied separately, but in sequence, for more information about each step, please refer to [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0). Comparing to the foundation repository, the key differences from the steps in foundation to steps in these repository are:
+The repo is separated in distinct Terraform projects, each within their own directory that must be applied separately, but in sequence, for more information about each step, please refer to [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/tree/v4.0.0). Comparing to the foundation repository, the key differences from the steps in foundation to steps in these repository are:
 
 * [1. org](./1-org/)
     * Specific to this repository, it will also configure Machine Learning Organization Policies.
