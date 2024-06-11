@@ -65,30 +65,30 @@ output "enable_cloudbuild_deploy" {
 
 output "service_catalog_project_id" {
   description = "Service Catalog Project ID."
-  value       = module.ml_infra_project.service_catalog_project_id
+  value       = module.ml_infra_projects.service_catalog_project_id
 }
 
 output "common_artifacts_project_id" {
   description = "App Infra Artifacts Project ID"
-  value       = module.ml_infra_project.common_artifacts_project_id
+  value       = module.ml_infra_projects.common_artifacts_project_id
 }
 
 output "service_catalog_repo_name" {
   description = "The name of the Service Catalog repository"
-  value       = module.ml_infra_project.service_catalog_repo_name
+  value       = module.ml_infra_projects.service_catalog_repo_name
 }
 
 output "service_catalog_repo_id" {
   description = "ID of the Service Catalog repository"
-  value       = module.ml_infra_project.service_catalog_repo_id
+  value       = module.ml_infra_projects.service_catalog_repo_id
 }
 
 output "artifacts_repo_name" {
   description = "The name of the Artifacts repository"
-  value       = module.ml_infra_project.artifacts_repo_name
+  value       = module.ml_infra_projects.artifacts_repo_name
 }
 
 output "artifacts_repo_id" {
   description = "ID of the Artifacts repository"
-  value       = module.ml_infra_project.artifacts_repo_id
+  value       = module.ml_infra_projects.artifacts_repo_id
 }
