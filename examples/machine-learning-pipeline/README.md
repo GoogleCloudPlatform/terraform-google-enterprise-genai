@@ -1,4 +1,4 @@
-# Vertex-ai-machine-learning-pipeline
+# Machile Learning Pipeline Overview
 
 This repo is part of a multi-part guide that shows how to configure and deploy
 the example.com reference architecture described in
@@ -37,7 +37,7 @@ up the global DNS hub.</td>
  which are connected as service projects to the shared VPC created in the previous stage.</td>
 </tr>
 <tr>
-<td>6-machine-learning(this file)</td>
+<td>Machine-learning-pipeline(this file)</td>
 <td>Deploys modules based on the modules created in 5-app-infra</td>
 </tr>
 </tbody>
@@ -49,7 +49,7 @@ file.
 
 ## Purpose
 
-
+The purpose of this guide is to provide a structured to deploying a machine learning pipeline on Google Cloud Platform using Vertex AI.
 
 ## Prerequisites
 
@@ -63,7 +63,7 @@ file.
 
 ### VPC-SC
 
-By now, `artifact-publish` and `service-catalog` have been deployed. The projects inflated under `6-machine-learning` are set in a service perimiter for added security.  As such, several services and accounts must be given ingress and egress policies before `6-machine-learning` has been deployed.
+By now, `artifact-publish` and `service-catalog` have been deployed. The projects inflated under `machine-learning-pipeline` are set in a service perimiter for added security.  As such, several services and accounts must be given ingress and egress policies before `machine-learning-pipeline` has been deployed.
 
 cd into gcp-networks
 
@@ -294,7 +294,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd bu3-machine-learning
    git checkout -b plan
 
-   cp -RT ../terraform-google-enterprise-genai/6-machine-learning/ .
+   cp -RT ../terraform-google-enterprise-genai/examples/machine-learning-pipeline .
    cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
    cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
@@ -423,11 +423,11 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 ## Running Terraform locally
 
-1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `6-machine-learning` folder, copy the Terraform wrapper script and ensure it can be executed.
+1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `machine-learning-pipeline` folder, copy the Terraform wrapper script and ensure it can be executed.
 
    ```bash
-   cd terraform-google-enterprise-genai/6-machine-learning
-   cp ../build/tf-wrapper.sh .
+   cd terraform-google-enterprise-genai/examples/machine-learning-pipeline
+   cp ../../build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -442,7 +442,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
-   export remote_state_bucket=$(terraform -chdir="../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   export remote_state_bucket=$(terraform -chdir="../../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
@@ -455,10 +455,10 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    member="user:$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")"
    echo ${member}
 
-   project_id=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   project_id=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo ${project_id}
 
-   terraform_sa=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
+   terraform_sa=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
    echo ${terraform_sa}
 
    gcloud iam service-accounts add-iam-policy-binding ${terraform_sa} --project ${project_id} --member="${member}" --role="roles/iam.serviceAccountTokenCreator"
@@ -467,7 +467,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
-   export backend_bucket=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-machine-learning"' --raw-output)
+   export backend_bucket=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-machine-learning"' --raw-output)
    echo "backend_bucket = ${backend_bucket}"
 
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
@@ -476,7 +476,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `modules/base_env/main.tf` with Service Catalog Project Id.
 
    ```bash
-   export service_catalog_project_id=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   export service_catalog_project_id=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
    echo "service_catalog_project_id = ${service_catalog_project_id}"
 
    ## Linux
@@ -484,17 +484,17 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 We will now deploy each of our environments (development/production/non-production) using this script.
-When using Cloud Build or Jenkins as your CI/CD tool, each environment corresponds to a branch in the repository for the `6-machine-learning` step. Only the corresponding environment is applied.
+When using Cloud Build or Jenkins as your CI/CD tool, each environment corresponds to a branch in the repository for the `machine-learning-pipeline` step. Only the corresponding environment is applied.
 
 To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
 
 1. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
 
    ```bash
-   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo ${INFRA_PIPELINE_PROJECT_ID}
 
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
@@ -565,7 +565,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 ## Post Deployment
 
-### BIG QUERY
+### Big Query
 
   In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance
   ```bash
@@ -792,7 +792,7 @@ Notably:
     },
     ```
 
-### SERVICE CATALOG
+### Service Catalog
 
 Once you have set up service catalog and attempt to deploy out terraform code, there is a high chance you will encounter this error:
 `Permission denied; please check you have the correct IAM permissions and APIs enabled.`
@@ -828,7 +828,7 @@ we want the `unknown-project-number` here.  Add this into your `egress_policies`
   },
 ```
 
-### MACHINE LEARNING PIPELINE
+### Machine Learning Pipeline
 
 This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench is deployed from service catalog and The datascientis can use it to write their code including any experiments, data processing code and pipeline components. In addition, a cloud storage bucket is deployed to use as the storage for our operations. Optionally a composer environment is which will later be used to schedule the pipeline run on intervals.
 
@@ -921,7 +921,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
       id: 'upload dag'
 ```
 
-### 3. Configure variables in compile_pipeline.py and runpipeline.py
+#### 3. Configure variables in compile_pipeline.py and runpipeline.py
 
 - Make sure to set the correct values for variables like **PROJECT_ID**, **BUCKET_URI**, encryption keys and service accounts, etc.:
 
@@ -941,7 +941,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
 The compile_pipeline.py and runpipeline.py files are commented to point out these variables.
 
-### 4. Merge and deploy
+#### 4. Merge and deploy
 
 - Once everything is configured, you can commit your changes and push to the dev branch. Then, create a PR to from dev to staging(non-prod) which will result in triggering the pipeline if approved. The vertex pipeline takes about 30 minutes to finish and if there are no errors, a trained model will be deployed to and endpoint in the prod project which you can use to make prediction requests.
 
