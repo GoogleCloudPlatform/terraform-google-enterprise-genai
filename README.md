@@ -23,7 +23,7 @@ Alternatively, the user can follow steps on [`docs/deploy_on_foundation_v4.0.0.m
 
 Additional steps were added to provide an example Machine Learning application:
 
-* [Machine-learning-pipeline](./examples/machine-learning-pipeline)
+* [machine-learning-pipeline](./examples/machine-learning-pipeline)
     * This additional step, adds an interactive coding and experimentation, deploying the Vertex Workbench for data scientists.
     * The step will guide you through creating a ML pipeline using a notebook on Google Vertex AI Workbench Instance.
     * After promoting the ML pipeline, it is triggered by Cloud Build upon staging branch merges, trains and deploys a model using the census income dataset.
