@@ -17,7 +17,3 @@
 data "google_project" "project" {
   project_id = var.project_id
 }
-
-data "google_projects" "log" {
-  filter = "labels.application_name:org-logging labels.environment:production lifecycleState:ACTIVE"
-}
