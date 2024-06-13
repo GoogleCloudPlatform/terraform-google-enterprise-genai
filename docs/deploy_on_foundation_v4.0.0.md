@@ -2173,7 +2173,7 @@ The constraints are located in the repository:
 
 - `gcp-policies-app-infra`
 
-**IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/`.
+**IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/` and the other repos (`gcp-bootstrap`, `gcp-org`, `gcp-projects`...).
 
 - Clone the `gcp-policies-app-infra` repo based on the Terraform output from the `4-projects` step.
 Clone the repo at the same level of the `terraform-google-enterprise-genai` folder, the following instructions assume this layout.
