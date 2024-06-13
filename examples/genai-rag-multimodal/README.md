@@ -59,6 +59,108 @@ When running the Notebook, you will reach a step that downloads an example PDF f
       - projects/200612033880 # Google Cloud Example Project
 ```
 
+## Deploying infrastructure using Machine Learning Infra Pipeline
+
+### Required Permissions for pipeline Service Account
+
+- Give `roles/compute.networkUser` to the Service Account that runs the Pipeline.
+
+  ```bash
+  SERVICE_ACCOUNT=$(terraform -chdir="./gcp-projects/ml_business_unit/shared" output -json terraform_service_accounts | jq -r '."ml-machine-learning"')
+
+  gcloud projects add-iam-policy-binding <INSERT_HOST_VPC_NETWORK_PROJECT_HERE> --member="serviceAccount:$SERVICE_ACCOUNT" --role="roles/compute.networkUser"
+  ```
+
+- Add the following ingress rule to the Service Perimeter.
+
+  ```yaml
+  ingressPolicies:
+  - ingressFrom:
+      identities:
+      - serviceAccount:<SERVICE_ACCOUNT>
+      sources:
+      - accessLevel: '*'
+    ingressTo:
+      operations:
+      - serviceName: '*'
+      resources:
+      - '*'
+  ```
+
+### Deployment steps
+
+**IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/` and the other repos (`gcp-bootstrap`, `gcp-org`, `gcp-projects`...).
+
+- Retrieve the Project ID where the Machine Learning Pipeline Repository is located in.
+
+  ```bash
+  export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="gcp-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
+  echo ${INFRA_PIPELINE_PROJECT_ID}
+  ```
+
+- Clone the repository.
+
+  ```bash
+  gcloud source repos clone ml-machine-learning --project=${INFRA_PIPELINE_PROJECT_ID}
+  ```
+
+- Navigate into the repo and the desired branch. Create directories if they don't exist.
+
+  ```bash
+  cd ml-machine-learning
+  git checkout -b development
+
+  mkdir -p ml_business_unit/development
+  mkdir -p modules
+  ```
+
+- Copy required files to the repository.
+
+  ```bash
+  cp -R ../terraform-google-enterprise-genai/examples/genai-rag-multimodal ./modules
+  cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
+  cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
+  chmod 755 ./tf-wrapper.sh
+
+  cat ../terraform-google-enterprise-genai/examples/genai-rag-multimodal/terraform.tfvars >> ml_business_unit/development/genai_example.auto.tfvars
+  cat ../terraform-google-enterprise-genai/examples/genai-rag-multimodal/variables.tf >> ml_business_unit/development/variables.tf
+  ```
+
+  > NOTE: Make sure there are no variable name collision for variables under `terraform-google-enterprise-genaiexamples/genai-rag-multimodal/variables.tf` and that your `terraform.tfvars` is updated with values from your environment.
+
+- Validate that variables under `ml_business_unit/development/genai_example.auto.tfvars` are correct.
+
+  ```bash
+  cat ml_business_unit/development/genai_example.auto.tfvars
+  ```
+
+- Create a file named `genai_example.tf` under `ml_business_unit/development` path that calls the module.
+
+  ```terraform
+  module "genai_example" {
+    source = "../../modules/genai-rag-multimodal"
+
+    kms_key                   = var.kms_key
+    network                   = var.network
+    subnet                    = var.subnet
+    machine_learning_project  = var.machine_learning_project
+    vector_search_vpc_project = var.vector_search_vpc_project
+  }
+  ```
+
+- Commit and push
+
+  ```terraform
+  git add .
+  git commit -m "Add GenAI example"
+
+  git push origin development
+  ```
+
+## Deploying infrastructure using terraform locally
+
+Run `terraform init && terraform apply -auto-approve`.
+
 ## Usage
 
 Once all the requirements are set up, you can start by running and adjusting the notebook step-by-step.
