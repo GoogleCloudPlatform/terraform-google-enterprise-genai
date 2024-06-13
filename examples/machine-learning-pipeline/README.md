@@ -77,18 +77,12 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
 
   ```
   "serviceAccount:sa-tf-cb-bu3-machine-learning@[prj_c_bu3infra_pipeline_project_id].iam.gserviceaccount.com"
-<<<<<<< HEAD
   "serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com",
   "serviceAccount:service-[prj_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com",
   "serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com",
   "serviceAccount:[prj_d_machine_learning_project_number]-compute@developer.gserviceaccount.com",
   "serviceAccount:sa-d-composer@[prj_d_machine_learning_project_id].iam.gserviceaccount.com",
   "serviceAccount:project-service-account@[prj_d_machine_learning_project_id].iam.gserviceaccount.com"
-=======
-  "serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com"
-  "serviceAccount:service-[prj_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com"
-  "serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com"
->>>>>>> main
   ```
 
   ```bash
@@ -143,7 +137,6 @@ Once there, select the perimeter that is associated with the environment (eg. `d
               "projects/[your-environment-bu3machine-learning-number]",
           ]
           "operations" = {
-<<<<<<< HEAD
             "compute.googleapis.com" = {
             "methods" = ["*"]
             }
@@ -186,47 +179,6 @@ Once there, select the perimeter that is associated with the environment (eg. `d
             "bigquery.googleapis.com" = {
             "methods" = ["*"]
             }
-=======
-              "compute.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "dns.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "logging.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "storage.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "cloudkms.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "iam.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "cloudresourcemanager.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "pubsub.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "secretmanager.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "aiplatform.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "composer.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "cloudbuild.googleapis.com" = {
-              "methods" = ["*"]
-              }
-              "bigquery.googleapis.com" = {
-              "methods" = ["*"]
-              }
->>>>>>> main
           }
           }
       },
@@ -711,19 +663,14 @@ Notably:
           "resources" = ["projects/[prj-c-bu3artifacts-number]"]
           "operations" = {
             "artifactregistry.googleapis.com" = {
-<<<<<<< HEAD
             "methods" = ["*"]
             }
             "cloudbuild.googleapis.com" = {
             "methods" = ["*"]
-=======
-              "methods" = ["*"]
->>>>>>> main
             }
           }
         }
       },
-<<<<<<< HEAD
       {
       "from" = {
         "identity_type" = "ANY_IDENTITY"
@@ -738,8 +685,6 @@ Notably:
         }
         }
     },
-=======
->>>>>>> main
       // Dataflow
       {
         "from" = {
@@ -757,7 +702,6 @@ Notably:
           }
         }
       },
-<<<<<<< HEAD
       {
         "from" = {
         "identity_type" = "ANY_IDENTITY"
@@ -786,8 +730,6 @@ Notably:
         }
         }
     },
-=======
->>>>>>> main
     ```
 
 1. Under NON-PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
@@ -968,7 +910,6 @@ You can read more about the details of the pipeline components on the [pipeline'
 Before you start, make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
 Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy the bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
 
-<<<<<<< HEAD
 Additionally, the following Service Accounts need to be created with the respective roles since the Compute Engine SA cannot to be used to deploy the Dataflow and Vertex Pipeline steps:
 
 `dataflow_runner_sa@prj-d-bu3machine-learning-[project-number].iam.gserviceaccount.com`
@@ -995,11 +936,6 @@ bq query --nouse_legacy_sql \
 #### 1. Run the notebook
 
 - Take assets/Vertexpipeline folder and make you own copy as a standalone git repository and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
-=======
-#### 1. Run the notebook
-
-- Take 7-vertexpipeline folder and make you own copy as a standalone git repository and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/7-vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
->>>>>>> main
 
 #### 2. Configure cloud build
 
@@ -1134,14 +1070,7 @@ Here are step-by-step instructions to make a request to your model using `gcloud
 #### Common errors
 
 - ***google.api_core.exceptions.ResourceExhausted: 429 The following quotas are exceeded: ```CustomModelServingCPUsPerProjectPerRegion 8: The following quotas are exceeded: CustomModelServingCPUsPerProjectPerRegion``` or similar error***:
-<<<<<<< HEAD
 This is likely due to the fact that you have too many models uploaded and deployed in Vertex AI. To resolve the issue, you can either submit a quota increase request or undeploy and delete a few models to free up resources.
 
 - ***Google Compute Engine Metadata service not available/found***:
 You might encounter this when the vertex pipeline job attempts to run even though it is an obsolete issue according to [this thread](https://issuetracker.google.com/issues/229537245#comment9). It'll most likely resolve by re-running the vertex pipeline.
-=======
-This is likely due to the fact that you have too many models uploaded and deployed in Vertex AI. To resolve the issue, you can either submit a quota increase request or undeploy and delete a few models to free up resources
-
-- ***Google Compute Engine Metadata service not available/found***:
-You might encounter this when the vertex pipeline job attempts to run even though it is an obsolete issue according to [this thread](https://issuetracker.google.com/issues/229537245#comment9). It'll most likely resolve by re-running the vertex pipeline
->>>>>>> main
