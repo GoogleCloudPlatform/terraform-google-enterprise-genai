@@ -86,7 +86,6 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
    export prj_c_bu3infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
    echo "prj_c_bu3infra_pipeline_project_id = ${prj_c_bu3infra_pipeline_project_id}"
 
-  
    export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
    echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
 
@@ -119,7 +118,7 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 
   ```
   ingress_policies = [
-      
+
       // users
       {
           "from" = {
@@ -220,7 +219,7 @@ Please refer to [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into is
 commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
 You will need a github repository set up for this step.  This repository houses the DAG's for composer.  As of this writing, the structure is as follows:
-   
+
    ```
    .
    ├── README.md
@@ -307,7 +306,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
-   
+
    ```bash
    GITHUB_APP_ID="YOUR-GITHUB-APP-ID-HERE"
    GITHUB_REMOTE_URI="YOUR-GITHUB-REMOTE-URI"
@@ -367,7 +366,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. Composer will rely on DAG's from a github repository.  In `4-projects`, a secret 'github-api-token' was created to house your github's api access key.  We need to create a new version for this secret which will be used in the composer module which is called in the `base_env` folder.  Use the script below to add the secrets into each machine learnings respective environment:
-   
+
    ```bash
    envs=(development non-production production)
    project_ids=()
@@ -585,7 +584,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 ### VPC-SC
 
 1. Now that machine learning's projects have all been inflated, please _return to gcp-projects_ and update COMMON.AUTO.TFVARS with this __additional__ information under `perimeter_additional_members`:
-    
+
     ```
     "serviceAccount:service-[prj-n-bu3machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
     "serviceAccount:[prj-n-bu3machine-learning-number]@cloudbuild.gserviceaccount.com",
@@ -595,7 +594,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
     ```
 
 2. optional - run the below command to generate a list of the above changes needed to COMMON.AUTO.TFVARS
-    
+
     ```bash
     ml_n=$(terraform -chdir="gcp-projects/business_unit_3/non-production" output -raw machine_learning_project_number)
     ml_p=$(terraform -chdir="gcp-projects/business_unit_3/production" output -raw machine_learning_project_number)
@@ -615,7 +614,7 @@ Notably:
    * "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
 
     This should be added under identities.  It should look like this::
-    
+
     ```
     egress_policies = [
           // notebooks
@@ -644,7 +643,7 @@ Notably:
    ```
 
 1. Remain in DEVELOPMENT.AUTO.TFVARS and include this entry under `egress_policies`.  Ensure you replace all [project numbers] with their corresponding project:
-    
+
     ```
       // artifact Registry
       {
@@ -683,7 +682,7 @@ Notably:
     ```
 
 1. Under NON-PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
-    
+
     ```
     {
       "from" = {
@@ -761,7 +760,7 @@ Notably:
     ```
 
 1.  Under PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
-    
+
     ```
     {
       "from" = {
