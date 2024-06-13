@@ -17,14 +17,16 @@ The repository is divided into distinct Terraform projects, each located in its 
   - Create Organization Level Keyring.
 - [2. environments](./2-environments/)
   - This repository will also establish organization and environment-level Cloud Key Management Service (KMS) keyrings during this stage.
+  - Create support for environment-level logging.
 - [3. networks-dual-svpc](./3-networks-dual-svpc/)
   - On this repository, it will also configure a private DNS zone for workbench instances to use either `private.googleapis.com` or `restricted.googleapis.com`.
-  - Custom firewall rules.
+  - Custom Firewall Rules (`allow_all_ingress_ranges` and `allow_all_egress_ranges`).
   - Enable Cloud NAT.
+  - Attach Environment-level Logging Project and Environment-level KMS Project to VPC-SC Perimeter.
 - [4. projects](./4-projects/)
   - Instead of creating `business_unit_1` and `business_unit_2`, this repository will create `ml_business_unit`.
-  - Additionally, it will establish a Service Catalog project capable of hosting terraform solutions and an artifacts project.
-  - Will create a Machine Learning project for each environment.
+  - Additionally, it will establish a Service Catalog project capable of hosting terraform solutions and an Artifacts project, both under the `common` folder.
+  - Will create a Machine Learning project for each environment, that is inside a VPC-SC Perimeter and can be used for deploying Machine Learning Workloads.
 - [5. app-infra](./5-app-infra/)  
   - Deploys a Service Catalog Pipeline, that can be used for packaging terraform modules.
   - Creates an Artifacts Pipeline, that can be used to create organization-wide custom docker images.
@@ -35,7 +37,7 @@ The repository is divided into distinct Terraform projects, each located in its 
   - Multimodal RAG by performing Q&A over a financial document filled with both text and images.
   - Use RAGAS for RAG chain evaluation.
 
-- [machine-learning-pipeline](./6-ml-pipeline/)
+- [machine-learning-pipeline](./examples/machine-learning-pipeline)
   - This example, adds an interactive coding and experimentation, deploying the Vertex Workbench for data scientists.
   - The step will guide you through creating a ML pipeline using a notebook on Google Vertex AI Workbench Instance.
   - After promoting the ML pipeline, it is triggered by Cloud Build upon staging branch merges, trains and deploys a model using the census income dataset.
