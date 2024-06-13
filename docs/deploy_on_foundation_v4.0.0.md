@@ -2521,4 +2521,4 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    cd ..
    ```
 
-- Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+- Navigate to the project that was output from `${SERVICE_CATALOG_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
