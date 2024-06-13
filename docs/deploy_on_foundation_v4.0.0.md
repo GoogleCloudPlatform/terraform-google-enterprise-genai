@@ -2484,6 +2484,8 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
 
 #### Configuring Cloud Source Repository of Service Catalog Solutions Pipeline
 
+The series of steps below will trigger the custom Service Catalog Pipeline.
+
 - Grab the Service Catalogs ID
 
    ```bash
