@@ -15,7 +15,7 @@
  */
 
 module "artifact_publish" {
-  source = "../../modules/publish_artifacts"
+  source = "../../../../modules/publish_artifacts"
 
   environment = local.environment
   description = "Publish Artifacts for ML Projects"

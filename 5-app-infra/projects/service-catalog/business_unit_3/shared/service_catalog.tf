@@ -15,7 +15,7 @@
  */
 
 module "service_catalog" {
-  source = "../../modules/svc_ctlg"
+  source = "../../../../modules/service_catalog"
 
   project_id                      = local.service_catalog_project_id
   region                          = var.instance_region
