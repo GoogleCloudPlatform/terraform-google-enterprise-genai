@@ -221,20 +221,32 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
 #### Configuring Cloud Source Repository of Artifact Application
 
 1. Grab the Artifact Project ID
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared" output -raw common_artifacts_project_id)
    echo ${ARTIFACT_PROJECT_ID}
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd publish-artifacts
    git checkout -b main
@@ -253,7 +265,11 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    ```
 
 1. `cd` out of the `publish-artifacts` repository.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd ..
    ```
@@ -270,7 +286,11 @@ Although Service Catalog itself must be manually deployed, the modules which wil
 The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are.
 
 The repository has the structure (truncated for brevity):
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```
    business_unit_3
    ├── development
@@ -382,7 +402,11 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```
 
 1. `cd` out of the `bu3-service-catalog` repository.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd ..
    ```
@@ -397,13 +421,21 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd service-catalog/
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
@@ -412,7 +444,11 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```
 
 1. Commit changes and push main branch to the new repo.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    git add modules
    git commit -m 'Initialize Service Catalog Build Repo'
@@ -421,7 +457,11 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```
 
 1. `cd` out of the `service_catalog` repository.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd ..
    ```
@@ -525,9 +565,15 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 ```
 
 1. `cd` out of the `artifact-publish`.
+<<<<<<< HEAD
    
    ```bash
    cd 
+=======
+
+   ```bash
+   cd
+>>>>>>> main
    ```
 
 1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
@@ -537,20 +583,32 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder.
 
 1. Grab the Artifact Project ID
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    export ARTIFACT_PROJECT_ID=$(terraform -chdir="terraform-google-enterprise-genai/4-projects/business_unit_3/shared" output -raw common_artifacts_project_id)
    echo ${ARTIFACT_PROJECT_ID}
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd publish-artifacts
    git checkout -b main
@@ -569,7 +627,11 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    ```
 
 1. `cd` out of the `publish-artifacts` repository.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd ..
    ```
@@ -680,13 +742,21 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd service-catalog/
    git checkout -b main
@@ -697,7 +767,11 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    ```
 
 1. Commit changes and push main branch to the new repo.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    git add modules
    git commit -m 'Initialize Service Catalog Build Repo'
@@ -706,7 +780,11 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    ```
 
 1. `cd` out of the `service-catalog` repository.
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
    ```bash
    cd ..
    ```
