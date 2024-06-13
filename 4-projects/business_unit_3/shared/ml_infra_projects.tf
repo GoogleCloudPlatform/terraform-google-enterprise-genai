@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module "ml_infra_project" {
+module "ml_infra_projects" {
   source = "../../modules/ml_infra_projects"
 
   org_id                                 = local.org_id

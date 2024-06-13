@@ -191,7 +191,7 @@ At this time the alternatives are:
 1. To use a [workaround](https://stackoverflow.com/a/62827358) to force Google API calls in Cloud Shell to use an IP from the `private.googleapis.com` range (199.36.153.8/30 ) or
 1. To deploy the foundation code from a local machine that supports IPv6.
 
-If you use the workaround, the API list should include the ones that are [allowed](../policy-library/policies/constraints/serviceusage_allow_basic_apis.yaml) in the terraform-example-foundation policy library.
+If you use the workaround, the API list should include the ones that are [allowed](../policy-library/policies/constraints/serviceusage_allow_basic_apis.yaml) in the terraform-google-enterprise-genai policy library.
 
 ### Error: Unsupported attribute
 
@@ -473,4 +473,4 @@ You can get this information from step `0-bootstrap` by running the following co
 
 **Terraform State lock possible causes:**
 
-- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/build/cloudbuild-tf-apply.yaml#L15).
+- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/build/cloudbuild-tf-apply.yaml#L15).

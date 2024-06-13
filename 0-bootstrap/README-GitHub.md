@@ -61,13 +61,13 @@ for each one of the repositories.
 
 ### Deploying step 0-bootstrap
 
-1. Clone [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation) into your local environment.
+1. Clone [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai) into your local environment.
 
    ```bash
-   git clone https://github.com/terraform-google-modules/terraform-example-foundation.git
+   git clone https://github.com/terraform-google-modules/terraform-google-enterprise-genai.git
    ```
 
-1. Clone the private repository you created to host the `0-bootstrap` terraform configuration at the same level of the `terraform-example-foundation` folder.
+1. Clone the private repository you created to host the `0-bootstrap` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
 You must be [authenticated to GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github).
 
    ```bash
@@ -78,7 +78,7 @@ You must be [authenticated to GitHub](https://docs.github.com/en/authentication/
 
    ```bash
    gcp-bootstrap/
-   terraform-example-foundation/
+   terraform-google-enterprise-genai/
    ```
 
 1. Navigate into the repo. All subsequent
@@ -110,11 +110,11 @@ You must be [authenticated to GitHub](https://docs.github.com/en/authentication/
    ```bash
    mkdir -p envs/shared
 
-   cp -RT ../terraform-example-foundation/0-bootstrap/ ./envs/shared
-   cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+   cp -RT ../terraform-google-enterprise-genai/0-bootstrap/ ./envs/shared
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    mkdir -p .github/workflows
-   cp ../terraform-example-foundation/build/github-tf-* ./.github/workflows/
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp ../terraform-google-enterprise-genai/build/github-tf-* ./.github/workflows/
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    cd ./envs/shared
    ```
@@ -153,7 +153,7 @@ export the GitHub fine grained access token as an environment variable:
 1. Use the helper script [validate-requirements.sh](../scripts/validate-requirements.sh) to validate your environment:
 
    ```bash
-   ../../../terraform-example-foundation/scripts/validate-requirements.sh  -o <ORGANIZATION_ID> -b <BILLING_ACCOUNT_ID> -u <END_USER_EMAIL> -e
+   ../../../terraform-google-enterprise-genai/scripts/validate-requirements.sh  -o <ORGANIZATION_ID> -b <BILLING_ACCOUNT_ID> -u <END_USER_EMAIL> -e
    ```
 
    **Note:** The script is not able to validate if the user is in a Cloud Identity or Google Workspace group with the required roles.
@@ -249,7 +249,7 @@ we recommend that you request 50 additional projects for the **projects step ser
 
 ## Deploying step 1-org
 
-1. Clone the repository you created to host the `1-org` terraform configuration at the same level of the `terraform-example-foundation` folder.
+1. Clone the repository you created to host the `1-org` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
 
    ```bash
    git clone git@github.com:<GITHUB-OWNER>/<GITHUB-ORGANIZATION-REPO>.git gcp-org
@@ -281,11 +281,11 @@ we recommend that you request 50 additional projects for the **projects step ser
 1. Copy contents of foundation to new repo.
 
    ```bash
-   cp -RT ../terraform-example-foundation/1-org/ .
-   cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+   cp -RT ../terraform-google-enterprise-genai/1-org/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    mkdir -p .github/workflows
-   cp ../terraform-example-foundation/build/github-tf-* ./.github/workflows/
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp ../terraform-google-enterprise-genai/build/github-tf-* ./.github/workflows/
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -365,7 +365,7 @@ See the shared folder [README.md](../1-org/envs/shared/README.md#inputs) for add
 
 ## Deploying step 2-environments
 
-1. Clone the repository you created to host the `2-environments` terraform configuration at the same level of the `terraform-example-foundation` folder.
+1. Clone the repository you created to host the `2-environments` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
 
    ```bash
    git clone git@github.com:<GITHUB-OWNER>/<GITHUB-ENVIRONMENTS-REPO>.git gcp-environments
@@ -404,11 +404,11 @@ See the shared folder [README.md](../1-org/envs/shared/README.md#inputs) for add
 1. Copy contents of foundation to new repo.
 
    ```bash
-   cp -RT ../terraform-example-foundation/2-environments/ .
-   cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+   cp -RT ../terraform-google-enterprise-genai/2-environments/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    mkdir -p .github/workflows
-   cp ../terraform-example-foundation/build/github-tf-* ./.github/workflows/
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp ../terraform-google-enterprise-genai/build/github-tf-* ./.github/workflows/
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -472,7 +472,7 @@ or go to [Deploying step 3-networks-hub-and-spoke](#deploying-step-3-networks-hu
 
 ## Deploying step 3-networks-dual-svpc
 
-1. Clone the repository you created to host the `3-networks-dual-svpc` terraform configuration at the same level of the `terraform-example-foundation` folder.
+1. Clone the repository you created to host the `3-networks-dual-svpc` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
 
    ```bash
    git clone git@github.com:<GITHUB-OWNER>/<GITHUB-NETWORKS-REPO>.git gcp-networks
@@ -510,11 +510,11 @@ or go to [Deploying step 3-networks-hub-and-spoke](#deploying-step-3-networks-hu
 1. Copy contents of foundation to new repo.
 
    ```bash
-   cp -RT ../terraform-example-foundation/3-networks-dual-svpc/ .
-   cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+   cp -RT ../terraform-google-enterprise-genai/3-networks-dual-svpc/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    mkdir -p .github/workflows
-   cp ../terraform-example-foundation/build/github-tf-* ./.github/workflows/
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp ../terraform-google-enterprise-genai/build/github-tf-* ./.github/workflows/
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -635,7 +635,7 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 
 ## Deploying step 3-networks-hub-and-spoke
 
-1. Clone the repository you created to host the `3-networks-hub-and-spoke` terraform configuration at the same level of the `terraform-example-foundation` folder.
+1. Clone the repository you created to host the `3-networks-hub-and-spoke` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
 
    ```bash
    git clone git@github.com:<GITHUB-OWNER>/<GITHUB-NETWORKS-REPO>.git gcp-networks
@@ -673,11 +673,11 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 1. Copy contents of foundation to new repo.
 
    ```bash
-   cp -RT ../terraform-example-foundation/3-networks-hub-and-spoke/ .
-   cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+   cp -RT ../terraform-google-enterprise-genai/3-networks-hub-and-spoke/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    mkdir -p .github/workflows
-   cp ../terraform-example-foundation/build/github-tf-* ./.github/workflows/
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp ../terraform-google-enterprise-genai/build/github-tf-* ./.github/workflows/
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 
@@ -786,7 +786,7 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 
 ## Deploying step 4-projects
 
-1. Clone the repository you created to host the `4-projects` terraform configuration at the same level of the `terraform-example-foundation` folder.
+1. Clone the repository you created to host the `4-projects` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
 
    ```bash
    git clone git@github.com:<GITHUB-OWNER>/<GITHUB-PROJECTS-REPO>.git gcp-projects
@@ -825,11 +825,11 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 1. Copy contents of foundation to new repo.
 
    ```bash
-   cp -RT ../terraform-example-foundation/4-projects/ .
-   cp -RT ../terraform-example-foundation/policy-library/ ./policy-library
+   cp -RT ../terraform-google-enterprise-genai/4-projects/ .
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    mkdir -p .github/workflows
-   cp ../terraform-example-foundation/build/github-tf-* ./.github/workflows/
-   cp ../terraform-example-foundation/build/tf-wrapper.sh .
+   cp ../terraform-google-enterprise-genai/build/github-tf-* ./.github/workflows/
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
    ```
 

@@ -5,7 +5,7 @@ Uses Google Cloud Asset Inventory to create a feed of IAM Policy change events, 
 
 ```hcl
 module "secure_cai_notification" {
-  source = "terraform-google-modules/terraform-example-foundation/google//1-org/modules/cai-monitoring"
+  source = "terraform-google-modules/terraform-google-enterprise-genai/google//1-org/modules/cai-monitoring"
 
   org_id               = <ORG ID>
   billing_account      = <BILLING ACCOUNT ID>

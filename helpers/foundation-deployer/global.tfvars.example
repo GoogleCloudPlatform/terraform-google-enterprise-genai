@@ -29,7 +29,7 @@ validator_project_id = "EXISTING_PROJECT_ID"
 
 
 // 0-bootstrap inputs
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md#inputs
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#inputs
 
 org_id          = "REPLACE_ME" # format "000000000000"
 billing_account = "REPLACE_ME" # format "000000-000000-000000"
@@ -55,7 +55,7 @@ folder_prefix  = "fldr"
 
 // Optional - for enabling the automatic groups creation, uncomment the groups
 // variable and update the values with the desired group names
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/0-bootstrap/README.md#optional---automatic-creation-of-google-cloud-identity-groups
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#optional---automatic-creation-of-google-cloud-identity-groups
 
 // After deploy, the Bootstrap service account will need to be granted "Group Admin" role in the
 // Google Workspace by a Super Admin before Cloud Build builds can be executed by the Bootstrap workspace.
@@ -85,7 +85,7 @@ folder_prefix  = "fldr"
 
 
 // 1-org inputs
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/1-org/envs/shared/README.md#inputs
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/1-org/envs/shared/README.md#inputs
 
 audit_data_users   = "REPLACE_ME" # "gcp-security-admins@example.com"
 billing_data_users = "REPLACE_ME" # "gcp-billing-data-users@example.com"
@@ -101,8 +101,8 @@ log_export_storage_location                 = "US"
 billing_export_dataset_location             = "US"
 
 // Choose witch network architecture to use:
-// Dual Shared VPC: https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-dual-svpc/README.md
-// Hub And Spoke: https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-hub-and-spoke/README.md
+// Dual Shared VPC: https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc/README.md
+// Hub And Spoke: https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke/README.md
 
 enable_hub_and_spoke = false
 
@@ -115,14 +115,14 @@ create_unique_tag_key = false
 
 
 // 2-environments inputs
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/2-environments/envs/production/README.md#inputs
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/2-environments/envs/production/README.md#inputs
 
 monitoring_workspace_users = "REPLACE_ME" # "gcp-monitoring-admins@example.com"
 
 
 // 3-networks inputs
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-hub-and-spoke/envs/production/README.md#inputs
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/3-networks-hub-and-spoke/envs/shared/README.md#inputs
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke/envs/production/README.md#inputs
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke/envs/shared/README.md#inputs
 
 domain = "example.com." # The DNS name of peering managed zone. Must end with a period.
 
@@ -149,7 +149,7 @@ target_name_server_addresses = [
 
 
 // 4-projects inputs
-// https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/4-projects/business_unit_1/production/README.md#inputs
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects/business_unit_1/production/README.md#inputs
 
 projects_gcs_location = "US"
 projects_kms_location = "us"
