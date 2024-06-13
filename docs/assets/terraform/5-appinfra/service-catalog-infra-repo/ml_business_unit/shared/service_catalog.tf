@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+locals {
+  region_kms_keyring = [for i in local.shared_keyrings : i if split("/", i)[3] == var.instance_region]
+}
+
+data "google_project" "common_svc_catalog" {
+  project_id = local.service_catalog_project_id
+}
+
 module "service_catalog" {
   source = "../../modules/service_catalog"
 
@@ -23,5 +31,6 @@ module "service_catalog" {
   machine_learning_project_number = local.machine_learning_project_number
   tf_service_catalog_sa_email     = local.tf_service_catalog_sa_email
 
-  log_bucket = var.log_bucket
+  log_bucket     = var.log_bucket
+  kms_crypto_key = "${one(local.region_kms_keyring)}/cryptoKeys/${data.google_project.common_svc_catalog.name}"
 }
