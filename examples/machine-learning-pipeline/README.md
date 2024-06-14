@@ -224,7 +224,7 @@ Please refer to [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into is
 **Note:** If you are using MacOS, replace `cp -RT` with `cp -R` in the relevant
 commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
-You will need a github repository set up for this step.  This repository houses the DAG's for composer.  As of this writing, the structure is as follows:
+If you have chosen to deploy Composer with the Pipeline, you will need a github repository set up for this step. This repository houses the DAG's for composer. As of this writing, the structure is as follows:
 
    ```
    .
@@ -920,17 +920,29 @@ This service account requires the following roles:
 * `roles/dataflow.worker`
 * `roles/storage.admin`
 
-
+A service account to run vertex model needs to be created. No role is required for the `vertex_model_sa`:
 `vertex_model_sa@prj-d-bu3machine-learning-[project-number].iam.gserviceaccount.com`
 
-No role is required for the `vertex_model_sa`.
 
-Run the command below to grant the notebook to be able to create jobs in BigQuery:
+Next step is to run the command below to grant the notebook to be able to create jobs in BigQuery:
 ```
 bq query --nouse_legacy_sql \
 'ALTER PROJECT `prj-d-bu3machine-learning-[project-number]` SET OPTIONS \
 (`region-us-central1.default_kms_key_name`="projects/[prj-d-kms-project-ID]/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3machine-learning");'
 ```
+
+It is also necessary to grant `roles/iam.serviceAccountUser` to the Compute Engine SA that has been created before. This service account can be found in the `prj-d-bu3machine-learning-[project-id]` an it`s format is `[project-number]-compute@developer.gserviceaccount.com`.
+
+Finally, it needs to be created a Service Account to run the workbench instance. This Service Account must have the following roles:
+
+* roles/cloudbuild.approver
+* roles/cloudbuild.serviceAccount
+* roles/cloudbuild.tokenAccessor
+* roles/cloudfunctions.admin
+* roles/cloudkms.admin
+* roles/compute.instanceAdmin.v1
+* roles/iam.serviceAccountUser
+* roles/aiplatform.admin
 
 
 #### 1. Run the notebook
