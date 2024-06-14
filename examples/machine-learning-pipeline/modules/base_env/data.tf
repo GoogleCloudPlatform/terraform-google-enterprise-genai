@@ -27,11 +27,11 @@ data "google_projects" "production" {
 }
 
 data "google_service_account" "non-production" {
-  project    = data.google_projects.non-production.projects.0.project_id
-  account_id = "${data.google_projects.non-production.projects.0.number}-compute@developer.gserviceaccount.com"
+  project    = var.non-production_project_id
+  account_id = "${var.non-production_project_number}-compute@developer.gserviceaccount.com"
 }
 
 data "google_service_account" "production" {
-  project    = data.google_projects.production.projects.0.project_id
-  account_id = "${data.google_projects.production.projects.0.number}-compute@developer.gserviceaccount.com"
+  project    = var.production_project_id
+  account_id = "${var.production_project_number}-compute@developer.gserviceaccount.com"
 }
