@@ -27,7 +27,7 @@ The repository is divided into distinct Terraform projects, each located in its 
   - Instead of creating `business_unit_1` and `business_unit_2`, this repository will create `ml_business_unit`.
   - Additionally, it will establish a Service Catalog project capable of hosting terraform solutions and an Artifacts project, both under the `common` folder.
   - Will create a Machine Learning project for each environment, that is inside a VPC-SC Perimeter and can be used for deploying Machine Learning Workloads.
-- [5. app-infra](./5-app-infra/)  
+- [5. app-infra](./5-app-infra/)
   - Deploys a Service Catalog Pipeline, that can be used for packaging terraform modules.
   - Creates an Artifacts Pipeline, that can be used to create organization-wide custom docker images.
 
