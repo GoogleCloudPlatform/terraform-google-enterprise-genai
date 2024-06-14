@@ -163,8 +163,8 @@ func main() {
 		// Note: destroy is only terraform destroy, local directories are not deleted.
 		// 5-app-infra
 		msg.PrintStageMsg("Destroying 5-app-infra stage")
-		err = s.RunDestroyStep("bu1-example-app", func() error {
-			io := stages.GetInfraPipelineOutputs(t, conf.CheckoutPath, "bu1-example-app")
+		err = s.RunDestroyStep("ml-example-app", func() error {
+			io := stages.GetInfraPipelineOutputs(t, conf.CheckoutPath, "ml-example-app")
 			return stages.DestroyExampleAppStage(t, s, io, conf)
 		})
 		if err != nil {
@@ -302,12 +302,12 @@ func main() {
 
 	// 5-app-infra
 	msg.PrintStageMsg("Deploying 5-app-infra stage")
-	io := stages.GetInfraPipelineOutputs(t, conf.CheckoutPath, "bu1-example-app")
+	io := stages.GetInfraPipelineOutputs(t, conf.CheckoutPath, "ml-example-app")
 	io.RemoteStateBucket = bo.RemoteStateBucketProjects
 
 	msg.PrintBuildMsg(io.InfraPipeProj, io.DefaultRegion, conf.DisablePrompt)
 
-	err = s.RunStep("bu1-example-app", func() error {
+	err = s.RunStep("ml-example-app", func() error {
 		return stages.DeployExampleAppStage(t, s, globalTFVars, io, conf)
 	})
 	if err != nil {

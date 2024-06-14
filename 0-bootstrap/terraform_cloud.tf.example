@@ -63,14 +63,10 @@ locals {
       "3-shared"         = { vcs_branch = "production", directory = "/envs/shared" },
     },
     "proj" = {
-      "4-bu1-production"     = { vcs_branch = "production", directory = "/business_unit_1/production" },
-      "4-bu1-non-production" = { vcs_branch = "non-production", directory = "/business_unit_1/non-production" },
-      "4-bu1-development"    = { vcs_branch = "development", directory = "/business_unit_1/development" },
-      "4-bu1-shared"         = { vcs_branch = "production", directory = "/business_unit_1/shared" },
-      "4-bu2-production"     = { vcs_branch = "production", directory = "/business_unit_2/production" },
-      "4-bu2-non-production" = { vcs_branch = "non-production", directory = "/business_unit_2/non-production" },
-      "4-bu2-development"    = { vcs_branch = "development", directory = "/business_unit_2/development" },
-      "4-bu2-shared"         = { vcs_branch = "production", directory = "/business_unit_2/shared" },
+      "4-ml-production"     = { vcs_branch = "production", directory = "/ml_business_unit/production" },
+      "4-ml-non-production" = { vcs_branch = "non-production", directory = "/ml_business_unit/non-production" },
+      "4-ml-development"    = { vcs_branch = "development", directory = "/ml_business_unit/development" },
+      "4-ml-shared"         = { vcs_branch = "production", directory = "/ml_business_unit/shared" },
 
     },
   }
@@ -218,14 +214,9 @@ resource "tfe_run_trigger" "networks_shared_production" {
   sourceable_id = tfe_workspace.main["3-shared"].id
 }
 
-resource "tfe_run_trigger" "projects_bu1_shared_production" {
-  workspace_id  = tfe_workspace.main["4-bu1-production"].id
-  sourceable_id = tfe_workspace.main["4-bu1-shared"].id
-}
-
-resource "tfe_run_trigger" "projects_bu2_shared_production" {
-  workspace_id  = tfe_workspace.main["4-bu2-production"].id
-  sourceable_id = tfe_workspace.main["4-bu2-shared"].id
+resource "tfe_run_trigger" "projects_ml_shared_production" {
+  workspace_id  = tfe_workspace.main["4-ml-production"].id
+  sourceable_id = tfe_workspace.main["4-ml-shared"].id
 }
 
 module "tfc_cicd" {

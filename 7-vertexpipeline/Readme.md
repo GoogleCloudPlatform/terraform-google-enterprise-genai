@@ -127,7 +127,7 @@ The following method runs the pipeline. Note that a kms encryption key is suppli
     display_name=f"census_income_{timestamp}",
     template_path='./common/vertex-ai-pipeline/pipeline_package.yaml',
     pipeline_root=pipelineroot,
-    encryption_spec_key_name='projects/prj-d-kms-ui2h/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3machine-learning',
+    encryption_spec_key_name='projects/prj-d-kms-ui2h/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-ml-machine-learning',
     parameter_values={
         "create_bq_dataset_query": create_bq_dataset_query,
         "bq_dataset": data_config['bq_dataset'],

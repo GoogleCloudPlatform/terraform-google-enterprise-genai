@@ -56,14 +56,9 @@ func TestProjectsShared(t *testing.T) {
 		tfDir string
 	}{
 		{
-			name:  "bu1",
-			repo:  "bu1-example-app",
-			tfDir: "../../../4-projects/business_unit_1/shared",
-		},
-		{
-			name:  "bu2",
-			repo:  "bu2-example-app",
-			tfDir: "../../../4-projects/business_unit_2/shared",
+			name:  "ml",
+			repo:  "ml-example-app",
+			tfDir: "../../../4-projects/ml_business_unit/shared",
 		},
 	} {
 		t.Run(tts.name, func(t *testing.T) {

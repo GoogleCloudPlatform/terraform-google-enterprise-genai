@@ -15,7 +15,7 @@ Alternatively, the user can follow steps on [`docs/deploy_on_foundation_v4.0.0.m
 * [3. networks-dual-svpc](./3-networks-dual-svpc/)
     * On this repository, it will also configure a private DNS zone for workbench instances to use either `private.googleapis.com` or `restricted.googleapis.com`.
 * [4. projects](./4-projects/)
-    * Instead of creating `business_unit_1` and `business_unit_2`, this repository exclusively creates `business_unit_3`.
+    * Instead of creating `business_unit_1` and `business_unit_2`, this repository exclusively creates `ml_business_unit`.
     * Additionally, it will establish a Service Catalog project capable of hosting terraform solutions and an artifacts project.
     * Will create a Machine Learning project for each environment.
 * [5. app-infra](./5-app-infra/)

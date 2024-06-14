@@ -771,16 +771,15 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
    mv production.auto.example.tfvars production.auto.tfvars
    ```
 
-1. See any of the envs folder [README.md](../4-projects/business_unit_1/production/README.md#inputs) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
-1. See any of the shared folder [README.md](../4-projects/business_unit_1/shared/README.md#inputs) files for additional information on the values in the `shared.auto.tfvars` file.
+1. See any of the envs folder [README.md](../4-projects/ml_business_unit/production/README.md#inputs) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
+1. See any of the shared folder [README.md](../4-projects/ml_business_unit/shared/README.md#inputs) files for additional information on the values in the `shared.auto.tfvars` file.
 
-1. You need to manually plan and apply only once the `business_unit_1/shared` and `business_unit_2/shared` environments since `development`, `non-production`, and `production` depend on them.
+1. You need to manually plan and apply only once the `ml_business_unit/shared` environments since `development`, `non-production`, and `production` depend on them.
 
 1. In order to manually run the apply for shared workspace from your local we need to temporary unset the TFC backend by renaming `envs/shared/backend.tf` to `envs/shared/backend.tf.temporary_disabled`.
 
    ```bash
-   mv business_unit_1/shared/backend.tf business_unit_1/shared/backend.tf.temporary_disabled
-   mv business_unit_2/shared/backend.tf business_unit_2/shared/backend.tf.temporary_disabled
+   mv ml_business_unit/shared/backend.tf ml_business_unit/shared/backend.tf.temporary_disabled
    ```
 
 1. Use `terraform output` to get the CI/CD project ID and the projects step Terraform Service Account from gcp-bootstrap output.
@@ -831,10 +830,8 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 1. In order to set the TFC backend for shared workspace we now can rename `envs/shared/backend.tf.temporary_disabled` to `envs/shared/backend.tf` and run `terraform init`. When you're prompted, agree to copy Terraform state to Terraform Cloud.
 
    ```bash
-   mv business_unit_1/shared/backend.tf.temporary_disabled business_unit_1/shared/backend.tf
-   mv business_unit_2/shared/backend.tf.temporary_disabled business_unit_2/shared/backend.tf
-   terraform -chdir="business_unit_1/shared/" init
-   terraform -chdir="business_unit_2/shared/" init
+   mv ml_business_unit/shared/backend.tf.temporary_disabled ml_business_unit/shared/backend.tf
+   terraform -chdir="ml_business_unit/shared/" init
    ```
 
 1. Commit changes

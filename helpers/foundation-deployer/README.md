@@ -123,7 +123,7 @@ Im addition to the variables declared in the file `global.tfvars` for configurin
 
     ```text
     deploy-directory/
-    └── bu1-example-app
+    └── ml-example-app
     └── gcp-bootstrap
     └── gcp-environments
     └── gcp-networks
