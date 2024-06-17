@@ -1,17 +1,3 @@
-// Copyright 2023 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package stages
 
 import (
@@ -375,7 +361,7 @@ func DeployProjectsStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 		Repo:          ProjectsRepo,
 		GitConf:       conf,
 		HasManualStep: true,
-		GroupingUnits: []string{"ml_business_unit"},
+		GroupingUnits: []string{"business_unit_1", "business_unit_2"},
 		Envs:          []string{"production", "non-production", "development"},
 	}
 
@@ -395,7 +381,7 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 	}
 	// update backend bucket
 	for _, e := range []string{"production", "non-production", "development"} {
-		err = utils.ReplaceStringInFile(filepath.Join(c.FoundationPath, AppInfraStep, "ml_business_unit", e, "backend.tf"), "UPDATE_APP_INFRA_BUCKET", outputs.StateBucket)
+		err = utils.ReplaceStringInFile(filepath.Join(c.FoundationPath, AppInfraStep, "business_unit_1", e, "backend.tf"), "UPDATE_APP_INFRA_BUCKET", outputs.StateBucket)
 		if err != nil {
 			return err
 		}
@@ -404,7 +390,7 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, out
 	gcpPoliciesPath := filepath.Join(c.CheckoutPath, "gcp-policies-app-infra")
 	policiesConf := utils.CloneCSR(t, PoliciesRepo, gcpPoliciesPath, outputs.InfraPipeProj, c.Logger)
 	policiesBranch := "main"
-	err = s.RunStep("ml-example-app.gcp-policies-app-infra", func() error {
+	err = s.RunStep("bu1-example-app.gcp-policies-app-infra", func() error {
 		return preparePoliciesRepo(policiesConf, policiesBranch, c.FoundationPath, gcpPoliciesPath)
 	})
 	if err != nil {

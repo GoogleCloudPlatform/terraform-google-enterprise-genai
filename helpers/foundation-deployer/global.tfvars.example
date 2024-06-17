@@ -149,7 +149,7 @@ target_name_server_addresses = [
 
 
 // 4-projects inputs
-// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects/ml_business_unit/production/README.md#inputs
+// https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects/business_unit_1/production/README.md#inputs
 
 projects_gcs_location = "US"
 projects_kms_location = "us"

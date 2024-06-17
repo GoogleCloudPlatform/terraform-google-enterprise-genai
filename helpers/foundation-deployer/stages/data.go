@@ -1,17 +1,3 @@
-// Copyright 2023 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package stages
 
 import (
@@ -34,7 +20,7 @@ const (
 	EnvironmentsRepo = "gcp-environments"
 	NetworksRepo     = "gcp-networks"
 	ProjectsRepo     = "gcp-projects"
-	AppInfraRepo     = "ml-example-app"
+	AppInfraRepo     = "bu1-example-app"
 	BootstrapStep    = "0-bootstrap"
 	OrgStep          = "1-org"
 	EnvironmentsStep = "2-environments"
@@ -286,15 +272,15 @@ func GetBootstrapStepOutputs(t testing.TB, foundationPath string) BootstrapOutpu
 
 func GetInfraPipelineOutputs(t testing.TB, checkoutPath, workspace string) InfraPipelineOutputs {
 	options := &terraform.Options{
-		TerraformDir: filepath.Join(checkoutPath, "gcp-projects", "ml_business_unit", "shared"),
+		TerraformDir: filepath.Join(checkoutPath, "gcp-projects", "business_unit_1", "shared"),
 		Logger:       logger.Discard,
 		NoColor:      true,
 	}
 	return InfraPipelineOutputs{
 		InfraPipeProj: terraform.Output(t, options, "cloudbuild_project_id"),
 		DefaultRegion: terraform.Output(t, options, "default_region"),
-		TerraformSA:   terraform.OutputMap(t, options, "terraform_service_accounts")["ml-example-app"],
-		StateBucket:   terraform.OutputMap(t, options, "state_buckets")["ml-example-app"],
+		TerraformSA:   terraform.OutputMap(t, options, "terraform_service_accounts")["bu1-example-app"],
+		StateBucket:   terraform.OutputMap(t, options, "state_buckets")["bu1-example-app"],
 	}
 }
 

@@ -56,30 +56,39 @@ function shared(){
 
 function projectsshared(){
     # disable shared.auto.tfvars
-    mv 4-projects/ml_business_unit/shared/shared.auto.tfvars  4-projects/ml_business_unit/shared/shared.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/shared/shared.auto.tfvars  4-projects/business_unit_1/shared/shared.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/shared/shared.auto.tfvars  4-projects/business_unit_2/shared/shared.auto.tfvars.disabled
 
     # disable common.auto.tfvars
-    mv 4-projects/ml_business_unit/shared/common.auto.tfvars 4-projects/ml_business_unit/shared/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/shared/common.auto.tfvars 4-projects/business_unit_1/shared/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/shared/common.auto.tfvars 4-projects/business_unit_2/shared/common.auto.tfvars.disabled
 }
 
 function projects(){
     # disable ENVS.auto.tfvars in main module
-    mv 4-projects/ml_business_unit/development/development.auto.tfvars 4-projects/ml_business_unit/development/development.auto.tfvars.disabled
-    mv 4-projects/ml_business_unit/non-production/non-production.auto.tfvars  4-projects/ml_business_unit/non-production/non-production.auto.tfvars.disabled
-    mv 4-projects/ml_business_unit/production/production.auto.tfvars 4-projects/ml_business_unit/production/production.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/development/development.auto.tfvars 4-projects/business_unit_1/development/development.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/development/development.auto.tfvars 4-projects/business_unit_2/development/development.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/non-production/non-production.auto.tfvars  4-projects/business_unit_1/non-production/non-production.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/non-production/non-production.auto.tfvars  4-projects/business_unit_2/non-production/non-production.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/production/production.auto.tfvars 4-projects/business_unit_1/production/production.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/production/production.auto.tfvars 4-projects/business_unit_2/production/production.auto.tfvars.disabled
 
     # disable common.auto.tfvars in main module
-    mv 4-projects/ml_business_unit/development/common.auto.tfvars 4-projects/ml_business_unit/development/common.auto.tfvars.disabled
-    mv 4-projects/ml_business_unit/non-production/common.auto.tfvars  4-projects/ml_business_unit/non-production/common.auto.tfvars.disabled
-    mv 4-projects/ml_business_unit/production/common.auto.tfvars 4-projects/ml_business_unit/production/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/development/common.auto.tfvars 4-projects/business_unit_1/development/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/non-production/common.auto.tfvars  4-projects/business_unit_1/non-production/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_1/production/common.auto.tfvars 4-projects/business_unit_1/production/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/development/common.auto.tfvars 4-projects/business_unit_2/development/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/non-production/common.auto.tfvars  4-projects/business_unit_2/non-production/common.auto.tfvars.disabled
+    mv 4-projects/business_unit_2/production/common.auto.tfvars 4-projects/business_unit_2/production/common.auto.tfvars.disabled
 }
 
 function appinfra(){
     # disable common.auto.tfvars in main module
-    mv 5-app-infra/ml_business_unit/development/common.auto.tfvars 5-app-infra/ml_business_unit/development/common.auto.tfvars.disabled
-    mv 5-app-infra/ml_business_unit/non-production/common.auto.tfvars  5-app-infra/ml_business_unit/non-production/common.auto.tfvars.disabled
-    mv 5-app-infra/ml_business_unit/production/common.auto.tfvars  5-app-infra/ml_business_unit/production/common.auto.tfvars.disabled
+    mv 5-app-infra/business_unit_1/development/common.auto.tfvars 5-app-infra/business_unit_1/development/common.auto.tfvars.disabled
+    mv 5-app-infra/business_unit_1/non-production/common.auto.tfvars  5-app-infra/business_unit_1/non-production/common.auto.tfvars.disabled
+    mv 5-app-infra/business_unit_1/production/common.auto.tfvars  5-app-infra/business_unit_1/production/common.auto.tfvars.disabled
 }
+
 
 # parse args
 for arg in "$@"
