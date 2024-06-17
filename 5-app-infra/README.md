@@ -330,6 +330,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    git checkout -b plan
 
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/service-catalog/ .
+   cp -R ../terraform-google-enterprise-genai/5-app-infra/modules/ ./modules
    cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
    cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
