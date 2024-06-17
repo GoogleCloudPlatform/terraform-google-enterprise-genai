@@ -69,3 +69,8 @@ variable "environment" {
 variable "project_id" {
   description = "Project ID"
 }
+
+variable "kms_crypto_key" {
+  description = "KMS Key to be used"
+  type        = string
+}
