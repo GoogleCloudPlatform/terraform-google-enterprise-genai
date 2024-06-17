@@ -41,15 +41,15 @@ min_depth=1  # Must be configured based in your directory design
 # additional special value "shared"
 #
 # When using environments as root nodes the regex  contains the name of the
-# folder that contain the Terraform configuration e.g: ml_business_unit_1
-# and ml_business_unit_2
+# folder that contain the Terraform configuration e.g: business_unit_1
+# and business_unit_2
 #==============================================================================#
 
 # Environments as leaf nodes in source code case
 leaf_regex_plan="^(development|non-production|production|shared)$"
 
 # Environments as root nodes in source code case
-# leaf_regex_plan="^(ml_business_unit_1|ml_business_unit_2)$"
+# leaf_regex_plan="^(business_unit_1|business_unit_2)$"
 
 #====================================================================#
 # Function used for the criteria for running terraform int/plan/show
@@ -69,11 +69,11 @@ do_plan() {
 # Environments as leaf nodes in source code case (Default)
 # Example:
 #         git-repo
-#         └── ml_business_unit_1
+#         └── business_unit_1
 #             ├── development
 #             ├── non-production
 #             └── production
-#         └── ml_business_unit_2
+#         └── business_unit_2
 #             ├── development
 #             ├── non-production
 #             └── production
@@ -96,19 +96,19 @@ do_action() {
 # Example:
 #         git-repo
 #         └── development
-#             ├── ml_business_unit_1
-#             └── ml_business_unit_2
+#             ├── business_unit_1
+#             └── business_unit_2
 #         └── non-production
-#             ├── ml_business_unit_1
-#             └── ml_business_unit_2
+#             ├── business_unit_1
+#             └── business_unit_2
 #         └── production
-#             ├── ml_business_unit_1
-#             └── ml_business_unit_2
+#             ├── business_unit_1
+#             └── business_unit_2
 #=============================================================#
 
 ##### Start of alternative source organization - uncomment to use Environments as root nodes  #####
 
-# leaf_regex_action="^(ml_business_unit_1|ml_business_unit_2)$" # edit this list
+# leaf_regex_action="^(business_unit_1|business_unit_2)$" # edit this list
 # do_action() {
 #   local env_path="$1"
 #   local tf_env="${env_path#$base_dir/}"

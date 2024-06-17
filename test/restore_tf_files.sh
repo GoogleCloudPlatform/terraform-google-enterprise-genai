@@ -122,11 +122,12 @@ function projects(){
     mv 4-projects/business_unit_2/non-production/common.auto.tfvars.disabled 4-projects/business_unit_2/non-production/common.auto.tfvars
     mv 4-projects/business_unit_2/production/common.auto.tfvars.disabled 4-projects/business_unit_2/production/common.auto.tfvars
     mv 4-projects/business_unit_2/shared/common.auto.tfvars.disabled 4-projects/business_unit_2/shared/common.auto.tfvars
+
 }
 
 function appinfra(){
     # restore backend configs in main module
-        mv 5-app-infra/business_unit_1/development/backend.tf.disabled 5-app-infra/business_unit_1/development/backend.tf
+    mv 5-app-infra/business_unit_1/development/backend.tf.disabled 5-app-infra/business_unit_1/development/backend.tf
     mv 5-app-infra/business_unit_1/non-production/backend.tf.disabled 5-app-infra/business_unit_1/non-production/backend.tf
     mv 5-app-infra/business_unit_1/production/backend.tf.disabled 5-app-infra/business_unit_1/production/backend.tf
 
