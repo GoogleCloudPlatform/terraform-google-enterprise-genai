@@ -18,7 +18,8 @@ locals {
   service_catalog_project_id      = data.terraform_remote_state.projects_shared.outputs.service_catalog_project_id
   service_catalog_repo_name       = data.terraform_remote_state.projects_shared.outputs.service_catalog_repo_name
   machine_learning_project_number = data.terraform_remote_state.machine_learning_development.outputs.machine_learning_project_number
-  tf_service_catalog_sa_email     = data.terraform_remote_state.projects_shared.outputs.terraform_service_accounts["bu3-service-catalog"]
+  tf_service_catalog_sa_email     = data.terraform_remote_state.projects_shared.outputs.terraform_service_accounts["ml-service-catalog"]
+  shared_keyrings                 = data.terraform_remote_state.projects_shared.outputs.shared_level_keyrings
 }
 
 data "terraform_remote_state" "projects_shared" {
