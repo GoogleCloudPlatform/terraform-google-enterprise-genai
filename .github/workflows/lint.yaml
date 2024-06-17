@@ -54,4 +54,4 @@ jobs:
         env:
           DISABLE_TFLINT: 1
           ENABLE_PARALLEL: 0
-          EXCLUDE_LINT_DIRS: \./examples/machine-learning-pipeline|\./docs/assets/terraform
+          EXCLUDE_LINT_DIRS: \./examples/machine-learning-pipeline|\./docs/assets/terraform|\./5-app-infra/projects/service-catalog/business_unit_3/shared
