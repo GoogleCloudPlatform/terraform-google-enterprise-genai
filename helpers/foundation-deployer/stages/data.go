@@ -34,7 +34,7 @@ const (
 	EnvironmentsRepo = "gcp-environments"
 	NetworksRepo     = "gcp-networks"
 	ProjectsRepo     = "gcp-projects"
-	AppInfraRepo     = "ml-example-app"
+	AppInfraRepo     = "bu1-example-app"
 	BootstrapStep    = "0-bootstrap"
 	OrgStep          = "1-org"
 	EnvironmentsStep = "2-environments"
@@ -286,15 +286,15 @@ func GetBootstrapStepOutputs(t testing.TB, foundationPath string) BootstrapOutpu
 
 func GetInfraPipelineOutputs(t testing.TB, checkoutPath, workspace string) InfraPipelineOutputs {
 	options := &terraform.Options{
-		TerraformDir: filepath.Join(checkoutPath, "gcp-projects", "ml_business_unit", "shared"),
+		TerraformDir: filepath.Join(checkoutPath, "gcp-projects", "business_unit_1", "shared"),
 		Logger:       logger.Discard,
 		NoColor:      true,
 	}
 	return InfraPipelineOutputs{
 		InfraPipeProj: terraform.Output(t, options, "cloudbuild_project_id"),
 		DefaultRegion: terraform.Output(t, options, "default_region"),
-		TerraformSA:   terraform.OutputMap(t, options, "terraform_service_accounts")["ml-example-app"],
-		StateBucket:   terraform.OutputMap(t, options, "state_buckets")["ml-example-app"],
+		TerraformSA:   terraform.OutputMap(t, options, "terraform_service_accounts")["bu1-example-app"],
+		StateBucket:   terraform.OutputMap(t, options, "state_buckets")["bu1-example-app"],
 	}
 }
 

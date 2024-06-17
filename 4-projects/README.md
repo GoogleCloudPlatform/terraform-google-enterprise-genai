@@ -45,7 +45,7 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy a simple <a href="https://cloud.google.com/compute/">Compute Engine</a> instance in one of the machine learning business unit projects using the infra pipeline set up in 4-projects.</td>
+<td>Deploy service catalog and artifacts pipeline.</td>
 </tr>
 </tbody>
 </table>
@@ -60,7 +60,6 @@ The purpose of this step is to set up the folder structure, projects, and infras
 For machine learning business unit, a shared `infra-pipeline` project is created along with Cloud Build triggers, CSRs for application infrastructure code and Google Cloud Storage buckets for state storage.
 
 This step follows the same [conventions](https://github.com/terraform-google-modules/terraform-google-enterprise-genai#branching-strategy) as the Foundation pipeline deployed in [0-bootstrap](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md).
-A custom [workspace](https://github.com/terraform-google-modules/terraform-google-bootstrap/blob/master/modules/tf_cloudbuild_workspace/README.md) (`ml-example-app`) is created by this pipeline and necessary roles are granted to the Terraform Service Account of this workspace by enabling variable `sa_roles` as shown in this [example](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects/modules/base_env/example_base_shared_vpc_project.tf).
 
 This pipeline is utilized to deploy resources in projects across development/non-production/production in step [5-app-infra](../5-app-infra/README.md).
 Other Workspaces can also be created to isolate deployments if needed.

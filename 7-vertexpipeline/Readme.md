@@ -19,7 +19,6 @@ In the first step, a bigquery dataset is created using a bigquery operator offer
         location=region,
     )
 
-
 Note that the default encryption key for bigquery is set after the projecet inflation so you don't have to pass the key in every query.
 
 ## Dataflow for data ingestion
@@ -188,6 +187,3 @@ Note that the is triggered by cloud build (for the first time) and cloud compose
 - The bigquery service agent on the non-prod project will need EncryptDecrypt permission on the kms key so that it can create the dataset using the CMEK key.
  - First, a non-prod service account to take care of components that run in non-prod (dataset creation, dataflow, training, and evaluation). This could simply be the default compute engine service account for the non-prod tenant. This service account needs write permission to upload the trained model from the non-prod bucket to the Vertex environment of prod.
  - Another service account that has permissions on the prod tenant in order to deploy the model and the model monitoring job. This could simply be the default service account for the prod tenant. This service account will also need read permission on bigquery of non-prod where the data exists so that the monitoring job deployed by this service account in prod
-
-
-

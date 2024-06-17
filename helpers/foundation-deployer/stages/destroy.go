@@ -135,7 +135,7 @@ func DestroyProjectsStage(t testing.TB, s steps.Steps, outputs BootstrapOutputs,
 		Step:          ProjectsStep,
 		Repo:          ProjectsRepo,
 		HasManualStep: true,
-		GroupingUnits: []string{"ml_business_unit"},
+		GroupingUnits: []string{"business_unit_1", "business_unit_2"},
 		Envs:          []string{"development", "non-production", "production"},
 	}
 	return destroyStage(t, stageConf, s, c)
@@ -148,7 +148,7 @@ func DestroyExampleAppStage(t testing.TB, s steps.Steps, outputs InfraPipelineOu
 		CICDProject:   outputs.InfraPipeProj,
 		Step:          AppInfraStep,
 		Repo:          AppInfraRepo,
-		GroupingUnits: []string{"ml_business_unit"},
+		GroupingUnits: []string{"business_unit_1", "business_unit_2"},
 		Envs:          []string{"development", "non-production", "production"},
 	}
 	return destroyStage(t, stageConf, s, c)
