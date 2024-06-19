@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+# output "trigger_sa_account_id" {
+#   description = "Account id of service account cloudbuild."
+#   value       = module.artifact_pipeline.trigger_sa_account_id
+# }
 
-cloud_source_service_catalog_repo_name = "service-catalog"
+# output "cloudbuild_v2_repo_id" {
+#   description = "Repository ID of cloudbuild repository"
+#   value       = module.artifact_pipeline.cloudbuild_v2_repo_id
+# }
 
-cloud_source_artifacts_repo_name = "publish-artifacts"
+# output "kms_key_id" {
+#   description = "Projects Key ID for encrytion"
+#   value       = module.artifact_pipeline.kms_key_id
+# }
+
+output "cloudbuild_trigger_id" {
+  value = module.artifact_publish.cloudbuild_trigger_id
+}

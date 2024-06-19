@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
-
-cloud_source_service_catalog_repo_name = "service-catalog"
-
-cloud_source_artifacts_repo_name = "publish-artifacts"
+output "vertex_ai_tensorboard" {
+  description = "TensorBoard resource."
+  value       = google_vertex_ai_tensorboard.tensorboard
+}

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+locals {
+  business_unit = "ml_business_unit"
+  environment   = "common"
+}
 
-cloud_source_service_catalog_repo_name = "service-catalog"
-
-cloud_source_artifacts_repo_name = "publish-artifacts"

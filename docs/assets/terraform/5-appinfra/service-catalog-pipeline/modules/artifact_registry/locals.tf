@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * 2Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
-
-cloud_source_service_catalog_repo_name = "service-catalog"
-
-cloud_source_artifacts_repo_name = "publish-artifacts"
+locals {
+  keyring_name = "sample-keyring"
+  region_short_code = {
+    "us-central1" = "usc1"
+    "us-east4"    = "use4"
+  }
+}

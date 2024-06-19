@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+output "storage_bucket_name" {
+  description = "Name of storage bucket created"
+  value       = module.service_catalog.storage_bucket_name
+}
 
-cloud_source_service_catalog_repo_name = "service-catalog"
-
-cloud_source_artifacts_repo_name = "publish-artifacts"
+output "cloudbuild_trigger_id" {
+  description = "Id of Cloud Build Trigger"
+  value       = module.service_catalog.cloudbuild_trigger_id
+}

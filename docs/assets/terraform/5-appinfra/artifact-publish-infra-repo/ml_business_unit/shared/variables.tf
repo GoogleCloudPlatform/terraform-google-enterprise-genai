@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+variable "instance_region" {
+  description = "The region where compute instance will be created. A subnetwork must exists in the instance region."
+  type        = string
+}
 
-cloud_source_service_catalog_repo_name = "service-catalog"
-
-cloud_source_artifacts_repo_name = "publish-artifacts"
+variable "remote_state_bucket" {
+  description = "Backend bucket to load remote state information from previous steps."
+  type        = string
+}

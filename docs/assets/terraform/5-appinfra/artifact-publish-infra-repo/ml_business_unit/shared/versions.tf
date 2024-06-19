@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,30 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+terraform {
+  required_version = ">= 0.13"
 
-cloud_source_service_catalog_repo_name = "service-catalog"
+  required_providers {
 
-cloud_source_artifacts_repo_name = "publish-artifacts"
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 3.77, < 6"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 3.77, < 6"
+    }
+
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.1"
+    }
+
+  }
+}

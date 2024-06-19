@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * 1Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+data "google_project" "project" {
+  project_id = var.project_id
+}
 
-cloud_source_service_catalog_repo_name = "service-catalog"
+data "google_projects" "kms" {
+  filter = "labels.application_name:env-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
+}
 
-cloud_source_artifacts_repo_name = "publish-artifacts"
+data "google_kms_key_ring" "kms" {
+  name     = local.keyring_name
+  location = var.region
+  project  = data.google_projects.kms.projects.0.project_id
+}
+
+data "google_kms_crypto_key" "key" {
+  name     = data.google_project.project.name
+  key_ring = data.google_kms_key_ring.kms.id
+}

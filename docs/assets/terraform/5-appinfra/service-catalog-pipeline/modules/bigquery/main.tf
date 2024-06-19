@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
-
-cloud_source_service_catalog_repo_name = "service-catalog"
-
-cloud_source_artifacts_repo_name = "publish-artifacts"
+module "bigquery" {
+  source         = "terraform-google-modules/bigquery/google"
+  version        = "7.0.0"
+  dataset_id     = var.dataset_id
+  project_id     = data.google_project.project.project_id
+  location       = var.region
+  encryption_key = data.google_kms_crypto_key.key.id
+}

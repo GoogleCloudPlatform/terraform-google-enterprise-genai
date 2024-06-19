@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
 
-cloud_source_service_catalog_repo_name = "service-catalog"
+remote_state_bucket = "REMOTE_STATE_BUCKET"
 
-cloud_source_artifacts_repo_name = "publish-artifacts"
+log_bucket = "REPLACE_LOG_BUCKET"
+
+# github_ api_ token = "PUT IN TOKEN"
+
+# github_app_installation_id = "18685983"
+
+# github_remote_uri = "https://github.com/badal-io/ml-foundations-tf-modules.git"
+

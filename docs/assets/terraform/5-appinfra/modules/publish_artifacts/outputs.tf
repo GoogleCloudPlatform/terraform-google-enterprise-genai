@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+output "cloudbuild_trigger_id" {
+  value = google_cloudbuild_trigger.docker_build.id
+}
 
-cloud_source_service_catalog_repo_name = "service-catalog"
-
-cloud_source_artifacts_repo_name = "publish-artifacts"

@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-# We suggest you to use the same region from the 0-bootstrap step
-default_region = "us-central1"
+variable "name" {
+  type        = string
+  description = "The name of the metadata store instance"
+  default     = null
+}
 
-cloud_source_service_catalog_repo_name = "service-catalog"
+variable "region" {
+  type        = string
+  description = "The resource region, one of [us-central1, us-east4]."
+  default     = "us-central1"
+  validation {
+    condition     = contains(["us-central1", "us-east4"], var.region)
+    error_message = "Region must be one of [us-central1, us-east4]."
+  }
+}
 
-cloud_source_artifacts_repo_name = "publish-artifacts"
+variable "project_id" {
+  type        = string
+  description = "Optional Project ID."
+  default     = null
+}
