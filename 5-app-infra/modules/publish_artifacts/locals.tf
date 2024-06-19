@@ -15,8 +15,11 @@
  */
 
 locals {
-  env_code = substr(var.environment, 0, 1)
-  name_var = format("%s-%s", local.env_code, var.name)
+  current_user_email  = data.google_client_openid_userinfo.current_user.email
+  current_user_domain = split("@", local.current_user_email)[1]
+  current_member      = strcontains(local.current_user_domain, "iam.gserviceaccount.com") ? "serviceAccount:${local.current_user_email}" : "user:${local.current_user_email}"
+  env_code            = substr(var.environment, 0, 1)
+  name_var            = format("%s-%s", local.env_code, var.name)
   # key_ring_var = "projects/${var.cmek_project_id}/locations/${var.region}/keyRings/sample-keyring"
   region_short_code = {
     "us-central1" = "usc1"

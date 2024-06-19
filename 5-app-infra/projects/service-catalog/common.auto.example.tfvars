@@ -18,6 +18,8 @@ instance_region = "us-central1" // should be one of the regions used to create n
 
 remote_state_bucket = "REMOTE_STATE_BUCKET"
 
+log_bucket = "REPLACE_LOG_BUCKET"
+
 # github_ api_ token = "PUT IN TOKEN"
 
 # github_app_installation_id = "18685983"

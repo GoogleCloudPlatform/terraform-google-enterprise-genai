@@ -15,12 +15,14 @@
  */
 
 locals {
-  # github_repository = replace(var.github_remote_uri, "https://", "")
-  log_bucket_prefix = "bkt"
+  current_user_email  = data.google_client_openid_userinfo.current_user.email
+  current_user_domain = split("@", local.current_user_email)[1]
+  current_member      = strcontains(local.current_user_domain, "iam.gserviceaccount.com") ? "serviceAccount:${local.current_user_email}" : "user:${local.current_user_email}"
+  log_bucket_prefix   = "bkt"
   bucket_permissions = {
 
     "roles/storage.admin" = [
-      "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+      google_service_account.trigger_sa.member,
     ],
     "roles/storage.legacyObjectReader" = [
       "serviceAccount:${var.machine_learning_project_number}@cloudbuild.gserviceaccount.com",
