@@ -18,6 +18,7 @@ locals {
   common_artifacts_project_id = data.terraform_remote_state.projects_shared.outputs.common_artifacts_project_id
   service_catalog_project_id  = data.terraform_remote_state.projects_shared.outputs.service_catalog_project_id
   artifacts_repo_name         = data.terraform_remote_state.projects_shared.outputs.artifacts_repo_name
+  shared_keyrings             = data.terraform_remote_state.projects_shared.outputs.shared_level_keyrings
 }
 
 data "terraform_remote_state" "projects_shared" {
