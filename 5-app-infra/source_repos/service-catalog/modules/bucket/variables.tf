@@ -16,7 +16,7 @@
 
 variable "name" {
   type        = string
-  description = "name of bucket."
+  description = "Name of bucket."
 }
 
 variable "region" {
@@ -31,7 +31,7 @@ variable "region" {
 
 variable "dual_region_locations" {
   type        = list(string)
-  description = "dual region description."
+  description = "Dual region description."
   default     = []
   validation {
     condition     = length(var.dual_region_locations) == 0 || length(var.dual_region_locations) == 2
@@ -147,7 +147,7 @@ variable "labels" {
 
 variable "add_random_suffix" {
   type        = bool
-  description = "whether to add a random suffix to the bucket name."
+  description = "Whether to add a random suffix to the bucket name."
   default     = false
 }
 
