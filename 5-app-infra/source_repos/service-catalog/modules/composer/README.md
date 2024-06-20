@@ -26,7 +26,7 @@ The following table outlines which of the suggested controls for Vertex Generati
 | github\_remote\_uri | URL of your GitHub repo. | `string` | n/a | yes |
 | github\_secret\_name | Name of the GitHub secret to extract GitHub token info. | `string` | `"github-api-token"` | no |
 | image\_version | The version of the Airflow running in the Cloud Composer environment. | `string` | `"composer-2.5.2-airflow-2.6.3"` | no |
-| kms\_keyring | The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as var.location and the same environment.<br>This value can be obtained by running "gcloud kms keyrings list --project=KMS\_PROJECT\_ID --location=REGION." | `string` | n/a | yes |
+| kms\_keyring | The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as the other resources and the same environment.<br>This value can be obtained by running "gcloud kms keyrings list --project=KMS\_PROJECT\_ID --location=REGION." | `string` | n/a | yes |
 | labels | The resource labels (a map of key/value pairs) to be applied to the Cloud Composer. | `map(string)` | `{}` | no |
 | maintenance\_window | The configuration settings for Cloud Composer maintenance window. | <pre>object({<br>    start_time = string<br>    end_time   = string<br>    recurrence = string<br>  })</pre> | <pre>{<br>  "end_time": "2021-01-01T13:00:00Z",<br>  "recurrence": "FREQ=WEEKLY;BYDAY=SU",<br>  "start_time": "2021-01-01T01:00:00Z"<br>}</pre> | no |
 | name | Name of the Composer environment. | `string` | n/a | yes |
