@@ -17,6 +17,7 @@
 resource "google_workbench_instance" "instance" {
   name     = var.name
   location = var.location
+  project  = var.project_id
 
   gce_setup {
     machine_type = var.machine_type

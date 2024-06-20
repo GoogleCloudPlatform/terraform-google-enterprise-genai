@@ -15,8 +15,8 @@
  */
 
 variable "name" {
-  description = "name of the notebook instance"
   type        = string
+  description = "Name of the notebook instance."
 }
 
 variable "location" {
@@ -30,20 +30,20 @@ variable "location" {
 }
 
 variable "machine_type" {
-  description = "type of the machine to spin up for the notebook"
   type        = string
+  description = "Type of the machine to spin up for the notebook."
   default     = "e2-standard-4"
 }
 
 variable "instance_owners" {
-  description = "email of the owner of the instance, e.g. alias@example.com. Only one owner is supported!"
   type        = set(string)
+  description = "Email of the owner of the instance, e.g. alias@example.com. Only one owner is supported!"
 }
 
 
 variable "accelerator_type" {
-  description = "The type of accelerator to use"
   type        = string
+  description = "The type of accelerator to use."
   default     = "NVIDIA_TESLA_K80"
   validation {
     condition = contains(["ACCELERATOR_TYPE_UNSPECIFIED", "NVIDIA_TESLA_K80",
@@ -55,39 +55,37 @@ variable "accelerator_type" {
 }
 variable "core_count" {
   type        = number
+  description = "Number of accelerators to use."
   default     = 1
-  description = "number of accelerators to use"
 }
 
 variable "image_project" {
-  description = "The name of the Google Cloud project that this VM image belongs to. Format: projects/{project_id}"
   type        = string
-  # default     = "deeplearning-platform-release"
-  default = "cloud-notebooks-managed"
+  description = "The name of the Google Cloud project that this VM image belongs to. Format: projects/{project_id}."
+  default     = "cloud-notebooks-managed"
 }
 
 variable "image_family" {
-  description = "Use this VM image family to find the image; the newest image in this family will be used."
   type        = string
-  # default     = "common-cpu-notebooks"
-  default = "workbench-instances"
+  description = "Use this VM image family to find the image; the newest image in this family will be used."
+  default     = "workbench-instances"
 }
 
 variable "image_name" {
-  description = "Use VM image name to find the image."
   type        = string
+  description = "Use VM image name to find the image."
   default     = ""
 }
 
 variable "install_gpu_driver" {
-  description = "Whether the end user authorizes Google Cloud to install GPU driver on this instance. Only applicable to instances with GPUs."
   type        = bool
+  description = "Whether the end user authorizes Google Cloud to install GPU driver on this instance. Only applicable to instances with GPUs."
   default     = false
 }
 
 variable "boot_disk_type" {
-  description = "Possible disk types for notebook instances"
   type        = string
+  description = "Possible disk types for notebook instances."
   default     = "PD_SSD"
   validation {
     condition     = contains(["DISK_TYPE_UNSPECIFIED", "PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.boot_disk_type)
@@ -96,14 +94,14 @@ variable "boot_disk_type" {
 }
 
 variable "boot_disk_size_gb" {
-  description = "(Optional) The size of the boot disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB)"
   type        = string
+  description = "(Optional) The size of the boot disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB)."
   default     = "150"
 }
 
 variable "data_disk_type" {
-  description = "Optional. Input only. Indicates the type of the disk. Possible values are: PD_STANDARD, PD_SSD, PD_BALANCED, PD_EXTREME."
   type        = string
+  description = "(Optional) Input only. Indicates the type of the disk. Possible values are: PD_STANDARD, PD_SSD, PD_BALANCED, PD_EXTREME."
   default     = "PD_SSD"
   validation {
     condition     = contains(["PD_STANDARD", "PD_SSD", "PD_BALANCED", "PD_EXTREME"], var.data_disk_type)
@@ -112,39 +110,47 @@ variable "data_disk_type" {
 }
 
 variable "data_disk_size_gb" {
-  description = "(Optional) The size of the data disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB)"
   type        = string
+  description = "(Optional) The size of the data disk in GB attached to this instance, up to a maximum of 64000 GB (64 TB)"
   default     = "150"
 }
 
 
 variable "disable_proxy_access" {
-  description = "(Optional) The notebook instance will not register with the proxy"
   type        = bool
+  description = "(Optional) The notebook instance will not register with the proxy"
   default     = false
 }
 
-# variable "dataproc_kernel_access" {
-#   description = "(Optional) Enables access to Dataproc kernels."
-#   type        = bool
-#   default     = true
-# }
-
 variable "boundry_code" {
-  description = "The boundry code for the tenant"
   type        = string
+  description = "The boundry code for the tenant"
   default     = "001"
 }
 
-
 variable "project_id" {
   type        = string
-  description = "Optional Project ID."
-  default     = null
+  description = "Project ID to deploy the instance."
 }
 
 variable "tags" {
   type        = list(string)
   description = "The Compute Engine tags to add to instance."
   default     = ["egress-internet"]
+}
+
+variable "kms_keyring" {
+  type        = string
+  description = <<EOF
+    The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as var.location and the same environment.
+    This value can be obtained by running "gcloud kms keyrings list --project=KMS_PROJECT_ID --location=REGION".
+  EOF
+}
+
+variable "vpc_project" {
+  type        = string
+  description = <<EOF
+  This is the project id of the Restricted Shared VPC Host Project for your environment.
+  This value can be obtained by running "gcloud projects list --filter='labels.application_name:restricted-shared-vpc-host lifecycleState:ACTIVE'" and selecting the project.
+  EOF
 }
