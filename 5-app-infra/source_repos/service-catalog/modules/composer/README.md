@@ -58,7 +58,7 @@ The following table outlines which of the suggested controls for Vertex Generati
 gcloud projects add-iam-policy-binding ML_PROJECT_NUMBER --member=serviceAccount:service-ML_PROJECT_NUMBER@cloudcomposer-accounts.iam.gserviceaccount.com --role=roles/composer.ServiceAgentV2Ext
 ```
 
-- Service Agent cannot use encryption key, granting `roles/cloudkms.cryptoKeyEncrypterDecrypter` for each of the following identities:
+- If Service Agent cannot use encryption key, grant `roles/cloudkms.cryptoKeyEncrypterDecrypter` for each of the following identities on the key:
 
 ```txt
 service-$ML_PROJECT_NUMBER@cloudcomposer-accounts.iam.gserviceaccount.com
