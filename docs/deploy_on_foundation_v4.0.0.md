@@ -2251,8 +2251,8 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    cd ml-artifact-publish/
    git checkout -b plan
 
-   cp -RT ../terraform-google-enterprise-genai/docs/assets/terraform/5-appinfra/artifact-publish-infra-repo .
-   cp -R ../terraform-google-enterprise-genai/docs/assets/terraform/5-appinfra/modules .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/artifact-publish/ .
+   cp -R ../terraform-google-enterprise-genai/5-app-infra/modules/ ./modules
    cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
    cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
@@ -2294,7 +2294,7 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    git push --set-upstream origin plan
    ```
 
-- Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`.
+- Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`. Before proceeding further, make sure that the build applied successfully.
 
    ```bash
    git checkout -b production
@@ -2331,7 +2331,7 @@ The series of steps below will trigger the custom artifacts pipeline.
    git checkout -b main
 
    git commit -m "Initialize Repository" --allow-empty
-   cp -RT ../terraform-google-enterprise-genai/docs/assets/terraform/5-appinfra/artifacts-pipeline .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/artifact-publish/ .
    ```
 
 - Commit changes and push your main branch to the new repo.
@@ -2418,8 +2418,8 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    cd ml-service-catalog
    git checkout -b plan
 
-   cp -RT ../terraform-google-enterprise-genai/docs/assets/terraform/5-appinfra/service-catalog-infra-repo .
-   cp -R ../terraform-google-enterprise-genai/docs/assets/terraform/5-appinfra/modules .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/service-catalog/ .
+   cp -R ../terraform-google-enterprise-genai/5-app-infra/modules/ ./modules
    cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
    cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
    chmod 755 ./tf-wrapper.sh
@@ -2469,7 +2469,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    git push --set-upstream origin plan
    ```
 
-- Merge changes to production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`.
+- Merge changes to production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`. Before proceeding further, make sure that the build applied successfully.
 
    ```bash
    git checkout -b production
@@ -2503,7 +2503,7 @@ The series of steps below will trigger the custom Service Catalog Pipeline.
 
    ```bash
    cd service-catalog/
-   cp -RT ../terraform-google-enterprise-genai/docs/assets/terraform/5-appinfra/service-catalog-pipeline .
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
    git add img
    git commit -m "Add img directory"
    ```
