@@ -19,6 +19,7 @@ locals {
   machine_learning_kms_keys   = data.terraform_remote_state.projects_env.outputs.machine_learning_kms_keys
   service_catalog_repo_name   = data.terraform_remote_state.projects_shared.outputs.service_catalog_repo_name
   service_catalog_project_id  = data.terraform_remote_state.projects_shared.outputs.service_catalog_project_id
+  project_number              = data.terraform_remote_state.projects_env.outputs.machine_learning_project_number
 }
 
 data "terraform_remote_state" "projects_env" {
