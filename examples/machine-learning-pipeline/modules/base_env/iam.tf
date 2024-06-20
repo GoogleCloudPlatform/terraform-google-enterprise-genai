@@ -86,13 +86,13 @@ locals {
   ]
 
   aiplatform_non_prod_sa = [
-    "serviceAccount:service-${data.google_projects.non-production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
-    "serviceAccount:service-${data.google_projects.non-production.projects.0.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+    "serviceAccount:service-${var.non_production_project_number}gcp-sa-aiplatform.iam.gserviceaccount.com",
+    "serviceAccount:service-${var.non_production_project_number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
   ]
 
   aiplatform_prod_sa = [
-    "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
-    "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+    "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
+    "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
   ]
 
   service_agent_key_binding = flatten([
@@ -132,7 +132,7 @@ resource "google_kms_crypto_key_iam_member" "composer_kms_key_binding_non_prod" 
   for_each      = { for k, v in var.kms_keys : k => v if var.env == "non-production" }
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+  member        = "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
 resource "google_service_account_iam_member" "composer_service_agent" {
@@ -147,7 +147,7 @@ resource "google_service_account_iam_member" "compute_non_production" {
   # provider           = google-beta
   service_account_id = data.google_service_account.non-production.name
   role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${data.google_projects.production.projects.0.number}-compute@developer.gserviceaccount.com"
+  member             = "serviceAccount:${var.production_project_number}-compute@developer.gserviceaccount.com"
 }
 
 resource "google_service_account_iam_member" "compute_production" {
@@ -155,7 +155,7 @@ resource "google_service_account_iam_member" "compute_production" {
   # provider           = google-beta
   service_account_id = data.google_service_account.production.name
   role               = "roles/iam.serviceAccountUser"
-  member             = "serviceAccount:${data.google_projects.non-production.projects.0.number}-compute@developer.gserviceaccount.com"
+  member             = "serviceAccount:${var.non_production_project_number}-compute@developer.gserviceaccount.com"
 }
 
 ######################
@@ -207,7 +207,7 @@ resource "google_project_iam_member" "bq_pipeline_prod_vertex_admin" {
   count    = var.env == "production" ? 1 : 0
   provider = google-beta
   project  = var.project_id
-  member   = "serviceAccount:service-${data.google_projects.non-production.projects.0.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com"
+  member   = "serviceAccount:service-${var.non_production_project_number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com"
   role     = "roles/aiplatform.admin"
 }
 
@@ -231,7 +231,7 @@ resource "google_project_iam_member" "monitoring" {
   count   = var.env == "non-production" ? 1 : 0
   project = var.project_id
   role    = "roles/bigquery.admin"
-  member  = "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+  member  = "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "compute_roles" {
@@ -261,7 +261,7 @@ resource "google_storage_bucket_iam_member" "prod_access" {
   count  = var.env == "non-production" ? 1 : 0
   bucket = join("-", [var.gcs_bucket_prefix, data.google_project.project.labels.env_code, var.bucket_name])
   role   = "roles/storage.objectViewer"
-  member = "serviceAccount:service-${data.google_projects.production.projects.0.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+  member = "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
 
   depends_on = [module.bucket]
 }
