@@ -48,3 +48,23 @@ The following table outlines which of the suggested controls for Vertex Generati
 | gke\_cluster | Google Kubernetes Engine cluster used to run the Cloud Composer Environment. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+
+## Troubleshooting
+
+- Error: googleapi: Error 400: Composer API Service Agent service account (service-ML_PROJECT_NUMBER@cloudcomposer-accounts.iam.gserviceaccount.com) does not have required permissions set. Cloud Composer v2 API Service Agent Extension role might be missing. Please refer to https://cloud.google.com/composer/docs/composer-2/create-environments#grant-permissions and Composer Creation Troubleshooting pages to resolve this issue., failedPrecondition
+
+```bash
+gcloud projects add-iam-policy-binding ML_PROJECT_NUMBER --member=serviceAccount:service-ML_PROJECT_NUMBER@cloudcomposer-accounts.iam.gserviceaccount.com --role=roles/composer.ServiceAgentV2Ext
+```
+
+- Service Agent cannot use encryption key, granting `roles/cloudkms.cryptoKeyEncrypterDecrypter` for each of the following identities:
+
+```txt
+service-$ML_PROJECT_NUMBER@cloudcomposer-accounts.iam.gserviceaccount.com
+service-$ML_PROJECT_NUMBER@gcp-sa-artifactregistry.iam.gserviceaccount.com
+service-$ML_PROJECT_NUMBER@container-engine-robot.iam.gserviceaccount.com
+service-$ML_PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com
+service-$ML_PROJECT_NUMBER@compute-system.iam.gserviceaccount.com
+service-$ML_PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com
+```
