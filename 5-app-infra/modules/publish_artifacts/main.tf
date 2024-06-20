@@ -21,7 +21,7 @@ resource "google_project_service_identity" "artifact_registry_agent" {
 }
 
 resource "google_kms_crypto_key_iam_member" "artifact-kms-key-binding" {
-  crypto_key_id = data.google_kms_crypto_key.key.id
+  crypto_key_id = var.kms_crypto_key
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_project_service_identity.artifact_registry_agent.email}"
 }
@@ -40,7 +40,7 @@ resource "google_artifact_registry_repository" "repo" {
   #NIST 800-53: SC-12 SC-13
   #CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
 
-  kms_key_name = data.google_kms_crypto_key.key.id
+  kms_key_name = var.kms_crypto_key
 
   #Cleanup policy
   #Control ID:  AR-CO-6.1
@@ -101,6 +101,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
     repo_name   = var.name
   }
   build {
+    timeout = "1800s"
     step {
       id         = "unshallow"
       name       = "gcr.io/cloud-builders/git"
@@ -119,7 +120,6 @@ resource "google_cloudbuild_trigger" "docker_build" {
         <<-EOT
         changed_files=$(git diff $${COMMIT_SHA}^1 --name-only -r)
         changed_folders=$(echo "$changed_files" | awk -F/ '{print $2}' | sort | uniq )
-
         for folder in $changed_folders; do
             echo "Found docker folder: $folder"
             echo $folder >> /workspace/docker_build

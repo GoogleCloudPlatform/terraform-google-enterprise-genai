@@ -26,12 +26,12 @@ output "host_vpc_project_id" {
 
 output "host_vpc_network" {
   description = "This is the Self-link of the Host VPC network"
-  value       = var.network
+  value       = google_workbench_instance.instance.gce_setup[0].network_interfaces[0].network
 }
 
 output "notebook_project_id" {
   description = "The Project ID where the notebook will be run on"
-  value       = var.machine_learning_project
+  value       = google_workbench_instance.instance.project
 }
 
 output "vector_search_bucket_name" {

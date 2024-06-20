@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #   service = "storage.googleapis.com"
 # }
 # resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
-#   crypto_key_id = data.google_kms_crypto_key.key.id
+#   crypto_key_id = var.kms_crypto_key
 #   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 #   member        = "serviceAccount:${google_project_service_identity.storage_agent.email}"
 # }
@@ -41,13 +41,13 @@ resource "google_storage_bucket" "bucket" {
   uniform_bucket_level_access = true
 
   encryption {
-    default_kms_key_name = data.google_kms_crypto_key.key.id
+    default_kms_key_name = var.kms_crypto_key
   }
   versioning {
     enabled = true
   }
   logging {
-    log_bucket = join("-", [local.log_bucket_prefix, data.google_projects.log.projects.0.project_id])
+    log_bucket = var.log_bucket
   }
 
 }
@@ -142,4 +142,3 @@ resource "google_cloudbuild_trigger" "zip_files" {
     }
   }
 }
-
