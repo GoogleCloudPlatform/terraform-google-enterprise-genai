@@ -15,7 +15,6 @@
  */
 
 locals {
-  keyring_name = "sample-keyring"
   region_short_code = {
     "us-central1" = "usc1"
     "us-east4"    = "use4"
