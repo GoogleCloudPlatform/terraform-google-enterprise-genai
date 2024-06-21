@@ -40,7 +40,7 @@ resource "google_secret_manager_secret" "secret" {
   replication {
     user_managed {
       replicas {
-        location = data.google_kms_key_ring.kms.location
+        location = local.key_location
 
         #Customer Managed Encryption Keys
         #Control ID: COM-CO-2.3
