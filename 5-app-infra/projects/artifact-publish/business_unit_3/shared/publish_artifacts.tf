@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
+locals {
+  region_kms_keyring = [for i in local.shared_keyrings : i if split("/", i)[3] == var.instance_region]
+}
+
+data "google_project" "common_artifacts" {
+  project_id = local.common_artifacts_project_id
+}
+
 module "artifact_publish" {
-  source = "../../../../modules/publish_artifacts"
+  source = "../../modules/publish_artifacts"
 
   environment = local.environment
   description = "Publish Artifacts for ML Projects"
@@ -34,4 +42,6 @@ module "artifact_publish" {
       }
     ]
   }]
+
+  kms_crypto_key = "${one(local.region_kms_keyring)}/cryptoKeys/${data.google_project.common_artifacts.name}"
 }

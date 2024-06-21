@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,9 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-data "google_projects" "kms" {
-  filter = "labels.application_name:org-kms labels.environment:production lifecycleState:ACTIVE"
-  # filter = "labels.application_name:org-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
+data "google_sourcerepo_repository" "artifacts_repo" {
+  name    = var.name
+  project = var.project_id
 }
 
-data "google_kms_key_ring" "kms" {
-  name     = "sample-keyring"
-  location = var.region
-  project  = data.google_projects.kms.projects.0.project_id
-}
-
-data "google_kms_crypto_key" "key" {
-  name     = data.google_project.project.name
-  key_ring = data.google_kms_key_ring.kms.id
-}
-
-data "google_projects" "log" {
-  filter = "labels.application_name:org-logging labels.environment:production lifecycleState:ACTIVE"
-}
+data "google_client_openid_userinfo" "current_user" {}

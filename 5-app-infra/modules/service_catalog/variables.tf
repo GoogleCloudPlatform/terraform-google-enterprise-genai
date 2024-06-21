@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,4 +41,20 @@ variable "tf_service_catalog_sa_email" {
 variable "machine_learning_project_number" {
   description = "Project Number for the Machine Learning (Vertex) Project"
   type        = string
+}
+
+variable "kms_crypto_key" {
+  description = "KMS Key to be used"
+  type        = string
+}
+
+variable "log_bucket" {
+  description = "Bucket to store logs from service catalog bucket"
+  type        = string
+}
+
+variable "trigger_sa_id" {
+  description = "Account Id of Docker Build Pipeline SA"
+  type        = string
+  default     = "svc-catalog"
 }

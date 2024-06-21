@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #   service = "storage.googleapis.com"
 # }
 # resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
-#   crypto_key_id = data.google_kms_crypto_key.key.id
+#   crypto_key_id = var.kms_crypto_key
 #   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 #   member        = "serviceAccount:${google_project_service_identity.storage_agent.email}"
 # }
@@ -41,13 +41,13 @@ resource "google_storage_bucket" "bucket" {
   uniform_bucket_level_access = true
 
   encryption {
-    default_kms_key_name = data.google_kms_crypto_key.key.id
+    default_kms_key_name = var.kms_crypto_key
   }
   versioning {
     enabled = true
   }
   logging {
-    log_bucket = join("-", [local.log_bucket_prefix, data.google_projects.log.projects.0.project_id])
+    log_bucket = var.log_bucket
   }
 
 }
@@ -59,11 +59,6 @@ resource "google_storage_bucket_iam_member" "bucket_role" {
   member   = each.value.acct
 }
 
-# resource "google_sourcerepo_repository" "service_catalog" {
-#   project = var.project_id
-#   name    = var.name
-# }
-
 resource "google_sourcerepo_repository_iam_member" "read" {
   project    = var.project_id
   repository = var.name
@@ -71,35 +66,62 @@ resource "google_sourcerepo_repository_iam_member" "read" {
   member     = "serviceAccount:${var.tf_service_catalog_sa_email}"
 }
 
+resource "google_service_account" "trigger_sa" {
+  account_id   = var.trigger_sa_id
+  display_name = "Service Catalog Pipeline Account"
+  project      = var.project_id
+}
+
+resource "google_service_account_iam_member" "impersonate" {
+  service_account_id = google_service_account.trigger_sa.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = local.current_member
+}
+
+resource "random_string" "suffix" {
+  length  = 10
+  special = false
+  upper   = false
+}
+
+resource "google_storage_bucket" "cloud_build_logs" {
+  name                        = "svc-catalog-pipeline-logs-${random_string.suffix.result}"
+  storage_class               = "REGIONAL"
+  project                     = var.project_id
+  location                    = var.region
+  uniform_bucket_level_access = true
+
+  encryption {
+    default_kms_key_name = var.kms_crypto_key
+  }
+}
+
+resource "google_sourcerepo_repository_iam_member" "repo_reader" {
+  repository = data.google_sourcerepo_repository.artifacts_repo.id
+  role       = "roles/source.reader"
+  member     = google_service_account.trigger_sa.member
+}
+
+resource "google_storage_bucket_iam_member" "storage_admin" {
+  bucket = google_storage_bucket.cloud_build_logs.name
+  role   = "roles/storage.admin"
+  member = google_service_account.trigger_sa.member
+}
+
 resource "google_cloudbuild_trigger" "zip_files" {
   name     = "zip-tf-files-trigger"
   project  = var.project_id
   location = var.region
-
-  # repository_event_config {
-  #   repository = var.cloudbuild_repo_id
-  #   push {
-  #     branch = "^main$"
-  #   }
-  # }
 
   trigger_template {
     branch_name = "^main$"
     repo_name   = var.name
   }
 
+  service_account = google_service_account.trigger_sa.id
   build {
-    # step {
-    #   id         = "unshallow"
-    #   name       = "gcr.io/cloud-builders/git"
-    #   secret_env = ["token"]
-    #   entrypoint = "/bin/bash"
-    #   args = [
-    #     "-c",
-    #     "git fetch --unshallow https://$token@${local.github_repository}"
-    #   ]
-
-    # }
+    timeout     = "1800s"
+    logs_bucket = google_storage_bucket.bucket.name
     step {
       id         = "unshallow"
       name       = "gcr.io/cloud-builders/git"
@@ -110,12 +132,6 @@ resource "google_cloudbuild_trigger" "zip_files" {
       ]
 
     }
-    # available_secrets {
-    #   secret_manager {
-    #     env          = "token"
-    #     version_name = var.secret_version_name
-    #   }
-    # }
     step {
       id         = "find-folders-affected-in-push"
       name       = "gcr.io/cloud-builders/git"
@@ -141,5 +157,6 @@ resource "google_cloudbuild_trigger" "zip_files" {
       args = ["cp", "/workspace/*.tar.gz", "gs://${google_storage_bucket.bucket.name}/modules/"]
     }
   }
-}
 
+  depends_on = [google_service_account_iam_member.impersonate]
+}

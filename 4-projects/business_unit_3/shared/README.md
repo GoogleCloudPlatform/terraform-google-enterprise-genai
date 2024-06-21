@@ -34,6 +34,7 @@
 | service\_catalog\_project\_id | Service Catalog Project ID. |
 | service\_catalog\_repo\_id | ID of the Service Catalog repository |
 | service\_catalog\_repo\_name | The name of the Service Catalog repository |
+| shared\_level\_keyrings | Keyrings used on shared level project creation |
 | state\_buckets | GCS Buckets to store TF state |
 | terraform\_service\_accounts | APP Infra Pipeline Terraform Accounts. |
 

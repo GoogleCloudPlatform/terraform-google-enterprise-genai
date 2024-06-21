@@ -72,8 +72,6 @@ The constraints are located in the repository:
 
 - `gcp-policies`
 
-All changes below must be made to both repositories:
-
 **IMPORTANT:** Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
 
 - Copy `cmek_settings.yaml` from this repository to the policies repository:
@@ -2164,3 +2162,365 @@ git commit -m "Initialize ML environment"
 
 git push origin production
 ```
+
+## 5-appinfra: Deploy Service Catalog and Artifacts Publish Applications
+
+### Update `gcloud terraform vet` policies for app-infra
+
+The first step is to update the `gcloud terraform vet` policies constraints to allow usage of the APIs needed by the Blueprint and add more policies.
+
+The constraints are located in the repository:
+
+- `gcp-policies-app-infra`
+
+**IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/` and the other repos (`gcp-bootstrap`, `gcp-org`, `gcp-projects`...).
+
+- Clone the `gcp-policies-app-infra` repo based on the Terraform output from the `4-projects` step.
+Clone the repo at the same level of the `terraform-google-enterprise-genai` folder, the following instructions assume this layout.
+Run `terraform output cloudbuild_project_id` in the `4-projects` folder to get the Cloud Build Project ID.
+
+   ```bash
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="gcp-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
+   echo ${INFRA_PIPELINE_PROJECT_ID}
+
+   gcloud source repos clone gcp-policies gcp-policies-app-infra --project=${INFRA_PIPELINE_PROJECT_ID}
+   ```
+
+   **Note:** `gcp-policies` repo has the same name as the repo created in step `1-org`. In order to prevent a collision, the previous command will clone this repo in the folder `gcp-policies-app-infra`.
+
+- Navigate into the repo and copy contents of policy-library to new repo. All subsequent steps assume you are running them from the gcp-policies-app-infra directory. If you run them from another directory, adjust your copy paths accordingly.
+
+   ```bash
+   cd gcp-policies-app-infra/
+   git checkout -b main
+
+   cp -RT ../terraform-google-enterprise-genai/policy-library/ .
+   ```
+
+- Commit changes and push your main branch to the new repo.
+
+   ```bash
+   git add .
+   git commit -m 'Initialize policy library repo'
+
+   git push --set-upstream origin main
+   ```
+
+- Navigate out of the repo.
+
+   ```bash
+   cd ..
+   ```
+
+### Artifacts Application
+
+The purpose of this step is to deploy out an artifact registry to store custom docker images. A Cloud Build pipeline is also deployed out. At the time of this writing, it is configured to attach itself to a Cloud Source Repository. The Cloud Build pipeline is responsible for building out a custom image that may be used in Machine Learning Workflows.  If you are in a situation where company policy requires no outside repositories to be accessed, custom images can be used to keep access to any image internally.
+
+Since every workflow will have access to these images, it is deployed in the `common` folder, and keeping with the foundations structure, is listed as `shared` under this Business Unit.  It will only need to be deployed once.
+
+The Pipeline is connected to a Google Cloud Source Repository with a simple structure:
+
+   ```txt
+   ├── README.md
+   └── images
+      ├── tf2-cpu.2-13:0.1
+      │   └── Dockerfile
+      └── tf2-gpu.2-13:0.1
+         └── Dockerfile
+   ```
+
+For the purposes of this example, the pipeline is configured to monitor the `main` branch of this repository.
+
+Each folder under `images` has the full name and tag of the image that must be built.  Once a change to the `main` branch is pushed, the pipeline will analyse which files have changed and build that image out and place it in the artifact repository.  For example, if there is a change to the Dockerfile in the `tf2-cpu-13:0.1` folder, or if the folder itself has been renamed, it will build out an image and tag it based on the folder name that the Dockerfile has been housed in.
+
+Once pushed, the pipeline build logs can be accessed by navigating to the artifacts project name created in step-4:
+
+   ```bash
+   terraform -chdir="gcp-projects/ml_business_unit/shared/" output -raw common_artifacts_project_id
+   ```
+
+- Clone the `ml-artifact-publish` repo.
+
+   ```bash
+   gcloud source repos clone ml-artifact-publish --project=${INFRA_PIPELINE_PROJECT_ID}
+   ```
+
+- Navigate into the repo, change to non-main branch and copy contents of GenAI to the new repo. Subsequent steps assume you are running them from the `ml-artifact-publish` directory.
+
+   ```bash
+   cd ml-artifact-publish/
+   git checkout -b plan
+
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/artifact-publish/ .
+   cp -R ../terraform-google-enterprise-genai/5-app-infra/modules/ ./modules
+   cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
+   chmod 755 ./tf-wrapper.sh
+   ```
+
+- Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
+
+   ```bash
+   mv common.auto.example.tfvars common.auto.tfvars
+   ```
+
+- Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+
+   ```bash
+   export remote_state_bucket=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw projects_gcs_bucket_tfstate)
+   echo "remote_state_bucket = ${remote_state_bucket}"
+   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   ```
+
+- Update `backend.tf` with your bucket from the infra pipeline output.
+
+   ```bash
+   export backend_bucket=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-artifact-publish"' --raw-output)
+   echo "backend_bucket = ${backend_bucket}"
+
+   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+   ```
+
+- Commit changes.
+
+   ```bash
+   git add .
+   git commit -m 'Initialize repo'
+   ```
+
+- Push your plan branch to trigger a plan for all environments. Because the _plan_ branch is not a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing your _plan_ branch triggers _terraform plan_ but not _terraform apply_. Review the plan output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`.
+
+   ```bash
+   git push --set-upstream origin plan
+   ```
+
+- Merge changes to shared. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`. Before proceeding further, make sure that the build applied successfully.
+
+   ```bash
+   git checkout -b production
+   git push origin production
+   ```
+
+- `cd` out of the `ml-artifacts-publish` repository.
+
+   ```bash
+   cd ..
+   ```
+
+#### Configuring Cloud Source Repository of Artifact Application
+
+The series of steps below will trigger the custom artifacts pipeline.
+
+- Grab the Artifact Project ID
+
+   ```bash
+   export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
+   echo ${ARTIFACT_PROJECT_ID}
+   ```
+
+- Clone the freshly minted Cloud Source Repository that was created for this project.
+
+   ```bash
+   gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
+   ```
+
+- Enter the repo folder and copy over the example files from the folder on GenAI repository.
+
+   ```bash
+   cd publish-artifacts
+   git checkout -b main
+
+   git commit -m "Initialize Repository" --allow-empty
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/artifact-publish/ .
+   ```
+
+- Commit changes and push your main branch to the new repo.
+
+   ```bash
+   git add .
+   git commit -m 'Build Images'
+
+   git push --set-upstream origin main
+   ```
+
+- `cd` out of the `publish-artifacts` repository.
+
+   ```bash
+   cd ..
+   ```
+
+### Service Catalog Pipeline Configuration
+
+This step has two main purposes:
+
+1. To deploy a pipeline and a bucket which is linked to a Google Cloud Repository that houses terraform modules for the use in Service Catalog.
+Although Service Catalog itself must be manually deployed, the modules which will be used can still be automated.
+
+2. To deploy infrastructure for operational environments (ie. `non-production` & `production`.)
+
+The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are.
+
+The repository has the structure (truncated for brevity):
+
+   ```text
+   ml_business_unit
+   ├── development
+   ├── non-production
+   ├── production
+   modules
+   ├── bucket
+   │   ├── README.md
+   │   ├── data.tf
+   │   ├── main.tf
+   │   ├── outputs.tf
+   │   ├── provider.tf
+   │   └── variables.tf
+   ├── composer
+   │   ├── README.md
+   │   ├── data.tf
+   │   ├── iam.roles.tf
+   │   ├── iam.users.tf
+   │   ├── locals.tf
+   │   ├── main.tf
+   │   ├── outputs.tf
+   │   ├── provider.tf
+   │   ├── terraform.tfvars.example
+   │   ├── variables.tf
+   │   └── vpc.tf
+   ├── cryptography
+   │   ├── README.md
+   │   ├── crypto_key
+   │   │   ├── main.tf
+   │   │   ├── outputs.tf
+   │   │   └── variables.tf
+   │   └── key_ring
+   │       ├── main.tf
+   │       ├── outputs.tf
+   │       └── variables.tf
+   ```
+
+Each folder under `modules` represents a terraform module.
+When there is a change in any of the terraform module folders, the pipeline will find whichever module has been changed since the last push, `tar.gz` that file and place it in a bucket for Service Catalog to access.
+
+This pipeline is listening to the `main` branch of this repository for changes in order for the modules to be uploaded to service catalog.
+
+The pipeline also listens for changes made to `plan`, `development`, `non-production` & `production` branches, this is used for deploying infrastructure to each project.
+
+- Clone the `ml-service-catalog` repo.
+
+   ```bash
+   gcloud source repos clone ml-service-catalog --project=${INFRA_PIPELINE_PROJECT_ID}
+   ```
+
+- Navigate into the repo, change to non-main branch and copy contents of foundation to new repo. All subsequent steps assume you are running them from the ml-service-catalog directory. If you run them from another directory, adjust your copy paths accordingly.
+
+   ```bash
+   cd ml-service-catalog
+   git checkout -b plan
+
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/projects/service-catalog/ .
+   cp -R ../terraform-google-enterprise-genai/5-app-infra/modules/ ./modules
+   cp ../terraform-google-enterprise-genai/build/cloudbuild-tf-* .
+   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
+   chmod 755 ./tf-wrapper.sh
+   ```
+
+- Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
+
+   ```bash
+   mv common.auto.example.tfvars common.auto.tfvars
+   ```
+
+- Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+
+   ```bash
+   export remote_state_bucket=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw projects_gcs_bucket_tfstate)
+   echo "remote_state_bucket = ${remote_state_bucket}"
+   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   ```
+
+- Update the `log_bucket` variable with the value of the `logs_export_storage_bucket_name`.
+
+  ```bash
+   export log_bucket=$(terraform -chdir="../gcp-org/envs/shared" output -raw logs_export_storage_bucket_name)
+   echo "log_bucket = ${log_bucket}"
+   sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./common.auto.tfvars
+   ```
+
+- Update `backend.tf` with your bucket from the infra pipeline output.
+
+   ```bash
+   export backend_bucket=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-service-catalog"' --raw-output)
+   echo "backend_bucket = ${backend_bucket}"
+
+   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+   ```
+
+- Commit changes.
+
+   ```bash
+   git add .
+   git commit -m 'Initialize repo'
+   ```
+
+- Push your plan branch to trigger a plan for all environments. Because the _plan_ branch is not a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing your _plan_ branch triggers _terraform plan_ but not _terraform apply_. Review the plan output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`.
+
+   ```bash
+   git push --set-upstream origin plan
+   ```
+
+- Merge changes to production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project `https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID`. Before proceeding further, make sure that the build applied successfully.
+
+   ```bash
+   git checkout -b production
+   git push origin production
+   ```
+
+- `cd` out of the `ml-service-catalog` repository.
+
+   ```bash
+   cd ..
+   ```
+
+#### Configuring Cloud Source Repository of Service Catalog Solutions Pipeline
+
+The series of steps below will trigger the custom Service Catalog Pipeline.
+
+- Grab the Service Catalogs ID
+
+   ```bash
+   export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="gcp-projects/ml_business_unit/shared" output -raw service_catalog_project_id)
+   echo ${SERVICE_CATALOG_PROJECT_ID}
+   ```
+
+- Clone the freshly minted Cloud Source Repository that was created for this project.
+
+   ```bash
+   gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
+   ```
+
+- Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
+
+   ```bash
+   cd service-catalog/
+   cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
+   git add img
+   git commit -m "Add img directory"
+   ```
+
+- Commit changes and push main branch to the new repo.
+
+   ```bash
+   git add modules
+   git commit -m 'Initialize Service Catalog Build Repo'
+
+   git push --set-upstream origin main
+   ```
+
+- `cd` out of the `service_catalog` repository.
+
+   ```bash
+   cd ..
+   ```
+
+- Navigate to the project that was output from `${SERVICE_CATALOG_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.

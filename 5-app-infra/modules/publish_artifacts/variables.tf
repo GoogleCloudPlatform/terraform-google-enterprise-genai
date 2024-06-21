@@ -69,3 +69,14 @@ variable "environment" {
 variable "project_id" {
   description = "Project ID"
 }
+
+variable "kms_crypto_key" {
+  description = "KMS Key to be used"
+  type        = string
+}
+
+variable "docker_build_sa_id" {
+  description = "Account Id of Docker Build Pipeline SA"
+  type        = string
+  default     = "docker-build"
+}

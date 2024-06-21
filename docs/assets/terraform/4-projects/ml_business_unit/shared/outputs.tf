@@ -92,3 +92,8 @@ output "artifacts_repo_id" {
   description = "ID of the Artifacts repository"
   value       = module.ml_infra_projects.artifacts_repo_id
 }
+
+output "shared_level_keyrings" {
+  description = "Keyrings used on shared level project creation"
+  value       = local.shared_kms_key_ring
+}
