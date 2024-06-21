@@ -18,17 +18,7 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-data "google_projects" "kms" {
-  filter = "labels.application_name:env-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
-}
-
-data "google_kms_key_ring" "kms" {
-  name     = local.keyring_name
-  location = var.region
-  project  = data.google_projects.kms.projects.0.project_id
-}
-
 data "google_kms_crypto_key" "key" {
   name     = data.google_project.project.name
-  key_ring = data.google_kms_key_ring.kms.id
+  key_ring = var.kms_keyring
 }

@@ -17,5 +17,4 @@
 locals {
   project_hash = substr(sha256(data.google_project.project.project_id), 0, 6)
   name_var     = "bq-${var.dataset_id}-${data.google_project.project.labels.env_code}-${local.project_hash}"
-  keyring_name = "sample-keyring"
 }
