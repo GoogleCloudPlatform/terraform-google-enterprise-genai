@@ -52,3 +52,9 @@ variable "log_bucket" {
   description = "Bucket to store logs from service catalog bucket"
   type        = string
 }
+
+variable "trigger_sa_id" {
+  description = "Account Id of Docker Build Pipeline SA"
+  type        = string
+  default     = "svc-catalog"
+}

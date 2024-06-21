@@ -17,3 +17,10 @@
 data "google_project" "project" {
   project_id = var.project_id
 }
+
+data "google_sourcerepo_repository" "artifacts_repo" {
+  name    = var.name
+  project = var.project_id
+}
+
+data "google_client_openid_userinfo" "current_user" {}

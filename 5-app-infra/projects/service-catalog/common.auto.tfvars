@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-data "google_project" "project" {
-  project_id = var.project_id
-}
+instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
 
-data "google_projects" "kms" {
-  filter = "labels.application_name:env-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
-}
+remote_state_bucket = "bkt-prj-b-seed-7c57-gcp-projects-tfstate"
 
-data "google_kms_key_ring" "kms" {
-  name     = local.keyring_name
-  location = var.region
-  project  = data.google_projects.kms.projects.0.project_id
-}
+# github_ api_ token = "PUT IN TOKEN"
 
-data "google_kms_crypto_key" "key" {
-  name     = data.google_project.project.name
-  key_ring = data.google_kms_key_ring.kms.id
-}
+# github_app_installation_id = "18685983"
+
+# github_remote_uri = "https://github.com/badal-io/ml-foundations-tf-modules.git"
+

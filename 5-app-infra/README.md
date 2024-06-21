@@ -619,6 +619,14 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    gcloud iam service-accounts add-iam-policy-binding ${terraform_sa} --project ${project_id} --member="${member}" --role="roles/iam.serviceAccountTokenCreator"
    ```
 
+1. Update the `log_bucket` variable with the value of the `logs_export_storage_bucket_name`.
+
+  ```bash
+   export log_bucket=$(terraform -chdir="../gcp-org/envs/shared" output -raw logs_export_storage_bucket_name)
+   echo "log_bucket = ${log_bucket}"
+   sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./common.auto.tfvars
+   ```
+
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
