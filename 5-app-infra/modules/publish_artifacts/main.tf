@@ -117,7 +117,7 @@ resource "google_kms_crypto_key_iam_member" "storage_agent" {
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 
-  depends_on = [ google_project_service_identity.storage_agent ]
+  depends_on = [google_project_service_identity.storage_agent]
   #member = "serviceAccount:${google_project_service_identity.storage.email}"
 }
 
