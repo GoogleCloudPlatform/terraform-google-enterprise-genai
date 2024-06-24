@@ -59,7 +59,7 @@ module "machine_learning_project" {
   // Map for the roles where the key is the repository name ("${var.business_code}-example-app")
   // and the value is the list of roles that this SA need to deploy step 5-app-infra
   sa_roles = {
-    "bu3-machine-learning" = [
+    "ml-machine-learning" = [
       "roles/aiplatform.admin",
       "roles/artifactregistry.admin",
       "roles/bigquery.admin",
@@ -162,7 +162,7 @@ resource "google_kms_crypto_key_iam_member" "kms_admin" {
   for_each      = module.machine_learning_project.kms_keys
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
-  member        = "serviceAccount:${local.app_infra_pipeline_service_accounts["bu3-machine-learning"]}"
+  member        = "serviceAccount:${local.app_infra_pipeline_service_accounts["ml-machine-learning"]}"
 }
 
 // Add crypto key viewer role to kms environment project
@@ -212,7 +212,7 @@ resource "google_sourcerepo_repository_iam_member" "read" {
   project    = local.service_catalog_project_id
   repository = local.service_catalog_repo_name
   role       = "roles/viewer"
-  member     = "serviceAccount:${local.app_infra_pipeline_service_accounts["bu3-machine-learning"]}"
+  member     = "serviceAccount:${local.app_infra_pipeline_service_accounts["ml-machine-learning"]}"
 }
 
 // Add Browser Role to CloudBuild at Env Folder

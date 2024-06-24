@@ -15,7 +15,7 @@
  */
 
 variable "business_code" {
-  description = "The business code (ex. bu1)."
+  description = "The business code (ex. ml)."
   type        = string
 }
 

@@ -45,7 +45,7 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy a simple <a href="https://cloud.google.com/compute/">Compute Engine</a> instance in one of the business unit projects using the infra pipeline set up in 4-projects.</td>
+<td>Deploy service catalog and artifacts pipeline.</td>
 </tr>
 </tbody>
 </table>
@@ -57,10 +57,9 @@ For an overview of the architecture and the parts, see the
 
 The purpose of this step is to set up the folder structure, projects, and infrastructure pipelines for applications that are connected as service projects to the shared VPC created in the previous stage.
 
-For each business unit, a shared `infra-pipeline` project is created along with Cloud Build triggers, CSRs for application infrastructure code and Google Cloud Storage buckets for state storage.
+For machine learning business unit, a shared `infra-pipeline` project is created along with Cloud Build triggers, CSRs for application infrastructure code and Google Cloud Storage buckets for state storage.
 
 This step follows the same [conventions](https://github.com/terraform-google-modules/terraform-google-enterprise-genai#branching-strategy) as the Foundation pipeline deployed in [0-bootstrap](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md).
-A custom [workspace](https://github.com/terraform-google-modules/terraform-google-bootstrap/blob/master/modules/tf_cloudbuild_workspace/README.md) (`bu1-example-app`) is created by this pipeline and necessary roles are granted to the Terraform Service Account of this workspace by enabling variable `sa_roles` as shown in this [example](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects/modules/base_env/example_base_shared_vpc_project.tf).
 
 This pipeline is utilized to deploy resources in projects across development/non-production/production in step [5-app-infra](../5-app-infra/README.md).
 Other Workspaces can also be created to isolate deployments if needed.
@@ -122,8 +121,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    mv production.auto.example.tfvars production.auto.tfvars
    ```
 
-1. See any of the envs folder [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
-1. See any of the shared folder [README.md](./business_unit_1/shared/README.md) files for additional information on the values in the `shared.auto.tfvars` file.
+1. See any of the envs folder [README.md](./ml_business_unit/production/README.md) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
+
+1. See any of the shared folder [README.md](./ml_business_unit/shared/README.md) files for additional information on the values in the `shared.auto.tfvars` file.
 
 1. Use `terraform output` to get the backend bucket value from 0-bootstrap output.
 
@@ -141,8 +141,10 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git commit -m 'Initialize projects repo'
    ```
 
-1. You need to manually plan and apply only once the `business_unit_1/shared` and `business_unit_2/shared` environments since `development`, `non-production`, and `production` depend on them.
+1. You need to manually plan and apply only once the `ml_business_unit/shared` environments since `development`, `non-production`, and `production` depend on them.
+
 1. To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
+
 1. Use `terraform output` to get the Cloud Build project ID and the projects step Terraform Service Account from 0-bootstrap output. An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set using the Terraform Service Account to enable impersonation.
 
    ```bash
@@ -253,8 +255,8 @@ See `0-bootstrap` [README-GitHub.md](../0-bootstrap/README-GitHub.md#deploying-s
    mv production.auto.example.tfvars production.auto.tfvars
    ```
 
-1. See any of the envs folder [README.md](./business_unit_1/production/README.md) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
-   See any of the shared folder [README.md](./business_unit_1/shared/README.md) files for additional information on the values in the `shared.auto.tfvars` file.
+1. See any of the envs folder [README.md](./ml_business_unit/production/README.md) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
+   See any of the shared folder [README.md](./ml_business_unit/shared/README.md) files for additional information on the values in the `shared.auto.tfvars` file.
    Use `terraform output` to get the remote state bucket (the backend bucket used by previous steps) value from `0-bootstrap` output.
 
    ```bash
