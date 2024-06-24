@@ -37,10 +37,10 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:app_env_base/v0.0.1"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:app_env_base/v0.1.0"
   }
 
   provider_meta "google-beta" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:app_env_base/v0.0.1"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:app_env_base/v0.1.0"
   }
 }
