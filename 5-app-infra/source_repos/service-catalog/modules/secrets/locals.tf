@@ -15,6 +15,6 @@
  */
 
 locals {
-  keyring_name      = "sample-keyring"
+  key_location      = element(split("/", var.kms_keyring), 3)
   pubsub_topic_name = "secret-rotation-notifications"
 }
