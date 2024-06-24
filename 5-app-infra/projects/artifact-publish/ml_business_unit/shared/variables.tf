@@ -23,8 +23,3 @@ variable "remote_state_bucket" {
   description = "Backend bucket to load remote state information from previous steps."
   type        = string
 }
-
-variable "log_bucket" {
-  description = "Log bucket to be used by Service Catalog Bucket"
-  type        = string
-}
