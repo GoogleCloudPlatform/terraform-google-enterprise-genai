@@ -16,14 +16,13 @@
 
 variable "project_id" {
   type        = string
-  description = "Optional Project ID."
-  default     = null
+  description = "Project ID."
 }
 
 variable "message_retention_duration" {
+  type        = string
   description = "Message retention duration."
   default     = "86400s"
-  type        = string
 }
 
 variable "region" {
@@ -37,16 +36,23 @@ variable "region" {
 }
 
 variable "topic_name" {
-  description = "Topic name"
   type        = string
+  description = "Topic name."
 }
 
 variable "locked_regions" {
-  description = "Regions that pubsub presistence is locked to"
   type        = list(any)
+  description = "Regions that Pub/Sub persistence is locked to."
   default = [
     "us-central1",
     "us-east4"
   ]
 }
 
+variable "kms_keyring" {
+  type        = string
+  description = <<EOF
+The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as the other resources and the same environment.
+This value can be obtained by running "gcloud kms keyrings list --project=KMS_PROJECT_ID --location=REGION."
+EOF
+}
