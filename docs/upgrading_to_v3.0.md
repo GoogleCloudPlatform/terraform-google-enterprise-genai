@@ -1,5 +1,5 @@
 # Upgrade Guidance
-Before moving forward with adopting components of v3, review the list of breaking changes below. You can find a complete list of features, bug fixes and other updates in the [Changelog](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/CHANGELOG.md).
+Before moving forward with adopting components of v3, review the list of breaking changes below. You can find a complete list of features, bug fixes and other updates in the [Changelog](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/CHANGELOG.md).
 
 **Important:** There is no in-place upgrade path from v2 to v3.
 
@@ -17,7 +17,7 @@ There is no direct path for upgrading from v2 to v3 as this may result in resour
 
 In case you require to integrate some of the v3's features, we recommend to review the documentation regarding the feature you are interested in and use v3's code as a guidance for its implementation. We also recommend to review the output from `terraform plan` for any destructive operations before applying the updates.
 
-**Note:** You must verify that you are using the correct version for `terraform` and `gcloud`. You can check these and other additional requirements using this [validate script](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/scripts/validate-requirements.sh).
+**Note:** You must verify that you are using the correct version for `terraform` and `gcloud`. You can check these and other additional requirements using this [validate script](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/scripts/validate-requirements.sh).
 
 ### Move Blocks
 

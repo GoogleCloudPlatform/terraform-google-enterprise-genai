@@ -45,17 +45,17 @@ Helper tool to deploy the Terraform example foundation.
     ```
 
 - Update `global.tfvars` with values from your environment.
-- The `0-bootstrap` README [prerequisites](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
+- The `0-bootstrap` README [prerequisites](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
 - Variable `code_checkout_path` is the full path to `deploy-directory` directory.
 - Variable `foundation_code_path` is the full path to `terraform-google-enterprise-genai` directory.
 - See the READMEs for the stages for additional information:
-  - [0-bootstrap](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md)
-  - [1-org](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/1-org/README.md)
-  - [2-environments](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/2-environments/README.md)
-  - [3-networks-dual-svpc](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc)
-  - [3-networks-hub-and-spoke](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke)
-  - [4-projects](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects)
-  - [5-app-infra](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/5-app-infra)
+  - [0-bootstrap](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md)
+  - [1-org](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/1-org/README.md)
+  - [2-environments](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/2-environments/README.md)
+  - [3-networks-dual-svpc](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc)
+  - [3-networks-hub-and-spoke](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke)
+  - [4-projects](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/4-projects)
+  - [5-app-infra](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/5-app-infra)
 
 ### Location
 

@@ -473,4 +473,4 @@ You can get this information from step `0-bootstrap` by running the following co
 
 **Terraform State lock possible causes:**
 
-- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/build/cloudbuild-tf-apply.yaml#L15).
+- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/build/cloudbuild-tf-apply.yaml#L15).

@@ -45,13 +45,13 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy a simple <a href="https://cloud.google.com/compute/">Compute Engine</a> instance in one of the business unit projects using the infra pipeline set up in 4-projects.</td>
+<td>Deploys Service Catalog Pipeline and Custom Artifacts Pipeline.</td>
 </tr>
 </tbody>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai).
+[terraform-google-enterprise-genai README](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai).
 
 ## Purpose
 
@@ -82,7 +82,6 @@ If you enable Assured Workloads, to delete the Assured workload, you will need t
 Use the [GCP console](https://console.cloud.google.com/compliance/assuredworkloads) to identify the resources to be deleted.
 
 ## Usage
-
 
 **Note:** If you are using MacOS, replace `cp -RT` with `cp -R` in the relevant
 commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
@@ -143,26 +142,8 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```bash
    git push --set-upstream origin plan
    ```
+
 1. Review the plan output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
-
-### `N.B.` Read this before continuing further!!
-
-A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent Google service accounts to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
-You must disable the contraint in every folder that is about to be configured by terraform, push your code and then apply the contraint again:
-
-#### Do this before you push development, non-production & production
-
-1. Google Console is the quickest way to achieve this.  Under `IAM & Admin`, select `Organization Policies`.  Search for "Domain Restricted Sharing"
-![list-policy](imgs/list-policy.png)
-
-1. Select 'Manage Policy'.  This directs you to the Domain Restricted Sharing Edit Policy page.  It will be set at 'Inherit parent's policy'.  Change this to 'Google-managed default'
-![edit-policy](imgs/edit-policy.png)
-
-1. Follow the instructions on checking out `development`, `non-production` & `production` branches.  Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
-
-### Deployment Continued...
-
-1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `development` folder before continuing further.
 
 1. Merge changes to development branch. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_.
@@ -174,10 +155,6 @@ You must disable the contraint in every folder that is about to be configured by
 
 1. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
 
-1. Enable the Organization Policy on the `development` folder has highlighted [here](#do-this-before-you-push-development-non-production--production)
-
-1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `non-production` folder before continuing further.
-
 1. Merge changes to non-production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
 
@@ -185,9 +162,6 @@ You must disable the contraint in every folder that is about to be configured by
    git checkout -b non-production
    git push origin non-production
    ```
-1. Enable the Organization Policy on the `non-production` folder has highlighted [here](#do-this-before-you-push-development-non-production--production)
-
-1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `production` folder before continuing further.
 
 1. Merge changes to production branch. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
@@ -196,9 +170,190 @@ You must disable the contraint in every folder that is about to be configured by
    git checkout -b production
    git push origin production
    ```
-1. Enable the Organization Policy on the `production` folder has highlighted [here](#do-this-before-you-push-development-non-production--production)
 
+### `N.B.` Read this before continuing further
 
+A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
+
+You must disable the contraint, assign the permission on the bucket and then apply the contraint again. This step-by-step presents you with two different options (`Option 1` and `Option 2`) and only one of them should be executed.
+
+The first and the recommended option is making the changes by using `gcloud` cli, as described in `Option 1`.
+
+`Option 2` is an alternative to `gcloud` cli and relies on Google Cloud Console.
+
+#### Option 1: Use `gcloud` cli to disable/enable organization policy constraint
+
+You will be doing this procedure for each environment (`development`, `non-production` & `production`)
+
+##### `development` environment configuration
+
+1. Configure the following variable below with the value of `gcp-environments` repository path.
+
+    ```bash
+    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
+    ```
+
+    Make sure your git is checked out to the development branch by running `git checkout development` on `GCP_ENVIRONMENTS_PATH`.
+
+    ```bash
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout development)
+    ```
+
+2. Retrieve the bucket name and project id from terraform outputs.
+
+    ```bash
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_project_id)
+    ```
+
+3. Validate the variable values.
+
+    ```bash
+    echo env_log_project_id=$ENV_LOG_PROJECT_ID
+    echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
+    ```
+
+4. Reset your org policy for the logging project by running the following command.
+
+    ```bash
+    gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
+
+5. Assign `roles/storage.objectCreator` role to `cloud-storage-analytics@google.com` group.
+
+    ```bash
+    gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
+    ```
+
+    > Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
+
+6. Delete the change made on the first step to the organization policy, this will make the project inherit parent policies.
+
+    ```bash
+    gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
+
+##### `non-production` environment configuration
+
+1. Configure the following variable below with the value of `gcp-environments` repository path.
+
+    ```bash
+    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
+    ```
+
+    Make sure your git is checked out to the `non-production` branch by running `git checkout nonproduction` on `GCP_ENVIRONMENTS_PATH`.
+
+    ```bash
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout nonproduction)
+    ```
+
+2. Retrieve the bucket name and project id from terraform outputs.
+
+    ```bash
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_project_id)
+    ```
+
+3. Validate the variable values.
+
+    ```bash
+    echo env_log_project_id=$ENV_LOG_PROJECT_ID
+    echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
+    ```
+
+4. Reset your org policy for the logging project by running the following command.
+
+    ```bash
+    gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
+
+5. Assign `roles/storage.objectCreator` role to `cloud-storage-analytics@google.com` group.
+
+    ```bash
+    gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
+    ```
+
+    > Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
+
+6. Delete the change made on the first step to the organization policy, this will make the project inherit parent policies.
+
+    ```bash
+    gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
+
+##### `production` environment configuration
+
+1. Configure the following variable below with the value of `gcp-environments` repository path.
+
+    ```bash
+    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
+    ```
+
+    Make sure your git is checked out to the `production` branch by running `git checkout production` on `GCP_ENVIRONMENTS_PATH`.
+
+    ```bash
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout production)
+    ```
+
+2. Retrieve the bucket name and project id from terraform outputs.
+
+    ```bash
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_project_id)
+    ```
+
+3. Validate the variable values.
+
+    ```bash
+    echo env_log_project_id=$ENV_LOG_PROJECT_ID
+    echo env_log_bucket_name=$ENV_LOG_BUCKET_NAME
+    ```
+
+4. Reset your org policy for the logging project by running the following command.
+
+    ```bash
+    gcloud org-policies reset iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
+
+5. Assign `roles/storage.objectCreator` role to `cloud-storage-analytics@google.com` group.
+
+    ```bash
+    gcloud storage buckets add-iam-policy-binding gs://$ENV_LOG_BUCKET_NAME --member="group:cloud-storage-analytics@google.com" --role="roles/storage.objectCreator"
+    ```
+
+    > Note: you might receive an error telling you that this is against an organization policy, this can happen because of the propagation time from the change made to the organization policy (propagation time is tipically 2 minutes, but can take 7 minutes or longer). If this happens, wait some minutes and try again
+
+6. Delete the change made on the first step to the organization policy, this will make the project inherit parent policies.
+
+    ```bash
+    gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
+    ```
+
+#### Option 2: Use Google Cloud Console to disable/enable organization policy constraint
+
+Proceed with these steps only if `Option 1` is not chosen.
+
+1. On `ml_logging.tf` locate the following lines and uncomment them:
+
+    ```terraform
+    resource "google_storage_bucket_iam_member" "bucket_logging" {
+      bucket = google_storage_bucket.log_bucket.name
+      role   = "roles/storage.objectCreator"
+      member = "group:cloud-storage-analytics@google.com"
+    }
+    ```
+
+2. Under `IAM & Admin`, select `Organization Policies`.  Search for "Domain Restricted Sharing".
+
+    ![list-policy](../2-environments/imgs/list-policy.png)
+
+3. Select 'Manage Policy'.  This directs you to the Domain Restricted Sharing Edit Policy page.  It will be set at 'Inherit parent's policy'.  Change this to 'Google-managed default'.
+
+    ![edit-policy](../2-environments/imgs/edit-policy.png)
+
+4. Follow the instructions on checking out `development`, `non-production` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
+
+After making these modifications, you can follow the README.md procedure for `2-environment` step on foundation, make sure you **change the organization policy after running the steps on foundation**.
 
 1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md), or go to [3-networks-hub-and-spoke](../3-networks-hub-and-spoke/README.md) to use the [Hub and Spoke](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke) network mode.
 

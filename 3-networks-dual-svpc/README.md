@@ -45,13 +45,13 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy a simple <a href="https://cloud.google.com/compute/">Compute Engine</a> instance in one of the business unit projects using the infra pipeline set up in 4-projects.</td>
+<td>Deploys Service Catalog Pipeline and Custom Artifacts Pipeline.</td>
 </tr>
 </tbody>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai).
+[terraform-google-enterprise-genai README](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai).
 
 ## Purpose
 

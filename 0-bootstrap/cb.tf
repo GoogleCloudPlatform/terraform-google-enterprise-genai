@@ -16,7 +16,7 @@
 
 locals {
   // terraform version image configuration
-  terraform_version = "1.3.0"
+  terraform_version = "1.3.10"
   // The version of the terraform docker image to be used in the workspace builds
   docker_tag_version_terraform = "v1"
 
@@ -166,6 +166,7 @@ module "tf_cloud_builder" {
   enable_worker_pool           = true
   worker_pool_id               = module.tf_private_pool.private_worker_pool_id
   bucket_name                  = "${var.bucket_prefix}-${module.tf_source.cloudbuild_project_id}-tf-cloudbuilder-build-logs"
+  build_timeout                = "1200s"
 }
 
 module "bootstrap_csr_repo" {

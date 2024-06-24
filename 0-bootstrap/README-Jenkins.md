@@ -51,7 +51,7 @@ You arrived to these instructions because you are using the `jenkins_bootstrap` 
   - Access to the Jenkins Controller Web UI
   - [SSH Agent Jenkins plugin](https://plugins.jenkins.io/ssh-agent) installed in your Jenkins Controller
   - Private IP address for the Jenkins Agent: usually assigned by your network administrator. You will use this IP for the GCE instance that will be created in the `prj-b-cicd` GCP Project in step [II. Create the SEED and CI/CD projects using Terraform](#ii-create-the-seed-and-cicd-projects-using-terraform).
-  - Access to create five Git repositories, one for each directory in this [monorepo](https://github.com/terraform-google-modules/terraform-google-enterprise-genai) (`0-bootstrap, 1-org, 2-environments, 3-networks, 4-projects`). These are usually private repositories that might be on-prem.
+  - Access to create five Git repositories, one for each directory in this [monorepo](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai) (`0-bootstrap, 1-org, 2-environments, 3-networks, 4-projects`). These are usually private repositories that might be on-prem.
 
 1. Generate a SSH key pair. In the Jenkins Controller host, use the `ssh-keygen` command to generate a SSH key pair.
    - You will need this key pair to enable authentication between the Controller and Agent. Although the key pair can be generated in any linux machine, it is recommended not to copy the secret private key from one host to another, so you probably want to do this in the Jenkins Controller host command line.
@@ -78,7 +78,7 @@ You arrived to these instructions because you are using the `jenkins_bootstrap` 
    - Jenkins Agent’s private IP address (usually assigned by your Network Administrator. In the provided examples this IP is "172.16.1.6"). This private IP will be reachable through the VPN connection that you will create later.
 
 1. Create five individual Git repositories in your Git server (This might be a task delegated to your infrastructure team)
-   - Note that although this infrastructure code is distributed to you as a [monorepo](https://github.com/terraform-google-modules/terraform-google-enterprise-genai), you will store the code in five different repositories, one for each directory:
+   - Note that although this infrastructure code is distributed to you as a [monorepo](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai), you will store the code in five different repositories, one for each directory:
 
    ```text
    ./0-bootstrap
@@ -113,7 +113,7 @@ You arrived to these instructions because you are using the `jenkins_bootstrap` 
 1. Clone this mono-repository with:
 
    ```bash
-   git clone https://github.com/terraform-google-modules/terraform-google-enterprise-genai
+   git clone https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai
    ```
 
 1. Clone the repository you created to host the `0-bootstrap` directory with:

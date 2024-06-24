@@ -45,14 +45,10 @@ Hub and Spoke network model. It also sets up the global DNS hub.</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy a <a href="https://cloud.google.com/compute/">Compute Engine</a> instance in one of the business unit projects using the infra pipeline setup in 4-projects.</td>
+<td>Deploys Service Catalog Pipeline and Custom Artifacts Pipeline.</td>
 </tr>
 </tbody>
 </table>
-
-For an overview of the architecture and the parts, see the
-[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai)
-file.
 
 ## Purpose
 
@@ -119,7 +115,7 @@ See [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into issues during 
 ## Deploying with Jenkins
 
 If you are using the `jenkins_bootstrap` sub-module, see
-[README-Jenkins](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README-Jenkins.md)
+[README-Jenkins](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README-Jenkins.md)
 for requirements and instructions on how to run the 0-bootstrap step. Using
 Jenkins requires a few manual steps, including configuring connectivity with
 your current Jenkins manager (controller) environment.
@@ -132,10 +128,10 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
 
 ## Deploying with Cloud Build
 
-1. Clone [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai) into your local environment and navigate to the `0-bootstrap` folder.
+1. Clone [terraform-google-enterprise-genai](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai) into your local environment and navigate to the `0-bootstrap` folder.
 
    ```bash
-   git clone https://github.com/terraform-google-modules/terraform-google-enterprise-genai.git
+   git clone https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git
 
    cd terraform-google-enterprise-genai/0-bootstrap
    ```

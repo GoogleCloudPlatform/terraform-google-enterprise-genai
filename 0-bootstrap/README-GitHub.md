@@ -61,10 +61,10 @@ for each one of the repositories.
 
 ### Deploying step 0-bootstrap
 
-1. Clone [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai) into your local environment.
+1. Clone [terraform-google-enterprise-genai](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai) into your local environment.
 
    ```bash
-   git clone https://github.com/terraform-google-modules/terraform-google-enterprise-genai.git
+   git clone https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git
    ```
 
 1. Clone the private repository you created to host the `0-bootstrap` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.

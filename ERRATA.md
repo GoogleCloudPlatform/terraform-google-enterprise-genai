@@ -35,7 +35,7 @@ This will be addressed in the next version of the blueprint guide.
 - Cloud Asset Inventory will be integrated in a future release.
 - The unallocated IP address space in the Shared VPC networks, described in Section 7.3, is currently being used by Private Service Networking in this release.
 
-## [1.x](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/releases/tag/v1.0.0)
+## [1.x](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/releases/tag/v1.0.0)
 ### Code Discrepancies
 
 #### Labeling

@@ -59,10 +59,10 @@ that are created, see the organization bootstrap module
 
 ### Instructions
 
-1. Clone [terraform-google-enterprise-genai](https://github.com/terraform-google-modules/terraform-google-enterprise-genai) into your local environment.
+1. Clone [terraform-google-enterprise-genai](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai) into your local environment.
 
    ```bash
-   git clone https://github.com/terraform-google-modules/terraform-google-enterprise-genai.git
+   git clone https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai.git
    ```
 
 1. Clone all the private repositories (or projects) you created at the same level of the `terraform-google-enterprise-genai` folder.
