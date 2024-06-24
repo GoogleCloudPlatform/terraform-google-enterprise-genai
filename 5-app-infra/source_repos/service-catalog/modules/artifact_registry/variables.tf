@@ -1,5 +1,5 @@
-/** <!--
- * 4Copyright 2024 Google LLC
+/**
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,23 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * -->
+ *
  */
 
 variable "name" {
-  description = "Name of the repository."
   type        = string
+  description = "Name of the repository."
 }
 
 variable "description" {
-  description = "Description of the repository."
   type        = string
+  description = "Description of the repository."
   default     = ""
 }
 
 variable "format" {
-  description = "Format of the repository."
   type        = string
+  description = "Format of the repository."
   default     = "DOCKER"
 }
 
@@ -43,13 +43,12 @@ variable "region" {
 }
 
 variable "cleanup_policy_dry_run" {
-  description = "Whether to perform a dry run of the cleanup policy."
   type        = bool
+  description = "Whether to perform a dry run of the cleanup policy."
   default     = false
 }
 
 variable "cleanup_policies" {
-  description = "List of cleanup policies."
   type = list(object({
     id     = string
     action = optional(string)
@@ -64,6 +63,7 @@ variable "cleanup_policies" {
       keep_count            = optional(number)
     })))
   }))
+  description = "List of cleanup policies."
   default = [
     {
       id     = "delete-prerelease"
@@ -81,6 +81,13 @@ variable "cleanup_policies" {
 
 variable "project_id" {
   type        = string
-  description = "Optional Project ID."
-  default     = null
+  description = "Project ID."
+}
+
+variable "kms_keyring" {
+  type        = string
+  description = <<EOF
+The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as the other resources and the same environment.
+This value can be obtained by running "gcloud kms keyrings list --project=KMS_PROJECT_ID --location=REGION."
+EOF
 }
