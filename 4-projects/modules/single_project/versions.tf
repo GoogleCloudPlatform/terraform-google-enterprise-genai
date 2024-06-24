@@ -28,10 +28,10 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:single_project/v0.0.1"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:single_project/v0.1.0"
   }
 
   provider_meta "google-beta" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:single_project/v0.0.1"
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:single_project/v0.1.0"
   }
 }
