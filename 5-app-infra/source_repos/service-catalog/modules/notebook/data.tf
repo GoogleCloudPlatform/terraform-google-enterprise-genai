@@ -18,37 +18,20 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-data "google_projects" "kms" {
-  filter = "labels.application_name:env-kms labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
-}
-
-data "google_projects" "vpc" {
-  filter = "labels.application_name:restricted-shared-vpc-host labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
-  # filter = "labels.application_name:base-shared-vpc-host labels.environment:${data.google_project.project.labels.environment} lifecycleState:ACTIVE"
-}
-
 data "google_compute_network" "shared_vpc" {
-  name = "vpc-${data.google_project.project.labels.env_code}-shared-restricted"
-  # name    = "vpc-${data.google_project.project.labels.env_code}-shared-base"
-  project = data.google_projects.vpc.projects.0.project_id
+  name    = "vpc-${data.google_project.project.labels.env_code}-shared-restricted"
+  project = var.vpc_project
 }
 
 data "google_compute_subnetwork" "subnet" {
-  name = "sb-${data.google_project.project.labels.env_code}-shared-restricted-${local.region}"
-  # name    = "sb-${data.google_project.project.labels.env_code}-shared-base-${local.region}"
-  project = data.google_projects.vpc.projects.0.project_id
+  name    = "sb-${data.google_project.project.labels.env_code}-shared-restricted-${local.region}"
+  project = var.vpc_project
   region  = local.region
-}
-
-data "google_kms_key_ring" "kms" {
-  name     = "sample-keyring"
-  location = local.region
-  project  = data.google_projects.kms.projects.0.project_id
 }
 
 data "google_kms_crypto_key" "key" {
   name     = data.google_project.project.name
-  key_ring = data.google_kms_key_ring.kms.id
+  key_ring = var.kms_keyring
 }
 
 data "google_netblock_ip_ranges" "legacy_health_checkers" {
