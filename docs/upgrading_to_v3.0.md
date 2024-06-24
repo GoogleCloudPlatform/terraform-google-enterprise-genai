@@ -5,7 +5,7 @@ Before moving forward with adopting components of v3, review the list of breakin
 
 ## Breaking Changes
 
-- Minimum required Terraform version is now 1.3.0. For previous release, the minimum version was 0.13.7.
+- Minimum required Terraform version is now 1.5.7. For previous release, the minimum version was 0.13.7.
 - Added Granular Service Account (SA) for each stage which is utilized within Cloud Build using [BYOSA feature](https://cloud.google.com/build/docs/securing-builds/configure-user-specified-service-accounts). In previous versions, a single SA was used to deploy all steps which resulted in excessive permissions. Now, each stage has its own SA with very limited permissions.
 - 3-networks stage has been split into two different directories. Previously, the 3-networks step supported both network modes, Dual Shared VPC and Hub and Spoke. In this release, these two modes have been separated into two different implementations for easier customization and maintenance.
 
@@ -25,7 +25,7 @@ Integrating features to your codebase can end up with some resources being moved
 
 Given this variety of scenarios, we suggest you to consider `moved` blocks which enables you to update your resources and safely refactor your code. For more details, see [moved blocks](https://developer.hashicorp.com/terraform/tutorials/configuration-language/move-config).
 
-**Note:** `moved` blocks are supported by the required terraform version for example foundation v3 (v1.3.0).
+**Note:** `moved` blocks are supported by the required terraform version for example foundation v3 (v1.5.7).
 
 Next, we give some examples on how these moved blocks can be implemented.
 

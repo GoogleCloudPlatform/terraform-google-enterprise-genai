@@ -73,9 +73,9 @@ The purpose of this step is to:
    echo "access_context_manager_policy_id = ${ACCESS_CONTEXT_MANAGER_ID}"
    ```
 
-1. For the manual step described in this document, you need [Terraform](https://www.terraform.io/downloads.html) version 1.3.0 or later to be installed.
+1. For the manual step described in this document, you need [Terraform](https://www.terraform.io/downloads.html) version 1.5.7 or later to be installed.
 
-**Note:** Make sure that you use version 1.3.0 or later of Terraform throughout this series. Otherwise, you might experience Terraform state snapshot lock errors.
+**Note:** Make sure that you use version 1.5.7 or later of Terraform throughout this series. Otherwise, you might experience Terraform state snapshot lock errors.
 
 ### Troubleshooting
 
@@ -188,6 +188,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    echo "remote_state_bucket = ${backend_bucket}"
 
    sed -i "s/REMOTE_STATE_BUCKET/${backend_bucket}/" ./common.auto.tfvars
+   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_ME/${backend_bucket}/" $i; done
    ```
    **Note:** Make sure that you update the `perimeter_additional_members` variable with your e-mail in order to be able to view/access resources in the project protected by the VPC service controls.
 
@@ -199,7 +200,9 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    ```
 
 1. You must manually plan and apply the `shared` environment (only once) since the `development`, `non-production` and `production` environments depend on it.
+
 1. To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
+
 1. Use `terraform output` to get the Cloud Build project ID and the networks step Terraform Service Account from 0-bootstrap output. An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set using the Terraform Service Account to enable impersonation.
 
    ```bash
@@ -208,12 +211,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
    export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw networks_step_terraform_service_account_email)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
-   ```
-
-1. Log into gcloud using service account impersonation and then set your configuration:
-   ```bash
-   gcloud auth application-default login --impersonate-service-account=${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
-   gcloud config set auth/impersonate_service_account ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
 1. Run `init` and `plan` and review output for environment shared.
@@ -233,11 +230,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
    ```bash
    ./tf-wrapper.sh apply shared
-   ```
-
-1. Unset your gcloud configuration to remove impersonation:
-   ```bash
-   gcloud config unset auth/impersonate_service_account
    ```
 
 1. Push your plan branch to trigger a plan for all environments. Because the
@@ -273,6 +265,13 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git checkout -b non-production
    git push origin non-production
    ```
+
+1. Before executing the next step, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
+
+   ```bash
+   unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+   ```
+
 
 1. You can now move to the instructions in the [4-projects](../4-projects/README.md) step.
 

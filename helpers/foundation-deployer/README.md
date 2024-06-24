@@ -6,7 +6,7 @@ Helper tool to deploy the Terraform example foundation.
 
 ### Validate required tools
 
-- Check if required tools, Go 1.18+, Terraform 1.3.0+, gcloud 393.0.0+, and Git 2.28.0+, are installed:
+- Check if required tools, Go 1.18+, Terraform 1.5.7+, gcloud 393.0.0+, and Git 2.28.0+, are installed:
 
     ```bash
     go version
@@ -163,5 +163,5 @@ Im addition to the variables declared in the file `global.tfvars` for configurin
 - [Go](https://go.dev/doc/install) 1.18+
 - [Google Cloud SDK](https://cloud.google.com/sdk/install) version 393.0.0+
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) version 2.28.0+
-- [Terraform](https://www.terraform.io/downloads.html) version 1.3.0+
+- [Terraform](https://www.terraform.io/downloads.html) version 1.5.7+
 - See `0-bootstrap` README for additional IAM [requirements](../../0-bootstrap/README.md#prerequisites) on the user deploying the Foundation.

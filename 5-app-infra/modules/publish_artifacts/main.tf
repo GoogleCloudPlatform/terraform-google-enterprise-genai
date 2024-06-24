@@ -20,6 +20,13 @@ resource "google_project_service_identity" "artifact_registry_agent" {
   service = "artifactregistry.googleapis.com"
 }
 
+resource "google_project_service_identity" "storage_agent" {
+  provider = google-beta
+
+  project = var.project_id
+  service = "storage.googleapis.com"
+}
+
 resource "google_kms_crypto_key_iam_member" "artifact-kms-key-binding" {
   crypto_key_id = var.kms_crypto_key
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -109,6 +116,8 @@ resource "google_kms_crypto_key_iam_member" "storage_agent" {
   crypto_key_id = var.kms_crypto_key
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+
+  depends_on = [ google_project_service_identity.storage_agent ]
   #member = "serviceAccount:${google_project_service_identity.storage.email}"
 }
 

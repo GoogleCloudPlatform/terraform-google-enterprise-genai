@@ -241,17 +241,17 @@ You will be doing this procedure for each environment (`development`, `non-produ
     export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
     ```
 
-    Make sure your git is checked out to the `non-production` branch by running `git checkout nonproduction` on `GCP_ENVIRONMENTS_PATH`.
+    Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout nonproduction)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
     ```bash
-    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_bucket_name)
-    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_project_id)
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
     ```
 
 3. Validate the variable values.
@@ -355,7 +355,7 @@ Proceed with these steps only if `Option 1` is not chosen.
 
 After making these modifications, you can follow the README.md procedure for `2-environment` step on foundation, make sure you **change the organization policy after running the steps on foundation**.
 
-1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md), or go to [3-networks-hub-and-spoke](../3-networks-hub-and-spoke/README.md) to use the [Hub and Spoke](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke) network mode.
+1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md).
 
 ### Deploying with Jenkins
 
