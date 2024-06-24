@@ -142,7 +142,6 @@ function appinfra(){
     mv 5-app-infra/business_unit_1/production/common.auto.tfvars.disabled 5-app-infra/business_unit_1/production/common.auto.tfvars
 }
 
-
 # parse args
 for arg in "$@"
 do

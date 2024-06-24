@@ -24,7 +24,7 @@ This will be addressed in the next version of the blueprint guide.
 
 #### Naming
 - The Service Account naming is not aligned to the blueprint guide. Naming will be modified accordingly in a future release.
-- The infrastructure pipeline project naming (`prj-buN-c-infra-pipeline`) is not aligned to the blueprint guide(`prj-buN-c-sample-infra-pipeline`). Naming will be modified accordingly in a future release.
+- The infrastructure pipeline project naming (`prj-ml-buN-c-infra-pipeline`) is not aligned to the blueprint guide(`prj-ml-buN-c-sample-infra-pipeline`). Naming will be modified accordingly in a future release.
 
 #### Networking
 - The “allow-windows-activation” rule that exists in the code is not explicitly called out in the guide.

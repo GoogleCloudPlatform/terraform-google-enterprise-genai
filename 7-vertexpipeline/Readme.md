@@ -1,6 +1,5 @@
 Machine learning pipeline from development to production
 
-
 # Use case
 This example illustrates the promotion of a a machine learning pipeline from an interactive tenant to a production tenant. The example specifically trains a model on a [UCI census dataset](%28https://archive.ics.uci.edu/dataset/20/census+income%29)
 for binary classification.
@@ -18,7 +17,6 @@ In the first step, a bigquery dataset is created using a bigquery operator offer
         project=project,
         location=region,
     )
-
 
 Note that the default encryption key for bigquery is set after the projecet inflation so you don't have to pass the key in every query.
 
@@ -127,7 +125,7 @@ The following method runs the pipeline. Note that a kms encryption key is suppli
     display_name=f"census_income_{timestamp}",
     template_path='./common/vertex-ai-pipeline/pipeline_package.yaml',
     pipeline_root=pipelineroot,
-    encryption_spec_key_name='projects/prj-d-kms-ui2h/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3machine-learning',
+    encryption_spec_key_name='projects/prj-d-kms-ui2h/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-ml-machine-learning',
     parameter_values={
         "create_bq_dataset_query": create_bq_dataset_query,
         "bq_dataset": data_config['bq_dataset'],
@@ -188,6 +186,3 @@ Note that the is triggered by cloud build (for the first time) and cloud compose
 - The bigquery service agent on the non-prod project will need EncryptDecrypt permission on the kms key so that it can create the dataset using the CMEK key.
  - First, a non-prod service account to take care of components that run in non-prod (dataset creation, dataflow, training, and evaluation). This could simply be the default compute engine service account for the non-prod tenant. This service account needs write permission to upload the trained model from the non-prod bucket to the Vertex environment of prod.
  - Another service account that has permissions on the prod tenant in order to deploy the model and the model monitoring job. This could simply be the default service account for the prod tenant. This service account will also need read permission on bigquery of non-prod where the data exists so that the monitoring job deployed by this service account in prod
-
-
-

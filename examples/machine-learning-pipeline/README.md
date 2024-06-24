@@ -76,15 +76,15 @@ Below, you can find the values that will need to be applied to `common.auto.tfva
 In `common.auto.tfvars` update your `perimeter_additional_members` to include:
 
   ```
-  "serviceAccount:sa-tf-cb-bu3-machine-learning@[prj_c_bu3infra_pipeline_project_id].iam.gserviceaccount.com"
+  "serviceAccount:sa-tf-cb-ml-machine-learning@[prj_c_ml_infra_pipeline_project_id].iam.gserviceaccount.com"
   "serviceAccount:sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com"
   "serviceAccount:service-[prj_d_logging_project_number]@gs-project-accounts.iam.gserviceaccount.com"
   "serviceAccount:[prj_d_machine_learning_project_number]@cloudbuild.gserviceaccount.com"
   ```
 
   ```bash
-   export prj_c_bu3infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
-   echo "prj_c_bu3infra_pipeline_project_id = ${prj_c_bu3infra_pipeline_project_id}"
+   export prj_c_ml-infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
+   echo "prj_c_ml-infra_pipeline_project_id = ${prj_c_ml_infra_pipeline_project_id}"
 
    export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
    echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
@@ -104,7 +104,7 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
    export project_d_logging_project_number=$(gsutil cat gs://$backend_bucket/terraform/environments/development/default.tfstate | jq -r '.outputs.env_log_project_number.value')
    echo "project_d_logging_project_number = ${project_d_logging_project_number}"
 
-   prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/business_unit_3/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
+   prj_d_machine_learning_project_number=$(gsutil cat gs://$backend_bucket_projects/terraform/projects/ml_business_unit/development/default.tfstate | jq -r '.outputs.machine_learning_project_number.value')
    echo "project_d_machine_learning_number = ${prj_d_machine_learning_project_number}"
   ```
 
@@ -131,7 +131,7 @@ Once there, select the perimeter that is associated with the environment (eg. `d
           "resources" = [
               "projects/[your-environment-shared-restricted-project-number]",
               "projects/[your-environment-kms-project-number]",
-              "projects/[your-environment-bu3machine-learning-number]",
+              "projects/[your-environment-mlmachine-learning-number]",
           ]
           "operations" = {
               "compute.googleapis.com" = {
@@ -190,8 +190,8 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
             "from" = {
             "identity_type" = ""
             "identities" = [
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
-                "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
+                "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
+                "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
             ]
             },
             "to" = {
@@ -232,7 +232,7 @@ Add in your dags in the `dags` folder.  Any changes to this folder will trigger 
 
 Have a github token for access to your repository ready, along with an [Application Installation Id](https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github#connecting_a_github_host_programmatically) and the remote uri to your repository.
 
-These environmental project inflations are closely tied to the `service-catalog` project that have already deployed.  By now, the `bu3-service-catalog` should have been inflated.  `service-catalog` contains modules that are being deployed in an interactive (development) environment. Since they already exist; they can be used as terraform modules for operational (non-production, production) environments.  This was done in order to avoid code redundancy. One area for all `machine-learning` deployments.
+These environmental project inflations are closely tied to the `service-catalog` project that have already deployed.  By now, the `ml-service-catalog` should have been inflated.  `service-catalog` contains modules that are being deployed in an interactive (development) environment. Since they already exist; they can be used as terraform modules for operational (non-production, production) environments.  This was done in order to avoid code redundancy. One area for all `machine-learning` deployments.
 
 Under `modules/base_env/main.tf` you will notice all module calls are using `git` links as sources.  These links refer to the `service-catalog` cloud source repository we have already set up.
 
@@ -245,7 +245,7 @@ Clone the repo at the same level of the `terraform-google-enterprise-genai` fold
 Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get the Cloud Build Project ID.
 
    ```bash
-   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="gcp-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="gcp-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
    echo ${INFRA_PIPELINE_PROJECT_ID}
 
    gcloud source repos clone gcp-policies gcp-policies-app-infra --project=${INFRA_PIPELINE_PROJECT_ID}
@@ -279,18 +279,18 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    cd ..
    ```
 
-1. Clone the `bu3-machine-learning` repo.
+1. Clone the `ml-machine-learning` repo.
 
    ```bash
-   gcloud source repos clone bu3-machine-learning --project=${INFRA_PIPELINE_PROJECT_ID}
+   gcloud source repos clone ml-machine-learning --project=${INFRA_PIPELINE_PROJECT_ID}
    ```
 
 1. Navigate into the repo, change to non-main branch and copy contents of foundation to new repo.
-   All subsequent steps assume you are running them from the bu3-machine-learning directory.
+   All subsequent steps assume you are running them from the ml-machine-learning directory.
    If you run them from another directory, adjust your copy paths accordingly.
 
    ```bash
-   cd bu3-machine-learning
+   cd ml-machine-learning
    git checkout -b plan
 
    cp -RT ../terraform-google-enterprise-genai/examples/machine-learning-pipeline .
@@ -326,7 +326,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Use `terraform output` to retrieve the Service Catalog project-id from the projects step and update values in `module/base_env`.
 
    ```bash
-   export service_catalog_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   export service_catalog_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -raw service_catalog_project_id)
    echo "service_catalog_project_id = ${service_catalog_project_id}"
 
    ## Linux
@@ -336,7 +336,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
-   export backend_bucket=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-machine-learning"' --raw-output)
+   export backend_bucket=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-machine-learning"' --raw-output)
    echo "backend_bucket = ${backend_bucket}"
 
    ## Linux
@@ -349,7 +349,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `modules/base_env/main.tf` with the name of service catalog project id to complete the git fqdn for module sources:
 
    ```bash
-   export service_catalog_project_id=$(terraform -chdir="../gcp-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   export service_catalog_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -raw service_catalog_project_id)
 
    ##LINUX
    sed -i "s/SERVICE-CATALOG-PROJECT-ID/${service_catalog_project_id}/" ./modules/base_env/main.tf
@@ -373,7 +373,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    github_token="YOUR-GITHUB-TOKEN"
 
    for env in "${envs[@]}"; do
-      output=$(terraform -chdir="../gcp-projects/business_unit_3/${env}" output -raw machine_learning_project_id)
+      output=$(terraform -chdir="../gcp-projects/ml_business_unit/${env}" output -raw machine_learning_project_id)
       project_ids+=("$output")
    done
 
@@ -446,7 +446,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    ```
 
-1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the bu3 Terraform service account.
+1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the ml Terraform service account.
 
 1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
@@ -454,10 +454,10 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    member="user:$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")"
    echo ${member}
 
-   project_id=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   project_id=$(terraform -chdir="../../4-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
    echo ${project_id}
 
-   terraform_sa=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
+   terraform_sa=$(terraform -chdir="../../4-projects/ml_business_unit/shared/" output -json terraform_service_accounts | jq '."ml-machine-learning"' --raw-output)
    echo ${terraform_sa}
 
    gcloud iam service-accounts add-iam-policy-binding ${terraform_sa} --project ${project_id} --member="${member}" --role="roles/iam.serviceAccountTokenCreator"
@@ -466,7 +466,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
-   export backend_bucket=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -json state_buckets | jq '."bu3-machine-learning"' --raw-output)
+   export backend_bucket=$(terraform -chdir="../../4-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-machine-learning"' --raw-output)
    echo "backend_bucket = ${backend_bucket}"
 
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
@@ -475,7 +475,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 1. Update `modules/base_env/main.tf` with Service Catalog Project Id.
 
    ```bash
-   export service_catalog_project_id=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -raw service_catalog_project_id)
+   export service_catalog_project_id=$(terraform -chdir="../../4-projects/ml_business_unit/shared/" output -raw service_catalog_project_id)
    echo "service_catalog_project_id = ${service_catalog_project_id}"
 
    ## Linux
@@ -490,10 +490,10 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
 1. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
 
    ```bash
-   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -raw cloudbuild_project_id)
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../4-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
    echo ${INFRA_PIPELINE_PROJECT_ID}
 
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../4-projects/business_unit_3/shared/" output -json terraform_service_accounts | jq '."bu3-machine-learning"' --raw-output)
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../4-projects/ml_business_unit/shared/" output -json terraform_service_accounts | jq '."ml-machine-learning"' --raw-output)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
@@ -568,9 +568,9 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
   In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance
   ```bash
-   ml_project_dev=$(terraform -chdir="gcp-projects/business_unit_3/development" output -json)
-   ml_project_nonprd=$(terraform -chdir="gcp-projects/business_unit_3/non-production" output -json)
-   ml_project_prd=$(terraform -chdir="gcp-projects/business_unit_3/production" output -json)
+   ml_project_dev=$(terraform -chdir="gcp-projects/ml_business_unit/development" output -json)
+   ml_project_nonprd=$(terraform -chdir="gcp-projects/ml_business_unit/non-production" output -json)
+   ml_project_prd=$(terraform -chdir="gcp-projects/ml_business_unit/production" output -json)
 
   projects=( "$ml_project_dev" "$ml_project_nonprd" "$ml_project_prd" )
 
@@ -586,18 +586,18 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 1. Now that machine learning's projects have all been inflated, please _return to gcp-projects_ and update COMMON.AUTO.TFVARS with this __additional__ information under `perimeter_additional_members`:
 
     ```
-    "serviceAccount:service-[prj-n-bu3machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
-    "serviceAccount:[prj-n-bu3machine-learning-number]@cloudbuild.gserviceaccount.com",
-    "serviceAccount:[prj-n-bu3machine-learning-number]-compute@developer.gserviceaccount.com",
-    "serviceAccount:[prj-p-bu3machine-learning-number]@cloudbuild.gserviceaccount.com",
-    "serviceAccount:service-[prj-p-bu3machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
+    "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
+    "serviceAccount:[prj-n-ml-machine-learning-number]@cloudbuild.gserviceaccount.com",
+    "serviceAccount:[prj-n-ml-machine-learning-number]-compute@developer.gserviceaccount.com",
+    "serviceAccount:[prj-p-ml-machine-learning-number]@cloudbuild.gserviceaccount.com",
+    "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
     ```
 
 2. optional - run the below command to generate a list of the above changes needed to COMMON.AUTO.TFVARS
 
     ```bash
-    ml_n=$(terraform -chdir="gcp-projects/business_unit_3/non-production" output -raw machine_learning_project_number)
-    ml_p=$(terraform -chdir="gcp-projects/business_unit_3/production" output -raw machine_learning_project_number)
+    ml_n=$(terraform -chdir="gcp-projects/ml_business_unit/non-production" output -raw machine_learning_project_number)
+    ml_p=$(terraform -chdir="gcp-projects/ml_business_unit/production" output -raw machine_learning_project_number)
 
     echo "serviceAccount:service-${ml_n}@dataflow-service-producer-prod.iam.gserviceaccount.com",
     echo "serviceAccount:${ml_n}@cloudbuild.gserviceaccount.com",
@@ -611,7 +611,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 1. Add in more agents to the DEVELOPMENT.AUTO.TFVARS file under `egress_policies`.
 Notably:
 
-   * "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
+   * "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
 
     This should be added under identities.  It should look like this::
 
@@ -622,9 +622,9 @@ Notably:
               "from" = {
               "identity_type" = ""
               "identities" = [
-                  "serviceAccount:bq-[prj-d-bu3machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition
-                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
-                  "serviceAccount:service-[prj-d-bu3machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
+                  "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition
+                  "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
+                  "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
               ]
               },
               "to" = {
@@ -650,11 +650,11 @@ Notably:
         "from" = {
           "identity_type" = ""
           "identities" = [
-            "serviceAccount:service-[prj-d-bu3machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+            "serviceAccount:service-[prj-d-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
           ]
         },
         "to" = {
-          "resources" = ["projects/[prj-c-bu3artifacts-number]"]
+          "resources" = ["projects/[prj-c-ml-artifacts-number]"]
           "operations" = {
             "artifactregistry.googleapis.com" = {
               "methods" = ["*"]
@@ -667,11 +667,11 @@ Notably:
         "from" = {
           "identity_type" = ""
           "identities" = [
-            "serviceAccount:service-[prj-n-bu3machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
+            "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
           ]
         },
         "to" = {
-          "resources" = ["projects/[prj-n-bu3machine-learning-number]"]
+          "resources" = ["projects/[prj-n-ml-machine-learning-number]"]
           "operations" = {
             "compute.googleapis.com" = {
               "methods" = ["*"]
@@ -691,7 +691,7 @@ Notably:
       },
       "to" = {
         "resources" = [
-          "projects/[prj-c-bu3artifacts-number]"
+          "projects/[prj-c-ml-artifacts-number]"
         ]
         "operations" = {
           "artifactregistry.googleapis.com" = {
@@ -705,11 +705,11 @@ Notably:
       "from" = {
         "identity_type" = ""
         "identities" = [
-          "serviceAccount:service-[prj-n-bu3machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+          "serviceAccount:service-[prj-n-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
         ]
       },
       "to" = {
-        "resources" = ["projects/[prj-c-bu3artifacts-number]"]
+        "resources" = ["projects/[prj-c-ml-artifacts-number]"]
         "operations" = {
           "artifactregistry.googleapis.com" = {
             "methods" = ["*"]
@@ -722,7 +722,7 @@ Notably:
       "from" = {
         "identity_type" = ""
         "identities" = [
-          "serviceAccount:service-[prj-n-bu3machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
+          "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
         ]
       },
       "to" = {
@@ -738,12 +738,12 @@ Notably:
       "from" = {
         "identity_type" = ""
         "identities" = [
-          "serviceAccount:[prj-n-bu3machine-learning-number]-compute@developer.gserviceaccount.com",
-          "serviceAccount:service-[prj-d-bu3machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
+          "serviceAccount:[prj-n-ml-machine-learning-number]-compute@developer.gserviceaccount.com",
+          "serviceAccount:service-[prj-d-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
         ]
       },
       "to" = {
-        "resources" = ["projects/[prj-p-bu3machine-learning-number]"]
+        "resources" = ["projects/[prj-p-ml-machine-learning-number]"]
         "operations" = {
           "aiplatform.googleapis.com" = {
             "methods" = ["*"]
@@ -766,15 +766,15 @@ Notably:
       "from" = {
         "identity_type" = ""
         "identities" = [
-          "serviceAccount:service-[prj-p-bu3machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
-          "serviceAccount:service-[prj-p-bu3machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
+          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
           "serviceAccount:cloud-cicd-artifact-registry-copier@system.gserviceaccount.com",
         ]
       },
       "to" = {
         "resources" = [
-          "projects/[prj-n-bu3machine-learning-number]",
-          "projects/[prj-c-bu3artifacts-number]",
+          "projects/[prj-n-ml-machine-learning-number]",
+          "projects/[prj-c-ml-artifacts-number]",
         ]
         "operations" = {
           "artifactregistry.googleapis.com" = {
@@ -795,7 +795,7 @@ Notably:
 
 Once you have set up service catalog and attempt to deploy out terraform code, there is a high chance you will encounter this error:
 `Permission denied; please check you have the correct IAM permissions and APIs enabled.`
-This is  due to a VPC Service control error that until now, is impossible to add into the egress policy.  Go to `prj-d-bu3machine-learning` project and view the logs, filtering for ERRORS.  There will be a VPC Service Controls entry that has an `egressViolation`.  It should look something like the following:
+This is  due to a VPC Service control error that until now, is impossible to add into the egress policy.  Go to `prj-d-ml-machine-learning` project and view the logs, filtering for ERRORS.  There will be a VPC Service Controls entry that has an `egressViolation`.  It should look something like the following:
 ```
 egressViolations: [
    0: {
@@ -926,14 +926,14 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
     |variable|definition|example value|How to obtain|
     |--------|----------|-------------|-------------|
-    |PROJECT_ID|The id of the non-prod project|`{none-prod-project-id}`|From the project's menu in console navigate to the `fldr-non-production/fldr-non-production-bu3` folder; here you can find the machine learning project in non-prod (`prj-n-bu3machine-learning`) and obtain its' ID|
-    |BUCKET_URI|URI of the non-prod bucket|`gs://non-prod-bucket`|From the project menu in console navigate to the non-prod ML project `fldr-non-production/fldr-non-production-bu3/prj-n-bu3machine-learning` project, navigate to cloud storage and copy the name of the bucket available there|
+    |PROJECT_ID|The id of the non-prod project|`{none-prod-project-id}`|From the project's menu in console navigate to the `fldr-non-production/fldr-non-production-ml` folder; here you can find the machine learning project in non-prod (`prj-n-ml-machine-learning`) and obtain its' ID|
+    |BUCKET_URI|URI of the non-prod bucket|`gs://non-prod-bucket`|From the project menu in console navigate to the non-prod ML project `fldr-non-production/fldr-non-production-ml/prj-n-ml-machine-learning` project, navigate to cloud storage and copy the name of the bucket available there|
     |REGION|The region for pipeline jobs|Can be left as default `us-central1`|
-    |PROD_PROJECT_ID|ID of the prod project|`prod-project-id`|In console's project menu, navigate to the `fldr-production/fldr-production-bu3` folder; here you can find the machine learning project in prod (`prj-p-bu3machine-learning`) and obtain its' ID|
-    |Image|The image artifact used to run the pipeline components. The image is already built and pushed to the artifact repository in your artifact project under the common folder|`f"us-central1-docker.pkg.dev/{{artifact-project}}/{{artifact-repository}}/vertexpipeline:v2"`|Navigate to `fldr-common/prj-c-bu3artifacts` project. Navigate to the artifact registry repositories in the project to find the full name of the image artifact.|
+    |PROD_PROJECT_ID|ID of the prod project|`prod-project-id`|In console's project menu, navigate to the `fldr-production/fldr-production-ml` folder; here you can find the machine learning project in prod (`prj-p-ml-machine-learning`) and obtain its' ID|
+    |Image|The image artifact used to run the pipeline components. The image is already built and pushed to the artifact repository in your artifact project under the common folder|`f"us-central1-docker.pkg.dev/{{artifact-project}}/{{artifact-repository}}/vertexpipeline:v2"`|Navigate to `fldr-common/prj-c-ml-artifacts` project. Navigate to the artifact registry repositories in the project to find the full name of the image artifact.|
     |DATAFLOW_SUBNET|The shared subnet in non-prod env required to run the dataflow job|`https://www.googleapis.com/compute/v1/projects/{non-prod-network-project}/regions/us-central1/subnetworks/{subnetwork-name}`|Navigate to the `fldr-network/prj-n-shared-restricted` project. Navigate to the VPC networks and under the subnets tab, find the name of the network associated with your region (us-central1)|
-    |SERVICE_ACCOUNT|The service account used to run the pipeline and it's components such as the model monitoring job. This is the compute default service account of non-prod if you don't plan on using another costume service account|`{non-prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the non-prod project `fldr-non-production/fldr-non-production-bu3/prj-n-bu3machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
-    |PROD_SERICE_ACCOUNT|The service account used to create endpoint, upload the model, and deploy the model in the prod project. This is the compute default service account of prod if you don't plan on using another costume service account|`{prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the prod project `fldr-production/fldr-production-bu3/prj-p-bu3machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
+    |SERVICE_ACCOUNT|The service account used to run the pipeline and it's components such as the model monitoring job. This is the compute default service account of non-prod if you don't plan on using another costume service account|`{non-prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the non-prod project `fldr-non-production/fldr-non-production-ml/prj-n-ml-machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
+    |PROD_SERICE_ACCOUNT|The service account used to create endpoint, upload the model, and deploy the model in the prod project. This is the compute default service account of prod if you don't plan on using another costume service account|`{prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the prod project `fldr-production/fldr-production-ml/prj-p-ml-machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
     |deployment_config['encryption']|The kms key for the prod env. This key is used to encrypt the vertex model, endpoint, model deployment, and model monitoring.|`projects/{prod-kms-project}/locations/us-central1/keyRings/{keyring-name}/cryptoKeys/{key-name}`|Navigate to `fldr-production/prj-n-kms`, navigate to the Security/Key management in that project to find the key in `sample-keyring` keyring of your target region `us-central1`|
     |encryption_spec_key_name|The name of the encryption key for the non-prod env. This key is used to create the vertex pipeline job and it's associated metadata store|`projects/{non-prod-kms-project}/locations/us-central1/keyRings/{keyring-name}/cryptoKeys/{key-name}`|Navigate to `fldr-non-production/prj-n-kms`, navigate to the Security/Key management in that project to find the key in `sample-keyring` keyring of your target region `us-central1`|
     |monitoring_config['email']|The email that Vertex AI monitoring will email alerts to|`your email`|your email associated with your gcp account|
