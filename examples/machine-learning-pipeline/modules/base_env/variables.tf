@@ -29,7 +29,7 @@ variable "environment_code" {
 }
 
 variable "business_code" {
-  description = "Business unit code (ie. bu3)"
+  description = "Business unit code (ie. ml)"
   type        = string
 
 }

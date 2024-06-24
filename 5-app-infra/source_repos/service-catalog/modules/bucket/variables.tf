@@ -16,7 +16,7 @@
 
 variable "name" {
   type        = string
-  description = "name of bucket"
+  description = "Name of bucket."
 }
 
 variable "region" {
@@ -31,8 +31,8 @@ variable "region" {
 
 variable "dual_region_locations" {
   type        = list(string)
+  description = "Dual region description."
   default     = []
-  description = "dual region description"
   validation {
     condition     = length(var.dual_region_locations) == 0 || length(var.dual_region_locations) == 2
     error_message = "Exactly 0 or 2 regions expected."
@@ -47,7 +47,7 @@ variable "force_destroy" {
 
 variable "versioning_enabled" {
   type        = bool
-  description = "Whether to enable versioning or not"
+  description = "Whether to enable versioning or not."
   default     = true
 }
 
@@ -103,14 +103,14 @@ variable "lifecycle_rules" {
 
 variable "retention_policy" {
   type        = any
+  description = "Map of retention policy values. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket#retention_policy."
   default     = {}
-  description = "Map of retention policy values. Format is the same as described in provider documentation https://www.terraform.io/docs/providers/google/r/storage_bucket#retention_policy"
 }
 
 variable "object_folder_temporary_hold" {
   type        = bool
-  default     = false
   description = "Set root folder temporary hold according to security control GCS-CO-6.16, toggle off to allow for object deletion."
+  default     = false
 }
 
 #Labeling Tag
@@ -119,8 +119,8 @@ variable "object_folder_temporary_hold" {
 #CRI Profile: PR.IP-2.1 PR.IP-2.2 PR.IP-2.3
 
 variable "labels" {
-  description = "Labels to be attached to the buckets"
   type        = map(string)
+  description = "Labels to be attached to the buckets."
   default = {
     #Labelling tag
     #Control ID: GCS-CO-6.4
@@ -146,20 +146,20 @@ variable "labels" {
 }
 
 variable "add_random_suffix" {
-  description = "whether to add a random suffix to the bucket name"
   type        = bool
+  description = "Whether to add a random suffix to the bucket name."
   default     = false
 }
 
 variable "uniform_bucket_level_access" {
-  description = "Whether to have uniform access levels or not"
   type        = bool
+  description = "Whether to have uniform access levels or not."
   default     = true
 }
 
 variable "storage_class" {
   type        = string
-  description = "Storage class to create the bucket"
+  description = "Storage class to create the bucket."
   default     = "STANDARD"
   validation {
     condition     = contains(["STANDARD", "MULTI_REGIONAL", "REGIONAL", "NEARLINE", "COLDLINE", "ARCHIVE"], var.storage_class)
@@ -168,19 +168,31 @@ variable "storage_class" {
 }
 
 variable "requester_pays" {
-  description = "Enables Requester Pays on a storage bucket."
   type        = bool
+  description = "Enables Requester Pays on a storage bucket."
   default     = false
 }
 
 variable "gcs_bucket_prefix" {
-  description = "Name prefix to be used for GCS Bucket"
   type        = string
+  description = "Name prefix to be used for GCS Bucket."
   default     = "bkt"
 }
 
 variable "project_id" {
   type        = string
-  description = "Optional Project ID."
-  default     = null
+  description = "Project ID to create resources."
+}
+
+variable "kms_keyring" {
+  type        = string
+  description = <<EOF
+The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as the other resources and the same environment.
+This value can be obtained by running "gcloud kms keyrings list --project=KMS_PROJECT_ID --location=REGION."
+EOF
+}
+
+variable "log_bucket" {
+  type        = string
+  description = "Bucket to store logs from the created bucket. This is the Env-level Log Bucket creted on 2-environments."
 }

@@ -12,7 +12,7 @@ EVAL_TABLE_ID           = 'census_eval_table_composer'
 RUNNER                  = "DataflowRunner"
 REGION                  = "us-central1"
 JOB_NAME                = "census-ingest-composer"
-default_kms_key_name="projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3machine-learning"
+default_kms_key_name="projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-ml-machine-learning"
 
 default_args = {
     'owner'           : 'airflow',

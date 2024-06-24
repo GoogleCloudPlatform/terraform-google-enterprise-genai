@@ -45,7 +45,7 @@ Hub and Spoke network model. It also sets up the global DNS hub.</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy a <a href="https://cloud.google.com/compute/">Compute Engine</a> instance in one of the business unit projects using the infra pipeline setup in 4-projects.</td>
+<td>Deploy a service catalog and artifacts pipeline.</td>
 </tr>
 </tbody>
 </table>

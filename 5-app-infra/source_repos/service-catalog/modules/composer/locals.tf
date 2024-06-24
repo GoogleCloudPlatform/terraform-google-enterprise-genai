@@ -34,8 +34,6 @@ locals {
 
   private_service_connect_ip = "10.116.46.2"
 
-  keyring_name = "sample-keyring"
-
   sa_name = format("%s-%s", data.google_project.project.labels.env_code, var.name)
 
   labels = merge(

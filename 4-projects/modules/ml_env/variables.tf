@@ -15,12 +15,12 @@
  */
 
 variable "business_code" {
-  description = "The business code (ex. bu1)."
+  description = "The business code (ex. ml)."
   type        = string
 }
 
 variable "business_unit" {
-  description = "The business (ex. business_unit_1)."
+  description = "The business (ex. ml_business_unit)."
   type        = string
 }
 
