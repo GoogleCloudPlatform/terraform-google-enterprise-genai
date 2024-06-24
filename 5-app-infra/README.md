@@ -360,6 +360,14 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
 
+1. Update the `log_bucket` variable with the value of the `logs_export_storage_bucket_name`.
+
+   ```bash
+   export log_bucket=$(terraform -chdir="../gcp-org/envs/shared" output -raw logs_export_storage_bucket_name)
+   echo "log_bucket = ${log_bucket}"
+   sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./common.auto.tfvars
+   ```
+
 1. Commit changes.
 
    ```bash

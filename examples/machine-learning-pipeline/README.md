@@ -44,7 +44,7 @@ up the global DNS hub.</td>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai)
+[terraform-google-enterprise-genai README](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai)
 file.
 
 ## Purpose

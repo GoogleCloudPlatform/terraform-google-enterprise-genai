@@ -45,13 +45,13 @@ Hub and Spoke network model. It also sets up the global DNS hub</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy service catalog and artifacts pipeline.</td>
+<td>Deploys Service Catalog Pipeline and Custom Artifacts Pipeline.</td>
 </tr>
 </tbody>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai).
+[terraform-google-enterprise-genai README](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai).
 
 ## Purpose
 
@@ -59,7 +59,8 @@ The purpose of this step is to set up the folder structure, projects, and infras
 
 For machine learning business unit, a shared `infra-pipeline` project is created along with Cloud Build triggers, CSRs for application infrastructure code and Google Cloud Storage buckets for state storage.
 
-This step follows the same [conventions](https://github.com/terraform-google-modules/terraform-google-enterprise-genai#branching-strategy) as the Foundation pipeline deployed in [0-bootstrap](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md).
+This step follows the same [conventions](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai#branching-strategy) as the Foundation pipeline deployed in [0-bootstrap](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md).
+A custom [workspace](https://github.com/terraform-google-modules/terraform-google-bootstrap/blob/master/modules/tf_cloudbuild_workspace/README.md) (`bu1-example-app`) is created by this pipeline and necessary roles are granted to the Terraform Service Account of this workspace by enabling variable `sa_roles` as shown in this [example](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/4-projects/modules/base_env/example_base_shared_vpc_project.tf).
 
 This pipeline is utilized to deploy resources in projects across development/non-production/production in step [5-app-infra](../5-app-infra/README.md).
 Other Workspaces can also be created to isolate deployments if needed.
@@ -71,9 +72,9 @@ Other Workspaces can also be created to isolate deployments if needed.
 1. 2-environments executed successfully.
 1. 3-networks executed successfully.
 
-1. For the manual step described in this document, you need [Terraform](https://www.terraform.io/downloads.html) version 1.3.0 or later to be installed.
+1. For the manual step described in this document, you need [Terraform](https://www.terraform.io/downloads.html) version 1.5.7 or later to be installed.
 
-   **Note:** Make sure that you use version 1.3.0 or later of Terraform throughout this series. Otherwise, you might experience Terraform state snapshot lock errors.
+   **Note:** Make sure that you use version 1.5.7 or later of Terraform throughout this series. Otherwise, you might experience Terraform state snapshot lock errors.
 
    **Note 2:** As mentioned in 0-bootstrap [README note 2](../0-bootstrap/README.md#deploying-with-cloud-build) at the end of Cloud Build deploy section, make sure that you have requested at least 50 additional projects for the **projects step service account**, otherwise you may face a project quota exceeded error message during the following steps and you will need to apply the fix from [this entry](../docs/TROUBLESHOOTING.md#attempt-to-run-4-projects-step-without-enough-project-quota) of the Troubleshooting guide in order to continue.
 
@@ -131,7 +132,11 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
 
+   export projects_gcs_bucket_tfstate=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
+   echo "projects_gcs_bucket_tfstate = ${projects_gcs_bucket_tfstate}"
+
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_PROJECTS_BACKEND/${projects_gcs_bucket_tfstate}/" $i; done
    ```
 
 1. Commit changes.
@@ -155,12 +160,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
-1. Log into gcloud using service account impersonation and then set your configuration:
-   ```bash
-   gcloud auth application-default login --impersonate-service-account=${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
-   gcloud config set auth/impersonate_service_account ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
-   ```
-
 1. Run `init` and `plan` and review output for environment shared.
 
    ```bash
@@ -178,11 +177,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
    ```bash
    ./tf-wrapper.sh apply shared
-   ```
-
-1. Unset your gcloud configuration to remove impersonation:
-   ```bash
-   gcloud config unset auth/impersonate_service_account
    ```
 
 1. Push your plan branch to trigger a plan for all environments. Because the

@@ -45,13 +45,13 @@ hub-and-spoke network model. It also sets up the global DNS hub.</td>
 </tr>
 <tr>
 <td><a href="../5-app-infra">5-app-infra</a></td>
-<td>Deploy a service catalog and artifacts pipeline.</td>
+<td>Deploys Service Catalog Pipeline and Custom Artifacts Pipeline.</td>
 </tr>
 </tbody>
 </table>
 
 For an overview of the architecture and the parts, see the
-[terraform-google-enterprise-genai README](https://github.com/terraform-google-modules/terraform-google-enterprise-genai).
+[terraform-google-enterprise-genai README](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai).
 
 ## Purpose
 
