@@ -134,7 +134,6 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
    export projects_gcs_bucket_tfstate=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "projects_gcs_bucket_tfstate = ${projects_gcs_bucket_tfstate}"
-   
 
    sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_PROJECTS_BACKEND/${projects_gcs_bucket_tfstate}/" $i; done
