@@ -63,6 +63,48 @@ gcp-projects
 terraform-google-enterprise-genai
 ```
 
+## Terraform Cloud Build Image Version Update
+
+The codebase uses terraform functionalities that are only available on 1.5.x, therefore, the user need to upgrade the terraform version on the cloud builder and can do so by following the following procedure.
+
+- Navigate to `gcp-bootstrap`.
+
+```bash
+cd gcp-bootstrap
+```
+
+- Open `envs/shared/cb.tf` file, locate the `terraform_version` field under `locals` and update it to 1.5.7.
+
+```terraform
+locals {
+  // terraform version image configuration
+  terraform_version = "1.5.7"
+  // The version of the terraform docker image to be used in the workspace builds
+  docker_tag_version_terraform = "v1"
+  ...
+}
+```
+
+- Initialize and plan shared environment.
+
+```bash
+./tf-wrapper.sh init shared
+./tf-wrapper.sh plan shared
+```
+
+- Apply the modifications and ensure that the build triggered by this modification was applied successfully.
+
+```bash
+./tf-wrapper.sh apply shared
+```
+
+- Commit and the modifications to the repository.
+
+```bash
+git commit -am "Update cb.tf - bump terraform to 1.5.7"
+git push origin plan
+```
+
 ## Policies
 
 ### Update `gcloud terraform vet` policies
@@ -413,14 +455,14 @@ git commit -m "Create env-level keys and env-level logging"
 git push origin development
 ```
 
-### `nonproduction` branch
+### `non-production` branch
 
-- Go to `gcp-environments` repository, and check out on `nonproduction` branch.
+- Go to `gcp-environments` repository, and check out on `non-production` branch.
 
 ```bash
 cd ../gcp-environments
 
-git checkout nonproduction
+git checkout non-production
 ```
 
 - Return to `terraform-google-enterprise-genai` repo.
@@ -555,7 +597,7 @@ variable "project_budget" {
 projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
 ```
 
-- On `gcp-environments/envs/nonproduction/outputs.tf` add the following outputs:
+- On `gcp-environments/envs/non-production/outputs.tf` add the following outputs:
 
 ```terraform
 output "env_log_project_id" {
@@ -622,7 +664,7 @@ git add .
 
 git commit -m "Create env-level keys and env-level logging"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 ### `production` branch
@@ -907,17 +949,17 @@ You will be doing this procedure for each environment (`development`, `non-produ
     export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
     ```
 
-    Make sure your git is checked out to the `non-production` branch by running `git checkout nonproduction` on `GCP_ENVIRONMENTS_PATH`.
+    Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout nonproduction)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
     ```bash
-    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_bucket_name)
-    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_project_id)
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
     ```
 
 3. Validate the variable values.
@@ -1283,14 +1325,14 @@ git commit -m "Create custom fw rules, enable nat, configure dns and service per
 git push origin development
 ```
 
-### `nonproduction` branch on `gcp-networks`
+### `non-production` branch on `gcp-networks`
 
-- Go to `gcp-networks` repository, and check out on `nonproduction` branch.
+- Go to `gcp-networks` repository, and check out on `non-production` branch.
 
 ```bash
 cd ../gcp-networks
 
-git checkout nonproduction
+git checkout non-production
 ```
 
 #### Private DNS zone configuration (non-production)
@@ -1322,7 +1364,7 @@ git add .
 
 git commit -m "Create DNS notebook configuration"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 #### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (non-production)
@@ -1532,7 +1574,7 @@ Commit all changes and push to the current branch.
 git add .
 git commit -m "Create custom fw rules, enable nat, configure dns and service perimeter"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 ### `production` branch on `gcp-networks`
@@ -2001,16 +2043,16 @@ git commit -m "Initialize ML environment"
 git push origin development
 ```
 
-### `nonproduction` branch on `gcp-projects`
+### `non-production` branch on `gcp-projects`
 
-This will create the machine learning nonproduction environment. A Machine Learning project will be hosted under a folder.
+This will create the machine learning non-production environment. A Machine Learning project will be hosted under a folder.
 
 - Go to `gcp-projects` repository and checkout to `plan` branch.
 
 ```bash
 cd ../gcp-projects
 
-git checkout nonproduction
+git checkout non-production
 ```
 
 - Return to GenAI repository.
@@ -2076,7 +2118,7 @@ for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PR
 git add .
 git commit -m "Initialize ML environment"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 ### `production` branch on `gcp-projects`
