@@ -24,7 +24,7 @@ This will be addressed in the next version of the blueprint guide.
 
 #### Naming
 - The Service Account naming is not aligned to the blueprint guide. Naming will be modified accordingly in a future release.
-- The infrastructure pipeline project naming (`prj-buN-c-infra-pipeline`) is not aligned to the blueprint guide(`prj-buN-c-sample-infra-pipeline`). Naming will be modified accordingly in a future release.
+- The infrastructure pipeline project naming (`prj-ml-buN-c-infra-pipeline`) is not aligned to the blueprint guide(`prj-ml-buN-c-sample-infra-pipeline`). Naming will be modified accordingly in a future release.
 
 #### Networking
 - The “allow-windows-activation” rule that exists in the code is not explicitly called out in the guide.
@@ -35,7 +35,7 @@ This will be addressed in the next version of the blueprint guide.
 - Cloud Asset Inventory will be integrated in a future release.
 - The unallocated IP address space in the Shared VPC networks, described in Section 7.3, is currently being used by Private Service Networking in this release.
 
-## [1.x](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/releases/tag/v1.0.0)
+## [1.x](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/releases/tag/v1.0.0)
 ### Code Discrepancies
 
 #### Labeling

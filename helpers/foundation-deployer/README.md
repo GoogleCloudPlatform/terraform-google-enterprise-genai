@@ -6,7 +6,7 @@ Helper tool to deploy the Terraform example foundation.
 
 ### Validate required tools
 
-- Check if required tools, Go 1.18+, Terraform 1.3.0+, gcloud 393.0.0+, and Git 2.28.0+, are installed:
+- Check if required tools, Go 1.18+, Terraform 1.5.7+, gcloud 393.0.0+, and Git 2.28.0+, are installed:
 
     ```bash
     go version
@@ -45,17 +45,17 @@ Helper tool to deploy the Terraform example foundation.
     ```
 
 - Update `global.tfvars` with values from your environment.
-- The `0-bootstrap` README [prerequisites](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
+- The `0-bootstrap` README [prerequisites](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#prerequisites)  section has additional prerequisites needed to run this helper.
 - Variable `code_checkout_path` is the full path to `deploy-directory` directory.
 - Variable `foundation_code_path` is the full path to `terraform-google-enterprise-genai` directory.
 - See the READMEs for the stages for additional information:
-  - [0-bootstrap](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md)
-  - [1-org](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/1-org/README.md)
-  - [2-environments](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/2-environments/README.md)
-  - [3-networks-dual-svpc](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc)
-  - [3-networks-hub-and-spoke](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke)
-  - [4-projects](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/4-projects)
-  - [5-app-infra](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/5-app-infra)
+  - [0-bootstrap](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md)
+  - [1-org](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/1-org/README.md)
+  - [2-environments](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/2-environments/README.md)
+  - [3-networks-dual-svpc](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc)
+  - [3-networks-hub-and-spoke](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke)
+  - [4-projects](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/4-projects)
+  - [5-app-infra](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/5-app-infra)
 
 ### Location
 
@@ -163,5 +163,5 @@ Im addition to the variables declared in the file `global.tfvars` for configurin
 - [Go](https://go.dev/doc/install) 1.18+
 - [Google Cloud SDK](https://cloud.google.com/sdk/install) version 393.0.0+
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) version 2.28.0+
-- [Terraform](https://www.terraform.io/downloads.html) version 1.3.0+
+- [Terraform](https://www.terraform.io/downloads.html) version 1.5.7+
 - See `0-bootstrap` README for additional IAM [requirements](../../0-bootstrap/README.md#prerequisites) on the user deploying the Foundation.

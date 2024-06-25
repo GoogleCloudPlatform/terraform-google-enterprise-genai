@@ -87,12 +87,12 @@ This could be due to init.defaultBranch being set to something other than
 When running the build for the branch `production` in step 3-networks in your **Foundation CI/CD Pipeline** the build fails with:
 
 ```
-state snapshot was created by Terraform v1.x.x, which is newer than current v1.3.0; upgrade to Terraform v1.x.x or greater to work with this state
+state snapshot was created by Terraform v1.x.x, which is newer than current v1.5.7; upgrade to Terraform v1.x.x or greater to work with this state
 ```
 
 **Cause:**
 
-The manual deploy step for the shared environment in [3-networks](../3-networks#deploying-with-cloud-build) was executed with a Terraform version newer than version v1.3.0 used in the **Foundation CI/CD Pipeline**.
+The manual deploy step for the shared environment in [3-networks](../3-networks#deploying-with-cloud-build) was executed with a Terraform version newer than version v1.5.7 used in the **Foundation CI/CD Pipeline**.
 
 **Solution:**
 
@@ -100,7 +100,7 @@ You have two options:
 
 #### Downgrade your local Terraform version
 
-You will need to re-run the deploy of the 3-networks shared environment with Terraform v1.3.0.
+You will need to re-run the deploy of the 3-networks shared environment with Terraform v1.5.7.
 
 Steps:
 
@@ -108,8 +108,8 @@ Steps:
 - Update `backend.tf` with your bucket name from the 0-bootstrap step.
 - Run `terraform destroy` in the folder using the Terraform v1.x.x version.
 - Delete the Terraform state file in `gs://YOUR-TF-STATE-BUCKET/terraform/networks/envs/shared/default.tfstate`. This bucket is in your **Seed Project**.
-- Install Terraform v1.3.0.
-- Re-run the manual deploy of 3-networks shared environment using Terraform v1.3.0.
+- Install Terraform v1.5.7.
+- Re-run the manual deploy of 3-networks shared environment using Terraform v1.5.7.
 
 #### Upgrade your 0-bootstrap runner image Terraform version
 
@@ -117,7 +117,7 @@ Replace `1.x.x` with the actual version of your local Terraform version in the f
 
 - Go to folder `0-bootstrap`.
 - Edit the local `terraform_version` in the Terraform [cb.tf](../0-bootstrap/cb.tf) file:
-  - Upgrade local `terraform_version` from `"1.3.0"` to `"1.x.x"`
+  - Upgrade local `terraform_version` from `"1.5.7"` to `"1.x.x"`
 - Run `terraform init`.
 - Run `terraform plan` and review the output.
 - Run `terraform apply`.
@@ -269,7 +269,7 @@ You will need to mark some Terraform resources as **tainted** in order to trigge
 
 1. In a terminal, navigate to the path where the error is being reported.
 
-   For example, if the unknown project ID is `prj-bu1-p-sample-base-abcd`, you should go to ./gcp-projects/business_unit_1/production (`business_unit_1` due to `bu1` and `production` due to `p`, see the Security Foundations [naming conventions](https://cloud.google.com/architecture/security-foundations/using-example-terraform#naming_conventions) for more information on the projects naming guideline).
+   For example, if the unknown project ID is `prj-ml-p-sample-base-abcd`, you should go to ./gcp-projects/ml_business_unit/production (`ml_business_unit` due to `ml` and `production` due to `p`, see the Security Foundations [naming conventions](https://cloud.google.com/architecture/security-foundations/using-example-terraform#naming_conventions) for more information on the projects naming guideline).
 
    ```bash
    cd ./gcp-projects/<business_unit>/<environment>
@@ -473,4 +473,4 @@ You can get this information from step `0-bootstrap` by running the following co
 
 **Terraform State lock possible causes:**
 
-- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/terraform-google-modules/terraform-google-enterprise-genai/blob/master/build/cloudbuild-tf-apply.yaml#L15).
+- If you realize that the Terraform State lock was due to a build timeout increase the build timeout on [build configuration](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/build/cloudbuild-tf-apply.yaml#L15).

@@ -15,6 +15,12 @@
  */
 
 locals {
+  compute_engine_sa_project_roles = [
+    "roles/logging.logWriter",
+    "roles/storage.objectViewer",
+    "roles/artifactregistry.reader",
+    "roles/artifactregistry.writer",
+  ]
   cf_roles = [
     "roles/pubsub.publisher",
     "roles/eventarc.eventReceiver",
@@ -33,6 +39,14 @@ locals {
   }
 }
 
+data "google_storage_project_service_account" "gcs_sa" {
+  project = var.project_id
+}
+
+data "google_compute_default_service_account" "default" {
+  project = var.project_id
+}
+
 // Service Accounts
 resource "google_project_service_identity" "service_sa" {
   for_each = local.services
@@ -42,10 +56,6 @@ resource "google_project_service_identity" "service_sa" {
   service = each.value
 }
 
-data "google_storage_project_service_account" "gcs_sa" {
-  project = var.project_id
-}
-
 // Encrypter/Decrypter role
 resource "google_kms_crypto_key_iam_member" "encrypter_decrypter" {
   for_each = var.enable_cmek ? local.identities : {}
@@ -53,6 +63,13 @@ resource "google_kms_crypto_key_iam_member" "encrypter_decrypter" {
   crypto_key_id = var.encryption_key
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = each.value
+}
+
+resource "google_project_iam_member" "log_writer" {
+  for_each = toset(local.compute_engine_sa_project_roles)
+  project  = var.project_id
+  role     = each.value
+  member   = data.google_compute_default_service_account.default.member
 }
 
 // Cloud Function SA
@@ -81,6 +98,7 @@ resource "time_sleep" "wait_kms_iam" {
   depends_on = [
     google_kms_crypto_key_iam_member.encrypter_decrypter,
     google_organization_iam_member.cloudfunction_findings_editor,
-    google_project_iam_member.cloudfunction_iam
+    google_project_iam_member.cloudfunction_iam,
+    google_project_iam_member.log_writer
   ]
 }

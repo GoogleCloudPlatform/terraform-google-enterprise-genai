@@ -75,11 +75,11 @@ resource "google_storage_bucket" "log_bucket" {
   Logging Bucket - IAM
 *****************************************/
 
-resource "google_storage_bucket_iam_member" "bucket_logging" {
-  bucket = google_storage_bucket.log_bucket.name
-  role   = "roles/storage.objectCreator"
-  member = "group:cloud-storage-analytics@google.com"
-}
+# resource "google_storage_bucket_iam_member" "bucket_logging" {
+#   bucket = google_storage_bucket.log_bucket.name
+#   role   = "roles/storage.objectCreator"
+#   member = "group:cloud-storage-analytics@google.com"
+# }
 
 resource "google_kms_crypto_key_iam_member" "gcs_logging_key" {
   crypto_key_id = module.kms_keyring.keys_by_region[var.gcs_logging_bucket_location][local.logging_key_name]

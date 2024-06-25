@@ -16,8 +16,8 @@
 
 resource "google_storage_bucket" "bucket" {
   provider = google-beta
-  name     = join("-", [var.gcs_bucket_prefix, data.google_projects.log.projects.0.labels.env_code, var.name])
-  project  = data.google_project.project.project_id
+  name     = join("-", [var.gcs_bucket_prefix, data.google_project.project.effective_labels.env_code, var.name])
+  project  = var.project_id
   location = upper(var.region)
 
   dynamic "custom_placement_config" {
@@ -125,7 +125,7 @@ resource "google_storage_bucket" "bucket" {
   #CRI Profile: DM.ED-7.1 DM.ED-7.2 DM.ED-7.3 DM.ED-7.4 PR.IP-1.4
 
   logging {
-    log_bucket = join("-", [local.log_bucket_prefix, data.google_projects.log.projects.0.project_id])
+    log_bucket = var.log_bucket
   }
 }
 
