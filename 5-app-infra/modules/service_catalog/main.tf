@@ -53,9 +53,9 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_bucket_iam_member" "bucket_role" {
-  bucket   = google_storage_bucket.bucket.name
-  role     = "roles/storage.admin"
-  member   = google_service_account.trigger_sa.member
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.admin"
+  member = google_service_account.trigger_sa.member
 }
 
 resource "google_sourcerepo_repository_iam_member" "read" {
