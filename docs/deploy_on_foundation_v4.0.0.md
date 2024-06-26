@@ -85,7 +85,7 @@ locals {
 }
 ```
 
-- Initialize and plan shared environment.
+- Initialize and plan shared environment. The commands below must be run at `gcp-bootstrap/` directory.
 
 ```bash
 ./tf-wrapper.sh init shared
@@ -2141,6 +2141,12 @@ cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
 
 ```bash
 rm -rf ../gcp-projects/ml_business_unit/shared
+```
+
+- Retrieve shared directory from `plan` branch.
+
+```bash
+git checkout origin/plan -- ml_business_unit/shared
 ```
 
 - Add modules to the `gcp-projects` repository.

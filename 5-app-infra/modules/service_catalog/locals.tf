@@ -19,25 +19,4 @@ locals {
   current_user_domain = split("@", local.current_user_email)[1]
   current_member      = strcontains(local.current_user_domain, "iam.gserviceaccount.com") ? "serviceAccount:${local.current_user_email}" : "user:${local.current_user_email}"
   log_bucket_prefix   = "bkt"
-  bucket_permissions = {
-
-    "roles/storage.admin" = [
-      google_service_account.trigger_sa.member,
-    ],
-    "roles/storage.legacyObjectReader" = [
-      "serviceAccount:${var.machine_learning_project_number}@cloudbuild.gserviceaccount.com",
-    ],
-  }
-
-  bucket_roles = flatten([
-    for role in keys(local.bucket_permissions) : [
-      for sa in local.bucket_permissions[role] :
-      {
-        role = role
-        acct = sa
-      }
-    ]
-  ])
 }
-
-
