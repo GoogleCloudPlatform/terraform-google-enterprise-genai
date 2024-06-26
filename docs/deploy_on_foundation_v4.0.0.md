@@ -63,6 +63,48 @@ gcp-projects
 terraform-google-enterprise-genai
 ```
 
+## Terraform Cloud Build Image Version Update
+
+The codebase uses terraform functionalities that are only available on 1.5.x, therefore, the user need to upgrade the terraform version on the cloud builder and can do so by following the following procedure.
+
+- Navigate to `gcp-bootstrap`.
+
+```bash
+cd gcp-bootstrap
+```
+
+- Open `envs/shared/cb.tf` file, locate the `terraform_version` field under `locals` and update it to 1.5.7.
+
+```terraform
+locals {
+  // terraform version image configuration
+  terraform_version = "1.5.7"
+  // The version of the terraform docker image to be used in the workspace builds
+  docker_tag_version_terraform = "v1"
+  ...
+}
+```
+
+- Initialize and plan shared environment. The commands below must be run at `gcp-bootstrap/` directory.
+
+```bash
+./tf-wrapper.sh init shared
+./tf-wrapper.sh plan shared
+```
+
+- Apply the modifications and ensure that the build triggered by this modification was applied successfully.
+
+```bash
+./tf-wrapper.sh apply shared
+```
+
+- Commit and the modifications to the repository.
+
+```bash
+git commit -am "Update cb.tf - bump terraform to 1.5.7"
+git push origin plan
+```
+
 ## Policies
 
 ### Update `gcloud terraform vet` policies
@@ -343,35 +385,6 @@ variable "project_budget" {
 projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
 ```
 
-- On `gcp-environments/envs/development/outputs.tf` add the following outputs:
-
-```terraform
-output "env_log_project_id" {
-  description = "Project ID of the environments log project"
-  value       = module.env.env_logs_project_id
-}
-
-output "env_log_project_number" {
-  description = "Project Number of the environments log project"
-  value       = module.env.env_logs_project_number
-}
-
-output "env_log_bucket_name" {
-  description = "Name of environment log bucket"
-  value       = module.env.env_log_bucket_name
-}
-
-output "env_kms_project_number" {
-  description = "Project Number for environment Cloud Key Management Service (KMS)."
-  value       = module.env.env_kms_project_number
-}
-
-output "key_rings" {
-  description = "Keyring Names created"
-  value       = module.env.key_rings
-}
-```
-
 - On `gcp-environments/modules/env_baseline/outputs.tf` add the following outputs:
 
 ```terraform
@@ -401,6 +414,35 @@ output "env_log_bucket_name" {
 }
 ```
 
+- On `gcp-environments/envs/development/outputs.tf` add the following outputs:
+
+```terraform
+output "env_log_project_id" {
+  description = "Project ID of the environments log project"
+  value       = module.env.env_logs_project_id
+}
+
+output "env_log_project_number" {
+  description = "Project Number of the environments log project"
+  value       = module.env.env_logs_project_number
+}
+
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = module.env.env_log_bucket_name
+}
+
+output "env_kms_project_number" {
+  description = "Project Number for environment Cloud Key Management Service (KMS)."
+  value       = module.env.env_kms_project_number
+}
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.env.key_rings
+}
+```
+
 - Commit and push files to git repo.
 
 ```bash
@@ -413,14 +455,14 @@ git commit -m "Create env-level keys and env-level logging"
 git push origin development
 ```
 
-### `nonproduction` branch
+### `non-production` branch
 
-- Go to `gcp-environments` repository, and check out on `nonproduction` branch.
+- Go to `gcp-environments` repository, and check out on `non-production` branch.
 
 ```bash
 cd ../gcp-environments
 
-git checkout nonproduction
+git checkout non-production
 ```
 
 - Return to `terraform-google-enterprise-genai` repo.
@@ -555,35 +597,6 @@ variable "project_budget" {
 projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
 ```
 
-- On `gcp-environments/envs/nonproduction/outputs.tf` add the following outputs:
-
-```terraform
-output "env_log_project_id" {
-  description = "Project ID of the environments log project"
-  value       = module.env.env_logs_project_id
-}
-
-output "env_log_project_number" {
-  description = "Project Number of the environments log project"
-  value       = module.env.env_logs_project_number
-}
-
-output "env_log_bucket_name" {
-  description = "Name of environment log bucket"
-  value       = module.env.env_log_bucket_name
-}
-
-output "env_kms_project_number" {
-  description = "Project Number for environment Cloud Key Management Service (KMS)."
-  value       = module.env.env_kms_project_number
-}
-
-output "key_rings" {
-  description = "Keyring Names created"
-  value       = module.env.key_rings
-}
-```
-
 - On `gcp-environments/modules/env_baseline/outputs.tf` add the following outputs:
 
 ```terraform
@@ -613,6 +626,35 @@ output "env_log_bucket_name" {
 }
 ```
 
+- On `gcp-environments/envs/non-production/outputs.tf` add the following outputs:
+
+```terraform
+output "env_log_project_id" {
+  description = "Project ID of the environments log project"
+  value       = module.env.env_logs_project_id
+}
+
+output "env_log_project_number" {
+  description = "Project Number of the environments log project"
+  value       = module.env.env_logs_project_number
+}
+
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = module.env.env_log_bucket_name
+}
+
+output "env_kms_project_number" {
+  description = "Project Number for environment Cloud Key Management Service (KMS)."
+  value       = module.env.env_kms_project_number
+}
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.env.key_rings
+}
+```
+
 - Commit and push files to git repo.
 
 ```bash
@@ -622,7 +664,7 @@ git add .
 
 git commit -m "Create env-level keys and env-level logging"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 ### `production` branch
@@ -767,35 +809,6 @@ variable "project_budget" {
 projects_step_terraform_service_account_email = data.terraform_remote_state.bootstrap.outputs.projects_step_terraform_service_account_email
 ```
 
-- On `gcp-environments/envs/production/outputs.tf` add the following outputs:
-
-```terraform
-output "env_log_project_id" {
-  description = "Project ID of the environments log project"
-  value       = module.env.env_logs_project_id
-}
-
-output "env_log_project_number" {
-  description = "Project Number of the environments log project"
-  value       = module.env.env_logs_project_number
-}
-
-output "env_log_bucket_name" {
-  description = "Name of environment log bucket"
-  value       = module.env.env_log_bucket_name
-}
-
-output "env_kms_project_number" {
-  description = "Project Number for environment Cloud Key Management Service (KMS)."
-  value       = module.env.env_kms_project_number
-}
-
-output "key_rings" {
-  description = "Keyring Names created"
-  value       = module.env.key_rings
-}
-```
-
 - On `gcp-environments/modules/env_baseline/outputs.tf` add the following outputs:
 
 ```terraform
@@ -825,6 +838,35 @@ output "env_log_bucket_name" {
 }
 ```
 
+- On `gcp-environments/envs/production/outputs.tf` add the following outputs:
+
+```terraform
+output "env_log_project_id" {
+  description = "Project ID of the environments log project"
+  value       = module.env.env_logs_project_id
+}
+
+output "env_log_project_number" {
+  description = "Project Number of the environments log project"
+  value       = module.env.env_logs_project_number
+}
+
+output "env_log_bucket_name" {
+  description = "Name of environment log bucket"
+  value       = module.env.env_log_bucket_name
+}
+
+output "env_kms_project_number" {
+  description = "Project Number for environment Cloud Key Management Service (KMS)."
+  value       = module.env.env_kms_project_number
+}
+
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = module.env.key_rings
+}
+```
+
 - Commit and push files to git repo.
 
 ```bash
@@ -851,15 +893,19 @@ The first and the recommended option is making the changes by using `gcloud` cli
 
 You will be doing this procedure for each environment (`development`, `non-production` & `production`)
 
-##### `development` environment configuration
+##### Configure `GCP_ENVIRONMENTS_PATH` variable
 
-1. Configure the following variable below with the value of `gcp-environments` repository path.
+1. Configure the following variable below with the value of `gcp-environments` repository absolute path. This variable will be used in this section for configuring the necessary permissions.
 
     ```bash
     export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
     ```
 
-    Make sure your git is checked out to the development branch by running `git checkout development` on `GCP_ENVIRONMENTS_PATH`.
+    > Tip: you can retrieve the absolute path of the gcp-environments directory by running `readlink -f ../gcp-environments`.
+
+##### `development` environment configuration
+
+1. Make sure your git is checked out to the development branch by running `git checkout development` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
     (cd $GCP_ENVIRONMENTS_PATH && git checkout development)
@@ -871,6 +917,8 @@ You will be doing this procedure for each environment (`development`, `non-produ
     export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_bucket_name)
     export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/development" output -raw env_log_project_id)
     ```
+
+    > Tip: If you haven't initilized the terraform on the branch, you may do so by running `./tf-wrapper.sh init development` command on the `gcp-environments` directory.
 
 3. Validate the variable values.
 
@@ -901,24 +949,20 @@ You will be doing this procedure for each environment (`development`, `non-produ
 
 ##### `non-production` environment configuration
 
-1. Configure the following variable below with the value of `gcp-environments` repository path.
+1. Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
-    ```
-
-    Make sure your git is checked out to the `non-production` branch by running `git checkout nonproduction` on `GCP_ENVIRONMENTS_PATH`.
-
-    ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout nonproduction)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
     ```bash
-    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_bucket_name)
-    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_project_id)
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
     ```
+
+    > Tip: If you haven't initilized the terraform on the branch, you may do so by running `./tf-wrapper.sh init non-production` command on the `gcp-environments` directory.
 
 3. Validate the variable values.
 
@@ -949,13 +993,7 @@ You will be doing this procedure for each environment (`development`, `non-produ
 
 ##### `production` environment configuration
 
-1. Configure the following variable below with the value of `gcp-environments` repository path.
-
-    ```bash
-    export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
-    ```
-
-    Make sure your git is checked out to the `production` branch by running `git checkout production` on `GCP_ENVIRONMENTS_PATH`.
+1. Make sure your git is checked out to the `production` branch by running `git checkout production` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
     (cd $GCP_ENVIRONMENTS_PATH && git checkout production)
@@ -967,6 +1005,8 @@ You will be doing this procedure for each environment (`development`, `non-produ
     export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_bucket_name)
     export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/production" output -raw env_log_project_id)
     ```
+
+    > Tip: If you haven't initilized the terraform on the branch, you may do so by running `./tf-wrapper.sh init production` command on the `gcp-environments` directory.
 
 3. Validate the variable values.
 
@@ -1283,14 +1323,14 @@ git commit -m "Create custom fw rules, enable nat, configure dns and service per
 git push origin development
 ```
 
-### `nonproduction` branch on `gcp-networks`
+### `non-production` branch on `gcp-networks`
 
-- Go to `gcp-networks` repository, and check out on `nonproduction` branch.
+- Go to `gcp-networks` repository, and check out on `non-production` branch.
 
 ```bash
 cd ../gcp-networks
 
-git checkout nonproduction
+git checkout non-production
 ```
 
 #### Private DNS zone configuration (non-production)
@@ -1322,7 +1362,7 @@ git add .
 
 git commit -m "Create DNS notebook configuration"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 #### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (non-production)
@@ -1532,7 +1572,7 @@ Commit all changes and push to the current branch.
 git add .
 git commit -m "Create custom fw rules, enable nat, configure dns and service perimeter"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 ### `production` branch on `gcp-networks`
@@ -1890,12 +1930,6 @@ git add .
 git commit -m "Create ML Business Unit"
 ```
 
-- Log into gcloud using service account impersonation and then set your configuration:
-
-```bash
-gcloud auth application-default login --impersonate-service-account=${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
-```
-
 - Run `init` and `plan` and review output for environment shared.
 
 ```bash
@@ -2001,16 +2035,16 @@ git commit -m "Initialize ML environment"
 git push origin development
 ```
 
-### `nonproduction` branch on `gcp-projects`
+### `non-production` branch on `gcp-projects`
 
-This will create the machine learning nonproduction environment. A Machine Learning project will be hosted under a folder.
+This will create the machine learning non-production environment. A Machine Learning project will be hosted under a folder.
 
 - Go to `gcp-projects` repository and checkout to `plan` branch.
 
 ```bash
 cd ../gcp-projects
 
-git checkout nonproduction
+git checkout non-production
 ```
 
 - Return to GenAI repository.
@@ -2076,7 +2110,7 @@ for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PR
 git add .
 git commit -m "Initialize ML environment"
 
-git push origin nonproduction
+git push origin non-production
 ```
 
 ### `production` branch on `gcp-projects`
@@ -2107,6 +2141,12 @@ cp -r docs/assets/terraform/4-projects/ml_business_unit ../gcp-projects
 
 ```bash
 rm -rf ../gcp-projects/ml_business_unit/shared
+```
+
+- Retrieve shared directory from `plan` branch.
+
+```bash
+git checkout origin/plan -- ml_business_unit/shared
 ```
 
 - Add modules to the `gcp-projects` repository.
