@@ -86,14 +86,8 @@ In `common.auto.tfvars` update your `perimeter_additional_members` to include:
   ```
 
   ```bash
-   export prj_c_ml-infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
-   echo "prj_c_ml-infra_pipeline_project_id = ${prj_c_ml_infra_pipeline_project_id}"
-
-   export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
-   echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
-
-   export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
-   echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
+   export prj_c_ml_infra_pipeline_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
+   echo "prj_c_ml_infra_pipeline_project_id = ${prj_c_ml_infra_pipeline_project_id}"
 
    export prj_b_seed_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw seed_project_id)
    echo "prj_b_seed_project_id = ${prj_b_seed_project_id}"
@@ -118,6 +112,8 @@ You can find the `sources.access_level` information by going to `Security` in yo
 Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL`
 
 #### Ingress Policies
+
+You can find your `access_level` info on the `Service Perimeter page` https://console.cloud.google.com/security/service-perimeter?referrer=search&orgonly=true&organizationId=YOUR-ORG-ID
 
   ```
   ingress_policies = [
@@ -212,8 +208,77 @@ For your DEVELOPMENT.AUTO.TFVARS file, also include this as an egress policy:
             }
             }
         },
+    {
+        "from" = {
+        "identity_type" = "ANY_IDENTITY"
+        "identities"    = []
+    },
+        "to" = {
+        "resources" = ["projects/[prj-c-mlartifacts-project-number]"]
+        "operations" = {
+            "artifactregistry.googleapis.com" = {
+            "methods" = ["*"]
+            }
+            "cloudbuild.googleapis.com" = {
+            "methods" = ["*"]
+            }
+        }
+        }
+    },
+    {
+        "from" = {
+        "identity_type" = "ANY_IDENTITY"
+        "identities"    = []
+    },
+        "to" = {
+        "resources" = ["projects/[prj-d-ml-machine-learning-project-number]"]
+        "operations" = {
+            "aiplatform.googleapis.com" = {
+            "methods" = ["*"]
+            }
+        }
+        }
+    },
+    {
+        "from" = {
+        "identity_type" = "ANY_IDENTITY"
+        "identities"    = []
+    },
+        "to" = {
+        "resources" = ["projects/[prj-d-kms-project-number]"]
+        "operations" = {
+            "cloudkms.googleapis.com" = {
+            "methods" = ["*"]
+            }
+        }
+        }
+    },
+
     ]
   ```
+
+Now you need to apply the changes on the gcp-networks for each respective environment folders: `development`, `non-production` & `production`.
+
+```bash
+git checkout development
+git add .
+git commit -m 'Update ingres and egress rules'
+git push
+```
+
+```bash
+git checkout non-production
+git add .
+git commit -m 'Update ingres and egress rules'
+git push
+```
+
+```bash
+git checkout production
+git add .
+git commit -m 'Update ingres and egress rules'
+git push
+```
 
 ### Troubleshooting
 
