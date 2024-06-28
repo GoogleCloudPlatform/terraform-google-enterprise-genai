@@ -41,6 +41,11 @@ resource "google_service_account" "vertex_sa" {
   account_id = "vertex-sa"
 }
 
+resource "google_service_account" "vertex_model" {
+  project    = local.machine_learning_project_id
+  account_id = "vertex-model"
+}
+
 resource "google_project_iam_member" "dataflow_sa" {
   for_each = toset(local.roles)
   project  = local.machine_learning_project_id
@@ -59,6 +64,12 @@ resource "google_service_account_iam_member" "compute_impersonate_vertex" {
   service_account_id = google_service_account.vertex_sa.id
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_service_account_iam_member" "vertex_impersonate_model" {
+  service_account_id = google_service_account.vertex_model.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = google_service_account.vertex_sa.member
 }
 
 resource "google_service_account_iam_member" "impersonate_dataflow" {
