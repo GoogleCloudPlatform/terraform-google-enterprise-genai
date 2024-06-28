@@ -128,4 +128,18 @@ egress_policies = [
       }
     }
   },
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_LOGGING_PROJECT_NUMBER"]
+      "operations" = {
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
 ]

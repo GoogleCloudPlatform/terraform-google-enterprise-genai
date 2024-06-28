@@ -37,7 +37,8 @@ module "composer" {
   python_version               = var.composer_python_version
   web_server_allowed_ip_ranges = var.composer_web_server_allowed_ip_ranges
 
-  depends_on = [google_service_account.composer, google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
+  kms_keyring = var.keyring
+  depends_on  = [google_service_account.composer, google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
 }
 
 ########################
@@ -58,21 +59,23 @@ module "big_query" {
   default_table_expiration_ms     = var.big_query_default_table_expiration_ms
   delete_contents_on_destroy      = var.big_query_delete_contents_on_destroy
 
-  depends_on = [google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
+  kms_keyring = var.keyring
+  depends_on  = [google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
 }
 
 ########################
 #      Metadata        #
 ########################
 
-module "metadata" {
-  count  = var.env != "development" ? 1 : 0
+module "metadata" {  
   source = "git::https://source.developers.google.com/p/SERVICE_CATALOG_PROJECT_ID/r/service-catalog//modules/metadata?ref=main"
 
   project_id = var.project_id
   name       = var.metadata_name
 
   region = var.region
+
+  kms_keyring = var.keyring
 
   depends_on = [google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
 }
@@ -82,7 +85,6 @@ module "metadata" {
 ########################
 
 module "bucket" {
-  count  = var.env != "development" ? 1 : 0
   source = "git::https://source.developers.google.com/p/SERVICE_CATALOG_PROJECT_ID/r/service-catalog//modules/bucket?ref=main"
 
   project_id = var.project_id
@@ -100,8 +102,9 @@ module "bucket" {
   storage_class                = var.bucket_storage_class
   requester_pays               = var.bucket_requester_pays
   gcs_bucket_prefix            = var.gcs_bucket_prefix
-
-  depends_on = [google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
+  kms_keyring                  = var.keyring
+  log_bucket                   = var.log_bucket
+  depends_on                   = [google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
 }
 
 ########################
@@ -112,10 +115,27 @@ module "tensorboard" {
   count  = var.env != "development" ? 1 : 0
   source = "git::https://source.developers.google.com/p/SERVICE_CATALOG_PROJECT_ID/r/service-catalog//modules/tensorboard?ref=main"
 
-  project_id = var.project_id
-  name       = var.tensorboard_name
+  project_id  = var.project_id
+  name        = var.tensorboard_name
+  kms_keyring = var.keyring
+  region      = var.region
 
-  region = var.region
+  depends_on = [google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
+}
+
+########################
+#      Notebook        #
+########################
+
+module "notebook" {
+  count  = var.env == "development" ? 1 : 0
+  source = "git::https://source.developers.google.com/p/SERVICE_CATALOG_PROJECT_ID/r/service-catalog//modules/notebook?ref=main"
+
+  project_id      = var.project_id
+  kms_keyring     = var.keyring
+  instance_owners = toset(["REPLACE_WITH_USER_GCP_EMAIL"])
+  name            = "ml-instance"
+  vpc_project     = "REPLACE_WITH_DEV_VPC_PROJECT"
 
   depends_on = [google_kms_crypto_key_iam_member.service_agent_kms_key_binding]
 }

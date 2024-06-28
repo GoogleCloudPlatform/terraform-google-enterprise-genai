@@ -21,3 +21,5 @@ remote_state_bucket = "REMOTE_STATE_BUCKET"
 github_app_installation_id = "GITHUB_APP_ID"
 
 github_remote_uri = "GITHUB_REMOTE_URI"
+
+seed_state_bucket = "REPLACE_SEED_TFSTATE_BUCKET"

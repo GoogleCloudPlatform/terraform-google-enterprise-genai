@@ -27,7 +27,7 @@ locals {
     "roles/bigquery.admin",
     "roles/dataflow.admin",
     "roles/dataflow.worker",
-    "roles/storage.objectUser",
+    "roles/storage.admin",
     "roles/aiplatform.admin",
   ]
 

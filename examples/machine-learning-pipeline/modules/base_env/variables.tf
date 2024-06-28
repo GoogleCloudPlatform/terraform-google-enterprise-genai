@@ -18,6 +18,16 @@
 #     Global Inputs    #
 ########################
 
+variable "log_bucket" {
+  description = "Log Bucket to be used."
+  type        = string
+}
+
+variable "keyring" {
+  description = "Keyring to be used."
+  type        = string
+}
+
 variable "env" {
   description = "Environment name. (ex. production)"
   type        = string
@@ -236,7 +246,7 @@ variable "big_query_delete_contents_on_destroy" {
 variable "metadata_name" {
   type        = string
   description = "The name of the metadata store instance"
-  default     = null
+  default     = "default"
 }
 
 ########################

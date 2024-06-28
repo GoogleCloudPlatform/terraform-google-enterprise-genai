@@ -58,4 +58,7 @@ module "base_env" {
 
   // TensorBoard
   tensorboard_name = "ml-tensorboard-${local.env}"
+
+  log_bucket = local.env_log_bucket
+  keyring    = one(local.region_kms_keyring)
 }

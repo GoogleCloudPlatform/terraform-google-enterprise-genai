@@ -2,7 +2,7 @@
 
 This example demonstrates the process of interactive coding and experimentation using the Google Vertex AI Workbench for data scientists. The guide outlines the creation of a machine learning (ML) pipeline within a notebook on a Google Vertex AI Workbench Instance.
 
-## Steps Involved:
+## Steps Involved
 
 - Creating the ML Pipeline:
   - Use a notebook on Google Vertex AI Workbench Instance to develop and adjust the ML pipeline on the development environment.
@@ -139,9 +139,9 @@ Once there, select the perimeter that is associated with the environment (eg. `d
   sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
       -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
       -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
-      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_d_logging_project_number/g" \
+      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_d_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
-    assets/vpc-sc-policies/policies.tf.example
+    assets/vpc-sc-policies/development.tf.example
   ```
 
   > *IMPORTANT*: The command above assumes you are running it on the root of the `examples/machine-learning-pipeline` on `terraform-google-enterprise-genai` directory.
@@ -258,9 +258,9 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
       -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
       -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
-      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_n_logging_project_number/g" \
+      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
-    assets/vpc-sc-policies/policies.tf.example
+    assets/vpc-sc-policies/non-production.tf.example
   ```
 
   > *IMPORTANT*: The command above assumes you are running it on the root of the `examples/machine-learning-pipeline` on `terraform-google-enterprise-genai` directory.
@@ -377,9 +377,9 @@ Once there, select the perimeter that is associated with the environment (eg. `p
   sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
       -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
       -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
-      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_p_logging_project_number/g" \
+      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
-    assets/vpc-sc-policies/policies.tf.example
+    assets/vpc-sc-policies/production.tf.example
   ```
 
   > *IMPORTANT*: The command above assumes you are running it on the root of the `examples/machine-learning-pipeline` on `terraform-google-enterprise-genai` directory.
@@ -393,11 +393,6 @@ Once there, select the perimeter that is associated with the environment (eg. `p
   git push origin production
   ```
 
-### Troubleshooting
-
-- Error: Error updating AccessLevel "accessPolicies/POLICY_ID/accessLevels/ACCESS_LEVEL": googleapi: Error 400: The email address 'service-PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com' is invalid or non-existent.
-  - To fix run: `gcloud storage service-agent --project=project_id_here`
-Please refer to [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into issues during this step.
 
 ## Usage
 
@@ -410,6 +405,12 @@ Step 12 in "Deploying with Cloud Build" highlights the necessary steps needed to
 ### Deploying with Cloud Build
 
 Have a github token for access to your repository ready, along with an [Application Installation Id](https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github#connecting_a_github_host_programmatically) and the remote uri to your repository.
+
+The `GITHUB_APP_ID` value can be retrieved after [installing Cloud Build GitHub App](https://github.com/apps/google-cloud-build) on your GitHub account or in an organization you own.
+
+The id can be retrieved when accessing the app configuration page by retrieving its value on the URL (https://github.com/settings/installations/<APPLICATION_ID_HERE>). To access the app configuration page, go to **Settings -> Applications -> Google Cloud Build (Configure Button)** on your github account.
+
+The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github repository and copying its value.
 
 1. Clone the `ml-machine-learning` repo.
 
@@ -468,6 +469,34 @@ Have a github token for access to your repository ready, along with an [Applicat
    sed -i "s/SERVICE_CATALOG_PROJECT_ID/${service_catalog_project_id}/g" ./modules/base_env/main.tf
    ```
 
+1. Update bucket variable, to retrieve values from 2-environment steps.
+
+  ```bash
+   export seed_state_bucket=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw gcs_bucket_tfstate)
+   echo "seed_state_bucket = ${seed_state_bucket}"
+
+   sed -i "s/REPLACE_SEED_TFSTATE_BUCKET/${seed_state_bucket}/" ./common.auto.tfvars
+  ```
+
+1. Update `vpc_project` variable with the development environment host VPC project.
+
+   ```bash
+   export vpc_project=$(terraform -chdir="../gcp-networks/envs/development" output -raw restricted_host_project_id)
+   echo $vpc_project
+   
+   ## Linux
+   sed -i "s/REPLACE_WITH_DEV_VPC_PROJECT/${vpc_project}/g" ./modules/base_env/main.tf
+   ```
+
+1. Update `intance_owners` variable with you GCP user account email. Replace `INSERT_YOUR_USER_EMAIL_HERE` with your email.
+
+   ```bash
+   export user_email="INSERT_YOUR_USER_EMAIL_HERE"
+   
+   ## Linux
+   sed -i "s/REPLACE_WITH_USER_GCP_EMAIL/${user_email}/g" ./modules/base_env/main.tf
+   ```
+
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
@@ -478,14 +507,30 @@ Have a github token for access to your repository ready, along with an [Applicat
    for i in `find . -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
    ```
 
-1. Update `modules/base_env/main.tf` with the name of service catalog project id to complete the git fqdn for module sources:
+1. Allow the Cloud Build Service Account to read 2-environments state.
 
-   ```bash
-   export service_catalog_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -raw service_catalog_project_id)
+1. Retrieve the value for "sa-tf-cb-ml-machine-learning@[prj_c_ml_infra_pipeline_project_id].iam.gserviceaccount.com" on your environment by running:
 
-   ##LINUX
-   sed -i "s/SERVICE-CATALOG-PROJECT-ID/${service_catalog_project_id}/" ./modules/base_env/main.tf
-   ```
+  ```bash
+  export ml_cb_sa=$(terraform -chdir="../gcp-projects/ml_business_unit/shared" output -json terraform_service_accounts | jq -r '."ml-machine-learning"')
+  echo $ml_cb_sa
+  ```
+
+1. Assign Storage Object Viewer on bucket:
+
+  ```bash
+  gcloud storage buckets add-iam-policy-binding gs://$seed_state_bucket \
+          --member=serviceAccount:$ml_cb_sa \
+          --role=roles/storage.objectViewer
+  ```
+
+1. Assign Artifact Registry Admin on publish artifacts project:
+
+  ```bash
+  gcloud projects add-iam-policy-binding $common_artifacts_project_id \
+          --member=serviceAccount:$ml_cb_sa \
+          --role=roles/artifactregistry.admin
+  ```
 
 1. Commit changes.
 
@@ -495,15 +540,15 @@ Have a github token for access to your repository ready, along with an [Applicat
    ```
 
 1. Push your plan branch to trigger a plan for all environments. Because the
-   _plan_ branch is not a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing your _plan_
-   branch triggers _terraform plan_ but not _terraform apply_. Review the plan output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
+   *plan* branch is not a [named environment branch](../docs/FAQ.md#what-is-a-named-branch), pushing your *plan*
+   branch triggers *terraform plan* but not *terraform apply*. Review the plan output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID>
 
    ```bash
    git push --set-upstream origin plan
    ```
 
 1. Merge changes to development. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
-   pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
+   pushing to this branch triggers both *terraform plan* and *terraform apply*. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID>
 
    ```
    git checkout -b development
@@ -511,7 +556,7 @@ Have a github token for access to your repository ready, along with an [Applicat
    ```
 
 1. Merge changes to non-production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
-   pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
+   pushing to this branch triggers both *terraform plan* and *terraform apply*. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID>
 
    ```bash
    git checkout -b non-production
@@ -519,7 +564,7 @@ Have a github token for access to your repository ready, along with an [Applicat
    ```
 
 1. Merge changes to production branch. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
-      pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your Cloud Build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID
+      pushing to this branch triggers both *terraform plan* and *terraform apply*. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID>
 
    ```bash
    git checkout -b production
@@ -532,7 +577,7 @@ Have a github token for access to your repository ready, along with an [Applicat
    cd ..
    ```
 
-## Running Terraform locally
+### Running Terraform locally - Only proceed with these if you have not used Cloud Build
 
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `machine-learning-pipeline` folder, copy the Terraform wrapper script and ensure it can be executed.
 
@@ -679,6 +724,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 ### Big Query
 
   In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance
+
   ```bash
    ml_project_dev=$(terraform -chdir="gcp-projects/ml_business_unit/development" output -json)
    ml_project_nonprd=$(terraform -chdir="gcp-projects/ml_business_unit/non-production" output -json)
@@ -693,41 +739,16 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
   done
   ```
 
-### VPC-SC
-
-1. Now that machine learning's projects have all been inflated, please _return to gcp-projects_ and update COMMON.AUTO.TFVARS with this __additional__ information under `perimeter_additional_members`:
-
-    ```
-    "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
-    "serviceAccount:[prj-n-ml-machine-learning-number]@cloudbuild.gserviceaccount.com",
-    "serviceAccount:[prj-n-ml-machine-learning-number]-compute@developer.gserviceaccount.com",
-    "serviceAccount:[prj-p-ml-machine-learning-number]@cloudbuild.gserviceaccount.com",
-    "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
-    ```
-
-2. optional - run the below command to generate a list of the above changes needed to COMMON.AUTO.TFVARS
-
-    ```bash
-    ml_n=$(terraform -chdir="gcp-projects/ml_business_unit/non-production" output -raw machine_learning_project_number)
-    ml_p=$(terraform -chdir="gcp-projects/ml_business_unit/production" output -raw machine_learning_project_number)
-
-    echo "serviceAccount:service-${ml_n}@dataflow-service-producer-prod.iam.gserviceaccount.com",
-    echo "serviceAccount:${ml_n}@cloudbuild.gserviceaccount.com",
-    echo "serviceAccount:${ml_n}-compute@developer.gserviceaccount.com",
-    echo "serviceAccount:${ml_p}@cloudbuild.gserviceaccount.com",
-    echo "serviceAccount:service-${ml_p}@gcp-sa-aiplatform.iam.gserviceaccount.com",
-    ```
-
-1.  Many of the necessary service agents and permissions were deployed in all project environments for machine-learning.  Additional entries will be needed for each environment.
+1. Many of the necessary service agents and permissions were deployed in all project environments for machine-learning.  Additional entries may be needed for each environment.
 
 1. Add in more agents to the DEVELOPMENT.AUTO.TFVARS file under `egress_policies`.
 Notably:
 
-   * "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
+   - "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
 
     This should be added under identities.  It should look like this::
 
-    ```
+    ```text
     egress_policies = [
           // notebooks
           {
@@ -754,248 +775,18 @@ Notably:
       ]
    ```
 
-1. Remain in DEVELOPMENT.AUTO.TFVARS and include this entry under `egress_policies`.  Ensure you replace all [project numbers] with their corresponding project:
 
-    ```
-      // artifact Registry
-      {
-        "from" = {
-          "identity_type" = ""
-          "identities" = [
-            "serviceAccount:service-[prj-d-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
-          ]
-        },
-        "to" = {
-          "resources" = ["projects/[prj-c-ml-artifacts-number]"]
-          "operations" = {
-            "artifactregistry.googleapis.com" = {
-            "methods" = ["*"]
-            }
-            "cloudbuild.googleapis.com" = {
-            "methods" = ["*"]
-            }
-          }
-        }
-      },
-      {
-      "from" = {
-        "identity_type" = "ANY_IDENTITY"
-        "identities"    = []
-      },
-      "to" = {
-        "resources" = ["projects/[prj-d-bu3machine-learning-project-number]"]
-        "operations" = {
-          "aiplatform.googleapis.com" = {
-          "methods" = ["*"]
-          }
-        }
-        }
-    },
-      // Dataflow
-      {
-        "from" = {
-          "identity_type" = ""
-          "identities" = [
-            "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
-          ]
-        },
-        "to" = {
-          "resources" = ["projects/[prj-n-ml-machine-learning-number]"]
-          "operations" = {
-            "compute.googleapis.com" = {
-              "methods" = ["*"]
-            }
-          }
-        }
-      },
-      {
-        "from" = {
-        "identity_type" = "ANY_IDENTITY"
-        "identities"    = []
-      },
-        "to" = {
-        "resources" = ["projects/[prj-d-kms-project-number]"]
-        "operations" = {
-            "cloudkms.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-        }
-      },
-      {
-        "from" = {
-        "identity_type" = ""
-        "identities"    = ["serviceAccount:service-[prj-d-bu3machine-learning-project-number]@gcp-sa-aiplatform.iam.gserviceaccount.com"]
-        },
-        "to" = {
-        "resources" = ["projects/[prj-d-bu3machine-learning-project-number]"]
-        "operations" = {
-            "storage.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-        }
-    },
-    ```
-
-1. Under NON-PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
-
-    ```
-    {
-      "from" = {
-        "identity_type" = "ANY_IDENTITY"
-        "identities"    = []
-      },
-      "to" = {
-        "resources" = [
-          "projects/[prj-c-ml-artifacts-number]"
-        ]
-        "operations" = {
-          "artifactregistry.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    // artifact Registry
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:service-[prj-n-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = ["projects/[prj-c-ml-artifacts-number]"]
-        "operations" = {
-          "artifactregistry.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    // DataFlow
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = ["projects/[prj-d-shared-restricted-number]"]
-        "operations" = {
-          "compute.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:[prj-n-ml-machine-learning-number]-compute@developer.gserviceaccount.com",
-          "serviceAccount:service-[prj-d-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = ["projects/[prj-p-ml-machine-learning-number]"]
-        "operations" = {
-          "aiplatform.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "storage.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "bigquery.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    ```
-
-1.  Under PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
-
-    ```
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
-          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
-          "serviceAccount:cloud-cicd-artifact-registry-copier@system.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = [
-          "projects/[prj-n-ml-machine-learning-number]",
-          "projects/[prj-c-ml-artifacts-number]",
-        ]
-        "operations" = {
-          "artifactregistry.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "storage.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "bigquery.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    ```
-
-### Service Catalog
-
-Once you have set up service catalog and attempt to deploy out terraform code, there is a high chance you will encounter this error:
-`Permission denied; please check you have the correct IAM permissions and APIs enabled.`
-This is  due to a VPC Service control error that until now, is impossible to add into the egress policy.  Go to `prj-d-ml-machine-learning` project and view the logs, filtering for ERRORS.  There will be a VPC Service Controls entry that has an `egressViolation`.  It should look something like the following:
-```
-egressViolations: [
-   0: {
-      servicePerimeter: "accessPolicies/1066661933618/servicePerimeters/sp_d_shared_restricted_default_perimeter_f3fv"
-      source: "projects/[machine-learning-project-number]"
-      sourceType: "Resource"
-      targetResource: "projects/[unknown-project-number]"
-   }
-]
-```
-
-we want the `unknown-project-number` here.  Add this into your `egress_policies` in `3-networks` under DEVELOPMENT.AUTO.TFVARS, NON-PRODUCTION.AUTO.TFVARS & PRODUCTION.AUTO.TFVARS
-
-```
-// Service Catalog
-  {
-    "from" = {
-      "identity_type" = "ANY_IDENTITY"
-      "identities"    = []
-    },
-    "to" = {
-      "resources" = ["projects/[unknown-project-number]"]
-      "operations" = {
-        "cloudbuild.googleapis.com" = {
-          "methods" = ["*"]
-        }
-      }
-    }
-  },
-```
-
-### Machine Learning Pipeline
+## Machine Learning Pipeline
 
 This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench is deployed from service catalog and The datascientis can use it to write their code including any experiments, data processing code and pipeline components. In addition, a cloud storage bucket is deployed to use as the storage for our operations. Optionally a composer environment is which will later be used to schedule the pipeline run on intervals.
 
-For our pipeline which trains and deploys a model on the [census income dataset](https://archive.ics.uci.edu/dataset/20/census+income), we use a notebook in the dev workbench to create our pipeline components, put them together into a pipeline and do a dry run of the pipeline to make sure there are no issues. You can access the repository [here](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/tree/main/7-vertexpipeline). [^1]
+For our pipeline which trains and deploys a model on the [census income dataset](https://archive.ics.uci.edu/dataset/20/census+income), we use a notebook in the dev workbench to create our pipeline components, put them together into a pipeline and do a dry run of the pipeline to make sure there are no issues. You can access the repository [here](./assets/Vertexpipeline/).
 
-[^1]: There is a Dockerfile in the repo which is the docker image used to run all pipeline steps and cloud build steps. In non-prod and prod environments, the only NIST compliant way to access additional dependencies and requirements is via docker images uploaded to artifact registry. We have baked everything for running the pipeline into this docker which exsits in the shared artifact registry.
+There is a Dockerfile in the repo which is the docker image used to run all pipeline steps and cloud build steps. In non-prod and prod environments, the only NIST compliant way to access additional dependencies and requirements is via docker images uploaded to artifact registry. We have baked everything for running the pipeline into this docker which exsits in the shared artifact registry.
 
 Once confident, we divide the code in two separate files to use in our CI/CD process in the non-prod environment. First is *compile_pipeline.py* which includes the code to build the pipeline and compile it into a directory (in our case, /common/vertex-ai-pipeline/pipeline_package.yaml)
 
 The second file, i.e. *runpipeline.py* includes the code for running the compiled pipeline. This is where the correct environemnt variables for non-prod nad prod (e.g., service accounts to use for each stage of the pipeline, kms keys corresponding to each step, buckets, etc.) are set. And eventually the pipeline is loaded from the yaml file at *common/vertex-ai-pipeline/pipeline_package.yaml* and submitted to vertex ai.
-
 
 There is a *cloudbuild.yaml* file in the repo with the CI/CD steps as follows:
 
@@ -1009,51 +800,21 @@ The cloud build trigger will be setup in the non-prod project which is where the
 
 Each time a pipeline job finishes successfully, a new version of the census income bracket predictor model will be deployed on the endpoint which will only take 25 percent of the traffic wherease the other 75 percent goes to the previous version of the model to enable A/B testing.
 
-You can read more about the details of the pipeline components on the [pipeline's repo](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/tree/main/7-vertexpipeline#readme)
+You can read more about the details of the pipeline components on the [pipeline's repo](./assets/Vertexpipeline/)
 
 ### Step by step
 
 Before you start, make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
 Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy the bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
 
-Additionally, the following Service Accounts need to be created with the respective roles since the Compute Engine SA cannot to be used to deploy the Dataflow and Vertex Pipeline steps:
 
-`dataflow_runner_sa@prj-d-bu3machine-learning-[project-number].iam.gserviceaccount.com`
+#### Creating the Vertex AI Workbench Instance
 
-This service account requires the following roles:
-* `roles/bigquery.admin`
-* `roles/dataflow.admin`
-* `roles/dataflow.worker`
-* `roles/storage.admin`
-
-A service account to run vertex model needs to be created. No role is required for the `vertex_model_sa`:
-`vertex_model_sa@prj-d-bu3machine-learning-[project-number].iam.gserviceaccount.com`
-
-
-Next step is to run the command below to grant the notebook to be able to create jobs in BigQuery:
-```
-bq query --nouse_legacy_sql \
-'ALTER PROJECT `prj-d-bu3machine-learning-[project-number]` SET OPTIONS \
-(`region-us-central1.default_kms_key_name`="projects/[prj-d-kms-project-ID]/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-bu3machine-learning");'
-```
-
-It is also necessary to grant `roles/iam.serviceAccountUser` to the Compute Engine SA that has been created before. This service account can be found in the `prj-d-bu3machine-learning-[project-id]` an it`s format is `[project-number]-compute@developer.gserviceaccount.com`.
-
-Before run notebooks, it is necessary to create a Service Account to run the workbench instance. This Service Account must have the following roles:
-
-* roles/cloudbuild.approver
-* roles/cloudbuild.serviceAccount
-* roles/cloudbuild.tokenAccessor
-* roles/cloudfunctions.admin
-* roles/cloudkms.admin
-* roles/compute.instanceAdmin.v1
-* roles/iam.serviceAccountUser
-* roles/aiplatform.admin
-
+- The workbench instance was deployed on `modules/base_env/main.tf` when running the infrastructure pipeline. You can also deploy notebook instances using Service Catalog, after configuring it, refer to [Google Docs for more information](https://cloud.google.com/service-catalog/docs/create-solutions).
 
 #### 1. Run the notebook
 
-- Take assets/Vertexpipeline folder and make you own copy as a standalone git repository and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
+- Take the code on `assets/Vertexpipeline` folder and make you own copy as a standalone git repository. Take note of this git repository url and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
 
 #### 2. Configure cloud build
 
@@ -1069,7 +830,6 @@ Before run notebooks, it is necessary to create a Service Account to run the wor
     |Location|Repository|
     |Cloud Build configuration file location|cloudbuild.yaml|
 
-
 - Open the cloudbuild.yaml file in your workbench and for steps 1 which uploads the source code for the dataflow job to your bucket.
 
     ```
@@ -1078,6 +838,7 @@ Before run notebooks, it is necessary to create a Service Account to run the wor
     ```
 
 - Similarly in step 2, replace the bucket name with the name of your own bucket in the non-prod project in order to upload the data to your bucket:
+
     ```
     name: 'gcr.io/cloud-builders/gsutil'
     args: ['cp', '-r', './data', 'gs://{your-bucket-name}']
@@ -1100,6 +861,7 @@ Before run notebooks, it is necessary to create a Service Account to run the wor
 ```
 
 - Optionally, if you want to schedule pipeline runs on regular intervals, uncomment the last two steps and replace the composer bucket with the name of your composer's bucket. The first step uploads the pipeline's yaml to the bucket and the second step uploads the dag to read that yaml and trigger the vertex pipeline:
+
 ```
  # upload to composer
    - name: 'gcr.io/cloud-builders/gsutil'
@@ -1151,7 +913,7 @@ Here are step-by-step instructions to make a request to your model using `gcloud
     INPUT_DATA_FILE="body.json"
     ```
 
-    > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the Google Cloud Console (https://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=<PROD_ML_PROJECT>`)
+    > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the Google Cloud Console (<https://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=><PROD_ML_PROJECT>`)
 
 2. Create a file named `body.json` and put some sample data into it:
 
@@ -1228,3 +990,144 @@ This is likely due to the fact that you have too many models uploaded and deploy
 
 - ***Google Compute Engine Metadata service not available/found***:
 You might encounter this when the vertex pipeline job attempts to run even though it is an obsolete issue according to [this thread](https://issuetracker.google.com/issues/229537245#comment9). It'll most likely resolve by re-running the vertex pipeline.
+
+### Troubleshooting
+
+#### Service Agent not existent
+
+- Error: Error updating AccessLevel "accessPolicies/POLICY_ID/accessLevels/ACCESS_LEVEL": googleapi: Error 400: The email address '<service-PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com>' is invalid or non-existent.
+  - To fix run: `gcloud storage service-agent --project=project_id_here`
+
+#### VPC-SC
+
+1. Under NON-PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
+
+    ```text
+    {
+      "from" = {
+        "identity_type" = ""
+        "identities" = [
+          "serviceAccount:service-[prj-n-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+        ]
+      },
+      "to" = {
+        "resources" = ["projects/[prj-c-ml-artifacts-number]"]
+        "operations" = {
+          "artifactregistry.googleapis.com" = {
+            "methods" = ["*"]
+          }
+        }
+      }
+    },
+    // DataFlow
+    {
+      "from" = {
+        "identity_type" = ""
+        "identities" = [
+          "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
+        ]
+      },
+      "to" = {
+        "resources" = ["projects/[prj-d-shared-restricted-number]"]
+        "operations" = {
+          "compute.googleapis.com" = {
+            "methods" = ["*"]
+          }
+        }
+      }
+    },
+    {
+      "from" = {
+        "identity_type" = ""
+        "identities" = [
+          "serviceAccount:[prj-n-ml-machine-learning-number]-compute@developer.gserviceaccount.com",
+          "serviceAccount:service-[prj-d-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
+        ]
+      },
+      "to" = {
+        "resources" = ["projects/[prj-p-ml-machine-learning-number]"]
+        "operations" = {
+          "aiplatform.googleapis.com" = {
+            "methods" = ["*"]
+          },
+          "storage.googleapis.com" = {
+            "methods" = ["*"]
+          },
+          "bigquery.googleapis.com" = {
+            "methods" = ["*"]
+          }
+        }
+      }
+    },
+    ```
+
+1. Under PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
+
+    ```
+    {
+      "from" = {
+        "identity_type" = ""
+        "identities" = [
+          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
+          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+          "serviceAccount:cloud-cicd-artifact-registry-copier@system.gserviceaccount.com",
+        ]
+      },
+      "to" = {
+        "resources" = [
+          "projects/[prj-n-ml-machine-learning-number]",
+          "projects/[prj-c-ml-artifacts-number]",
+        ]
+        "operations" = {
+          "artifactregistry.googleapis.com" = {
+            "methods" = ["*"]
+          },
+          "storage.googleapis.com" = {
+            "methods" = ["*"]
+          },
+          "bigquery.googleapis.com" = {
+            "methods" = ["*"]
+          }
+        }
+      }
+    },
+    ```
+
+#### Service Catalog
+
+If you have set up service catalog and attempt to deploy out terraform code, there is a high chance you will encounter this error:
+`Permission denied; please check you have the correct IAM permissions and APIs enabled.`
+This is  due to a VPC Service control error that until now, is impossible to add into the egress policy.  Go to `prj-d-ml-machine-learning` project and view the logs, filtering for ERRORS.  There will be a VPC Service Controls entry that has an `egressViolation`.  It should look something like the following:
+
+```
+egressViolations: [
+   0: {
+      servicePerimeter: "accessPolicies/1066661933618/servicePerimeters/sp_d_shared_restricted_default_perimeter_f3fv"
+      source: "projects/[machine-learning-project-number]"
+      sourceType: "Resource"
+      targetResource: "projects/[unknown-project-number]"
+   }
+]
+```
+
+we want the `unknown-project-number` here.  Add this into your `egress_policies` in `3-networks` under DEVELOPMENT.AUTO.TFVARS, NON-PRODUCTION.AUTO.TFVARS & PRODUCTION.AUTO.TFVARS
+
+```
+// Service Catalog
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/[unknown-project-number]"]
+      "operations" = {
+        "cloudbuild.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+```
+
+Please refer to [troubleshooting](../docs/TROUBLESHOOTING.md) if you run into issues during this step.

@@ -33,3 +33,8 @@ variable "github_remote_uri" {
   description = "The remote uri of your github repository"
   type        = string
 }
+
+variable "seed_state_bucket" {
+  description = "Remote state bucket from 0-bootstrap"
+  type        = string
+}

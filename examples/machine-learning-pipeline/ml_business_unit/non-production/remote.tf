@@ -23,6 +23,17 @@ locals {
   non_production_project_id     = data.terraform_remote_state.projects_nonproduction.outputs.machine_learning_project_id
   production_project_number     = data.terraform_remote_state.projects_production.outputs.machine_learning_project_number
   production_project_id         = data.terraform_remote_state.projects_production.outputs.machine_learning_project_id
+  env_log_bucket                = data.terraform_remote_state.environments_env.outputs.env_log_bucket_name
+  env_keyrings                  = data.terraform_remote_state.environments_env.outputs.key_rings
+}
+
+data "terraform_remote_state" "environments_env" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.seed_state_bucket
+    prefix = "terraform/environments/${local.env}"
+  }
 }
 
 data "terraform_remote_state" "projects_env" {

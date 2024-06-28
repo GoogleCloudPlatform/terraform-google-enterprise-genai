@@ -15,9 +15,17 @@
  */
 
 locals {
-  business_unit    = "ml_business_unit"
-  business_code    = "ml"
-  env              = "development"
-  environment_code = "d"
+  business_unit      = "ml_business_unit"
+  business_code      = "ml"
+  env                = "development"
+  environment_code   = "d"
+  region_kms_keyring = [for i in local.env_keyrings : i if split("/", i)[3] == var.instance_region]
+  roles = [
+    "roles/bigquery.admin",
+    "roles/dataflow.admin",
+    "roles/dataflow.worker",
+    "roles/storage.admin",
+    "roles/aiplatform.admin",
+  ]
 }
 
