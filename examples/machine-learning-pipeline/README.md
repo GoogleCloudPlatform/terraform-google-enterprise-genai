@@ -747,11 +747,11 @@ gcloud projects add-iam-policy-binding $prj_p_machine_learning_project_id \
             --role='roles/aiplatform.admin'
 ```
 
-- The default compute engine from production project must have `roles/storage.admin` on the non-production bucket. Run the command below to assign the permission
+- The AI Platform Service Agent from production project must have `roles/storage.admin` on the non-production bucket. Run the command below to assign the permission
 
 ```bash
 gcloud storage buckets add-iam-policy-binding gs://<non_production_bucket_name> \
-            --member="serviceAccount:"$prj_p_machine_learning_project_number"-compute@developer.gserviceaccount.com" \
+            --member="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com" \
             --role='roles/storage.admin'
 ```
 
