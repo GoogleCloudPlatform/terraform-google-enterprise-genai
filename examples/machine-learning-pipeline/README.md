@@ -388,6 +388,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
       -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
       -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
+      -e "s/REPLACE_WITH_NON_PROD_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
     assets/vpc-sc-policies/production.tf.example
   ```
 
@@ -732,9 +733,19 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 ### VPC-SC
 
-You will need to add `trigger-sa` in non-production VPC-SC perimeter. 
+- Add `trigger-sa` in non-production VPC-SC perimeter. You can do this by adding `"serviceAccount:trigger-sa@$prj_n_machine_learning_project_id.iam.gserviceaccount.com"` to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
 
-You can do this by adding `"serviceAccount:trigger-sa@<YOUR_NON_PROD_ML_PROJECT_ID>.iam.gserviceaccount.com"` to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
+- Add `"serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"` in non-production VPC-SC perimeter. You can do this by adding it to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
+
+### Permissions
+
+The default compute engine from non-production project must have `roles/aiplatform.admin` on the production project. Run the command below to assign the permission:
+
+```bash
+gcloud projects add-iam-policy-binding $prj_p_machine_learning_project_id \
+            --member="serviceAccount:"$prj_n_machine_learning_project_number"-compute@developer.gserviceaccount.com" \
+            --role='roles/aiplatform.admin'
+```
 
 ### Big Query
 
