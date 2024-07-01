@@ -25,6 +25,7 @@ locals {
   production_project_id         = data.terraform_remote_state.projects_production.outputs.machine_learning_project_id
   env_log_bucket                = data.terraform_remote_state.environments_env.outputs.env_log_bucket_name
   env_keyrings                  = data.terraform_remote_state.environments_env.outputs.key_rings
+  common_artifacts_project_id   = data.terraform_remote_state.projects_shared.outputs.common_artifacts_project_id
 }
 
 data "terraform_remote_state" "environments_env" {

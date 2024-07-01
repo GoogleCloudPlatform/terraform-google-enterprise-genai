@@ -58,6 +58,7 @@ def build_dataflow_args(
     runner: str,
     bq_project: str,
     subnet: str,
+    dataflow_sa: str,
 ) -> list:
     return [
         "--job_name",
@@ -77,6 +78,8 @@ def build_dataflow_args(
         "--no_use_public_ips",
         "--worker_zone",
         "us-central1-c",
+        "--service_account_email",
+        dataflow_sa,
     ]
 # build_dataflow_args = components.create_component_from_func(
 #     build_dataflow_args_fun, base_image='python:3.8-slim')
@@ -550,6 +553,7 @@ def pipeline(
     min_nodes: int = 2,
     max_nodes: int = 4,
     traffic_split: int = 25,
+    dataflow_sa: str = "",
 ):
     from google_cloud_pipeline_components.v1.bigquery import (
         BigqueryQueryJobOp)
@@ -580,7 +584,8 @@ def pipeline(
         bq_table=bq_train_table,
         runner=runner,
         bq_project=project,
-        subnet=dataflow_subnet
+        subnet=dataflow_subnet,
+        dataflow_sa=dataflow_sa,
     ).after(bq_dataset_op)
     dataflow_args_eval = build_dataflow_args(
         job_name=f"{job_name}eval",
@@ -589,7 +594,8 @@ def pipeline(
         bq_table=bq_eval_table,
         runner=runner,
         bq_project=project,
-        subnet=dataflow_subnet
+        subnet=dataflow_subnet,
+        dataflow_sa=dataflow_sa,
     ).after(bq_dataset_op)
 
     # run dataflow job

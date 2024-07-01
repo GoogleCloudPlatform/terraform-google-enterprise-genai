@@ -78,6 +78,12 @@ resource "google_service_account_iam_member" "impersonate_dataflow" {
   member             = google_service_account.vertex_sa.member
 }
 
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
+
 module "base_env" {
   source = "../../modules/base_env"
 
@@ -91,7 +97,7 @@ module "base_env" {
   project_id                    = local.machine_learning_project_id
   kms_keys                      = local.machine_learning_kms_keys
 
-  bucket_name = "ml-storage"
+  bucket_name = "ml-storage-${random_string.suffix.result}"
 
   log_bucket = local.env_log_bucket
   keyring    = one(local.region_kms_keyring)

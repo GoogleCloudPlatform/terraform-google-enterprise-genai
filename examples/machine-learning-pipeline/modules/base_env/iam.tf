@@ -86,7 +86,7 @@ locals {
   ]
 
   aiplatform_non_prod_sa = [
-    "serviceAccount:service-${var.non_production_project_number}gcp-sa-aiplatform.iam.gserviceaccount.com",
+    "serviceAccount:service-${var.non_production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com",
     "serviceAccount:service-${var.non_production_project_number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
   ]
 

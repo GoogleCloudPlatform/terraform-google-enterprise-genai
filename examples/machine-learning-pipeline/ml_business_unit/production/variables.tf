@@ -38,3 +38,9 @@ variable "seed_state_bucket" {
   description = "Remote state bucket from 0-bootstrap"
   type        = string
 }
+
+variable "repository_id" {
+  description = "Common artifacts repository id"
+  type = string
+  default = "c-publish-artifacts"
+}

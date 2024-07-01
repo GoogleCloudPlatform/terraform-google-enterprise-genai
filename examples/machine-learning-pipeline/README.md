@@ -252,6 +252,13 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   echo $common_artifacts_project_number
   ```
 
+- Retrieve the value for `prj_p_logging_project_number`:
+
+  ```bash
+  export prj_p_machine_learning_project_number=$(terraform -chdir="../gcp-projects/ml_business_unit/production" output -raw machine_learning_project_number)
+  echo $prj_p_machine_learning_project_number
+  ```
+
 - Run the following command to print the resulting ingress/egress policies that shall be put inside `gcp-networks/envs/non-production/non-production.auto.tfvars` variables file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/policies.tf.example`.
 
   ```bash
@@ -260,6 +267,7 @@ Once there, select the perimeter that is associated with the environment (eg. `n
       -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
       -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
+      -e "s/REPLACE_WITH_PROD_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
     assets/vpc-sc-policies/non-production.tf.example
   ```
 
@@ -326,7 +334,8 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   "serviceAccount:$env_step_sa",
   "serviceAccount:service-${prj_p_logging_project_number}@gs-project-accounts.iam.gserviceaccount.com",
   "serviceAccount:${prj_p_machine_learning_project_number}-compute@developer.gserviceaccount.com",
-  "serviceAccount:project-service-account@${prj_p_machine_learning_project_id}.iam.gserviceaccount.com"
+  "serviceAccount:project-service-account@${prj_p_machine_learning_project_id}.iam.gserviceaccount.com",
+  "serviceAccount:${prj_n_machine_learning_project_number}-compute@developer.gserviceaccount.com"
   EOF
   ```
 
@@ -721,6 +730,12 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 ## Post Deployment
 
+### VPC-SC
+
+You will need to add `trigger-sa` in non-production VPC-SC perimeter. 
+
+You can do this by adding `"serviceAccount:trigger-sa@<YOUR_NON_PROD_ML_PROJECT_ID>.iam.gserviceaccount.com"` to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
+
 ### Big Query
 
   In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance
@@ -829,24 +844,25 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
     |Configuration|Autodetected/Cloud Build configuration file (yaml or json)|
     |Location|Repository|
     |Cloud Build configuration file location|cloudbuild.yaml|
+    |Service Account|trigger-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com|
 
 - Open the cloudbuild.yaml file in your workbench and for steps 1 which uploads the source code for the dataflow job to your bucket.
 
-    ```
+    ```yaml
     name: 'gcr.io/cloud-builders/gsutil'
     args: ['cp', '-r', './src', 'gs://{your-bucket-name}']
     ```
 
 - Similarly in step 2, replace the bucket name with the name of your own bucket in the non-prod project in order to upload the data to your bucket:
 
-    ```
+    ```yaml
     name: 'gcr.io/cloud-builders/gsutil'
     args: ['cp', '-r', './data', 'gs://{your-bucket-name}']
     ```
 
 - Change the name of the image for step 3 and 4 to that of your own artifact project, i.e., `us-central1-docker.pkg.dev/{artifact_project_id}/c-publish-artifacts/vertexpipeline:v2` This is the project with artifact registry that houses the image required to run the pipeline.
 
-```
+```yaml
  - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
     entrypoint: 'python'
     args: ['compile_pipeline.py']
@@ -862,7 +878,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
 - Optionally, if you want to schedule pipeline runs on regular intervals, uncomment the last two steps and replace the composer bucket with the name of your composer's bucket. The first step uploads the pipeline's yaml to the bucket and the second step uploads the dag to read that yaml and trigger the vertex pipeline:
 
-```
+```yaml
  # upload to composer
    - name: 'gcr.io/cloud-builders/gsutil'
      args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://{your-composer-bucket}/dags/common/vertex-ai-pipeline/']
@@ -885,8 +901,6 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
     |REGION|The region for pipeline jobs|Can be left as default `us-central1`|
     |PROD_PROJECT_ID|ID of the prod project|`prod-project-id`|In console's project menu, navigate to the `fldr-production/fldr-production-ml` folder; here you can find the machine learning project in prod (`prj-p-ml-machine-learning`) and obtain its' ID|
     |Image|The image artifact used to run the pipeline components. The image is already built and pushed to the artifact repository in your artifact project under the common folder|`f"us-central1-docker.pkg.dev/{{artifact-project}}/{{artifact-repository}}/vertexpipeline:v2"`|Navigate to `fldr-common/prj-c-ml-artifacts` project. Navigate to the artifact registry repositories in the project to find the full name of the image artifact.|
-    |VERTEX_MODEL_SA|The service account created to run the Vertex model step.|vertex-model@{prj-d-ml-machine-learning-[project_id]}.iam.gserviceaccount.com|
-    |DATAFLOW_RUNNER_SA|The service account created that will be used to run the Dataflow steps.|dataflow-sa@{prj-d-ml-machine-learning-[project_id]}.iam.gserviceaccount.com|
     |DATAFLOW_SUBNET|The shared subnet in non-prod env required to run the dataflow job|`https://www.googleapis.com/compute/v1/projects/{non-prod-network-project}/regions/us-central1/subnetworks/{subnetwork-name}`|Navigate to the `fldr-network/prj-n-shared-restricted` project. Navigate to the VPC networks and under the subnets tab, find the name of the network associated with your region (us-central1)|
     |SERVICE_ACCOUNT|The service account used to run the pipeline and it's components such as the model monitoring job. This is the compute default service account of non-prod if you don't plan on using another costume service account|`{non-prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the non-prod project `fldr-non-production/fldr-non-production-ml/prj-n-ml-machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
     |PROD_SERICE_ACCOUNT|The service account used to create endpoint, upload the model, and deploy the model in the prod project. This is the compute default service account of prod if you don't plan on using another costume service account|`{prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the prod project `fldr-production/fldr-production-ml/prj-p-ml-machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
@@ -995,8 +1009,16 @@ You might encounter this when the vertex pipeline job attempts to run even thoug
 
 #### Service Agent not existent
 
+##### Storage
+
 - Error: Error updating AccessLevel "accessPolicies/POLICY_ID/accessLevels/ACCESS_LEVEL": googleapi: Error 400: The email address '<service-PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com>' is invalid or non-existent.
   - To fix run: `gcloud storage service-agent --project=project_id_here`
+
+##### Vertex AI Platform
+
+-  Error: Request `Create IAM Members roles/bigquery.dataViewer serviceAccount:service-<project_number>gcp-sa-aiplatform.iam.gserviceaccount.com for project "project_id"` returned error: Batch request and retried single request "Create IAM Members roles/bigquery.dataViewer serviceAccount:service-<project_number>gcp-sa-aiplatform.iam.gserviceaccount.com for project \"project_id\"" both failed. Final error: Error applying IAM policy for project "project_id": Error setting IAM policy for project "project_id": googleapi: Error 400: Invalid service account (service-<project_number>gcp-sa-aiplatform.iam.gserviceaccount.com)., badRequest
+
+  - To fix run: `gcloud beta services identity create --service=aiplatform.googleapis.com --project=<project_number>`
 
 #### VPC-SC
 

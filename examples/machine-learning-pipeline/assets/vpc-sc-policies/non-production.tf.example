@@ -106,14 +106,14 @@ egress_policies = [
       "identities"    = []
     },
     "to" = {
-      "resources" = ["projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER"]
+      "resources" = ["projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER","projects/REPLACE_WITH_PROD_ML_PROJECT_NUMBER"]
       "operations" = {
         "aiplatform.googleapis.com" = {
           "methods" = ["*"]
         }
       }
     }
-  },
+  },  
   {
     "from" = {
       "identity_type" = "ANY_IDENTITY"
