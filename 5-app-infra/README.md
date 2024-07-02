@@ -222,17 +222,20 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
 #### Configuring Cloud Source Repository of Artifact Application
 
 1. Grab the Artifact Project ID
+
    ```bash
    export ARTIFACT_PROJECT_ID=$(terraform -chdir="gcp-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
    echo ${ARTIFACT_PROJECT_ID}
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+
    ```bash
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
+
    ```bash
    cd publish-artifacts
    git checkout -b main
@@ -251,6 +254,7 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    ```
 
 1. `cd` out of the `publish-artifacts` repository.
+
    ```bash
    cd ..
    ```
@@ -267,6 +271,7 @@ Although Service Catalog itself must be manually deployed, the modules which wil
 The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are.
 
 The repository has the structure (truncated for brevity):
+
    ```
    ml_business_unit
    ├── development
@@ -402,11 +407,13 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+
    ```bash
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
+
    ```bash
    cd service-catalog/
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
@@ -415,6 +422,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```
 
 1. Commit changes and push main branch to the new repo.
+
    ```bash
    git add modules
    git commit -m 'Initialize Service Catalog Build Repo'
@@ -423,6 +431,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
    ```
 
 1. `cd` out of the `service_catalog` repository.
+
    ```bash
    cd ..
    ```
@@ -538,17 +547,20 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder.
 
 1. Grab the Artifact Project ID
+
    ```bash
    export ARTIFACT_PROJECT_ID=$(terraform -chdir="terraform-google-enterprise-genai/4-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
    echo ${ARTIFACT_PROJECT_ID}
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+
    ```bash
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the artifact files from `5-app-infra/source_repos/artifact-publish` folder.
+
    ```bash
    cd publish-artifacts
    git checkout -b main
@@ -567,6 +579,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    ```
 
 1. `cd` out of the `publish-artifacts` repository.
+
    ```bash
    cd ..
    ```
@@ -685,11 +698,13 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    ```
 
 1. Clone the freshly minted Cloud Source Repository that was created for this project.
+
    ```bash
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
 1. Enter the repo folder and copy over the service catalogs files from `5-app-infra/source_repos/service-catalog` folder.
+
    ```bash
    cd service-catalog/
    git checkout -b main
@@ -700,6 +715,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    ```
 
 1. Commit changes and push main branch to the new repo.
+
    ```bash
    git add modules
    git commit -m 'Initialize Service Catalog Build Repo'
@@ -708,6 +724,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    ```
 
 1. `cd` out of the `service-catalog` repository.
+
    ```bash
    cd ..
    ```
