@@ -616,6 +616,8 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
    ```bash
+   (cd ../../../4-projects && git checkout production && ./tf-wrapper init shared)
+
    member="user:$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")"
    echo ${member}
 
