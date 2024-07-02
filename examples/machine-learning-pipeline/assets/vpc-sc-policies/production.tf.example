@@ -153,6 +153,12 @@ egress_policies = [
         "storage.googleapis.com" = {
           "methods" = ["*"]
         }
+        "aiplatform.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "bigquery.googleapis.com" = {
+          "methods" = ["*"]
+        }
       }
     }
   },

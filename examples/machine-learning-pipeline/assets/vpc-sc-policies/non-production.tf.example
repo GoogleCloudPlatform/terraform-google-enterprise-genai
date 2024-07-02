@@ -102,13 +102,19 @@ egress_policies = [
   },
   {
     "from" = {
-      "identity_type" = "ANY_IDENTITY"
+      "identity_type" = "ANY_IDENTITY"  
       "identities"    = []
     },
     "to" = {
       "resources" = ["projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER","projects/REPLACE_WITH_PROD_ML_PROJECT_NUMBER"]
       "operations" = {
         "aiplatform.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "bigquery.googleapis.com" = {
           "methods" = ["*"]
         }
       }

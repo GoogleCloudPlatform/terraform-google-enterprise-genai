@@ -743,7 +743,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 ```bash
 gcloud projects add-iam-policy-binding $prj_p_machine_learning_project_id \
-            --member="serviceAccount:"$prj_n_machine_learning_project_number"-compute@developer.gserviceaccount.com" \
+            --member="serviceAccount:$prj_n_machine_learning_project_number-compute@developer.gserviceaccount.com" \
             --role='roles/aiplatform.admin'
 ```
 
@@ -752,6 +752,14 @@ gcloud projects add-iam-policy-binding $prj_p_machine_learning_project_id \
 ```bash
 gcloud storage buckets add-iam-policy-binding gs://<non_production_bucket_name> \
             --member="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com" \
+            --role='roles/storage.admin'
+```
+
+- The Default Compute Engine SA from production project must have `roles/storage.admin` on the non-production bucket. Run the command below to assign the permission
+
+```bash
+gcloud storage buckets add-iam-policy-binding gs://<non_production_bucket_name> \
+            --member="serviceAccount:$prj_p_machine_learning_project_number-compute@developer.gserviceaccount.com" \
             --role='roles/storage.admin'
 ```
 
