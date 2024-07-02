@@ -416,6 +416,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
 
    ```bash
    cd service-catalog/
+   git checkout -b main
    cp -RT ../terraform-google-enterprise-genai/5-app-infra/source_repos/service-catalog/ .
    git add img
    git commit -m "Add img directory"
