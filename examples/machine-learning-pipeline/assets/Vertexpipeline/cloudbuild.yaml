@@ -43,3 +43,5 @@ steps:
   #   args: ['cp', './composer/dags/dag.py', 'gs://us-central1-d-isolated-comp-8f58e4b5-bucket/dags/']
   #   id: 'upload dag'
 
+options:
+  logging: CLOUD_LOGGING_ONLY

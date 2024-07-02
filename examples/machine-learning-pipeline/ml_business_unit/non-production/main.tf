@@ -14,6 +14,81 @@
  * limitations under the License.
  */
 
+data "google_compute_default_service_account" "non_prod" {
+  project = local.machine_learning_project_id
+}
+
+resource "google_service_account" "dataflow_sa" {
+  project    = local.machine_learning_project_id
+  account_id = "dataflow-sa"
+}
+
+resource "google_project_iam_member" "dataflow_sa" {
+  for_each = toset([
+    "roles/bigquery.admin",
+    "roles/dataflow.admin",
+    "roles/dataflow.worker",
+    "roles/storage.admin",
+    "roles/aiplatform.admin",
+  ])
+  project = local.machine_learning_project_id
+  member  = google_service_account.dataflow_sa.member
+  role    = each.key
+}
+
+resource "google_service_account_iam_member" "impersonate_dataflow" {
+  service_account_id = google_service_account.dataflow_sa.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = data.google_compute_default_service_account.non_prod.member
+}
+
+resource "google_service_account" "trigger_sa" {
+  project    = local.machine_learning_project_id
+  account_id = "trigger-sa"
+}
+
+resource "google_storage_bucket_iam_member" "bucket" {
+  bucket = module.base_env.bucket.storage_bucket.name
+  role   = "roles/storage.admin"
+  member = google_service_account.trigger_sa.member
+}
+
+resource "google_project_iam_member" "trigger_sa" {
+  for_each = toset([
+    "roles/logging.logWriter",
+    "roles/aiplatform.admin"
+  ])
+  project = local.machine_learning_project_id
+  member  = google_service_account.trigger_sa.member
+  role    = each.key
+}
+
+resource "google_service_account_iam_member" "impersonate" {
+  service_account_id = data.google_compute_default_service_account.non_prod.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = google_service_account.trigger_sa.member
+}
+
+resource "google_artifact_registry_repository_iam_member" "ar_member" {
+  for_each = {
+    "compute-sa"    = "serviceAccount:${local.non_production_project_number}-compute@developer.gserviceaccount.com",
+    "trigger-sa"    = google_service_account.trigger_sa.member,
+    "aiplatform-sa" = "serviceAccount:service-${local.non_production_project_number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+  }
+
+
+  project    = local.common_artifacts_project_id
+  location   = var.instance_region
+  repository = var.repository_id
+  role       = "roles/artifactregistry.reader"
+  member     = each.value
+}
+
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
 
 module "base_env" {
   source = "../../modules/base_env"
@@ -30,7 +105,7 @@ module "base_env" {
   kms_keys = local.machine_learning_kms_keys
 
   // Composer
-  composer_enabled = true
+  composer_enabled = false
 
   composer_name = "composer"
   composer_airflow_config_overrides = {
@@ -55,8 +130,11 @@ module "base_env" {
   metadata_name = "metadata-store-${local.env}"
 
   // Bucket
-  bucket_name = "ml-storage-akdv"
+  bucket_name = "ml-storage-${random_string.suffix.result}"
 
   // TensorBoard
   tensorboard_name = "ml-tensorboard-${local.env}"
+
+  log_bucket = local.env_log_bucket
+  keyring    = one(local.region_kms_keyring)
 }

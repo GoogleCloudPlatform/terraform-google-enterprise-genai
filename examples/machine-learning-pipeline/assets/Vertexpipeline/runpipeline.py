@@ -50,7 +50,8 @@ class vertex_ai_pipeline:
                  DATAFLOW_SUBNET: str = "https://www.googleapis.com/compute/v1/projects/prj-n-shared-restricted-wooh/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1",
                  JOB_NAME: str = "census-ingest",
                  SERVICE_ACCOUNT: str = "1053774269887-compute@developer.gserviceaccount.com",
-                 PROD_SERVICE_ACCOUNT: str = "941180056038-compute@developer.gserviceaccount.com"
+                 PROD_SERVICE_ACCOUNT: str = "941180056038-compute@developer.gserviceaccount.com",
+                 DATAFLOW_SA: str = "your-dataflow-sa",                 
                  ):
 
         self.timestamp = datetime.now().strftime("%d_%H_%M_%S")
@@ -59,6 +60,7 @@ class vertex_ai_pipeline:
         self.REGION = REGION
         self.BUCKET_URI = BUCKET_URI
         self.DATA_PATH = DATA_PATH
+        self.DATAFLOW_SA = DATAFLOW_SA
 
         DAGS_FOLDER = os.environ.get("DAGS_FOLDER", "./")
         COMMON_FOLDER = os.path.join(DAGS_FOLDER, "common")
@@ -167,7 +169,7 @@ class vertex_ai_pipeline:
                 "prod_service_account": self.deployment_config["prod_service_account"],
                 "monitoring_name": self.monitoring_config['name'],
                 "monitoring_email": self.monitoring_config['email'],
-
+                "dataflow_sa": self.DATAFLOW_SA,
             },
             enable_caching=False,
         )
@@ -198,7 +200,9 @@ if __name__ == "__main__":
         # Replace with the compute default service account of your non-prod project
         SERVICE_ACCOUNT="1053774269887-compute@developer.gserviceaccount.com", \
         # Replace with the compute default service account of your prod project
-        PROD_SERVICE_ACCOUNT="941180056038-compute@developer.gserviceaccount.com"
+        PROD_SERVICE_ACCOUNT="941180056038-compute@developer.gserviceaccount.com",
+        # replace with dataflow sa from non-prod
+        DATAFLOW_SA="dataflow-sa@<non_prod_project_id>.iam.gserviceaccount.com",
     )
 
     pipeline.execute()

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
 
 module "base_env" {
   source = "../../modules/base_env"
@@ -54,8 +59,11 @@ module "base_env" {
   metadata_name = "metadata-store-${local.env}"
 
   // Bucket
-  bucket_name = "ml-storage-gvdf"
+  bucket_name = "ml-storage-${random_string.suffix.result}"
 
   // TensorBoard
   tensorboard_name = "ml-tensorboard-${local.env}"
+
+  log_bucket = local.env_log_bucket
+  keyring    = one(local.region_kms_keyring)
 }

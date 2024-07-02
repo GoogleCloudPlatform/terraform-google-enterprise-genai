@@ -128,4 +128,38 @@ egress_policies = [
       }
     }
   },
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_LOGGING_PROJECT_NUMBER"]
+      "operations" = {
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_NON_PROD_PROJECT_NUMBER"]
+      "operations" = {
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "aiplatform.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "bigquery.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
 ]
