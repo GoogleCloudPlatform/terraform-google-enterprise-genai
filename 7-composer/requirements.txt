@@ -1,5 +1,5 @@
 tensorflow-io-gcs-filesystem==0.25.0
-tensorflow-io==0.25.0
+tensorflow-io==0.37.1
 google-cloud-bigquery<3.0.0,>=1.11.1
 pandas==2.0.3
 db-dtypes==1.2.0
