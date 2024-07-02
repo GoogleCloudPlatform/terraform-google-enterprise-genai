@@ -67,7 +67,7 @@ module "big_query" {
 #      Metadata        #
 ########################
 
-module "metadata" {  
+module "metadata" {
   source = "git::https://source.developers.google.com/p/SERVICE_CATALOG_PROJECT_ID/r/service-catalog//modules/metadata?ref=main"
 
   project_id = var.project_id

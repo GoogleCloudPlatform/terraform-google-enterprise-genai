@@ -41,6 +41,6 @@ variable "seed_state_bucket" {
 
 variable "repository_id" {
   description = "Common artifacts repository id"
-  type = string
-  default = "c-publish-artifacts"
+  type        = string
+  default     = "c-publish-artifacts"
 }
