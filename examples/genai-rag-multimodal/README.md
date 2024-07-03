@@ -114,6 +114,29 @@ The main modifications to the original example include:
   }
   ```
 
+- Verify if `backend.tf` file exists at `ml-machine-learning/ml_business_unit/development`.
+  - If there is a `backend.tf` file, proceed with the next step and ignore the sub-steps below.
+  - If there is no `backend.tf` file, follow the sub-steps below:
+    - Create the file and put the following content into it:
+
+      ```terraform
+      terraform {
+        backend "gcs" {
+          bucket = "UPDATE_APP_INFRA_BUCKET"
+          prefix = "terraform/app-infra/ml_business_unit/development"
+        }
+      }
+      ```
+
+    - Run the command below to update `UPDATE_APP_INFRA_BUCKET`:
+
+      ```bash
+      export backend_bucket=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-artifact-publish"' --raw-output)
+      echo "backend_bucket = ${backend_bucket}"
+
+      for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
+      ```
+
 - Commit and push
 
   ```terraform
@@ -162,9 +185,76 @@ When running the Notebook, you will reach a step that downloads an example PDF f
 
 Once all the requirements are set up, you can start by running and adjusting the notebook step-by-step.
 
-To run the notebook, open the Google Cloud Console on Vertex AI Workbench, open JupyterLab and upload the notebook (`multimodal_rag_langchain.ipynb`) to it.
+To run the notebook, open the Google Cloud Console on Vertex AI Workbench (`https://console.cloud.google.com/vertex-ai/workbench/instances?referrer=search&project=<MACHINE_LEARNING_PROJECT_ID>`), click open JupyterLab on the created instance and upload the notebook (`multimodal_rag_langchain.ipynb`) in this repo to it.
 
 ### Optional: Use `terraform output` and bash command to fill in fields in the notebook
+
+#### Infra Pipeline (Cloud Build)
+
+If you ran using Cloud Build, proceed with the steps below to use `terraform output`.
+
+- Update `outputs.tf` file on `ml-machine-learning/ml_business_unit/development` with the following values:
+
+  ```terraform
+  output "private_endpoint_ip_address" {
+    value       = module.genai_example.private_endpoint_ip_address
+  }
+
+  output "host_vpc_project_id" {
+    value       = module.genai_example.host_vpc_project_id
+  }
+
+  output "host_vpc_network" {
+    value       = module.genai_example.host_vpc_network
+  }
+
+  output "notebook_project_id" {
+    value       = module.genai_example.notebook_project_id
+  }
+
+  output "vector_search_bucket_name" {
+    value       = module.genai_example.vector_search_bucket_name
+  }
+  ```
+
+- Run `./tf-wrapper init development` on `ml-machine-learning`.
+
+- Extract values from `terraform output` and validate. You must run the commands below at `ml-machine-learning/ml_business_unit/development`.
+
+  ```bash
+  export private_endpoint_ip_address=$(terraform output -raw private_endpoint_ip_address)
+  echo private_endpoint_ip_address=$private_endpoint_ip_address
+
+  export host_vpc_project_id=$(terraform output -raw host_vpc_project_id)
+  echo host_vpc_project_id=$host_vpc_project_id
+
+  export notebook_project_id=$(terraform output -raw notebook_project_id)
+  echo notebook_project_id=$notebook_project_id
+
+  export vector_search_bucket_name=$(terraform output -raw vector_search_bucket_name)
+  echo vector_search_bucket_name=$vector_search_bucket_name
+
+  export host_vpc_network=$(terraform output -raw host_vpc_network)
+  echo host_vpc_network=$host_vpc_network
+  ```
+
+- Search and Replace using `sed` command.
+
+  ```bash
+  sed -i "s/<INSERT_PRIVATE_IP_VALUE_HERE>/$private_endpoint_ip_address/g" multimodal_rag_langchain.ipynb
+
+  sed -i "s/<INSERT_HOST_VPC_PROJECT_ID>/$host_vpc_project_id/g" multimodal_rag_langchain.ipynb
+
+  sed -i "s/<INSERT_NOTEBOOK_PROJECT_ID>/$notebook_project_id/g" multimodal_rag_langchain.ipynb
+
+  sed -i "s/<INSERT_BUCKET_NAME>/$vector_search_bucket_name/g" multimodal_rag_langchain.ipynb
+
+  sed -i "s:<INSERT_HOST_VPC_NETWORK>:$host_vpc_network:g" multimodal_rag_langchain.ipynb
+  ```
+
+#### Terraform Locally
+
+If you ran terraform locally, proceed with the steps below to use `terraform output`.
 
 You can save some time adjusting the notebook by running the commands below:
 
