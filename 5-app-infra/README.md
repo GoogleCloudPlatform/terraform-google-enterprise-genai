@@ -550,7 +550,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. `cd` out of the repository.
 
    ```bash
-   cd
+   cd ..
    ```
 
 #### Configuring Cloud Source Repository of Artifact Application
