@@ -708,6 +708,12 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    ```
 
+1. `cd` out of the repository.
+
+   ```bash
+   cd ..
+   ```
+
 #### Configuring Cloud Source Repository of Service Catalog Solutions Pipeline
 
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder
