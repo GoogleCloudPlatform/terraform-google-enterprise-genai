@@ -20,7 +20,7 @@ The main modifications to the original example include:
 - Terraform v1.7.5
 - [Authenticated Google Cloud SDK 469.0.0](https://cloud.google.com/sdk/docs/authorizing)
 
-### Provision Infrastructure with Terraform
+### Terraform Variables Configuration
 
 - Update the `terraform.tfvars` file with values from your environment.
 
@@ -39,31 +39,11 @@ The main modifications to the original example include:
   - **KMS-PROJECT-ID**, **ML-ENV-KEYRING**, **ML-ENV-KEY**: Run `terraform output machine_learning_kms_keys` on `gcp-projects` repository, inside the Machine Learning business unit directory and on the development branch.
   - **REGION**: The chosen region.
 
-### Allow file download from Google Notebook Examples Bucket on VPC-SC Perimeter
-
-When running the Notebook, you will reach a step that downloads an example PDF file from a bucket, you need to add the egress rule below on the VPC-SC perimeter to allow the operation.
-
-```yaml
-- egressFrom:
-    identities:
-    - serviceAccount:rag-notebook-runner@<INSERT_YOUR_MACHINE_LEARNING_PROJECT_ID_HERE>.iam.gserviceaccount.com
-  egressTo:
-      operations:
-      - methodSelectors:
-      - method: google.storage.buckets.list
-      - method: google.storage.buckets.get
-      - method: google.storage.objects.get
-      - method: google.storage.objects.list
-      serviceName: storage.googleapis.com
-      resources:
-      - projects/200612033880 # Google Cloud Example Project
-```
-
 ## Deploying infrastructure using Machine Learning Infra Pipeline
 
-### Required Permissions for pipeline Service Account
+### Required Permissions and VPC-SC adjustments for pipeline Service Account
 
-- Give `roles/compute.networkUser` to the Service Account that runs the Pipeline.
+- The Service Account that runs the Pipeline must have `roles/compute.networkUser` on the Shared VPC Host Project, you can give this role by running the command below:
 
   ```bash
   SERVICE_ACCOUNT=$(terraform -chdir="./gcp-projects/ml_business_unit/shared" output -json terraform_service_accounts | jq -r '."ml-machine-learning"')
@@ -71,21 +51,7 @@ When running the Notebook, you will reach a step that downloads an example PDF f
   gcloud projects add-iam-policy-binding <INSERT_HOST_VPC_NETWORK_PROJECT_HERE> --member="serviceAccount:$SERVICE_ACCOUNT" --role="roles/compute.networkUser"
   ```
 
-- Add the following ingress rule to the Service Perimeter.
-
-  ```yaml
-  ingressPolicies:
-  - ingressFrom:
-      identities:
-      - serviceAccount:<SERVICE_ACCOUNT>
-      sources:
-      - accessLevel: '*'
-    ingressTo:
-      operations:
-      - serviceName: '*'
-      resources:
-      - '*'
-  ```
+- Add the build service account in the development VPC-SC perimeter. You can do this by adding "serviceAccount:<INSERT_SERVICE_ACCOUNT_EMAIL_HERE>" to `perimeter_additional_members` in `common.auto.tfvars` (development branch). If the command above executed succesfully, you can run `echo $SERVICE_ACCOUNT` to retrieve the Pipeline Service Account e-mail.
 
 ### Deployment steps
 
@@ -159,7 +125,38 @@ When running the Notebook, you will reach a step that downloads an example PDF f
 
 ## Deploying infrastructure using terraform locally
 
-Run `terraform init && terraform apply -auto-approve`.
+- Run `terraform init` inside this directory.
+- Run `terraform apply` inside this directory.
+
+## Post-Deployment
+
+### Allow file download from Google Notebook Examples Bucket on VPC-SC Perimeter
+
+When running the Notebook, you will reach a step that downloads an example PDF file from a bucket, you need to add the egress rule below on the VPC-SC perimeter to allow the operation. You can do this by adding this rule to `egress_rule` variable on `gcp-networks/envs/development/development.auto.tfvars` on the development branch.
+
+```terraform
+{
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:rag-notebook-runner@<INSERT_YOUR_MACHINE_LEARNING_PROJECT_ID_HERE>.iam.gserviceaccount.com"
+    ]
+  },
+  "to" = {
+    "resources" = ["projects/200612033880"]  # Google Cloud Example Project
+    "operations" = {
+        "storage.googleapis.com" = {
+        "methods" = [
+            "google.storage.buckets.list",
+            "google.storage.buckets.get",
+            "google.storage.objects.get",
+            "google.storage.objects.list",
+          ]
+        }
+    }
+  }
+},
+```
 
 ## Usage
 
