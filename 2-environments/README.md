@@ -196,7 +196,7 @@ You will be doing this procedure for each environment (`development`, `non-produ
     Make sure your git is checked out to the development branch by running `git checkout development` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout development && cd $GCP_ENVIRONMENTS_PATH/envs/development && terraform init)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout development && ./tf-wrapper.sh init development)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
@@ -244,7 +244,7 @@ You will be doing this procedure for each environment (`development`, `non-produ
     Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production && cd $GCP_ENVIRONMENTS_PATH/envs/non-production && terraform init)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production && ./tf-wrapper.sh init non-production)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
@@ -292,7 +292,7 @@ You will be doing this procedure for each environment (`development`, `non-produ
     Make sure your git is checked out to the `production` branch by running `git checkout production` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout production && cd $GCP_ENVIRONMENTS_PATH/envs/production && terraform init)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout production && ./tf-wrapper.sh init production)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
