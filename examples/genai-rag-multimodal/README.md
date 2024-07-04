@@ -185,7 +185,9 @@ When running the Notebook, you will reach a step that downloads an example PDF f
 
 Once all the requirements are set up, you can start by running and adjusting the notebook step-by-step.
 
-To run the notebook, open the Google Cloud Console on Vertex AI Workbench (`https://console.cloud.google.com/vertex-ai/workbench/instances?referrer=search&project=<MACHINE_LEARNING_PROJECT_ID>`), click open JupyterLab on the created instance and upload the notebook (`multimodal_rag_langchain.ipynb`) in this repo to it.
+To run the notebook, open the Google Cloud Console on Vertex AI Workbench (`https://console.cloud.google.com/vertex-ai/workbench/instances?referrer=search&project=<MACHINE_LEARNING_PROJECT_ID>`), click open JupyterLab on the created instance.
+
+After clicking "open JupyterLab" button, you will be taken to an interactive JupyterLab Workspace, you can upload the notebook (`multimodal_rag_langchain.ipynb`) in this repo to it. Once the notebook is uploaded to the environment, run it cell-by-cell to see process of building a RAG chain.
 
 ### Optional: Use `terraform output` and bash command to fill in fields in the notebook
 
