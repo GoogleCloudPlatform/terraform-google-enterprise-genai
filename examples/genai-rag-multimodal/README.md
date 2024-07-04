@@ -12,8 +12,14 @@ The main modifications to the original example include:
 
 - Adaptations to comply with Cloud Foundation Toolkit security measures.
 - Installation of additional libraries in the Conda environment.
-- Use of Vertex AI Workbench to run the notebook with a custom Service Account.
+- Use of Vertex AI Workbench to run the notebook with a custom Service Account in a secure environment.
 - Implementation of Vector Search on Vertex AI with [Private Service Connect](https://cloud.google.com/vpc/docs/private-service-connect).
+
+For more information about the technologies used in this example, please refer to the following resources:
+
+- [Vertex AI Workbench Introduction](https://cloud.google.com/vertex-ai/docs/workbench/introduction)
+- [Vertex AI Vector Search Overview](https://cloud.google.com/vertex-ai/docs/vector-search/overview)
+- [Ragas Documentation](https://docs.ragas.io/en/stable/)
 
 ## Requirements
 
@@ -33,10 +39,10 @@ The main modifications to the original example include:
   ```
 
 - Assuming you are deploying the example on top of the development environment, the following instructions will provide you more insight on how to retrieve these values:
-  - **NETWORK-PROJECT-ID**: Run `terraform output -raw restricted_host_project_id` on `gcp-networks` repository, inside the development environment directory and branch.
-  - **NETWORK-NAME**: Run `terraform output -raw restricted_network_name` on `gcp-networks` repository, inside the development environment directory and branch.
-  - **MACHINE-LEARNING-PROJECT-ID**: Run `terraform output -raw machine_learning_project_id` on `gcp-projects` repository, inside the Machine Learning business unit directory and on the development branch.
-  - **KMS-PROJECT-ID**, **ML-ENV-KEYRING**, **ML-ENV-KEY**: Run `terraform output machine_learning_kms_keys` on `gcp-projects` repository, inside the Machine Learning business unit directory and on the development branch.
+  - **NETWORK-PROJECT-ID**: Run `terraform -chdir="envs/development" output -raw restricted_host_project_id` on `gcp-networks` repository at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
+  - **NETWORK-NAME**: Run `terraform -chdir="envs/development" output -raw restricted_network_name` on `gcp-networks` repository at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
+  - **MACHINE-LEARNING-PROJECT-ID**: Run `terraform -chdir="ml_business_unit/development" output -raw machine_learning_project_id` on `gcp-projects` repository, at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
+  - **KMS-PROJECT-ID**, **ML-ENV-KEYRING**, **ML-ENV-KEY**: Run `terraform -chdir="ml_business_unit/development" output machine_learning_kms_keys` on `gcp-projects` repository, at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
   - **REGION**: The chosen region.
 
 ## Deploying infrastructure using Machine Learning Infra Pipeline
