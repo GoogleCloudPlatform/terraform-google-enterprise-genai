@@ -143,6 +143,14 @@ Once there, select the perimeter that is associated with the environment (eg. `d
   echo $common_artifacts_project_number
   ```
 
+- Retrieve the value for `prj_d_logging_project_number`:
+
+  ```bash
+  export prj_d_logging_project_number=$(terraform -chdir="../gcp-environments/envs/development" output -raw env_log_project_number)
+  echo $prj_d_logging_project_number
+  ```
+
+
 - Run the following command to print the resulting ingress/egress policies that shall be put inside `gcp-networks/envs/development/development.auto.tfvars` variables file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/policies.tf.example`.
 
   ```bash
@@ -151,6 +159,7 @@ Once there, select the perimeter that is associated with the environment (eg. `d
       -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
       -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_d_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
+      -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_d_logging_project_number/g" \
     assets/vpc-sc-policies/development.tf.example
   ```
 
@@ -269,6 +278,13 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   echo $prj_p_machine_learning_project_number
   ```
 
+- Retrieve the value for `prj_n_logging_project_number`:
+
+  ```bash
+  export prj_n_logging_project_number=$(terraform -chdir="../gcp-environments/envs/non-production" output -raw env_log_project_number)
+  echo $prj_n_logging_project_number
+  ```
+
 - Run the following command to print the resulting ingress/egress policies that shall be put inside `gcp-networks/envs/non-production/non-production.auto.tfvars` variables file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/policies.tf.example`.
 
   ```bash
@@ -278,6 +294,7 @@ Once there, select the perimeter that is associated with the environment (eg. `n
       -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
       -e "s/REPLACE_WITH_PROD_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
+      -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_n_logging_project_number/g" \
     assets/vpc-sc-policies/non-production.tf.example
   ```
 
@@ -356,7 +373,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
 
   ```bash
   export access_level=$(gcloud access-context-manager perimeters list --filter=status.resources:projects/$prj_p_machine_learning_project_number --format="value(status.accessLevels)")
-  
+
   echo $access_level
   ```
 
@@ -390,6 +407,13 @@ Once there, select the perimeter that is associated with the environment (eg. `p
   echo $common_artifacts_project_number
   ```
 
+- Retrieve the value for `prj_p_logging_project_number`:
+
+  ```bash
+  export prj_p_machine_learning_project_number=$(terraform -chdir="../gcp-projects/ml_business_unit/production" output -raw machine_learning_project_number)
+  echo $prj_p_machine_learning_project_number
+  ```
+
 - Run the following command to print the resulting ingress/egress policies that shall be put inside `gcp-networks/envs/production/production.auto.tfvars` variables file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/policies.tf.example`.
 
   ```bash
@@ -399,6 +423,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
       -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
       -e "s/REPLACE_WITH_NON_PROD_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
+      -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_p_logging_project_number/g" \
     assets/vpc-sc-policies/production.tf.example
   ```
 
