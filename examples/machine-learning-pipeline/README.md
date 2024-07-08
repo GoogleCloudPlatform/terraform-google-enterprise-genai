@@ -2,6 +2,16 @@
 
 This example demonstrates the process of interactive coding and experimentation using the Google Vertex AI Workbench for data scientists. The guide outlines the creation of a machine learning (ML) pipeline within a notebook on a Google Vertex AI Workbench Instance.
 
+This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench is deployed from service catalog and The datascientis can use it to write their code including any experiments, data processing code and pipeline components. In addition, a cloud storage bucket is deployed to use as the storage for our operations. Optionally a composer environment is which will later be used to schedule the pipeline run on intervals.
+
+Each environment, Development, Non-Production and Production have their own purpose and they are not a mirror from the previous environment.
+
+The Development environment is responsible to create pipeline components and make sure there are no issues in the environment.
+
+The non-production environment will result in triggering the pipeline if approved. The vertex pipeline takes about 30 minutes to finish.
+
+The production environment will provide an endpoint in the project which you can use to make prediction requests.
+
 ## Steps Involved
 
 - Creating the ML Pipeline:
@@ -414,7 +424,9 @@ Step 12 in "Deploying with Cloud Build" highlights the necessary steps needed to
 
 ### Deploying with Cloud Build
 
-Have a github token for access to your repository ready, along with an [Application Installation Id](https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github#connecting_a_github_host_programmatically) and the remote uri to your repository.
+Github App ID allows you to connect your GitHub repository to Cloud Build and it is optional to use or not.
+
+In case you want to integrate Github with Cloud Build you must have a github token for access to your repository ready, along with an [Application Installation Id](https://cloud.google.com/build/docs/automating-builds/github/connect-repo-github#connecting_a_github_host_programmatically) and the remote uri to your repository.
 
 The `GITHUB_APP_ID` value can be retrieved after [installing Cloud Build GitHub App](https://github.com/apps/google-cloud-build) on your GitHub account or in an organization you own.
 
@@ -451,7 +463,7 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. Update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
+1. If you are not integrating Github with Cloud Build, you can skip this step, otherwise you need to update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
 
    ```bash
    GITHUB_APP_ID="YOUR-GITHUB-APP-ID-HERE"
@@ -650,7 +662,7 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
    ```
 
 We will now deploy each of our environments (development/production/non-production) using this script.
-When using Cloud Build or Jenkins as your CI/CD tool, each environment corresponds to a branch in the repository for the `machine-learning-pipeline` step. Only the corresponding environment is applied.
+When using Cloud Build or Jenkins as your CI/CD tool, each environment corresponds to a branch in the repository for the `machine-learning-pipeline` step. Only the corresponding environment is applied.
 
 To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
 
@@ -819,8 +831,6 @@ Notably:
 
 
 ## Machine Learning Pipeline
-
-This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench is deployed from service catalog and The datascientis can use it to write their code including any experiments, data processing code and pipeline components. In addition, a cloud storage bucket is deployed to use as the storage for our operations. Optionally a composer environment is which will later be used to schedule the pipeline run on intervals.
 
 For our pipeline which trains and deploys a model on the [census income dataset](https://archive.ics.uci.edu/dataset/20/census+income), we use a notebook in the dev workbench to create our pipeline components, put them together into a pipeline and do a dry run of the pipeline to make sure there are no issues. You can access the repository [here](./assets/Vertexpipeline/).
 
