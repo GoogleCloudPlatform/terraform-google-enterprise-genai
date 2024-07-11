@@ -110,7 +110,7 @@ variable "github_name_prefix" {
 variable "github_app_installation_id" {
   type        = string
   description = "The app installation ID that was created when installing Google Cloud Build in GitHub: https://github.com/apps/google-cloud-build."
-  default = ""
+  default     = ""
 }
 
 variable "service_account_prefix" {
