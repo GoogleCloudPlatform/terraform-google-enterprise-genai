@@ -19,16 +19,16 @@ data "google_project" "project" {
 }
 
 resource "google_artifact_registry_repository_iam_member" "member" {
-  for_each = toset([
-    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
-    google_service_account.vertex_sa.member
-  ])
+  for_each = {
+    "aiplatform-sa" = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+    "vertex-sa"     = google_service_account.vertex_sa.member,
+  }
 
   project    = local.common_artifacts_project_id
   location   = var.instance_region
   repository = var.repository_id
   role       = "roles/artifactregistry.reader"
-  member     = each.key
+  member     = each.value
 }
 
 resource "google_service_account" "dataflow_sa" {
