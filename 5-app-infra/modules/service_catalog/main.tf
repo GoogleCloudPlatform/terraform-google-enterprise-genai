@@ -53,12 +53,10 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_bucket_iam_member" "bucket_role" {
-  for_each = { for gcs in local.bucket_roles : "${gcs.role}-${gcs.acct}" => gcs }
-  bucket   = google_storage_bucket.bucket.name
-  role     = each.value.role
-  member   = each.value.acct
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.admin"
+  member = google_service_account.trigger_sa.member
 }
-
 resource "google_sourcerepo_repository_iam_member" "read" {
   project    = var.project_id
   repository = var.name
