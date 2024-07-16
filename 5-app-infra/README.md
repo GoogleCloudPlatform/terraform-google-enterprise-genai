@@ -363,6 +363,7 @@ The pipeline also listens for changes made to `plan`, `development`, `non-produc
 1. Update the `log_bucket` variable with the value of the `logs_export_storage_bucket_name`.
 
    ```bash
+   terraform -chdir="../gcp-org/envs/shared" init
    export log_bucket=$(terraform -chdir="../gcp-org/envs/shared" output -raw logs_export_storage_bucket_name)
    echo "log_bucket = ${log_bucket}"
    sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./common.auto.tfvars
