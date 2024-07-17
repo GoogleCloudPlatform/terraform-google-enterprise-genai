@@ -2,7 +2,7 @@
 
 This example demonstrates the process of interactive coding and experimentation using the Google Vertex AI Workbench for data scientists. The guide outlines the creation of a machine learning (ML) pipeline within a notebook on a Google Vertex AI Workbench Instance.
 
-This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench is deployed from service catalog and The datascientis can use it to write their code including any experiments, data processing code and pipeline components. In addition, a cloud storage bucket is deployed to use as the storage for our operations. Optionally a composer environment is which will later be used to schedule the pipeline run on intervals.
+This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench is deployed from service catalog and the datascientis can use it to write their code including any experiments, data processing code and pipeline components. In addition, a cloud storage bucket is deployed to use as the storage for our operations. Optionally a composer environment is which will later be used to schedule the pipeline run on intervals.
 
 Each environment, Development, Non-Production and Production have their own purpose and they are not a mirror from the previous environment.
 
@@ -44,7 +44,7 @@ By now, `artifact-publish` and `service-catalog` have been deployed. The project
 
 To create new ingress/egress rules on the VPC-SC perimiter, follow the steps below:
 
-**IMPORTANT**: Please note that command below are running `terraform output` command, this means that the directories must be initialized with `./tf-wrapper.sh init <insert_desired_env_here>` if it was not already initialized.
+**IMPORTANT**: Please note that command below are running `terraform output` command, this means that the directories must be initialized with `terraform -chdir="<insert_desired_env_here>" init` if it was not already initialized.
 
 #### `development` environment
 
@@ -73,13 +73,17 @@ To create new ingress/egress rules on the VPC-SC perimiter, follow the steps bel
 - Retrieve the value for `prj_d_logging_project_number`:
 
   ```bash
+  terraform -chdir="../gcp-environments/envs/development" init
+
   export prj_d_logging_project_number=$(terraform -chdir="../gcp-environments/envs/development" output -raw env_log_project_number)
   echo $prj_d_logging_project_number
   ```
 
-- Retrieve the values for `prj_d_machine_learning_project_id` and `prj_d_logging_project_number`:
+- Retrieve the values for `prj_d_machine_learning_project_id` and `prj_d_machine_learning_project_number`:
 
   ```bash
+  terraform -chdir="../gcp-projects/ml_business_unit/development" init
+
   export prj_d_machine_learning_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/development" output -raw machine_learning_project_id)
   echo $prj_d_machine_learning_project_id
 
@@ -108,8 +112,13 @@ You can find the `sources.access_level` information by going to `Security` in yo
 Once there, select the perimeter that is associated with the environment (eg. `development`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL` or by running the following `gcloud` command:
 
   ```bash
-  export access_level=$(gcloud access-context-manager perimeters list --filter=status.resources:projects/$prj_d_machine_learning_project_number --format="value(status.accessLevels)")
-  
+  export org_id=$(terraform -chdir="../gcp-org/envs/shared" output  -raw org_id)
+  echo $org_id
+
+  export policy_id=$(gcloud access-context-manager policies list --organization $org_id --format="value(name)")
+  echo $policy_id
+
+  export access_level=$(gcloud access-context-manager perimeters list --policy=$policy_id --filter=status.resources:projects/$prj_d_machine_learning_project_number --format="value(status.accessLevels)")
   echo $access_level
   ```
 
@@ -123,6 +132,8 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 - Retrieve `restricted_host_project_number` variable value:
 
   ```bash
+  terraform -chdir="../gcp-networks/envs/development" init
+
   export restricted_host_project_id=$(terraform -chdir="../gcp-networks/envs/development" output -raw restricted_host_project_id)
   echo $restricted_host_project_id
 
@@ -151,19 +162,19 @@ Once there, select the perimeter that is associated with the environment (eg. `d
   ```
 
 
-- Run the following command to print the resulting ingress/egress policies that shall be put inside `gcp-networks/envs/development/development.auto.tfvars` variables file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/policies.tf.example`.
+- Run the following command to update the `gcp-networks/envs/development/development.auto.tfvars` file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/development.tf.example`.
 
   ```bash
   sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
-      -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
-      -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
-      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_d_machine_learning_project_number/g" \
-      -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
-      -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_d_logging_project_number/g" \
-    assets/vpc-sc-policies/development.tf.example
+    -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
+    -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
+    -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_d_machine_learning_project_number/g" \
+    -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
+    -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_d_logging_project_number/g" \
+  ../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/vpc-sc-policies/development.tf.example > envs/development/development.auto.tfvars
   ```
 
-  > *IMPORTANT*: The command above assumes you are running it on the root of the `examples/machine-learning-pipeline` on `terraform-google-enterprise-genai` directory.
+  > *IMPORTANT*: The command above assumes you are running it on the  `gcp-networks` directory.
 
 - Commit the results on `gcp-networks`.
 
@@ -176,11 +187,9 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 
 #### `non-production` environment
 
-- Navigate into `gcp-networks` directory and checkout to `non-production` branch:
+- Checkout to `non-production` branch:
 
   ```bash
-  cd gcp-networks/
-
   git checkout non-production
   ```
 
@@ -201,13 +210,17 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 - Retrieve the value for `prj_n_logging_project_number`:
 
   ```bash
+  terraform -chdir="../gcp-environments/envs/non-production" init
+
   export prj_n_logging_project_number=$(terraform -chdir="../gcp-environments/envs/non-production" output -raw env_log_project_number)
   echo $prj_n_logging_project_number
   ```
 
-- Retrieve the values for `prj_n_machine_learning_project_id` and `prj_n_logging_project_number`:
+- Retrieve the values for `prj_n_machine_learning_project_id` and `prj_n_machine_learning_project_number`:
 
   ```bash
+  terraform -chdir="../gcp-projects/ml_business_unit/non-production" init
+
   export prj_n_machine_learning_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/non-production" output -raw machine_learning_project_id)
   echo $prj_n_machine_learning_project_id
 
@@ -236,9 +249,15 @@ You can find the `sources.access_level` information by going to `Security` in yo
 Once there, select the perimeter that is associated with the environment (eg. `non-production`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL` or by running the following `gcloud` command:
 
   ```bash
-  export access_level=$(gcloud access-context-manager perimeters list --filter=status.resources:projects/$prj_n_machine_learning_project_number --format="value(status.accessLevels)")
-  
+  export org_id=$(terraform -chdir="../gcp-org/envs/shared" output  -raw org_id)
+  echo $org_id
+
+  export policy_id=$(gcloud access-context-manager policies list --organization $org_id --format="value(name)")
+  echo $policy_id
+
+  export access_level=$(gcloud access-context-manager perimeters list --policy=$policy_id --filter=status.resources:projects/$prj_n_machine_learning_project_number --format="value(status.accessLevels)")
   echo $access_level
+
   ```
 
 - Retrieve `env_kms_project_number` variable value:
@@ -251,6 +270,8 @@ Once there, select the perimeter that is associated with the environment (eg. `n
 - Retrieve `restricted_host_project_number` variable value:
 
   ```bash
+  terraform -chdir="../gcp-networks/envs/non-production" init
+
   export restricted_host_project_id=$(terraform -chdir="../gcp-networks/envs/non-production" output -raw restricted_host_project_id)
   echo $restricted_host_project_id
 
@@ -274,6 +295,8 @@ Once there, select the perimeter that is associated with the environment (eg. `n
 - Retrieve the value for `prj_p_logging_project_number`:
 
   ```bash
+  terraform -chdir="../gcp-projects/ml_business_unit/production" init
+
   export prj_p_machine_learning_project_number=$(terraform -chdir="../gcp-projects/ml_business_unit/production" output -raw machine_learning_project_number)
   echo $prj_p_machine_learning_project_number
   ```
@@ -285,7 +308,7 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   echo $prj_n_logging_project_number
   ```
 
-- Run the following command to print the resulting ingress/egress policies that shall be put inside `gcp-networks/envs/non-production/non-production.auto.tfvars` variables file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/policies.tf.example`.
+- Run the following command to update the `gcp-networks/envs/non-production/non-production.auto.tfvars` file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/non-production.tf.example`.
 
   ```bash
   sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
@@ -295,10 +318,10 @@ Once there, select the perimeter that is associated with the environment (eg. `n
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
       -e "s/REPLACE_WITH_PROD_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_n_logging_project_number/g" \
-    assets/vpc-sc-policies/non-production.tf.example
+    ../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/vpc-sc-policies/non-production.tf.example > envs/non-production/non-production.auto.tfvars
   ```
 
-  > *IMPORTANT*: The command above assumes you are running it on the root of the `examples/machine-learning-pipeline` on `terraform-google-enterprise-genai` directory.
+   > *IMPORTANT*: The command above assumes you are running it on the  `gcp-networks` directory.
 
 - Commit the results on `gcp-networks`.
 
@@ -336,11 +359,13 @@ Once there, select the perimeter that is associated with the environment (eg. `n
 - Retrieve the value for `prj_p_logging_project_number`:
 
   ```bash
+  terraform -chdir="../gcp-environments/envs/production" init
+
   export prj_p_logging_project_number=$(terraform -chdir="../gcp-environments/envs/production" output -raw env_log_project_number)
   echo $prj_p_logging_project_number
   ```
 
-- Retrieve the values for `prj_p_machine_learning_project_id` and `prj_p_logging_project_number`:
+- Retrieve the values for `prj_p_machine_learning_project_id` and `prj_p_machine_learning_project_number`:
 
   ```bash
   export prj_p_machine_learning_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/production" output -raw machine_learning_project_id)
@@ -372,8 +397,13 @@ You can find the `sources.access_level` information by going to `Security` in yo
 Once there, select the perimeter that is associated with the environment (eg. `production`). Copy the string under Perimeter Name and place it under `YOUR_ACCESS_LEVEL` or by running the following `gcloud` command:
 
   ```bash
-  export access_level=$(gcloud access-context-manager perimeters list --filter=status.resources:projects/$prj_p_machine_learning_project_number --format="value(status.accessLevels)")
+  export org_id=$(terraform -chdir="../gcp-org/envs/shared" output  -raw org_id)
+  echo $org_id
 
+  export policy_id=$(gcloud access-context-manager policies list --organization $org_id --format="value(name)")
+  echo $policy_id
+
+  export access_level=$(gcloud access-context-manager perimeters list --policy=$policy_id --filter=status.resources:projects/$prj_p_machine_learning_project_number --format="value(status.accessLevels)")
   echo $access_level
   ```
 
@@ -387,6 +417,8 @@ Once there, select the perimeter that is associated with the environment (eg. `p
 - Retrieve `restricted_host_project_number` variable value:
 
   ```bash
+  terraform -chdir="../gcp-networks/envs/production" init
+
   export restricted_host_project_id=$(terraform -chdir="../gcp-networks/envs/production" output -raw restricted_host_project_id)
   echo $restricted_host_project_id
 
@@ -414,20 +446,20 @@ Once there, select the perimeter that is associated with the environment (eg. `p
   echo $prj_p_machine_learning_project_number
   ```
 
-- Run the following command to print the resulting ingress/egress policies that shall be put inside `gcp-networks/envs/production/production.auto.tfvars` variables file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/policies.tf.example`.
+- Run the following command to update the `gcp-networks/envs/production/production.auto.tfvars` file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/production.tf.example`.
 
   ```bash
   sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
-      -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
-      -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
-      -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
-      -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
-      -e "s/REPLACE_WITH_NON_PROD_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
-      -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_p_logging_project_number/g" \
-    assets/vpc-sc-policies/production.tf.example
+    -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
+    -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
+    -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
+    -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
+    -e "s/REPLACE_WITH_NON_PROD_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
+    -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_p_logging_project_number/g" \
+  ../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/vpc-sc-policies/production.tf.example > envs/production/production.auto.tfvars
   ```
 
-  > *IMPORTANT*: The command above assumes you are running it on the root of the `examples/machine-learning-pipeline` on `terraform-google-enterprise-genai` directory.
+   > *IMPORTANT*: The command above assumes you are running it on the  `gcp-networks` directory.
 
 - Commit the results on `gcp-networks`.
 
