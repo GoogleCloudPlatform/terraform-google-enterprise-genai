@@ -26,14 +26,14 @@ variable "remote_state_bucket" {
 
 variable "github_app_installation_id" {
   description = "The app installation ID that was created when installing Google Cloud Build in Github: https://github.com/apps/google-cloud-build"
-  type        = string
-  default     = ""
+  type        = number
+  default     = null
 
 }
 variable "github_remote_uri" {
   description = "The remote uri of your github repository"
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "seed_state_bucket" {

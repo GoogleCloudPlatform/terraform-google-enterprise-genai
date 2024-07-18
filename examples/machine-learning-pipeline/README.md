@@ -337,8 +337,6 @@ Once there, select the perimeter that is associated with the environment (eg. `n
 - Navigate into `gcp-networks` directory and checkout to `production` branch:
 
   ```bash
-  cd gcp-networks/
-
   git checkout production
   ```
 
@@ -468,6 +466,8 @@ Once there, select the perimeter that is associated with the environment (eg. `p
 
   git commit -m 'Update ingress and egress rules'
   git push origin production
+
+  cd ..
   ```
 
 
@@ -520,7 +520,7 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. If you are not integrating Github with Cloud Build, you can skip this step, otherwise you need to update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository.
+1. If you are not integrating Github with Cloud Build, you can skip this step, otherwise you need to update the `common.auto.tfvars` file with your github app installation id, along with the url of your repository. Remember to uncomment the lines below that refer to Github.
 
    ```bash
    GITHUB_APP_ID="YOUR-GITHUB-APP-ID-HERE"
@@ -562,7 +562,7 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
    ```bash
    export vpc_project=$(terraform -chdir="../gcp-networks/envs/development" output -raw restricted_host_project_id)
    echo $vpc_project
-   
+
    ## Linux
    sed -i "s/REPLACE_WITH_DEV_VPC_PROJECT/${vpc_project}/g" ./modules/base_env/main.tf
    ```
@@ -571,7 +571,7 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
 
    ```bash
    export user_email="INSERT_YOUR_USER_EMAIL_HERE"
-   
+
    ## Linux
    sed -i "s/REPLACE_WITH_USER_GCP_EMAIL/${user_email}/g" ./modules/base_env/main.tf
    ```

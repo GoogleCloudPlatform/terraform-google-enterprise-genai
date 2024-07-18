@@ -18,8 +18,8 @@ instance_region = "us-central1" // should be one of the regions used to create n
 
 remote_state_bucket = "REMOTE_STATE_BUCKET"
 
-github_app_installation_id = "GITHUB_APP_ID"
+#github_app_installation_id = "GITHUB_APP_ID"
 
-github_remote_uri = "GITHUB_REMOTE_URI"
+#github_remote_uri = "GITHUB_REMOTE_URI"
 
 seed_state_bucket = "REPLACE_SEED_TFSTATE_BUCKET"

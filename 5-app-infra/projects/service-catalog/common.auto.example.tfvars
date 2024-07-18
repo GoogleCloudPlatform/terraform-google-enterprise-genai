@@ -20,9 +20,9 @@ remote_state_bucket = "REMOTE_STATE_BUCKET"
 
 log_bucket = "REPLACE_LOG_BUCKET"
 
-# github_ api_ token = "PUT IN TOKEN"
+# github_ api_ token = "GITHUB_APP_TOKEN"
 
-# github_app_installation_id = "18685983"
+# github_app_installation_id = "GITHUB_APP_ID"
 
-# github_remote_uri = "https://github.com/badal-io/ml-foundations-tf-modules.git"
+# github_remote_uri = "GITHUB_REMOTE_URI"
 
