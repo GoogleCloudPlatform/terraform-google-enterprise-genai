@@ -63,7 +63,10 @@ To run the commands described in this document, install the following:
 - [Terraform](https://www.terraform.io/downloads.html) version 1.5.7
 - [jq](https://jqlang.github.io/jq/download/) version 1.6.0 or later
 
-**Note:** Make sure that you use version 1.5.7 of Terraform throughout this series. Otherwise, you might experience Terraform state snapshot lock errors.
+**Notes:**
+
+- Make sure that you use version 1.5.7 of Terraform throughout this series. Otherwise, you might experience Terraform state snapshot lock errors.
+- It is recommended to use Bash terminal de deploy the code from this repository. Using other terminals might cause unexpected behaviours.
 
 Also make sure that you've done the following:
 
