@@ -634,6 +634,8 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
    git push origin development
    ```
 
+   **Note:** In case of message of error `Error: Provider produced inconsistent final plan` in the Cloud Build, a Retry should be done.
+
 1. Merge changes to non-production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both *terraform plan* and *terraform apply*. Review the apply output in your Cloud Build project <https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_INFRA_PIPELINE_PROJECT_ID>
 
