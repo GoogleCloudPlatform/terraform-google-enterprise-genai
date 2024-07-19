@@ -925,7 +925,7 @@ You can read more about the details of the pipeline components on the [pipeline'
 
 ### Step by step
 
-Before you start, make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
+If you are using Github make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
 Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy the bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
 
 
@@ -935,7 +935,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
 #### 1. Run the notebook
 
-- Take the code on `assets/Vertexpipeline` folder and make you own copy as a standalone git repository. Take note of this git repository url and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the dev branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your dev project.
+- Create a new git repository with the content of `examples/machine-learning-pipeline/assets/Vertexpipeline` folder. Take note of this git repository url and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the development branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your development project.
 
 #### 2. Configure cloud build
 
