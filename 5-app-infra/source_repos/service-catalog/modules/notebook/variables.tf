@@ -154,3 +154,11 @@ variable "vpc_project" {
   This value can be obtained by running "gcloud projects list --filter='labels.application_name:restricted-shared-vpc-host lifecycleState:ACTIVE'" and selecting the project.
   EOF
 }
+
+variable "kms_key_name" {
+  type        = string
+  description = <<EOF
+The KMS key to be used on the keyring, if not specified will use the default key created in 4-projects step"
+EOF
+  default     = ""
+}

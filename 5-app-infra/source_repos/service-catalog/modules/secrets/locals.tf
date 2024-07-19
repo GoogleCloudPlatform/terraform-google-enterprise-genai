@@ -17,4 +17,5 @@
 locals {
   key_location      = element(split("/", var.kms_keyring), 3)
   pubsub_topic_name = "secret-rotation-notifications"
+  key_name     = var.kms_key_name == "" ? var.project_id : var.kms_key_name
 }

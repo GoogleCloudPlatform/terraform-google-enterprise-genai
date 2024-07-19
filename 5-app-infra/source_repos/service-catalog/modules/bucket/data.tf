@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+locals {
+  key_name     = var.kms_key_name == "" ? var.project_id : var.kms_key_name
+}
+
 data "google_project" "project" {
   project_id = var.project_id
 }
 
 data "google_kms_crypto_key" "key" {
-  name     = data.google_project.project.name
+  name     = local.key_name
   key_ring = var.kms_keyring
 }
