@@ -479,7 +479,7 @@ Under `modules/base_env/main.tf` you will notice all module calls are using `git
 
 Step 12 in "Deploying with Cloud Build" highlights the necessary steps needed to point the module resources to the correct location.
 
-### Deploying with Cloud Build
+### Infrastructure Deployment with Cloud Build
 
 Github App ID allows you to connect your GitHub repository to Cloud Build and it is optional to use or not.
 
@@ -656,7 +656,7 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
    cd ..
    ```
 
-### Running Terraform locally - Only proceed with these if you have not used Cloud Build
+### Infrastructure Deployment with Local Terraform - Only proceed with these if you have not used Cloud Build
 
 1. The next instructions assume that you are at the same level of the `terraform-google-enterprise-genai` folder. Change into `machine-learning-pipeline` folder, copy the Terraform wrapper script and ensure it can be executed.
 
@@ -798,7 +798,7 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
   unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
   ```
 
-## Post Deployment
+## Post Infrastructure Deployment
 
 ### VPC-SC
 
@@ -899,17 +899,43 @@ Once this addition has been done, it is necessary to trigger the cloudbuild for 
 ```
 
 
-## Machine Learning Pipeline
+## Running the Machine Learning Pipeline
 
-For our pipeline which trains and deploys a model on the [census income dataset](https://archive.ics.uci.edu/dataset/20/census+income), we use a notebook in the dev workbench to create our pipeline components, put them together into a pipeline and do a dry run of the pipeline to make sure there are no issues. You can access the repository [here](./assets/Vertexpipeline/).
+Each environment, Development, Non-Production and Production have their own purpose and they are not a mirror from the previous environment. As you can see on the diagram below:
 
-There is a Dockerfile in the repo which is the docker image used to run all pipeline steps and cloud build steps. In non-prod and prod environments, the only NIST compliant way to access additional dependencies and requirements is via docker images uploaded to artifact registry. We have baked everything for running the pipeline into this docker which exsits in the shared artifact registry.
+```text
++---------------+     +-----------------------------+  +----------------+
+|               |     |                             |  |                |
+|  Development  |     |           Staging           |  |   Production   |
+|               |     |                             |  |                |
+|               |     |                             |  |                |
+|   Notebook    |     |  Promotion Pipeline         |  |                |
+|      |        |     |     (Cloud Build) ----------+--+--> ML Model    |
+|      |        |     |                     deploys |  |                |
+|      |deploys |     |                             |  |                |
+|      |        |     |                             |  |                |
+|      v        |     |                             |  |                |
+|   ML Model    |     |                             |  |                |
+|               |     |                             |  |                |
+|               |     |                             |  |                |
++---------------+     +-----------------------------+  +----------------+
+```
 
-Once confident, we divide the code in two separate files to use in our CI/CD process in the non-prod environment. First is *compile_pipeline.py* which includes the code to build the pipeline and compile it into a directory (in our case, /common/vertex-ai-pipeline/pipeline_package.yaml)
+The Development environment is responsible to create pipeline components and make sure there are no issues in the environment, after running the notebook on the development environment you will have a Machine Learning Model deployed that can be viewed on the following link `<https://console.cloud.google.com/vertex-ai/online-prediction>` and a Vertex AI workbench instance that is billed, refer to the [following link](https://cloud.google.com/vertex-ai/pricing#notebooks) for more detailed billing information.
 
-The second file, i.e. *runpipeline.py* includes the code for running the compiled pipeline. This is where the correct environemnt variables for non-prod nad prod (e.g., service accounts to use for each stage of the pipeline, kms keys corresponding to each step, buckets, etc.) are set. And eventually the pipeline is loaded from the yaml file at *common/vertex-ai-pipeline/pipeline_package.yaml* and submitted to vertex ai.
+The non-production environment will result in triggering the pipeline if approved. The vertex pipeline takes about 30 minutes to finish and deploys the model to production environment.
 
-There is a *cloudbuild.yaml* file in the repo with the CI/CD steps as follows:
+The production environment will provide an endpoint in the project which you can use to make prediction requests to the Machine Learning Model.
+
+For our pipeline which trains and deploys a model on the [census income dataset](https://archive.ics.uci.edu/dataset/20/census+income), we use a notebook in the development environment workbench to create our pipeline components, put them together into a pipeline and do a dry run of the pipeline to make sure there are no issues. You can access the repository that contains assets for the notebook [here](./assets/Vertexpipeline/).
+
+There is a [Dockerfile](../../5-app-infra/source_repos/artifact-publish/images/vertexpipeline:v2/Dockerfile) in the repo which is the docker image used to run all pipeline steps and cloud build steps. In non-prod and prod environments, the only NIST compliant way to access additional dependencies and requirements is via docker images uploaded to artifact registry. We have baked everything for running the pipeline into this docker which exist in the shared artifact registry.
+
+Once confident that the pipeline runs successfully on the development environment, we divide the code in two separate files to use in our CI/CD process, at the non-production (staging) environment. First file is *compile_pipeline.py* which includes the code to build the pipeline and compile it into a directory (in our case, `common/vertex-ai-pipeline/pipeline_package.yaml`)
+
+The second file, i.e. *runpipeline.py* includes the code for running the compiled pipeline. This is where the correct environment variables for non-production (staging) and production (e.g., service accounts to use for each stage of the pipeline, kms keys corresponding to each step, buckets, etc.) are set. And eventually the pipeline is loaded from the yaml file at *common/vertex-ai-pipeline/pipeline_package.yaml* and submitted to Vertex AI.
+
+There should be a *cloudbuild.yaml* template file at `examples/machine-learning-pipeline/assets/Vertexpipeline/cloudbuild.yaml` in this repository with the CI/CD steps as follows:
 
 1. Upload the Dataflow src file to the bucket in non-prod
 2. Upload the dataset to the bucket
@@ -917,7 +943,7 @@ There is a *cloudbuild.yaml* file in the repo with the CI/CD steps as follows:
 4. Run the pipeline via *runpipeline.py*
 5. Optionally, upload the pipeline's yaml file to the composer bucket to make it available for scheduled pipeline runs
 
-The cloud build trigger will be setup in the non-prod project which is where the ML pipeline will run. There are currently three branches on the repo namely dev, staging (non-prod), and prod. Cloud build will trigger the pipeline once there is a merge into the staging (non-prod) branch from dev. However, model deployment and monitorings steps take place in the prod environment. As a result, the service agents and service accounts of the non-prod environment are given some permission on the prod environment and vice versa.
+The cloud build trigger will be setup in the non-production project which is where the previously validated ML pipeline will run. There should be three branches on the repo namely dev, staging (non-prod), and prod. Cloud build will trigger the pipeline once there is a merge into the staging (non-prod) branch from dev. However, model deployment and monitorings steps take place in the production environment. As a result, the service agents and service accounts of the non-prod environment are given some permission on the prod environment and vice versa.
 
 Each time a pipeline job finishes successfully, a new version of the census income bracket predictor model will be deployed on the endpoint which will only take 25 percent of the traffic wherease the other 75 percent goes to the previous version of the model to enable A/B testing.
 
@@ -926,8 +952,8 @@ You can read more about the details of the pipeline components on the [pipeline'
 ### Step by step
 
 If you are using Github make sure you have your personal git access token ready. The git menu option on the left bar of the workbench requires the personal token to connect to git and clone the repo.
-Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy the bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
 
+Also make sure to have a gcs bucket ready to store the artifacts for the tutorial. To deploy a new bucket, you can go to service catalog and create a new deployment from the storage bucket solution.
 
 #### Creating the Vertex AI Workbench Instance
 
@@ -935,11 +961,19 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
 #### 1. Run the notebook
 
-- Create a new git repository with the content of `examples/machine-learning-pipeline/assets/Vertexpipeline` folder. Take note of this git repository url and clone it in the workbench in your dev project. Create a dev branch of the new repository. Switch to the development branch by choosing it in the branch section of the git view. Now go back to the file browser view by clicking the first option on the left bar menu. Navigate to the directory you just clone and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your development project.
+- Before running the notebook, create a new git repository with the content of `examples/machine-learning-pipeline/assets/Vertexpipeline` folder. Take note of this git repository url, you will need it to clone the repository.
+
+- Access workbench in your development project at the `https://console.cloud.google.com/vertex-ai/workbench/instances` link.
+
+- Click `Open Jupyterlab` button on the instance created, this will take you to an interactive environment inside Vertex AI.
+
+- Click the Git Icon and clone the repository you created, select the dev branch.
+
+- Navigate to the directory that contains `census_pipeline.ipynb` file and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your development project.
 
 #### 2. Configure cloud build
 
-- After the notebook runs successfully and the pipeline's test run finishes in the dev environment, create a cloud build trigger in your non-prod project. Configure the trigger to run when there is a merge into the staging (non-prod) branch by following the below settings.
+- After the notebook runs successfully and the pipeline's test run finishes in the dev environment, create a cloud build trigger in your non-production project. Configure the trigger to run when there is a merge into the staging (non-prod) branch by following the below settings.
 
     |Setting|Value|
     |-------|-----|
@@ -1020,7 +1054,7 @@ The compile_pipeline.py and runpipeline.py files are commented to point out thes
 
 - Once everything is configured, you can commit your changes and push to the dev branch. Then, create a PR to from dev to staging(non-prod) which will result in triggering the pipeline if approved. The vertex pipeline takes about 30 minutes to finish and if there are no errors, a trained model will be deployed to and endpoint in the prod project which you can use to make prediction requests.
 
-### 5. Model Validation
+#### 5. Model Validation
 
 Once you have the model running at an endpoint in the production project, you will be able to test it.
 Here are step-by-step instructions to make a request to your model using `gcloud` and `curl`:
