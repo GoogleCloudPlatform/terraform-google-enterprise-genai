@@ -819,7 +819,10 @@ gcloud projects add-iam-policy-binding $prj_p_machine_learning_project_id \
 - The AI Platform Service Agent from production project must have `roles/storage.admin` on the non-production bucket. Run the command below to assign the permission
 
 ```bash
-gcloud storage buckets add-iam-policy-binding gs://<non_production_bucket_name> \
+export non_production_bucket_name=$(gcloud storage buckets list --project $prj_n_machine_learning_project_id --format="value(name)" |grep bkt)
+echo $non_production_bucket_name
+
+gcloud storage buckets add-iam-policy-binding gs://$non_production_bucket_name\
             --member="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com" \
             --role='roles/storage.admin'
 ```
@@ -827,7 +830,7 @@ gcloud storage buckets add-iam-policy-binding gs://<non_production_bucket_name> 
 - The Default Compute Engine SA from production project must have `roles/storage.admin` on the non-production bucket. Run the command below to assign the permission
 
 ```bash
-gcloud storage buckets add-iam-policy-binding gs://<non_production_bucket_name> \
+gcloud storage buckets add-iam-policy-binding gs://$non_production_bucket_name\
             --member="serviceAccount:$prj_p_machine_learning_project_number-compute@developer.gserviceaccount.com" \
             --role='roles/storage.admin'
 ```
@@ -852,12 +855,11 @@ gcloud storage buckets add-iam-policy-binding gs://<non_production_bucket_name> 
 
 1. Many of the necessary service agents and permissions were deployed in all project environments for machine-learning.  Additional entries may be needed for each environment.
 
-1. Add in more agents to the DEVELOPMENT.AUTO.TFVARS file under `egress_policies`.
-Notably:
+1. Add in more agents to the DEVELOPMENT.AUTO.TFVARS file under `egress_policies`. This file is in `gcp-networks` directory. Make sure you are in the `development` branch.
 
    - "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"
 
-    This should be added under identities.  It should look like this::
+    This should be added under egress_policies -> notebooks -> identities.  It should look like this:
 
     ```text
     egress_policies = [
@@ -885,6 +887,16 @@ Notably:
           },
       ]
    ```
+
+Once this addition has been done, it is necessary to trigger the cloudbuild for `gcp-networks` for development environment:
+
+```bash
+  cd gcp-networks
+  git add .
+
+  git commit -m 'Update egress rules'
+  git push origin development
+```
 
 
 ## Machine Learning Pipeline
