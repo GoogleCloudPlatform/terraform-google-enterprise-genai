@@ -32,6 +32,7 @@
 | image\_project | The name of the Google Cloud project that this VM image belongs to. Format: projects/{project\_id}. | `string` | `"cloud-notebooks-managed"` | no |
 | install\_gpu\_driver | Whether the end user authorizes Google Cloud to install GPU driver on this instance. Only applicable to instances with GPUs. | `bool` | `false` | no |
 | instance\_owners | Email of the owner of the instance, e.g. alias@example.com. Only one owner is supported! | `set(string)` | n/a | yes |
+| kms\_key\_name | The KMS key to be used on the keyring, if not specified will use the default key created in 4-projects step" | `string` | `""` | no |
 | kms\_keyring | The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as var.location and the same environment.<br>    This value can be obtained by running "gcloud kms keyrings list --project=KMS\_PROJECT\_ID --location=REGION". | `string` | n/a | yes |
 | location | Notebook instance location (zone). | `string` | `"us-central1-a"` | no |
 | machine\_type | Type of the machine to spin up for the notebook. | `string` | `"e2-standard-4"` | no |
