@@ -19,5 +19,5 @@ locals {
     "us-central1" = "usc1"
     "us-east4"    = "use4"
   }
-  key_name = var.kms_key_name == "" ? var.project_id : var.kms_key_name
+  key_name = var.kms_key_name == "" ? data.google_project.project.name : var.kms_key_name
 }
