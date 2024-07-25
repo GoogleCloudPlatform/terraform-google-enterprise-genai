@@ -299,6 +299,10 @@ You can save some time adjusting the notebook by running the commands below:
   sed -i "s:<INSERT_HOST_VPC_NETWORK>:$host_vpc_network:g" multimodal_rag_langchain.ipynb
   ```
 
+## Notes
+
+- Some, but not exclusively, of the billable components deployed are: Vertex AI Workbench Instance, Private Service Connect Endpoint and Vector Search Endpoint.
+
 ## Known Issues
 
 - `Error: Error creating Instance: googleapi: Error 400: value_to_check(https://compute.googleapis.com/compute/v1/projects/...) is not found`.
