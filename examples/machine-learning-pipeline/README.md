@@ -17,7 +17,7 @@ The production environment will provide an endpoint in the project which you can
 - Creating the ML Pipeline:
   - Use a notebook on Google Vertex AI Workbench Instance to develop and adjust the ML pipeline on the development environment.
 - Triggering the Pipeline:
-  - The pipeline is set to trigger via Cloud Build upon merges to the staging branch after being validated on development environment.
+  - The pipeline is set to trigger via Cloud Build upon merges to the non-production branch after being validated on development environment.
 - Training and Deploying the Model:
   - The model is trained and deployed using the census income dataset.
   - Deployment and monitoring occur in the production environment.
@@ -806,7 +806,9 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 - Add `trigger-sa` in non-production VPC-SC perimeter. You can do this by adding `"serviceAccount:trigger-sa@$prj_n_machine_learning_project_id.iam.gserviceaccount.com"` to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
 
-- Add `"serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"` in non-production VPC-SC perimeter. You can do this by adding it to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
+- Add `"serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"` in non-production VPC-SC perimeter. You can do this by adding it to `perimeter_additional_members` in `common.auto.tfvars` (for both non-production and production branches).
+
+- Add `"serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com"` in production VPC-SC perimeter. You can do this by adding it to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
 
 ### Permissions
 
@@ -908,7 +910,7 @@ Each environment, Development, Non-Production and Production have their own purp
 ```text
 +---------------+     +-----------------------------+  +----------------+
 |               |     |                             |  |                |
-|  Development  |     |           Staging           |  |   Production   |
+|  Development  |     |           Non-production    |  |   Production   |
 |               |     |                             |  |                |
 |               |     |                             |  |                |
 |   Notebook    |     |  Promotion Pipeline         |  |                |
@@ -933,9 +935,9 @@ For our pipeline which trains and deploys a model on the [census income dataset]
 
 There is a [Dockerfile](../../5-app-infra/source_repos/artifact-publish/images/vertexpipeline:v2/Dockerfile) in the repo which is the docker image used to run all pipeline steps and cloud build steps. In non-prod and prod environments, the only NIST compliant way to access additional dependencies and requirements is via docker images uploaded to artifact registry. We have baked everything for running the pipeline into this docker which exist in the shared artifact registry.
 
-Once confident that the pipeline runs successfully on the development environment, we divide the code in two separate files to use in our CI/CD process, at the non-production (staging) environment. First file is *compile_pipeline.py* which includes the code to build the pipeline and compile it into a directory (in our case, `common/vertex-ai-pipeline/pipeline_package.yaml`)
+Once confident that the pipeline runs successfully on the development environment, we divide the code in two separate files to use in our CI/CD process, at the non-production environment. First file is *compile_pipeline.py* which includes the code to build the pipeline and compile it into a directory (in our case, `common/vertex-ai-pipeline/pipeline_package.yaml`)
 
-The second file, i.e. *runpipeline.py* includes the code for running the compiled pipeline. This is where the correct environment variables for non-production (staging) and production (e.g., service accounts to use for each stage of the pipeline, kms keys corresponding to each step, buckets, etc.) are set. And eventually the pipeline is loaded from the yaml file at *common/vertex-ai-pipeline/pipeline_package.yaml* and submitted to Vertex AI.
+The second file, i.e. *runpipeline.py* includes the code for running the compiled pipeline. This is where the correct environment variables for non-production and production (e.g., service accounts to use for each stage of the pipeline, kms keys corresponding to each step, buckets, etc.) are set. And eventually the pipeline is loaded from the yaml file at *common/vertex-ai-pipeline/pipeline_package.yaml* and submitted to Vertex AI.
 
 There should be a *cloudbuild.yaml* template file at `examples/machine-learning-pipeline/assets/Vertexpipeline/cloudbuild.yaml` in this repository with the CI/CD steps as follows:
 
@@ -945,7 +947,7 @@ There should be a *cloudbuild.yaml* template file at `examples/machine-learning-
 4. Run the pipeline via *runpipeline.py*
 5. Optionally, upload the pipeline's yaml file to the composer bucket to make it available for scheduled pipeline runs
 
-The cloud build trigger will be setup in the non-production project which is where the previously validated ML pipeline will run. There should be three branches on the repo namely dev, staging (non-prod), and prod. Cloud build will trigger the pipeline once there is a merge into the staging (non-prod) branch from dev. However, model deployment and monitorings steps take place in the production environment. As a result, the service agents and service accounts of the non-prod environment are given some permission on the prod environment and vice versa.
+The cloud build trigger will be setup in the non-production project which is where the previously validated ML pipeline will run. There should be three branches on the repo namely dev, non-prod, and prod. Cloud build will trigger the pipeline once there is a merge into the non-prod branch from dev. However, model deployment and monitorings steps take place in the production environment. As a result, the service agents and service accounts of the non-prod environment are given some permission on the prod environment and vice versa.
 
 Each time a pipeline job finishes successfully, a new version of the census income bracket predictor model will be deployed on the endpoint which will only take 25 percent of the traffic wherease the other 75 percent goes to the previous version of the model to enable A/B testing.
 
@@ -963,59 +965,57 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
 #### 1. Run the notebook
 
-- Before running the notebook, create a new git repository with the content of `examples/machine-learning-pipeline/assets/Vertexpipeline` folder. Take note of this git repository url, you will need it to clone the repository.
+- Before running the notebook, create a new git repository with the content of `examples/machine-learning-pipeline/assets/Vertexpipeline` folder. Take note of this git repository url, you will need it to clone the repository. You need to create `development` and `non-prod` branches in this repo.
 
 - Access workbench in your development project at the `https://console.cloud.google.com/vertex-ai/workbench/instances` link.
 
 - Click `Open Jupyterlab` button on the instance created, this will take you to an interactive environment inside Vertex AI.
 
-- Click the Git Icon and clone the repository you created, select the dev branch.
+- Click the Git Icon and clone the repository you created, select the development branch.
 
-- Navigate to the directory that contains `census_pipeline.ipynb` file and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your development project.
+- Navigate to the directory that contains `census_pipeline.ipynb` file and run [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook and don't forget to set the correct values corresponding to your development project. In case a message pops up asking what kernel to use, choose Python 3.
 
 #### 2. Configure cloud build
 
-- After the notebook runs successfully and the pipeline's test run finishes in the dev environment, create a cloud build trigger in your non-production project. Configure the trigger to run when there is a merge into the staging (non-prod) branch by following the below settings.
+- After the notebook runs successfully and the pipeline's test run finishes in the development environment, create a cloud build trigger in your non-production project. Configure the trigger to run when there is a merge into the non-prod branch by following the below settings.
+
+You can use the command below to get the `NON-PROD_MACHINE_LEARNING_PROJECT_ID`.
+```bash
+  export prj_n_machine_learning_project_id=$(terraform -chdir="gcp-projects/ml_business_unit/non-production" output -raw machine_learning_project_id)
+  echo $prj_n_machine_learning_project_id
+  echo "trigger-sa@"$prj_n_machine_learning_project_id".iam.gserviceaccount.com"
+```
 
     |Setting|Value|
     |-------|-----|
     |Event|push to branch|
     |Repository generation|1st gen|
     |Repository|the url to your fork of the repo|
-    |Branch|staging|
+    |Branch|non-prod|
     |Configuration|Autodetected/Cloud Build configuration file (yaml or json)|
     |Location|Repository|
-    |Cloud Build configuration file location|cloudbuild.yaml|
-    |Service Account|trigger-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com|
+    |Cloud Build configuration file location|cloudbuild.yaml (only if you chose Cloud Build configuration file)|
+    |Service Account|trigger-sa@YOUR_NON-PROD_MACHINE_LEARNING_PROJECT_ID.iam.gserviceaccount.com|
 
-- Open the cloudbuild.yaml file in your workbench and for steps 1 which uploads the source code for the dataflow job to your bucket.
+- Now, clone the Git repository you created at the same folder level than your `terraform-google-enterprise-genai` directory and switch to the development branch. Run the following commands to update the cloudbuild.yaml file. The commands below assumes that you are in the Git repository you cloned in the `Configure cloud build` step and you are in the `development` branch. The output of this command will contain placeholders to be replaced with the values from `bucket-name` and `artifact-project`. The template is located at assets/Vertexpipeline/cloudbuild.yaml.
 
-    ```yaml
-    name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', '-r', './src', 'gs://{your-bucket-name}']
-    ```
+```bash
+export prj_n_machine_learning_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/non-production" output -raw machine_learning_project_id)
+echo $prj_n_machine_learning_project_id
 
-- Similarly in step 2, replace the bucket name with the name of your own bucket in the non-prod project in order to upload the data to your bucket:
+export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
+non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+echo $non_prod_bucket_name
 
-    ```yaml
-    name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', '-r', './data', 'gs://{your-bucket-name}']
-    ```
+export directory="../gcp-projects/ml_business_unit/shared"
+(cd $directory && git checkout production)
 
-- Change the name of the image for step 3 and 4 to that of your own artifact project, i.e., `us-central1-docker.pkg.dev/{artifact_project_id}/c-publish-artifacts/vertexpipeline:v2` This is the project with artifact registry that houses the image required to run the pipeline.
+export common_artifacts_project_id=$(terraform -chdir="$directory" output -raw common_artifacts_project_id)
+echo $common_artifacts_project_id
 
-```yaml
- - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
-    entrypoint: 'python'
-    args: ['compile_pipeline.py']
-    id: 'compile_job'
-
-  # run pipeline
-  - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
-    entrypoint: 'python'
-    args: ['runpipeline.py']
-    id: 'run_job'
-    waitFor: ['compile_job']
+sed -e "s#{your-bucket-name}#$non_prod_bucket_name#g" \
+    -e "s#{your-artifact-project}#$common_artifacts_project_id#g" \
+../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/cloudbuild.yaml > cloudbuild.yaml
 ```
 
 - Optionally, if you want to schedule pipeline runs on regular intervals, uncomment the last two steps and replace the composer bucket with the name of your composer's bucket. The first step uploads the pipeline's yaml to the bucket and the second step uploads the dag to read that yaml and trigger the vertex pipeline:
@@ -1038,13 +1038,13 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
     |variable|definition|example value|How to obtain|
     |--------|----------|-------------|-------------|
-    |PROJECT_ID|The id of the non-prod project|`{none-prod-project-id}`|From the project's menu in console navigate to the `fldr-non-production/fldr-non-production-ml` folder; here you can find the machine learning project in non-prod (`prj-n-ml-machine-learning`) and obtain its' ID|
+    |PROJECT_ID|The id of the non-prod project|`{non-prod-project-id}`|From the project's menu in console navigate to the `fldr-non-production/fldr-non-production-ml` folder; here you can find the machine learning project in non-prod (`prj-n-ml-machine-learning`) and obtain its' ID|
     |BUCKET_URI|URI of the non-prod bucket|`gs://non-prod-bucket`|From the project menu in console navigate to the non-prod ML project `fldr-non-production/fldr-non-production-ml/prj-n-ml-machine-learning` project, navigate to cloud storage and copy the name of the bucket available there|
     |REGION|The region for pipeline jobs|Can be left as default `us-central1`|
     |PROD_PROJECT_ID|ID of the prod project|`prod-project-id`|In console's project menu, navigate to the `fldr-production/fldr-production-ml` folder; here you can find the machine learning project in prod (`prj-p-ml-machine-learning`) and obtain its' ID|
-    |Image|The image artifact used to run the pipeline components. The image is already built and pushed to the artifact repository in your artifact project under the common folder|`f"us-central1-docker.pkg.dev/{{artifact-project}}/{{artifact-repository}}/vertexpipeline:v2"`|Navigate to `fldr-common/prj-c-ml-artifacts` project. Navigate to the artifact registry repositories in the project to find the full name of the image artifact.|
+    |Image|The image artifact used to run the pipeline components. The image is already built and pushed to the artifact repository in your artifact project under the common folder|`f"us-central1-docker.pkg.dev/{artifact-project}/{artifact-repository}/vertexpipeline:v2"`|Navigate to `fldr-common/prj-c-ml-artifacts` project. Navigate to the artifact registry repositories in the project to find the full name of the image artifact.|
     |DATAFLOW_SUBNET|The shared subnet in non-prod env required to run the dataflow job|`https://www.googleapis.com/compute/v1/projects/{non-prod-network-project}/regions/us-central1/subnetworks/{subnetwork-name}`|Navigate to the `fldr-network/prj-n-shared-restricted` project. Navigate to the VPC networks and under the subnets tab, find the name of the network associated with your region (us-central1)|
-    |SERVICE_ACCOUNT|The service account used to run the pipeline and it's components such as the model monitoring job. This is the compute default service account of non-prod if you don't plan on using another costume service account|`{non-prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the non-prod project `fldr-non-production/fldr-non-production-ml/prj-n-ml-machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
+    |SERVICE_ACCOUNT|The service account used to run the pipeline and it's components such as the model monitoring job. This is the compute default service account of non-prod if you don't plan on using another costume service account|`{non-prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the non-prod project `fldr-non-production/fldr-non-production-ml/prj-n-mlmachine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
     |PROD_SERICE_ACCOUNT|The service account used to create endpoint, upload the model, and deploy the model in the prod project. This is the compute default service account of prod if you don't plan on using another costume service account|`{prod-project_number}-compute@developer.gserviceaccount.com`|Head over to the IAM page in the prod project `fldr-production/fldr-production-ml/prj-p-ml-machine-learning`, check the box for `Include Google-provided role grants` and look for the service account with the `{project_number}-compute@developer.gserviceaccount.com`|
     |deployment_config['encryption']|The kms key for the prod env. This key is used to encrypt the vertex model, endpoint, model deployment, and model monitoring.|`projects/{prod-kms-project}/locations/us-central1/keyRings/{keyring-name}/cryptoKeys/{key-name}`|Navigate to `fldr-production/prj-n-kms`, navigate to the Security/Key management in that project to find the key in `sample-keyring` keyring of your target region `us-central1`|
     |encryption_spec_key_name|The name of the encryption key for the non-prod env. This key is used to create the vertex pipeline job and it's associated metadata store|`projects/{non-prod-kms-project}/locations/us-central1/keyRings/{keyring-name}/cryptoKeys/{key-name}`|Navigate to `fldr-non-production/prj-n-kms`, navigate to the Security/Key management in that project to find the key in `sample-keyring` keyring of your target region `us-central1`|
@@ -1054,7 +1054,15 @@ The compile_pipeline.py and runpipeline.py files are commented to point out thes
 
 #### 4. Merge and deploy
 
-- Once everything is configured, you can commit your changes and push to the dev branch. Then, create a PR to from dev to staging(non-prod) which will result in triggering the pipeline if approved. The vertex pipeline takes about 30 minutes to finish and if there are no errors, a trained model will be deployed to and endpoint in the prod project which you can use to make prediction requests.
+- Once everything is configured, you can commit your changes and push to the development branch. Then, create a PR to from dev to non-prod which will result in triggering the pipeline if approved. The vertex pipeline takes about 30 minutes to finish and if there are no errors, a trained model will be deployed to and endpoint in the prod project which you can use to make prediction requests.
+
+The command below assumes that you are in the Git repository you cloned in the `Configure cloud build` step and you are in the `development` branch.
+```bash
+  git add .
+
+  git commit -m 'Update notebook files'
+  git push origin development
+```
 
 #### 5. Model Validation
 
@@ -1069,7 +1077,7 @@ Here are step-by-step instructions to make a request to your model using `gcloud
     INPUT_DATA_FILE="body.json"
     ```
 
-    > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT>` or by navigating to it on the Google Cloud Console (<https://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=><PROD_ML_PROJECT>`)
+    > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT_ID>` or by navigating to it on the Google Cloud Console (<https://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=><PROD_ML_PROJECT_ID>`)
 
 2. Create a file named `body.json` and put some sample data into it:
 

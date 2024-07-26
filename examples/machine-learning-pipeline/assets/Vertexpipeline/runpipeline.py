@@ -33,10 +33,10 @@ import os
 
 class vertex_ai_pipeline:
     def __init__(self,
-                 # Replace the project_id with your non_prod_project_id
-                 PROJECT_ID: str = "<non-prod-projectID>",
-                 # Replace prod_project_id with your prod_project_id
-                 PROD_PROJECT_ID: str = '<prod-projectID>',
+                 # Replace the {non-prod-project_id} for your non-prod-project-id
+                 PROJECT_ID: str = "{non-prod-project_id}",
+                 # Replace the {prod-project_id} for your prod-project-id
+                 PROD_PROJECT_ID: str = '{prod-project_id}',
                  REGION: str = "us-central1",
                  BUCKET_URI: str = "bucket_uri",
                  DATA_PATH: str = "data",
@@ -125,7 +125,7 @@ class vertex_ai_pipeline:
             'max_nodes': 4,
             'deployment_project': self.PROD_PROJECT_ID,
             # Replace encryption with the name of the kms key in the kms project of the prod folder and the prod kms ID project
-            "encryption": 'projects/prj-p-kms-<ID>/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-p-ml-machine-learning',
+            "encryption": 'projects/prj-p-kms-<ID>/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-p-mlmachine-learning',
             "service_account": self.SERVICE_ACCOUNT,
             "prod_service_account": self.PROD_SERVICE_ACCOUNT
         }
@@ -144,7 +144,7 @@ class vertex_ai_pipeline:
             template_path=self.yaml_file_path,
             pipeline_root=self.pipelineroot,
             # Replace encryption with the name of the kms key in the kms project of the non-prod folder and also de non-prod KMS project ID
-            encryption_spec_key_name='projects/prj-n-kms-<ID>/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-n-ml-machine-learning',
+            encryption_spec_key_name='projects/prj-n-kms-<ID>/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-n-mlmachine-learning',
             parameter_values={
                 "create_bq_dataset_query": self.create_bq_dataset_query,
                 "bq_dataset": self.data_config['bq_dataset'],
