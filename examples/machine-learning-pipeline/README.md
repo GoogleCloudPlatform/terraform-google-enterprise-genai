@@ -997,10 +997,13 @@ You can use the command below to get the `NON-PROD_MACHINE_LEARNING_PROJECT_ID`.
     |Cloud Build configuration file location|cloudbuild.yaml (only if you chose Cloud Build configuration file)|
     |Service Account|trigger-sa@YOUR_NON-PROD_MACHINE_LEARNING_PROJECT_ID.iam.gserviceaccount.com|
 
-- Now, clone the Git repository you created at the same folder level than your `terraform-google-enterprise-genai` directory and switch to the development branch. Run the following commands to update the cloudbuild.yaml file. The commands below assumes that you are in the Git repository you cloned in the `Configure cloud build` step and you are in the `development` branch. The output of this command will contain placeholders to be replaced with the values from `bucket-name` and `artifact-project`. The template is located at assets/Vertexpipeline/cloudbuild.yaml.
+- Now, clone the Git repository that resides at the same level as your `terraform-google-enterprise-genai` directory, and switch to the development branch. Execute the following commands to update the `cloudbuild.yaml` file. These commands assume that you are in the cloned Git repository, as configured in the "Configure cloud build" step, and that you are on the development branch. The output will include placeholders that need to be replaced with values from `bucket-name` and `artifact-project`. You can find the template at `assets/Vertexpipeline/cloudbuild.yaml`.
 
 ```bash
-export prj_n_machine_learning_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/non-production" output -raw machine_learning_project_id)
+export directory="../gcp-projects/ml_business_unit/non-production"
+(cd $directory && git checkout production)
+
+export prj_n_machine_learning_project_id=$(terraform -chdir=$directory output -raw machine_learning_project_id)
 echo $prj_n_machine_learning_project_id
 
 export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
@@ -1030,6 +1033,107 @@ sed -e "s#{your-bucket-name}#$non_prod_bucket_name#g" \
     - name: 'gcr.io/cloud-builders/gsutil'
       args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
       id: 'upload dag'
+```
+
+- Execute the following commands to update the `runpipeline.py` file. These commands assume that you are in the same Git repository from previous step and in the development branch. The output will include placeholders that need to be replaced with values from the projects that were deployed. You can find the example template at `assets/Vertexpipeline/runpipeline.py`.
+
+```bash
+export directory="../gcp-projects/ml_business_unit/shared"
+(cd $directory && git checkout production)
+
+export common_artifacts_project_id=$(terraform -chdir="$directory" output -raw common_artifacts_project_id)
+echo $common_artifacts_project_id
+
+
+export directory="../gcp-environments/envs/non-production"
+(cd $directory && git checkout non-production)
+
+export prj_n_kms_id=$(terraform -chdir="../gcp-environments/envs/production" output -raw env_kms_project_id)
+echo $prj_n_kms_id
+
+
+export directory="../gcp-networks/envs/non-production"
+(cd $directory && git checkout non-production)
+
+export $prj_n_shared_restricted_id=$(terraform -chdir="$directory" output -raw restricted_host_project_id)
+echo $prj_n_shared_restricted_id
+
+
+export directory="../gcp-projects/ml_business_unit/non-production"
+(cd $directory && git checkout non-production)
+
+export prj_n_machine_learning_project_number=$(terraform -chdir=$directory output -raw machine_learning_project_number)
+echo $prj_n_machine_learning_project_number
+
+
+export prj_n_machine_learning_project_id=$(terraform -chdir=$directory output -raw machine_learning_project_id)
+echo $prj_n_machine_learning_project_id
+
+export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
+non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+echo $non_prod_bucket_name
+
+export dataflow_sa="dataflow-sa@{prj-n-mlmachine-learning-id}.iam.gserviceaccount.com"
+echo $dataflow_sa
+
+
+export directory="../gcp-projects/ml_business_unit/production"
+(cd $directory && git checkout production)
+
+export prj_p_machine_learning_project_number=$(terraform -chdir=$directory output -raw machine_learning_project_number)
+echo $prj_p_machine_learning_project_number
+
+
+export prj_p_machine_learning_project_id=$(terraform -chdir=$directory output -raw machine_learning_project_id)
+echo $prj_p_machine_learning_project_id
+
+
+export directory="../gcp-environments/envs/production"
+(cd $directory && git checkout production)
+
+export prj_p_kms_id=$(terraform -chdir="../gcp-environments/envs/production" output -raw env_kms_project_id)
+echo $prj_p_kms_id
+
+
+sed -e "s#{prj-c-mlartifacts-id}#$common_artifacts_project_id#g" \
+    -e "s#{prj-n-kms-id}#$prj_n_kms_id#g" \
+    -e "s#{prj-n-shared-restricted-id}#$prj_n_shared_restricted_id#g" \
+    -e "s#{non-prod-project_number}#$prj_n_machine_learning_project_number#g" \
+    -e "s#{prj-n-mlmachine-learning-id}#$prj_n_machine_learning_project_id#g" \
+    -e "s#{your-bucket-name}'#$non_prod_bucket_name#g" \
+    -e "s#{your-dataflow-sa}#$dataflow_sa#g" \
+    -e "s#{prod_project_number}#$prj_p_machine_learning_project_number#g" \
+    -e "s#{prj-p-mlmachine-learning-id}#$prj_p_machine_learning_project_id#g" \
+    -e "s#{prj-p-kms-id}#$prj_p_kms_id#g" \
+../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/runpipeline.py > runpipeline.py
+```
+
+Remember to update the `monitoring_config` parameter in the `runpipeline.py` to the email that will be used.
+
+- Execute the following commands to update the `compile_pipeline.py` file. These commands assume that you are in the same Git repository from previous step and in the development branch. The output will include placeholders that need to be replaced with values from the projects that were deployed. You can find the example template at `assets/Vertexpipeline/compile_pipeline.py`.
+
+```bash
+export directory="../gcp-projects/ml_business_unit/shared"
+(cd $directory && git checkout production)
+
+export common_artifacts_project_id=$(terraform -chdir="$directory" output -raw common_artifacts_project_id)
+echo $common_artifacts_project_id
+
+export directory="../gcp-projects/ml_business_unit/non-production"
+(cd $directory && git checkout non-production)
+
+export prj_n_machine_learning_project_id=$(terraform -chdir=$directory output -raw machine_learning_project_id)
+echo $prj_n_machine_learning_project_id
+
+export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
+non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+echo $non_prod_bucket_name
+
+
+sed -e "s#{your-bucket-name}#$non_prod_bucket_name#g" \
+    -e "s#{your-artifact-project}#$common_artifacts_project_id#g" \
+    -e "s#{prj-n-mlmachine-learning-id}#$prj_n_machine_learning_project_id#g" \
+../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/compile_pipeline.py > compile_pipeline.py
 ```
 
 #### 3. Configure variables in compile_pipeline.py and runpipeline.py
@@ -1079,30 +1183,8 @@ Here are step-by-step instructions to make a request to your model using `gcloud
 
     > You can retrieve your ENDPOINT_ID by running `gcloud ai endpoints list --region=us-central1 --project=<PROD_ML_PROJECT_ID>` or by navigating to it on the Google Cloud Console (<https://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=><PROD_ML_PROJECT_ID>`)
 
-2. Create a file named `body.json` and put some sample data into it:
 
-    ```json
-    {
-        "instances": [
-            {
-                "features/gender": "Female",
-                "features/workclass": "Private",
-                "features/occupation": "Tech-support",
-                "features/marital_status": "Married-civ-spouse",
-                "features/race": "White",
-                "features/capital_gain": 0,
-                "features/education": "9th",
-                "features/age": 33,
-                "features/hours_per_week": 40,
-                "features/relationship": "Wife",
-                "features/native_country": "Canada",
-                "features/capital_loss": 0
-            }
-        ]
-    }
-    ```
-
-3. Run a curl request using `body.json` file as the JSON Body.
+3. Copy the `body.json` file from `terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/Vertexpipeline/body.json` to your current directory, then execute a curl request using it as the JSON payload.
 
     ```bash
     curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
