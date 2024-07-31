@@ -329,7 +329,7 @@ variable "gcs_logging_key_rotation_period" {
 }
 ```
 
-- On `gcp-environments/modules/env_baseline/variables.tf` add the following field to `project_budget` specification:
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following fields to `project_budget` specification:
 
 ```terraform
 logging_budget_amount                       = optional(number, 1000)
@@ -541,7 +541,7 @@ variable "gcs_logging_key_rotation_period" {
 }
 ```
 
-- On `gcp-environments/modules/env_baseline/variables.tf` add the following field to `project_budget` specification:
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following fields to `project_budget` specification:
 
 ```terraform
 logging_budget_amount                       = optional(number, 1000)
@@ -753,7 +753,7 @@ variable "gcs_logging_key_rotation_period" {
 }
 ```
 
-- On `gcp-environments/modules/env_baseline/variables.tf` add the following field to `project_budget` specification:
+- On `gcp-environments/modules/env_baseline/variables.tf` add the following fields to `project_budget` specification:
 
 ```terraform
 logging_budget_amount                       = optional(number, 1000)
@@ -1059,7 +1059,7 @@ Proceed with these steps only if `Option 1` is not chosen.
 
 4. Follow the instructions on checking out `development`, `non-production` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
 
-After making these modifications, you can follow the README.md procedure for `2-environment` step on foundation, make sure you **change the organization policy after running the steps on foundation**.
+Make sure you **change the organization policy** back to the original state.
 
 ## 3-network: Configure private DNS zone for Vertex Workbench Instances, Enable NAT and Attach projects to perimeter
 
