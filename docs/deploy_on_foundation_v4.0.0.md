@@ -1210,7 +1210,7 @@ On `gcp-networks/modules/base_env/remote.tf`:
 
 ##### Adding projects to service perimeter (dev)
 
-On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` field with the value below:
 
 ```terraform
 distinct(concat([var.project_number], var.perimeter_projects))
@@ -1462,7 +1462,7 @@ On `gcp-networks/modules/base_env/remote.tf`:
 
 ##### Adding projects to service perimeter (non-production)
 
-On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` field with the value below:
 
 ```terraform
 distinct(concat([var.project_number], var.perimeter_projects))
@@ -1714,7 +1714,7 @@ On `gcp-networks/modules/base_env/remote.tf`:
 
 ##### Adding projects to service perimeter (production)
 
-On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** and add the following module field to `resources`:
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` field with the value below:
 
 ```terraform
 distinct(concat([var.project_number], var.perimeter_projects))
