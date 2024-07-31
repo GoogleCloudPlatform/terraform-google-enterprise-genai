@@ -418,3 +418,5 @@ Before executing the next stages, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT`
 ```bash
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 ```
+
+1. You can now move to the instructions in the [4-projects](../4-projects/README.md) step.

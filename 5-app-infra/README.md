@@ -513,10 +513,10 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
 1. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
 
    ```bash
-   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../../4-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
    echo ${INFRA_PIPELINE_PROJECT_ID}
 
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../../4-projects/ml_business_unit/shared/" output -json terraform_service_accounts | jq '."ml-artifact-publish"' --raw-output)
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared/" output -json terraform_service_accounts | jq '."ml-artifact-publish"' --raw-output)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
@@ -530,7 +530,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
 1.  Run `validate` and check for violations.
 
    ```bash
-   ./tf-wrapper.sh validate shared $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
+   ./tf-wrapper.sh validate shared $(pwd)/../terraform-google-enterprise-genai/policy-library ${INFRA_PIPELINE_PROJECT_ID}
    ```
 
 1. Run `apply` shared.
@@ -635,7 +635,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. Update `backend.tf` with your bucket from the infra pipeline output.
 
    ```bash
-   export backend_bucket=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-service-catalog"' --raw-output)
+   export backend_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-service-catalog"' --raw-output)
    echo "backend_bucket = ${backend_bucket}"
 
    for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
@@ -644,7 +644,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. Update the `log_bucket` variable with the value of the `logs_export_storage_bucket_name`.
 
    ```bash
-   export log_bucket=$(terraform -chdir="../gcp-org/envs/shared" output -raw logs_export_storage_bucket_name)
+   export log_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/1-org/envs/shared" output -raw logs_export_storage_bucket_name)
    echo "log_bucket = ${log_bucket}"
    sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./common.auto.tfvars
    ```
@@ -652,7 +652,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
 
    ```bash
-   (cd ../terraform-google-enterprise-genai/4-projects && git checkout production && ./tf-wrapper init shared)
+   (cd ../terraform-google-enterprise-genai/4-projects && ./tf-wrapper.sh init shared)
 
    member="user:$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")"
    echo ${member}
@@ -674,10 +674,10 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
 1. Use `terraform output` to get the Infra Pipeline Project ID from 4-projects output.
 
    ```bash
-   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../../../4-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
+   export INFRA_PIPELINE_PROJECT_ID=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared/" output -raw cloudbuild_project_id)
    echo ${INFRA_PIPELINE_PROJECT_ID}
 
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../../../4-projects/ml_business_unit/shared/" output -json terraform_service_accounts | jq '."ml-service-catalog"' --raw-output)
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared/" output -json terraform_service_accounts | jq '."ml-service-catalog"' --raw-output)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
 
@@ -691,7 +691,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
 1. Run `validate` and check for violations.
 
    ```bash
-   ./tf-wrapper.sh validate shared $(pwd)/../policy-library ${INFRA_PIPELINE_PROJECT_ID}
+   ./tf-wrapper.sh validate shared $(pwd)/../terraform-google-enterprise-genai/policy-library ${INFRA_PIPELINE_PROJECT_ID}
    ```
 
 1. Run `apply` shared.
@@ -757,4 +757,6 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    cd ..
    ```
 
-1. Navigate to the project that was output from `${ARTIFACT_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+1. Navigate to the project that was output from `${SERVICE_CATALOG_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+
+https://console.cloud.google.com/cloud-build/builds;region=us-central1?orgonly=true&project=${SERVICE_CATALOG_PROJECT_ID}&supportedpurview=project
