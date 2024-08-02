@@ -2,13 +2,13 @@
 
 ## Overview
 
-To deploy a simple machine learning application, you must first have a [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) instance set up. The following steps will guide you through the additional configurations required on top of the foundation.
+To deploy a simple machine learning application, you must first have a **terraform-example-foundation v4.0.0** instance set up. The following steps will guide you through the additional configurations required on top of the foundation.
 
 ## Requirements
 
 ### Code
 
-- [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) deployed until at least step `4-projects`.
+- **terraform-example-foundation v4.0.0** deployed until at least step `4-projects`.
 - You must have role **Service Account User** (`roles/iam.serviceAccountUser`) on the [Terraform Service Accounts](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#terraform-service-accounts) created in the foundation [Seed Project](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#seed-project).
   The Terraform Service Accounts have the permissions to deploy each step of the foundation. Service Accounts:
   - `sa-terraform-bootstrap@<SEED_PROJECT_ID>.iam.gserviceaccount.com`.
@@ -455,14 +455,14 @@ git commit -m "Create env-level keys and env-level logging"
 git push origin development
 ```
 
-### `non-production` branch
+### `nonproduction` branch
 
-- Go to `gcp-environments` repository, and check out on `non-production` branch.
+- Go to `gcp-environments` repository, and check out on `nonproduction` branch.
 
 ```bash
 cd ../gcp-environments
 
-git checkout non-production
+git checkout nonproduction
 ```
 
 - Return to `terraform-google-enterprise-genai` repo.
@@ -626,7 +626,7 @@ output "env_log_bucket_name" {
 }
 ```
 
-- On `gcp-environments/envs/non-production/outputs.tf` add the following outputs:
+- On `gcp-environments/envs/nonproduction/outputs.tf` add the following outputs:
 
 ```terraform
 output "env_log_project_id" {
@@ -664,7 +664,7 @@ git add .
 
 git commit -m "Create env-level keys and env-level logging"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
 ### `production` branch
@@ -881,7 +881,7 @@ git push origin production
 
 ### `N.B.` Read this before continuing further
 
-A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
+A logging project will be created in every environment (`development`, `nonproduction`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
 
 You must disable the contraint, assign the permission on the bucket and then apply the contraint again. This step-by-step presents you with two different options (`Option 1` and `Option 2`) and only one of them should be executed.
 
@@ -891,7 +891,7 @@ The first and the recommended option is making the changes by using `gcloud` cli
 
 #### Option 1: Use `gcloud` cli to disable/enable organization policy constraint
 
-You will be doing this procedure for each environment (`development`, `non-production` & `production`)
+You will be doing this procedure for each environment (`development`, `nonproduction` & `production`)
 
 ##### Configure `GCP_ENVIRONMENTS_PATH` variable
 
@@ -947,22 +947,22 @@ You will be doing this procedure for each environment (`development`, `non-produ
     gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
     ```
 
-##### `non-production` environment configuration
+##### `nonproduction` environment configuration
 
-1. Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
+1. Make sure your git is checked out to the `nonproduction` branch by running `git checkout nonproduction` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout nonproduction)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
     ```bash
-    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
-    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_project_id)
     ```
 
-    > Tip: If you haven't initilized the terraform on the branch, you may do so by running `./tf-wrapper.sh init non-production` command on the `gcp-environments` directory.
+    > Tip: If you haven't initilized the terraform on the branch, you may do so by running `./tf-wrapper.sh init nonproduction` command on the `gcp-environments` directory.
 
 3. Validate the variable values.
 
@@ -1057,7 +1057,7 @@ Proceed with these steps only if `Option 1` is not chosen.
 
     ![edit-policy](../2-environments/imgs/edit-policy.png)
 
-4. Follow the instructions on checking out `development`, `non-production` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
+4. Follow the instructions on checking out `development`, `nonproduction` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
 
 Make sure you **change the organization policy** back to the original state.
 
@@ -1210,10 +1210,11 @@ On `gcp-networks/modules/base_env/remote.tf`:
 
 ##### Adding projects to service perimeter (dev)
 
-On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` field with the value below:
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` and `resources_dry_run` fields with the values below:
 
 ```terraform
-distinct(concat([var.project_number], var.perimeter_projects))
+resources               = var.enforce_vpcsc ? distinct(concat([var.project_number], var.perimeter_projects)) : []
+resources_dry_run               = distinct(concat([var.project_number], var.perimeter_projects))
 ```
 
 This shall result in a module similar to the code below:
@@ -1221,19 +1222,26 @@ This shall result in a module similar to the code below:
 ```terraform
 module "regular_service_perimeter" {
   source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version = "~> 4.0"
+  version = "~> 6.0"
 
   policy         = var.access_context_manager_policy_id
   perimeter_name = local.perimeter_name
   description    = "Default VPC Service Controls perimeter"
-  resources      = distinct(concat([var.project_number], var.perimeter_projects))
-  access_levels  = [module.access_level_members.name]
 
-  restricted_services     = var.restricted_services
-  vpc_accessible_services = ["RESTRICTED-SERVICES"]
+  # configurations for a perimeter in enforced mode.
+  resources               = var.enforce_vpcsc ? distinct(concat([var.project_number], var.perimeter_projects)) : []
+  restricted_services     = var.enforce_vpcsc ? var.restricted_services : []
+  vpc_accessible_services = var.enforce_vpcsc ? ["RESTRICTED-SERVICES"] : []
+  ingress_policies        = var.enforce_vpcsc ? var.ingress_policies : []
+  egress_policies         = var.enforce_vpcsc ? var.egress_policies : []
 
-  ingress_policies = var.ingress_policies
-  egress_policies  = var.egress_policies
+  # configurations for a perimeter in dry run mode.
+  resources_dry_run               = distinct(concat([var.project_number], var.perimeter_projects))
+  access_levels_dry_run           = [module.access_level_dry_run.name]
+  restricted_services_dry_run     = var.restricted_services_dry_run
+  vpc_accessible_services_dry_run = ["RESTRICTED-SERVICES"]
+  ingress_policies_dry_run        = var.ingress_policies_dry_run
+  egress_policies_dry_run         = var.egress_policies_dry_run
 
   depends_on = [
     time_sleep.wait_vpc_sc_propagation
@@ -1323,17 +1331,17 @@ git commit -m "Create custom fw rules, enable nat, configure dns and service per
 git push origin development
 ```
 
-### `non-production` branch on `gcp-networks`
+### `nonproduction` branch on `gcp-networks`
 
-- Go to `gcp-networks` repository, and check out on `non-production` branch.
+- Go to `gcp-networks` repository, and check out on `nonproduction` branch.
 
 ```bash
 cd ../gcp-networks
 
-git checkout non-production
+git checkout nonproduction
 ```
 
-#### Private DNS zone configuration (non-production)
+#### Private DNS zone configuration (nonproduction)
 
 - Return to `terraform-google-enterprise-genai` repo.
 
@@ -1362,10 +1370,10 @@ git add .
 
 git commit -m "Create DNS notebook configuration"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
-#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (non-production)
+#### Enabling NAT, Attaching projects to Service Perimeter and Creating custom firewall rules (nonproduction)
 
 Create `gcp-networks/modules/base_env/data.tf` file with the following content:
 
@@ -1460,12 +1468,13 @@ On `gcp-networks/modules/base_env/remote.tf`:
     }
     ```
 
-##### Adding projects to service perimeter (non-production)
+##### Adding projects to service perimeter (nonproduction)
 
-On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` field with the value below:
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` and `resources_dry_run` fields with the values below:
 
 ```terraform
-distinct(concat([var.project_number], var.perimeter_projects))
+resources               = var.enforce_vpcsc ? distinct(concat([var.project_number], var.perimeter_projects)) : []
+resources_dry_run               = distinct(concat([var.project_number], var.perimeter_projects))
 ```
 
 This shall result in a module similar to the code below:
@@ -1473,19 +1482,26 @@ This shall result in a module similar to the code below:
 ```terraform
 module "regular_service_perimeter" {
   source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version = "~> 4.0"
+  version = "~> 6.0"
 
   policy         = var.access_context_manager_policy_id
   perimeter_name = local.perimeter_name
   description    = "Default VPC Service Controls perimeter"
-  resources      = distinct(concat([var.project_number], var.perimeter_projects))
-  access_levels  = [module.access_level_members.name]
 
-  restricted_services     = var.restricted_services
-  vpc_accessible_services = ["RESTRICTED-SERVICES"]
+  # configurations for a perimeter in enforced mode.
+  resources               = var.enforce_vpcsc ? distinct(concat([var.project_number], var.perimeter_projects)) : []
+  restricted_services     = var.enforce_vpcsc ? var.restricted_services : []
+  vpc_accessible_services = var.enforce_vpcsc ? ["RESTRICTED-SERVICES"] : []
+  ingress_policies        = var.enforce_vpcsc ? var.ingress_policies : []
+  egress_policies         = var.enforce_vpcsc ? var.egress_policies : []
 
-  ingress_policies = var.ingress_policies
-  egress_policies  = var.egress_policies
+  # configurations for a perimeter in dry run mode.
+  resources_dry_run               = distinct(concat([var.project_number], var.perimeter_projects))
+  access_levels_dry_run           = [module.access_level_dry_run.name]
+  restricted_services_dry_run     = var.restricted_services_dry_run
+  vpc_accessible_services_dry_run = ["RESTRICTED-SERVICES"]
+  ingress_policies_dry_run        = var.ingress_policies_dry_run
+  egress_policies_dry_run         = var.egress_policies_dry_run
 
   depends_on = [
     time_sleep.wait_vpc_sc_propagation
@@ -1493,7 +1509,7 @@ module "regular_service_perimeter" {
 }
 ```
 
-##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules (non-production)
+##### Creating "allow all ingress ranges" and "allow all egress ranges" firewall rules (nonproduction)
 
 On `gcp-networks/modules/restricted_shared_vpc/firewall.tf` add the following firewall rules by adding the terraform code below to the file:
 
@@ -1551,7 +1567,7 @@ resource "google_compute_firewall" "allow_all_ingress" {
 }
 ```
 
-##### Changes to restricted shared VPC (non-production)
+##### Changes to restricted shared VPC (nonproduction)
 
 On `gcp-networks/modules/base_env/main.tf` edit the terraform module named **restricted_shared_vpc** and add the following fields to it:
 
@@ -1572,7 +1588,7 @@ Commit all changes and push to the current branch.
 git add .
 git commit -m "Create custom fw rules, enable nat, configure dns and service perimeter"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
 ### `production` branch on `gcp-networks`
@@ -1714,10 +1730,11 @@ On `gcp-networks/modules/base_env/remote.tf`:
 
 ##### Adding projects to service perimeter (production)
 
-On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` field with the value below:
+On `gcp-networks/modules/restricted_shared_vpc/service_control.tf`, modify the terraform module called **regular_service_perimeter** by replacing the `resources` and `resources_dry_run` fields with the values below:
 
 ```terraform
-distinct(concat([var.project_number], var.perimeter_projects))
+resources               = var.enforce_vpcsc ? distinct(concat([var.project_number], var.perimeter_projects)) : []
+resources_dry_run               = distinct(concat([var.project_number], var.perimeter_projects))
 ```
 
 This shall result in a module similar to the code below:
@@ -1725,19 +1742,26 @@ This shall result in a module similar to the code below:
 ```terraform
 module "regular_service_perimeter" {
   source  = "terraform-google-modules/vpc-service-controls/google//modules/regular_service_perimeter"
-  version = "~> 4.0"
+  version = "~> 6.0"
 
   policy         = var.access_context_manager_policy_id
   perimeter_name = local.perimeter_name
   description    = "Default VPC Service Controls perimeter"
-  resources      = distinct(concat([var.project_number], var.perimeter_projects))
-  access_levels  = [module.access_level_members.name]
 
-  restricted_services     = var.restricted_services
-  vpc_accessible_services = ["RESTRICTED-SERVICES"]
+  # configurations for a perimeter in enforced mode.
+  resources               = var.enforce_vpcsc ? distinct(concat([var.project_number], var.perimeter_projects)) : []
+  restricted_services     = var.enforce_vpcsc ? var.restricted_services : []
+  vpc_accessible_services = var.enforce_vpcsc ? ["RESTRICTED-SERVICES"] : []
+  ingress_policies        = var.enforce_vpcsc ? var.ingress_policies : []
+  egress_policies         = var.enforce_vpcsc ? var.egress_policies : []
 
-  ingress_policies = var.ingress_policies
-  egress_policies  = var.egress_policies
+  # configurations for a perimeter in dry run mode.
+  resources_dry_run               = distinct(concat([var.project_number], var.perimeter_projects))
+  access_levels_dry_run           = [module.access_level_dry_run.name]
+  restricted_services_dry_run     = var.restricted_services_dry_run
+  vpc_accessible_services_dry_run = ["RESTRICTED-SERVICES"]
+  ingress_policies_dry_run        = var.ingress_policies_dry_run
+  egress_policies_dry_run         = var.egress_policies_dry_run
 
   depends_on = [
     time_sleep.wait_vpc_sc_propagation
@@ -1909,7 +1933,7 @@ echo ${CLOUD_BUILD_PROJECT_ID}
 mv common.auto.example.tfvars common.auto.tfvars
 mv shared.auto.example.tfvars shared.auto.tfvars
 mv development.auto.example.tfvars development.auto.tfvars
-mv non-production.auto.example.tfvars non-production.auto.tfvars
+mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
 mv production.auto.example.tfvars production.auto.tfvars
 ```
 
@@ -2005,7 +2029,7 @@ cd ../gcp-projects
 mv common.auto.example.tfvars common.auto.tfvars
 mv shared.auto.example.tfvars shared.auto.tfvars
 mv development.auto.example.tfvars development.auto.tfvars
-mv non-production.auto.example.tfvars non-production.auto.tfvars
+mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
 mv production.auto.example.tfvars production.auto.tfvars
 ```
 
@@ -2035,16 +2059,16 @@ git commit -m "Initialize ML environment"
 git push origin development
 ```
 
-### `non-production` branch on `gcp-projects`
+### `nonproduction` branch on `gcp-projects`
 
-This will create the machine learning non-production environment. A Machine Learning project will be hosted under a folder.
+This will create the machine learning nonproduction environment. A Machine Learning project will be hosted under a folder.
 
 - Go to `gcp-projects` repository and checkout to `plan` branch.
 
 ```bash
 cd ../gcp-projects
 
-git checkout non-production
+git checkout nonproduction
 ```
 
 - Return to GenAI repository.
@@ -2083,7 +2107,7 @@ cd ../gcp-projects
 mv common.auto.example.tfvars common.auto.tfvars
 mv shared.auto.example.tfvars shared.auto.tfvars
 mv development.auto.example.tfvars development.auto.tfvars
-mv non-production.auto.example.tfvars non-production.auto.tfvars
+mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
 mv production.auto.example.tfvars production.auto.tfvars
 ```
 
@@ -2110,7 +2134,7 @@ for file in $(find . -name backend.tf); do sed -i "s/UPDATE_PROJECTS_BACKEND/$PR
 git add .
 git commit -m "Initialize ML environment"
 
-git push origin non-production
+git push origin nonproduction
 ```
 
 ### `production` branch on `gcp-projects`
@@ -2146,7 +2170,7 @@ rm -rf ../gcp-projects/ml_business_unit/shared
 - Retrieve shared directory from `plan` branch.
 
 ```bash
-git checkout origin/plan -- ml_business_unit/shared
+(cd ../gcp-projects && git checkout origin/plan -- ml_business_unit/shared)
 ```
 
 - Add modules to the `gcp-projects` repository.
@@ -2173,7 +2197,7 @@ cd ../gcp-projects
 mv common.auto.example.tfvars common.auto.tfvars
 mv shared.auto.example.tfvars shared.auto.tfvars
 mv development.auto.example.tfvars development.auto.tfvars
-mv non-production.auto.example.tfvars non-production.auto.tfvars
+mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
 mv production.auto.example.tfvars production.auto.tfvars
 ```
 
@@ -2396,7 +2420,7 @@ This step has two main purposes:
 1. To deploy a pipeline and a bucket which is linked to a Google Cloud Repository that houses terraform modules for the use in Service Catalog.
 Although Service Catalog itself must be manually deployed, the modules which will be used can still be automated.
 
-2. To deploy infrastructure for operational environments (ie. `non-production` & `production`.)
+2. To deploy infrastructure for operational environments (ie. `nonproduction` & `production`.)
 
 The resoning behind utilizing one repository with two deployment methodologies is due to how close interactive (`development`) and operational environments are.
 
@@ -2405,7 +2429,7 @@ The repository has the structure (truncated for brevity):
    ```text
    ml_business_unit
    ├── development
-   ├── non-production
+   ├── nonproduction
    ├── production
    modules
    ├── bucket
@@ -2444,7 +2468,7 @@ When there is a change in any of the terraform module folders, the pipeline will
 
 This pipeline is listening to the `main` branch of this repository for changes in order for the modules to be uploaded to service catalog.
 
-The pipeline also listens for changes made to `plan`, `development`, `non-production` & `production` branches, this is used for deploying infrastructure to each project.
+The pipeline also listens for changes made to `plan`, `development`, `nonproduction` & `production` branches, this is used for deploying infrastructure to each project.
 
 - Clone the `ml-service-catalog` repo.
 
@@ -2564,3 +2588,5 @@ The series of steps below will trigger the custom Service Catalog Pipeline.
    ```
 
 - Navigate to the project that was output from `${SERVICE_CATALOG_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+
+You may now proceed to deploy your applications, there are example applications under `examples` directory on the repository root.
