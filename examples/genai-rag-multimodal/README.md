@@ -39,11 +39,69 @@ For more information about the technologies used in this example, please refer t
   ```
 
 - Assuming you are deploying the example on top of the development environment, the following instructions will provide you more insight on how to retrieve these values:
-  - **NETWORK-PROJECT-ID**: Run `terraform -chdir="envs/development" output -raw restricted_host_project_id` on `gcp-networks` repository at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
-  - **NETWORK-NAME**: Run `terraform -chdir="envs/development" output -raw restricted_network_name` on `gcp-networks` repository at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
-  - **MACHINE-LEARNING-PROJECT-ID**: Run `terraform -chdir="ml_business_unit/development" output -raw machine_learning_project_id` on `gcp-projects` repository, at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
-  - **KMS-PROJECT-ID**, **ML-ENV-KEYRING**, **ML-ENV-KEY**: Run `terraform -chdir="ml_business_unit/development" output machine_learning_kms_keys` on `gcp-projects` repository, at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper init development` on the directory.
+  - **NETWORK-PROJECT-ID**: Run `terraform -chdir="envs/development" output -raw restricted_host_project_id` on `gcp-networks` repository at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper.sh init development` on the directory.
+  - **NETWORK-NAME**: Run `terraform -chdir="envs/development" output -raw restricted_network_name` on `gcp-networks` repository at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper.sh init development` on the directory.
+  - **MACHINE-LEARNING-PROJECT-ID**: Run `terraform -chdir="ml_business_unit/development" output -raw machine_learning_project_id` on `gcp-projects` repository, at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper.sh init development` on the directory.
+  - **KMS-PROJECT-ID**, **ML-ENV-KEYRING**, **ML-ENV-KEY**: Run `terraform -chdir="ml_business_unit/development" output machine_learning_kms_keys` on `gcp-projects` repository, at the development branch. Please note that if you have not initialized the environment you will need to run `./tf-wrapper.sh init development` on the directory.
   - **REGION**: The chosen region.
+
+  - Optionally, you may follow the series of steps below to automatically cre the `terraform.tfvars` file:
+    - **IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/` and the other repos (`gcp-bootstrap`, `gcp-org`, `gcp-projects`...).
+    - Retrieve values from terraform outputs to bash variables:
+
+      ```bash
+      (cd gcp-networks && git checkout development && ./tf-wrapper.sh init development)
+
+      export restricted_host_project_id=$(terraform -chdir="gcp-networks/envs/development" output -raw restricted_host_project_id)
+
+      export restricted_network_name=$(terraform -chdir="gcp-networks/envs/development" output -raw restricted_network_name)
+
+      (cd gcp-projects && git checkout development && ./tf-wrapper.sh init development)
+
+      export machine_learning_project_id=$(terraform -chdir="gcp-projects/ml_business_unit/development" output -raw machine_learning_project_id)
+
+      export machine_learning_kms_keys_json=$(terraform -chdir="gcp-projects/ml_business_unit/development" output -json machine_learning_kms_keys)
+      ```
+
+    - Extract the kms key from the `json` variable by using `jq`:
+
+      ```bash
+      export machine_learning_kms_keys=$(echo $machine_learning_kms_keys_json | jq -r ".\"$region\".id")
+      ```
+
+    - Create region environment variable (if you are not using `us-central1`, remember to change the value below):
+
+      ```bash
+      export region="us-central1"
+      ```
+
+    - Validate if the variables values are correct:
+
+      ```bash
+      echo region=$region
+      echo restricted_host_project_id=$restricted_host_project_id
+      echo restricted_network_name=$restricted_network_name
+      echo machine_learning_project_id=$machine_learning_project_id
+      echo machine_learning_kms_keys=$machine_learning_kms_keys
+      ```
+
+    - Populate `terraform.tfvars` with the following command:
+
+      ```bash
+      cat > terraform-google-enterprise-genai/examples/genai-rag-multimodal/terraform.tfvars <<EOF
+      kms_key                   = "$machine_learning_kms_keys"
+      network                   = "projects/$restricted_host_project_id/global/networks/NETWORK-NAME"
+      subnet                    = "projects/$restricted_host_project_id/regions/$region/subnetworks/$restricted_network_name"
+      machine_learning_project  = "$machine_learning_project_id"
+      vector_search_vpc_project = "$restricted_host_project_id"
+      EOF
+      ```
+
+    - Validate if all values are corrent in `terraform.tfvars`
+
+      ```bash
+      cat terraform-google-enterprise-genai/examples/genai-rag-multimodal/terraform.tfvars
+      ```
 
 ## Deploying infrastructure using Machine Learning Infra Pipeline
 
@@ -52,13 +110,30 @@ For more information about the technologies used in this example, please refer t
 - The Service Account that runs the Pipeline must have `roles/compute.networkUser` on the Shared VPC Host Project, you can give this role by running the command below:
 
   ```bash
+  (cd gcp-projects && git checkout production && ./tf-wrapper.sh init shared)
   SERVICE_ACCOUNT=$(terraform -chdir="./gcp-projects/ml_business_unit/shared" output -json terraform_service_accounts | jq -r '."ml-machine-learning"')
 
-  gcloud projects add-iam-policy-binding <INSERT_HOST_VPC_NETWORK_PROJECT_HERE> --member="serviceAccount:$SERVICE_ACCOUNT" --role="roles/compute.networkUser"
+  gcloud projects add-iam-policy-binding  $restricted_host_project_id --member="serviceAccount:$SERVICE_ACCOUNT" --role="roles/compute.networkUser"
   ```
 
-- Add the build service account in the development VPC-SC perimeter. You can do this by adding "serviceAccount:<INSERT_SERVICE_ACCOUNT_EMAIL_HERE>" to `perimeter_additional_members` in `common.auto.tfvars` (development branch). If the command above executed succesfully, you can run `echo $SERVICE_ACCOUNT` to retrieve the Pipeline Service Account e-mail.
+- Add the build service account in the development VPC-SC perimeter.
+  - Retrieve the service account value for your environment:
 
+    ```bash
+    echo "serviceAccount:$SERVICE_ACCOUNT"
+    ```
+  
+  - Add "serviceAccount:<YOUR_SA_HERE>" to `perimeter_additional_members` field in `common.auto.tfvars` at `gcp-networks` repository on the development branch.
+
+  - Commit and push the result by running the commands below:
+
+    ```bash
+    cd gcp-networks
+    git add common.auto.tfvars
+    git commit -m "Add machine learning build SA to perimeter"
+    git push origin development
+    ```
+  
 ### Deployment steps
 
 **IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/` and the other repos (`gcp-bootstrap`, `gcp-org`, `gcp-projects`...).
@@ -137,7 +212,7 @@ For more information about the technologies used in this example, please refer t
     - Run the command below to update `UPDATE_APP_INFRA_BUCKET`:
 
       ```bash
-      export backend_bucket=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-artifact-publish"' --raw-output)
+      export backend_bucket=$(terraform -chdir="../gcp-projects/ml_business_unit/shared/" output -json state_buckets | jq '."ml-machine-learning"' --raw-output)
       echo "backend_bucket = ${backend_bucket}"
 
       for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_APP_INFRA_BUCKET/${backend_bucket}/" $i; done
@@ -154,6 +229,7 @@ For more information about the technologies used in this example, please refer t
 
 ## Deploying infrastructure using terraform locally
 
+- Only proceed with these steps if you have not deployed [using cloudbuild](#deploying-infrastructure-using-machine-learning-infra-pipeline).
 - Run `terraform init` inside this directory.
 - Run `terraform apply` inside this directory.
 
@@ -225,7 +301,7 @@ If you ran using Cloud Build, proceed with the steps below to use `terraform out
   }
   ```
 
-- Run `./tf-wrapper init development` on `ml-machine-learning`.
+- Run `./tf-wrapper.sh init development` on `ml-machine-learning`.
 
 - Extract values from `terraform output` and validate. You must run the commands below at `ml-machine-learning/ml_business_unit/development`.
 
