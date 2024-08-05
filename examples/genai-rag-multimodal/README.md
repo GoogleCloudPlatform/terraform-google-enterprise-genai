@@ -134,9 +134,6 @@ For more information about the technologies used in this example, please refer t
     git push origin development
     ```
 
-### Required permission for notebook runner Service Account
-
-- Allow
 ### Deployment steps
 
 **IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/` and the other repos (`gcp-bootstrap`, `gcp-org`, `gcp-projects`...).
