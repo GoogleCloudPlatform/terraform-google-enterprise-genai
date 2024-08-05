@@ -2,13 +2,13 @@
 
 ## Overview
 
-This repository serves as a example for configuring an environment for the development and deployment of Machine Learning applications using the Vertex AI platform on Google Cloud. It seamlessly integrates the Cloud Foundation Toolkit (CFT) and implements robust security measures, drawing heavily from the [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) codebase.
+This repository serves as a example for configuring an environment for the development and deployment of Machine Learning applications using the Vertex AI platform on Google Cloud. It seamlessly integrates the Cloud Foundation Toolkit (CFT) and implements robust security measures, drawing heavily from the [terraform-example-foundation v4.1.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0) codebase.
 
-The repository is divided into distinct Terraform projects, each located in its own directory. These projects must be applied separately but in sequence. For detailed information about each step, please refer to [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0). The user has two options when deploying this codebase:
+The repository is divided into distinct Terraform projects, each located in its own directory. These projects must be applied separately but in sequence. For detailed information about each step, please refer to [terraform-example-foundation v4.1.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0). The user has two options when deploying this codebase:
 
 - Following the individual project steps as outlined in this repository, under `0-bootstrap` to `5-appinfra` directories.
-- Deploy the codebase on top of an existing Enterprise Foundations Blueprint instance by following the steps detailed in [`docs/deploy_on_foundation_v4.0.0.md`](./docs/deploy_on_foundation_v4.0.0.md).
-  > NOTE: If the user currently does not have a Enterprise Foundations Blueprint deployed, he can follow the steps outlined in [terraform-example-foundation v4.0.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.0.0) to deploy it.
+- Deploy the codebase on top of an existing Enterprise Foundations Blueprint instance by following the steps detailed in [`docs/deploy_on_foundation_v4.1.0.md`](./docs/deploy_on_foundation_v4.1.0.md).
+  > NOTE: If the user currently does not have a Enterprise Foundations Blueprint deployed, he can follow the steps outlined in [terraform-example-foundation v4.1.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0) to deploy it.
 
 ## Main Modifications made to Enterprise Foundations Blueprint
 

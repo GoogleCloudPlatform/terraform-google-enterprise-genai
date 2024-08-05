@@ -2,13 +2,13 @@
 
 ## Overview
 
-To deploy a simple machine learning application, you must first have a **terraform-example-foundation v4.0.0** instance set up. The following steps will guide you through the additional configurations required on top of the foundation.
+To deploy a simple machine learning application, you must first have a [terraform-example-foundation v4.1.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0) instance set up. The following steps will guide you through the additional configurations required on top of the foundation.
 
 ## Requirements
 
 ### Code
 
-- **terraform-example-foundation v4.0.0** deployed until at least step `4-projects`.
+- [terraform-example-foundation v4.1.0](https://github.com/terraform-google-modules/terraform-example-foundation/tree/v4.1.0) deployed until at least step `4-projects`.
 - You must have role **Service Account User** (`roles/iam.serviceAccountUser`) on the [Terraform Service Accounts](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#terraform-service-accounts) created in the foundation [Seed Project](https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/GLOSSARY.md#seed-project).
   The Terraform Service Accounts have the permissions to deploy each step of the foundation. Service Accounts:
   - `sa-terraform-bootstrap@<SEED_PROJECT_ID>.iam.gserviceaccount.com`.
