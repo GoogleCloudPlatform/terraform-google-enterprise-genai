@@ -90,8 +90,8 @@ For more information about the technologies used in this example, please refer t
       ```bash
       cat > terraform-google-enterprise-genai/examples/genai-rag-multimodal/terraform.tfvars <<EOF
       kms_key                   = "$machine_learning_kms_keys"
-      network                   = "projects/$restricted_host_project_id/global/networks/NETWORK-NAME"
-      subnet                    = "projects/$restricted_host_project_id/regions/$region/subnetworks/$restricted_network_name"
+      network                   = "projects/$restricted_host_project_id/global/networks/$restricted_network_name"
+      subnet                    = "projects/$restricted_host_project_id/regions/$region/subnetworks/sb-d-shared-restricted-$region"
       machine_learning_project  = "$machine_learning_project_id"
       vector_search_vpc_project = "$restricted_host_project_id"
       EOF
@@ -133,7 +133,10 @@ For more information about the technologies used in this example, please refer t
     git commit -m "Add machine learning build SA to perimeter"
     git push origin development
     ```
-  
+
+### Required permission for notebook runner Service Account
+
+- Allow
 ### Deployment steps
 
 **IMPORTANT:** Please note that the steps below are assuming you are checked out on the same level as `terraform-google-enterprise-genai/` and the other repos (`gcp-bootstrap`, `gcp-org`, `gcp-projects`...).
