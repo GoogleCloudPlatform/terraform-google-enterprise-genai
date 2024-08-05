@@ -242,6 +242,8 @@ For more information about the technologies used in this example, please refer t
 
 When running the Notebook, you will reach a step that downloads an example PDF file from a bucket, you need to add the egress rule below on the VPC-SC perimeter to allow the operation. You can do this by adding this rule to `egress_rule` variable on `gcp-networks/envs/development/development.auto.tfvars` on the development branch.
 
+> NOTE: If you are deploying this example on top of an existing foundation instance, the variable name might be `egress_policies`.
+
 ```terraform
 {
   "from" = {
@@ -272,7 +274,7 @@ Once all the requirements are set up, you can start by running and adjusting the
 
 To run the notebook, open the Google Cloud Console on Vertex AI Workbench (`https://console.cloud.google.com/vertex-ai/workbench/instances?referrer=search&project=<MACHINE_LEARNING_PROJECT_ID>`), click open JupyterLab on the created instance.
 
-After clicking "open JupyterLab" button, you will be taken to an interactive JupyterLab Workspace, you can upload the notebook (`multimodal_rag_langchain.ipynb`) in this repo to it. Once the notebook is uploaded to the environment, run it cell-by-cell to see process of building a RAG chain.
+After clicking "open JupyterLab" button, you will be taken to an interactive JupyterLab Workspace, you can upload the notebook (`multimodal_rag_langchain.ipynb`) in this repo to it. Once the notebook is uploaded to the environment, run it cell-by-cell to see process of building a RAG chain. The notebook contains placeholders variables that must be replaced, you may follow the next section instructions to automatically replace this placeholders using `sed` command.
 
 ### Optional: Use `terraform output` and bash command to fill in fields in the notebook
 
@@ -305,6 +307,8 @@ If you ran using Cloud Build, proceed with the steps below to use `terraform out
   ```
 
 - Run `./tf-wrapper.sh init development` on `ml-machine-learning`.
+
+- Run `cd ml_business_unit/development && terraform refresh`, to refresh the outputs.
 
 - Extract values from `terraform output` and validate. You must run the commands below at `ml-machine-learning/ml_business_unit/development`.
 
