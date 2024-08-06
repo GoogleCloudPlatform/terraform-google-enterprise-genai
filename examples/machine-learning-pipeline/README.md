@@ -185,7 +185,7 @@ Once there, select the perimeter that is associated with the environment (eg. `d
   git push origin development
   ```
 
-  > **IMPORTANT**: Before deleting or destroying this example, ensure you remove the egress/ingress policies before, to prevent any inconsistencies.
+  > **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
 
 #### `non-production` environment
 
@@ -334,7 +334,7 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   git push origin non-production
   ```
 
-  > **IMPORTANT**: Before deleting or destroying this example, ensure you remove the egress/ingress policies before, to prevent any inconsistencies.
+  > **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
 
 #### `production` environment
 
@@ -474,7 +474,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
   cd ..
   ```
 
-  > **IMPORTANT**: Before deleting or destroying this example, ensure you remove the egress/ingress policies before, to prevent any inconsistencies.
+  > **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
 
 ## Usage
 
