@@ -198,7 +198,7 @@ For more information about the technologies used in this example, please refer t
   ```
 
 - Verify if `backend.tf` file exists at `ml-machine-learning/ml_business_unit/development`.
-  - If there is a `backend.tf` file, proceed with the next step and ignore the sub-steps below.
+  - If there is a `backend.tf` file, proceed with the next step (commit and push) and ignore the sub-steps below.
   - If there is no `backend.tf` file, follow the sub-steps below:
     - Create the file by running the command below:
 
