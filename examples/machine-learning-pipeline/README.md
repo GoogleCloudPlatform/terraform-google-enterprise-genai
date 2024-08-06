@@ -185,6 +185,8 @@ Once there, select the perimeter that is associated with the environment (eg. `d
   git push origin development
   ```
 
+  > **IMPORTANT**: Before deleting this example, ensure you remove the egress/ingress policies to prevent any inconsistencies.
+
 #### `non-production` environment
 
 - Checkout to `non-production` branch:
@@ -332,6 +334,8 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   git push origin non-production
   ```
 
+  > **IMPORTANT**: Before deleting this example, ensure you remove the egress/ingress policies to prevent any inconsistencies.
+
 #### `production` environment
 
 - Navigate into `gcp-networks` directory and checkout to `production` branch:
@@ -470,6 +474,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
   cd ..
   ```
 
+  > **IMPORTANT**: Before deleting this example, ensure you remove the egress/ingress policies to prevent any inconsistencies.
 
 ## Usage
 
