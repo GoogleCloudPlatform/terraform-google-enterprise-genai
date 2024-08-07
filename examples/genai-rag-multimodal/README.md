@@ -21,6 +21,11 @@ For more information about the technologies used in this example, please refer t
 - [Vertex AI Vector Search Overview](https://cloud.google.com/vertex-ai/docs/vector-search/overview)
 - [Ragas Documentation](https://docs.ragas.io/en/stable/)
 
+After ensuring all requirements are satisfied you can follow one of the two deployment options:
+
+1. [**Using Machine Learning Infra Pipeline**](#deploying-infrastructure-using-machine-learning-infra-pipeline): This is a robust option suitable for production environments and continuous deployment scenarios.
+2. [**Using Terraform Locally**](#deploying-infrastructure-using-terraform-locally): This is a better option for one-time testing purposes where you know you will delete the example later.
+
 ## Requirements
 
 - Terraform v1.7.5
