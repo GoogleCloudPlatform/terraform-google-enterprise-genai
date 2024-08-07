@@ -185,6 +185,8 @@ Once there, select the perimeter that is associated with the environment (eg. `d
   git push origin development
   ```
 
+  > **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
+
 #### `non-production` environment
 
 - Checkout to `non-production` branch:
@@ -332,6 +334,8 @@ Once there, select the perimeter that is associated with the environment (eg. `n
   git push origin non-production
   ```
 
+  > **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
+
 #### `production` environment
 
 - Navigate into `gcp-networks` directory and checkout to `production` branch:
@@ -470,6 +474,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
   cd ..
   ```
 
+  > **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
 
 ## Usage
 
