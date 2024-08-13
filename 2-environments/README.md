@@ -405,7 +405,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../0-bootstrap/" output -raw environment_step_terraform_service_account_email)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
-1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `development` folder before continuing further
+1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `development` folder before continuing further.
 
 1. Run `init` and `plan` and review output for environment development.
 
@@ -426,7 +426,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ./tf-wrapper.sh apply development
    ```
 
-1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `non-production` folder before continuing further
+1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `non-production` folder before continuing further.
 
 1. Run `init` and `plan` and review output for environment non-production.
 
@@ -446,7 +446,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ```bash
    ./tf-wrapper.sh apply non-production
    ```
-1. Ensure you [disable The Orginization Policy](#do-this-before-you-push-development-non-production--production) on the `non-production` folder before continuing further
+1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `non-production` folder before continuing further.
 
 1. Run `init` and `plan` and review output for environment production.
 
@@ -473,4 +473,8 @@ Before executing the next stages, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT`
 
 ```bash
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
-```
+
+cd ../..
+ ```
+
+1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md).

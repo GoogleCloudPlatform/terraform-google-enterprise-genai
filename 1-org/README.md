@@ -293,4 +293,6 @@ Before executing the next stages, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT`
 
 ```bash
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
-```
+cd ../..
+ ```
+1. Proceed to the [2-environments](../2-environments/README.md) step.
