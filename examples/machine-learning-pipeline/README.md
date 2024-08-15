@@ -1287,13 +1287,207 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
 
 ## Post Infrastructure Deployment
 
-### VPC-SC
+### VPC-SC with Cloud Build
 
-1. Add `trigger-sa` in non-production VPC-SC perimeter. You can do this by adding `"serviceAccount:trigger-sa@$prj_n_machine_learning_project_id.iam.gserviceaccount.com"` to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
+For the next step, we need to update the non-production and production VPC-SC perimeters by adding the service accounts listed below.
 
-1. Add `"serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"` in non-production VPC-SC perimeter. You can do this by adding it to `perimeter_additional_members` in `common.auto.tfvars` (for both non-production and production branches).
+**IMPORTANT:** The content of `perimeter_additional_members` in the last line needs to follow this format: `"serviceAccount:YOUR-SERVICE_ACCOUNT"]`.
 
-1. Add `"serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com"` in production VPC-SC perimeter. You can do this by adding it to `perimeter_additional_members` in `common.auto.tfvars` (non-production branch).
+1. Obtain the service accounts to be used:
+
+    ```bash
+    export TRIGGER_SA="serviceAccount:trigger-sa@$prj_n_machine_learning_project_id.iam.gserviceaccount.com"
+    export GCP_SA_AIPLATFORM="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"
+    export API_ROBOT_SA="serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com"
+
+    echo $TRIGGER_SA
+    echo $GCP_SA_AIPLATFORM
+    echo $API_ROBOT_SA
+    ```
+
+**IMPORTANT:** The commands below assumes you are running it on the `terraform-google-enterprise-genai/examples/machine-learning-pipeline` directory.
+
+1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the non-production environment.
+
+    ```bash
+
+    cd ../../gcp-networks/env/non-production/
+    git checkout non-production
+
+    UPDATE_SA=$(printf '"%s",\n"%s",\n"%s"]' "$TRIGGER_SA" "$GCP_SA_AIPLATFORM" "$API_ROBOT_SA")
+
+    TEMP_FILE=$(mktemp)
+
+    awk -v new_entries="$UPDATE_SA" '
+      /perimeter_additional_members = \[/ {
+        print
+        in_list=1
+        next
+      }
+      in_list && /\]$/ {
+        sub(/\]$/, "")
+        print $0 ","
+        printf "%s\n", new_entries
+        in_list=0
+        next
+      }
+      {print}
+    ' common.auto.tfvars > "$TEMP_FILE"
+
+    mv "$TEMP_FILE" common.auto.tfvars
+
+    cat common.auto.tfvars ; echo ""
+    ```
+
+1. Commit the results on gcp-networks.
+
+    ```bash
+    git add .
+
+    git commit -m 'Update perimeter additional members'
+    git push origin non-production
+    ```
+
+1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the production environment.
+
+    ```bash
+
+    cd ../production/
+    git checkout production
+
+    var_global=$(printf '"%s"]' "$GCP_SA_AIPLATFORM")
+
+    TEMP_FILE=$(mktemp)
+
+    awk -v new_entry="$var_global" '
+      /perimeter_additional_members = \[/ {
+        print
+        in_list=1
+        next
+      }
+      in_list && /\]$/ {
+        sub(/\]$/, "")
+        print $0 ","
+        printf "%s\n", new_entry
+        in_list=0
+        next
+      }
+      {print}
+    ' common.auto.tfvars > "$TEMP_FILE"
+
+    mv "$TEMP_FILE" common.auto.tfvars
+
+    cat common.auto.tfvars ; echo ""
+    ```
+
+1. Commit the results on gcp-networks.
+
+    ```bash
+    git add .
+
+    git commit -m 'Update perimeter additional members'
+    git push origin production
+    ```
+
+### VPS-SC with Local Terraform - Only proceed with these if you have not used Cloud Build
+
+For the next step, we need to update the non-production and production VPC-SC perimeters by adding the service accounts listed below.
+
+**IMPORTANT:** The content of perimeter_additional_members in the last line needs to follow this format: `"serviceAccount:YOUR-SERVICE_ACCOUNT"]`.
+
+1. Obtain the service accounts to be used:
+
+    ```bash
+    export TRIGGER_SA="serviceAccount:trigger-sa@$prj_n_machine_learning_project_id.iam.gserviceaccount.com"
+    export GCP_SA_AIPLATFORM="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"
+    export API_ROBOT_SA="serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com"
+
+    echo $TRIGGER_SA
+    echo $GCP_SA_AIPLATFORM
+    echo $API_ROBOT_SA
+    ```
+
+**IMPORTANT:** The commands below assumes you are running it on the `terraform-google-enterprise-genai/examples/machine-learning-pipeline` directory.
+
+1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the non-production environment.
+
+    ```bash
+
+    cd ../../3-networks-dual-svpc/env/non-production/
+
+    UPDATE_SA=$(printf '"%s",\n"%s",\n"%s"]' "$TRIGGER_SA" "$GCP_SA_AIPLATFORM" "$API_ROBOT_SA")
+
+    TEMP_FILE=$(mktemp)
+
+    awk -v new_entries="$UPDATE_SA" '
+      /perimeter_additional_members = \[/ {
+        print
+        in_list=1
+        next
+      }
+      in_list && /\]$/ {
+        sub(/\]$/, "")
+        print $0 ","
+        printf "%s\n", new_entries
+        in_list=0
+        next
+      }
+      {print}
+    ' common.auto.tfvars > "$TEMP_FILE"
+
+    mv "$TEMP_FILE" common.auto.tfvars
+
+    cat common.auto.tfvars ; echo ""
+    ```
+
+1. Apply the results for development environment on 3-networks-dual-svpc.
+
+    ```bash
+    cd ../..
+
+    ./tf-wrapper.sh plan non-production
+    ./tf-wrapper.sh apply non-production
+    ```
+
+1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the production environment.
+
+    ```bash
+
+    cd env/production/
+
+    var_global=$(printf '"%s"]' "$GCP_SA_AIPLATFORM")
+
+    TEMP_FILE=$(mktemp)
+
+    awk -v new_entry="$var_global" '
+      /perimeter_additional_members = \[/ {
+        print
+        in_list=1
+        next
+      }
+      in_list && /\]$/ {
+        sub(/\]$/, "")
+        print $0 ","
+        printf "%s\n", new_entry
+        in_list=0
+        next
+      }
+      {print}
+    ' common.auto.tfvars > "$TEMP_FILE"
+
+    mv "$TEMP_FILE" common.auto.tfvars
+
+    cat common.auto.tfvars ; echo ""
+    ```
+
+1. Apply the results for development environment on 3-networks-dual-svpc.
+
+    ```bash
+    cd ../..
+
+    ./tf-wrapper.sh plan production
+    ./tf-wrapper.sh apply production
+    ```
 
 ### Permissions
 
