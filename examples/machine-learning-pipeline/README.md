@@ -1524,17 +1524,17 @@ For the next step, we need to update the non-production and production VPC-SC pe
 
 ### Big Query with Cloud Build
 
-**IMPORTANT**: The steps below are specific if you are deploying via `Cloud Build`. If you are deploying using Local Terraform, skip directly to the `Big Query with Local Terraform` section.
+**IMPORTANT**: The steps below are specific if you are deploying via `Cloud Build`. If you are deploying using Local Terraform, skip directly to the `Big Query with Local Terraform` section. The commands below assumes you are running it on the `terraform-google-enterprise-genai/examples/machine-learning-pipeline` directory.
 
  1. In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance
 
     ```bash
-    ml_project_dev=$(terraform -chdir="../../4-projects/ml_business_unit/development" output -raw machine_learning_project_id)
-    ml_project_dev_key=$(terraform -chdir="../../4-projects/ml_business_unit/development" output -json machine_learning_kms_keys)
-    ml_project_nonprd=$(terraform -chdir="../../4-projects/ml_business_unit/non-production" output -raw machine_learning_project_id)
-    ml_project_nonprod_key=$(terraform -chdir="../../4-projects/ml_business_unit/non-production" output -json machine_learning_kms_keys)
-    ml_project_prd=$(terraform -chdir="../../4-projects/ml_business_unit/production" output -raw machine_learning_project_id)
-    ml_project_prod_key=$(terraform -chdir="../../4-projects/ml_business_unit/production" output -json machine_learning_kms_keys)
+    ml_project_dev=$(terraform -chdir="../../../gcp-projects/ml_business_unit/development" output -raw machine_learning_project_id)
+    ml_project_dev_key=$(terraform -chdir="../../../gcp-projects/ml_business_unit/development" output -json machine_learning_kms_keys)
+    ml_project_nonprd=$(terraform -chdir="../../../gcp-projects/ml_business_unit/non-production" output -raw machine_learning_project_id)
+    ml_project_nonprod_key=$(terraform -chdir="../../../gcp-projects/ml_business_unit/non-production" output -json machine_learning_kms_keys)
+    ml_project_prd=$(terraform -chdir="../../../gcp-projects/ml_business_unit/production" output -raw machine_learning_project_id)
+    ml_project_prod_key=$(terraform -chdir="../../../gcp-projects/ml_business_unit/production" output -json machine_learning_kms_keys)
 
     project_key=$(echo "$ml_project_dev_key "| jq -r '."us-central1".id')
     echo "ALTER PROJECT \`$ml_project_dev\` SET OPTIONS (\`region-us-central1.default_kms_key_name\`=\"$project_key\");" | bq query --project_id "$ml_project_dev" --nouse_legacy_sql
