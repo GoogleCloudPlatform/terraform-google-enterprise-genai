@@ -1509,6 +1509,10 @@ For the next step, we need to update the non-production and production VPC-SC pe
                 --member="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com" \
                 --role='roles/storage.admin'
     ```
+**NOTE:** If the return of `$non_production_bucket_name` is empty, you may need to unset your billing quota project with the  command below:
+	```bash
+	gcloud config unset billing/quota_project
+	```
 
 1. The Default Compute Engine SA from production project must have `roles/storage.admin` on the non-production bucket. Run the command below to assign the permission
 
