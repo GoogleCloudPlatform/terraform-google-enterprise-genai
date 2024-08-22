@@ -1311,7 +1311,7 @@ For the next step, we need to update the non-production and production VPC-SC pe
 
     ```bash
 
-    cd gcp-networks/
+    cd ../../gcp-networks/env/non-production/
     git checkout non-production
 
     UPDATE_SA=$(printf '"%s",\n"%s",\n"%s"]' "$TRIGGER_SA" "$GCP_SA_AIPLATFORM" "$API_ROBOT_SA")
@@ -1352,6 +1352,7 @@ For the next step, we need to update the non-production and production VPC-SC pe
 
     ```bash
 
+    cd ../production/
     git checkout production
 
     var_global=$(printf '"%s"]' "$GCP_SA_AIPLATFORM")
