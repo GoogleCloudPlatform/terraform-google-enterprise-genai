@@ -1955,23 +1955,23 @@ After the notebook runs successfully and the pipeline's test run finishes in the
 1. In the next step, you can use the following commands to update the placeholders used in the file `census_pipeline.ipynb`. The commands below assume that you are in the new Git repository you created, on the development branch.
 
     ```bash
-      export prj_d_machine_learning_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/development" output -raw machine_learning_project_id)
-      echo $prj_d_machine_learning_project_id
+	export prj_d_machine_learning_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/development" output -raw machine_learning_project_id)
+	echo $prj_d_machine_learning_project_id
 
-      export prj_d_machine_learning_project_number=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/development" output -raw machine_learning_project_number)
-      echo $prj_d_machine_learning_project_number
+	export prj_d_machine_learning_project_number=$(terraform -chdir="../gcp-projects/ml_business_unit/development" output -raw machine_learning_project_number)
+	echo $prj_d_machine_learning_project_number
 
-      export prj_d_shared_restricted_id=$(terraform -chdir="../terraform-google-enterprise-genai/3-networks-dual-svpc/envs/development" output -raw restricted_host_project_id)
-      echo $prj_d_shared_restricted_id
+	export prj_d_shared_restricted_id=$(terraform -chdir="../gcp-networks/envs/development" output -raw restricted_host_project_id)
+	echo $prj_d_shared_restricted_id
 
-      export prj_d_kms_id=$(terraform -chdir="../terraform-google-enterprise-genai/2-environments/envs/development" output -raw env_kms_project_id)
-      echo $prj_d_kms_id
+	export prj_d_kms_id=$(terraform -chdir="../gcp-environments/envs/development" output -raw env_kms_project_id)
+	echo $prj_d_kms_id
 
-      export common_artifacts_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
-      echo $common_artifacts_project_id
+	export common_artifacts_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
+	echo $common_artifacts_project_id
 
-      export development_bucket_name=$(gcloud storage buckets list --project $prj_d_machine_learning_project_id --format="value(name)" |grep bkt)
-      echo $development_bucket_name
+	export development_bucket_name=$(gcloud storage buckets list --project $prj_d_machine_learning_project_id --format="value(name)" |grep bkt)
+	echo $development_bucket_name
 
       sed -i \
         -e "s/MACHINE_LEARNING_PROJECT_ID/$prj_d_machine_learning_project_id/g" \
