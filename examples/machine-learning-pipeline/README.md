@@ -1862,7 +1862,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
     export directory="../gcp-networks/envs/non-production"
     (cd $directory && git checkout non-production)
 
-    export $prj_n_shared_restricted_id=$(terraform -chdir="$directory" output -raw restricted_host_project_id)
+    export prj_n_shared_restricted_id=$(terraform -chdir="$directory" output -raw restricted_host_project_id)
     echo $prj_n_shared_restricted_id
 
     export directory="../gcp-projects/ml_business_unit/non-production"
