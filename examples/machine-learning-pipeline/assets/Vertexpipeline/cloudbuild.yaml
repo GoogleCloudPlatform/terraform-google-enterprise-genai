@@ -16,22 +16,22 @@ steps:
   # Upload dataflow src file to bucket
   # Replace the {your-bucket-name} from non-prod in the bucket name
   - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', '-r', './src', 'gs://{your-bucket-name}']
+    args: ['cp', '-r', './src', 'gs://{NON_PROD_BUCKET_NAME}']
 
   - name: 'gcr.io/cloud-builders/gsutil'
   # Replace the {your-bucket-name} from non-prod in the bucket name
-    args: ['cp', '-r', './data', 'gs://{your-bucket-name}']
+    args: ['cp', '-r', './data', 'gs://{NON_PROD_BUCKET_NAME}']
 
   # compile pipeline
   # Replace the {your-artifact-project} for your artifact project ID
-  - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
+  - name: 'us-central1-docker.pkg.dev/{COMMOM_ARTIFACTS_PRJ_ID}/c-publish-artifacts/vertexpipeline:v2'
     entrypoint: 'python'
     args: ['compile_pipeline.py']
     id: 'compile_job'
 
   # run pipeline
   # Replace the {your-artifact-project} for your artifact project ID
-  - name: 'us-central1-docker.pkg.dev/{your-artifact-project}/c-publish-artifacts/vertexpipeline:v2'
+  - name: 'us-central1-docker.pkg.dev/{COMMOM_ARTIFACTS_PRJ_ID}/c-publish-artifacts/vertexpipeline:v2'
     entrypoint: 'python'
     args: ['runpipeline.py']
     id: 'run_job'
