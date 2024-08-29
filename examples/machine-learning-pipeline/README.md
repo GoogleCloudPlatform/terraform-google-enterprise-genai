@@ -1776,7 +1776,7 @@ Also make sure to have a gcs bucket ready to store the artifacts for the tutoria
 
 1. Click `Open Jupyterlab` button on the instance created, this will take you to an interactive environment inside Vertex AI.
 
-1. Click the Git Icon (left side bar) and clone the repository you created, select the development branch.
+1. Click the Git Icon (left side bar) and clone over HTTPS the repository you created, select the development branch.
 
 1. Navigate to the directory that contains `census_pipeline.ipynb` file and execute [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook, ensuring that you set the correct values for your development project. If a message pops up asking which kernel to use, select Python 3. Make sure you are in the `development branch` and the fields were populated properly.
 
@@ -1996,7 +1996,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
 
 1. Click `Open Jupyterlab` button on the instance created, this will take you to an interactive environment inside Vertex AI.
 
-1. Click the Git Icon (left side bar) and clone the repository you created, select the development branch.
+1. Click the Git Icon (left side bar) and clone over HTTPS the repository you created, select the development branch.
 
 1. Navigate to the directory that contains `census_pipeline.ipynb` file and execute [the notebook](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/examples/machine-learning-pipeline/assets/Vertexpipeline/census_pipeline.ipynb) cell by cell. Pay attention to the instructions and comments in the notebook, ensuring that you set the correct values for your development project. If a message pops up asking which kernel to use, select Python 3. Make sure you are in the `development branch` and the fields were populated properly.
 
