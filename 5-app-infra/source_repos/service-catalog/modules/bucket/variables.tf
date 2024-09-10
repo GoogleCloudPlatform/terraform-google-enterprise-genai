@@ -196,3 +196,11 @@ variable "log_bucket" {
   type        = string
   description = "Bucket to store logs from the created bucket. This is the Env-level Log Bucket creted on 2-environments."
 }
+
+variable "kms_key_name" {
+  type        = string
+  description = <<EOF
+The KMS key to be used on the keyring, if not specified will use the default key created in 4-projects step"
+EOF
+  default     = ""
+}

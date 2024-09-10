@@ -262,6 +262,7 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
    git add .
    git commit -m 'Initialize bootstrap repo'
    git push --set-upstream origin plan
+   cd ..
    ```
 
 1. Continue with the instructions in the [1-org](../1-org/README.md) step.

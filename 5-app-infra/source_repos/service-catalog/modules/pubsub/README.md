@@ -67,6 +67,7 @@ The following table outlines which of the suggested controls for Vertex Generati
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| kms\_key\_name | The KMS key to be used on the keyring, if not specified will use the default key created in 4-projects step" | `string` | `""` | no |
 | kms\_keyring | The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as the other resources and the same environment.<br>This value can be obtained by running "gcloud kms keyrings list --project=KMS\_PROJECT\_ID --location=REGION." | `string` | n/a | yes |
 | locked\_regions | Regions that Pub/Sub persistence is locked to. | `list(any)` | <pre>[<br>  "us-central1",<br>  "us-east4"<br>]</pre> | no |
 | message\_retention\_duration | Message retention duration. | `string` | `"86400s"` | no |
