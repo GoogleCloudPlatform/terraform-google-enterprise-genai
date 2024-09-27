@@ -17,4 +17,5 @@
 locals {
   name_var = format("%s-%s", data.google_project.project.labels.env_code, var.name)
   region   = substr(var.location, 0, length(var.location) - 2)
+  key_name = var.kms_key_name == "" ? data.google_project.project.name : var.kms_key_name
 }

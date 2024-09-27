@@ -66,6 +66,7 @@ No outputs.
 | delete\_contents\_on\_destroy | If true, delete all the tables in the dataset when destroying the dataset; otherwise, destroying the dataset does not affect the tables in the dataset. If you try to delete a dataset that contains tables, and you set delete\_contents\_on\_destroy to false when you created the dataset, the request will fail. Always use this flag with caution. A missing value is treated as false. | `bool` | `false` | no |
 | description | A user-friendly description of the dataset. | `string` | `""` | no |
 | friendly\_name | A descriptive name for the dataset. | `string` | `""` | no |
+| kms\_key\_name | The KMS key to be used on the keyring, if not specified will use the default key created in 4-projects step" | `string` | `""` | no |
 | kms\_keyring | The KMS keyring that will be used when selecting the KMS key, preferably this should be on the same region as the other resources and the same environment.<br>This value can be obtained by running "gcloud kms keyrings list --project=KMS\_PROJECT\_ID --location=REGION." | `string` | n/a | yes |
 | project\_id | Project ID. | `string` | n/a | yes |
 | region | The resource region, one of [us-central1, us-east4]. | `string` | `"us-central1"` | no |

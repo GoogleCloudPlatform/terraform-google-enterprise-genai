@@ -69,4 +69,6 @@ locals {
   tags = var.region == "us-central1" ? ["composer-usc1"] : ["composer-use4"]
 
   github_repository = replace(var.github_remote_uri, "https://", "")
+
+  key_name = var.kms_key_name == "" ? data.google_project.project.name : var.kms_key_name
 }

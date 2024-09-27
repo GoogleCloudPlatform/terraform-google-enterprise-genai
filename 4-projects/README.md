@@ -360,5 +360,5 @@ Before executing the next stages, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT`
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 
 cd ../..
- ```
+```
 1. You can now move to the instructions in the [5-app-infra](../5-app-infra/README.md) step.

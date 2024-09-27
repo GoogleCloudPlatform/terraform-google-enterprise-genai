@@ -137,3 +137,11 @@ The KMS keyring that will be used when selecting the KMS key, preferably this sh
 This value can be obtained by running "gcloud kms keyrings list --project=KMS_PROJECT_ID --location=REGION."
 EOF
 }
+
+variable "kms_key_name" {
+  type        = string
+  description = <<EOF
+The KMS key to be used on the keyring, if not specified will use the default key created in 4-projects step"
+EOF
+  default     = ""
+}

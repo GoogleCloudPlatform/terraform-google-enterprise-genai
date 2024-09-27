@@ -171,7 +171,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
    git push origin production
    ```
 
-### `N.B.` Read this before continuing further
+### Read this before continuing further
 
 A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
 
@@ -405,6 +405,10 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../0-bootstrap/" output -raw environment_step_terraform_service_account_email)
    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
    ```
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `development` folder before continuing further.
 
 1. Run `init` and `plan` and review output for environment development.
@@ -446,6 +450,10 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ```bash
    ./tf-wrapper.sh apply non-production
    ```
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `non-production` folder before continuing further.
 
 1. Run `init` and `plan` and review output for environment production.
@@ -475,6 +483,6 @@ Before executing the next stages, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT`
 unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 
 cd ../..
- ```
+```
 
 1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md).

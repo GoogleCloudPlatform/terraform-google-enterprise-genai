@@ -758,4 +758,6 @@ After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` envir
    cd ..
    ```
 
-1. Navigate to the project that was output from `${SERVICE_CATALOG_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built: https://console.cloud.google.com/cloud-build/builds;region=us-central1?orgonly=true&project=${SERVICE_CATALOG_PROJECT_ID}&supportedpurview=project
+1. Navigate to the project that was output from `${SERVICE_CATALOG_PROJECT_ID}` in Google's Cloud Console to view the first run of images being built.
+
+https://console.cloud.google.com/cloud-build/builds;region=us-central1?orgonly=true&project=${SERVICE_CATALOG_PROJECT_ID}&supportedpurview=project

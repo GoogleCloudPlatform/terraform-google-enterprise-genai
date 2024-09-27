@@ -19,7 +19,7 @@ data "google_project" "project" {
 }
 
 data "google_kms_crypto_key" "key" {
-  name     = data.google_project.project.name
+  name     = local.key_name
   key_ring = var.kms_keyring
 }
 
