@@ -134,10 +134,19 @@ egress_policies = [
       "identities"    = []
     },
     "to" = {
-      "resources" = ["projects/REPLACE_WITH_LOGGING_PROJECT_NUMBER"]
+      "resources" = ["projects/REPLACE_WITH_LOGGING_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_NON_PROD_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER",
+                    ]
       "operations" = {
         "storage.googleapis.com" = {
           "methods" = ["*"]
+        }
+        "logging.googleapis.com" = {
+          methods = ["*"]
+        }
+        "cloudbuild.googleapis.com" = {
+          methods = ["*"]
         }
       }
     }

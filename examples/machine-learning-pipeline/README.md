@@ -296,7 +296,7 @@ Once there, select the perimeter that is associated with the environment (eg. `n
     echo $common_artifacts_project_number
     ```
 
-1. Retrieve the value for `prj_p_logging_project_number`:
+1. Retrieve the value for `prj_p_machine_learning_project_number`:
 
     ```bash
     terraform -chdir="../gcp-projects/ml_business_unit/production" init
@@ -312,15 +312,24 @@ Once there, select the perimeter that is associated with the environment (eg. `n
     echo $prj_n_logging_project_number
     ```
 
+1. Retrieve the value for `machine_learning_project_number` from `development` environment:
+
+    ```bash
+    export prj_d_machine_learning_project_number=$(terraform -chdir="../gcp-networks/envs/development" output -raw machine_learning_project_number)
+    echo $prj_d_machine_learning_project_number
+    ```
+
 1. Run the following command to update the `gcp-networks/envs/non-production/non-production.auto.tfvars` file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/non-production.tf.example`.
 
     ```bash
     sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
         -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
+        -e "s/REPLACE_WITH_DEV_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
         -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
         -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
         -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
         -e "s/REPLACE_WITH_PROD_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
+        -e "s/REPLACE_WITH_DEV_ML_PROJECT_NUMBER/$prj_d_machine_learning_project_number/g" \
         -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_n_logging_project_number/g" \
       ../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/vpc-sc-policies/non-production.tf.example > envs/non-production/non-production.auto.tfvars
     ```
@@ -689,7 +698,7 @@ To create new ingress/egress rules on the VPC-SC perimiter, follow the steps bel
 1. Retrieve the value for "sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com" on your environment by running:
 
     ```bash
-    export env_step_sa=$(terraform -chdir="../../0-bootstrap/envs/shared" output -raw environment_step_terraform_service_account_email)
+    export env_step_sa=$(terraform -chdir="../../gcp-bootstrap/envs/shared" output -raw environment_step_terraform_service_account_email)
     echo $env_step_sa
     ```
 
@@ -768,7 +777,6 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 
     ```bash
     export directory="../4-projects/ml_business_unit/shared"
-    (cd $directory && git checkout production)
 
     export common_artifacts_project_id=$(terraform -chdir="$directory" output -raw common_artifacts_project_id)
     echo $common_artifacts_project_id
@@ -794,7 +802,7 @@ Once there, select the perimeter that is associated with the environment (eg. `d
       -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_d_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
       -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_d_logging_project_number/g" \
-    ../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/vpc-sc-policies/development.tf.example > envs/development/development.auto.tfvars
+    ../examples/machine-learning-pipeline/assets/vpc-sc-policies/development.tf.example > envs/development/development.auto.tfvars
     ```
 
 1. Apply the results for development environment on `3-networks-dual-svpc`.
@@ -804,7 +812,20 @@ Once there, select the perimeter that is associated with the environment (eg. `d
     ./tf-wrapper.sh apply development
     ```
 
-> **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
+-> **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
+
+**NOTE:** If you receive some error while running the plan/apply commands you may need to impersonate the Service Account:
+
+  ```bash
+    export CLOUD_BUILD_PROJECT_ID=$(terraform -chdir="../0-bootstrap/" output -raw cloudbuild_project_id)
+    echo ${CLOUD_BUILD_PROJECT_ID}
+
+    export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../0-bootstrap/" output -raw networks_step_terraform_service_account_email)
+    echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
+  ```
+
+
+**DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
 
 #### `non-production` environment
 
@@ -818,7 +839,7 @@ Once there, select the perimeter that is associated with the environment (eg. `d
 1. Retrieve the value for "sa-terraform-env@[prj_b_seed_project_id].iam.gserviceaccount.com" on your environment by running:
 
     ```bash
-    export env_step_sa=$(terraform -chdir="../0-bootstrap/envs/shared" output -raw environment_step_terraform_service_account_email)
+    export env_step_sa=$(terraform -chdir="../../gcp-bootstrap/envs/shared" output -raw environment_step_terraform_service_account_email)
     echo $env_step_sa
     ```
 
@@ -898,7 +919,6 @@ Once there, select the perimeter that is associated with the environment (eg. `n
 
     ```bash
     export directory="../4-projects/ml_business_unit/shared"
-    (cd $directory && git checkout production)
 
     export common_artifacts_project_id=$(terraform -chdir="$directory" output -raw common_artifacts_project_id)
     echo $common_artifacts_project_id
@@ -907,13 +927,25 @@ Once there, select the perimeter that is associated with the environment (eg. `n
     echo $common_artifacts_project_number
     ```
 
-1. Retrieve the value for `prj_p_logging_project_number`:
+1. Retrieve the value for `prj_p_machine_learning_project_number`:
 
     ```bash
     terraform -chdir="../4-projects/ml_business_unit/production" init
 
     export prj_p_machine_learning_project_number=$(terraform -chdir="../4-projects/ml_business_unit/production" output -raw machine_learning_project_number)
     echo $prj_p_machine_learning_project_number
+    ```
+
+1. Retrieve the value for `restricted_host_project_id` from `Development` environment:
+
+    ```bash
+    terraform -chdir="envs/development" init
+
+    export dev_restricted_host_project_id=$(terraform -chdir="envs/development" output -raw restricted_host_project_id)
+    echo $dev_restricted_host_project_id
+
+    export dev_restricted_host_project_number=$(gcloud projects list --filter="projectId=$dev_restricted_host_project_id" --format="value(projectNumber)")
+    echo $dev_restricted_host_project_number
     ```
 
 1. Retrieve the value for `prj_n_logging_project_number`:
@@ -923,17 +955,26 @@ Once there, select the perimeter that is associated with the environment (eg. `n
     echo $prj_n_logging_project_number
     ```
 
+1. Retrieve the value for `machine_learning_project_number` from `development` environment:
+
+    ```bash
+    export prj_d_machine_learning_project_number=$(terraform -chdir="../4-projects/ml_business_unit/development" output -raw machine_learning_project_number)
+    echo $prj_d_machine_learning_project_number
+    ```
+
 1. Run the following command to update the `3-networks-dual-svpc/envs/non-production/non-production.auto.tfvars` file. The output of this command will contain both ingress and egress policies variables values already replaced with the template located at `assets/vpc-sc-policies/non-production.tf.example`.
 
     ```bash
     sed -e "s:REPLACE_WITH_ACCESS_LEVEL:$access_level:g" \
         -e "s/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
+        -e "s/REPLACE_WITH_DEV_SHARED_RESTRICTED_VPC_PROJECT_NUMBER/$restricted_host_project_number/g" \
         -e "s/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER/$env_kms_project_number/g" \
         -e "s/REPLACE_WITH_ENV_ML_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
         -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
         -e "s/REPLACE_WITH_PROD_ML_PROJECT_NUMBER/$prj_p_machine_learning_project_number/g" \
+        -e "s/REPLACE_WITH_DEV_ML_PROJECT_NUMBER/$prj_d_machine_learning_project_number/g" \
         -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_n_logging_project_number/g" \
-      ../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/vpc-sc-policies/non-production.tf.example > envs/non-production/non-production.auto.tfvars
+      ../examples/machine-learning-pipeline/assets/vpc-sc-policies/non-production.tf.example > envs/non-production/non-production.auto.tfvars
     ```
 
 > *IMPORTANT*: The command above assumes you are running it on the  `3-networks-dual-svpc` directory.
@@ -968,7 +1009,7 @@ Once there, select the perimeter that is associated with the environment (eg. `n
     ```bash
     terraform -chdir="../2-environments/envs/production" init
 
-    export prj_p_logging_project_number=$(terraform -chdir="../gcp-environments/envs/production" output -raw env_log_project_number)
+    export prj_p_logging_project_number=$(terraform -chdir="../2-environments/envs/production" output -raw env_log_project_number)
     echo $prj_p_logging_project_number
     ```
 
@@ -1024,9 +1065,9 @@ Once there, select the perimeter that is associated with the environment (eg. `p
 1. Retrieve `restricted_host_project_number` variable value:
 
     ```bash
-    terraform -chdir="3-networks-dual-svpc/envs/production" init
+    terraform -chdir="envs/production" init
 
-    export restricted_host_project_id=$(terraform -chdir="3-networks-dual-svpc/envs/production" output -raw restricted_host_project_id)
+    export restricted_host_project_id=$(terraform -chdir="envs/production" output -raw restricted_host_project_id)
     echo $restricted_host_project_id
 
     export restricted_host_project_number=$(gcloud projects list --filter="projectId=$restricted_host_project_id" --format="value(projectNumber)")
@@ -1037,7 +1078,6 @@ Once there, select the perimeter that is associated with the environment (eg. `p
 
     ```bash
     export directory="../4-projects/ml_business_unit/shared"
-    (cd $directory && git checkout production)
 
     export common_artifacts_project_id=$(terraform -chdir="$directory" output -raw common_artifacts_project_id)
     echo $common_artifacts_project_id
@@ -1046,7 +1086,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
     echo $common_artifacts_project_number
     ```
 
-1. Retrieve the value for `prj_p_logging_project_number`:
+1. Retrieve the value for `prj_p_machine_learning_project_number`:
 
     ```bash
     export prj_p_machine_learning_project_number=$(terraform -chdir="../4-projects/ml_business_unit/production" output -raw machine_learning_project_number)
@@ -1063,7 +1103,7 @@ Once there, select the perimeter that is associated with the environment (eg. `p
       -e "s/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER/$common_artifacts_project_number/g" \
       -e "s/REPLACE_WITH_NON_PROD_PROJECT_NUMBER/$prj_n_machine_learning_project_number/g" \
       -e "s/REPLACE_WITH_LOGGING_PROJECT_NUMBER/$prj_p_logging_project_number/g" \
-    ../terraform-google-enterprise-genai/examples/machine-learning-pipeline/assets/vpc-sc-policies/production.tf.example > envs/production/production.auto.tfvars
+    ../examples/machine-learning-pipeline/assets/vpc-sc-policies/production.tf.example > envs/production/production.auto.tfvars
     ```
 
 > *IMPORTANT*: The command above assumes you are running it on the  `3-networks-dual-svpc` directory.
@@ -1071,12 +1111,10 @@ Once there, select the perimeter that is associated with the environment (eg. `p
 1. Apply the results for development environment on `3-networks-dual-svpc`.
 
     ```bash
-    git add .
-
     ./tf-wrapper.sh plan production
     ./tf-wrapper.sh apply production
 
-    cd ..
+    cd ../..
     ```
 
 > **DISCLAIMER**: Remember that before deleting or destroying the `machine-learning-pipeline` example, you must remove the egress/ingress policies related to the example, to prevent any inconsistencies.
@@ -1103,9 +1141,17 @@ Under `modules/base_env/main.tf` you will notice all module calls are using `git
    mv common.auto.example.tfvars common.auto.tfvars
    ```
 
-1. Update `common.auto.tfvars` file with values from your environment.
+1. If you are not integrating Github with Cloud Build, you can skip this step, otherwise you need to update the common.auto.tfvars file with your github app installation id, along with the url of your repository. Remember to uncomment the lines below that refer to Github.
 
-1. Use `terraform output` to get the project and seed backend bucket value from 0-bootstrap.
+   ```bash
+    GITHUB_APP_ID="YOUR-GITHUB-APP-ID-HERE"
+    GITHUB_REMOTE_URI="YOUR-GITHUB-REMOTE-URI"
+
+    sed -i "s/GITHUB_APP_ID/${GITHUB_APP_ID}/" ./common.auto.tfvars
+    sed -i "s/GITHUB_REMOTE_URI/${GITHUB_REMOTE_URI}/" ./common.auto.tfvars
+   ```
+
+1. Update `common.auto.tfvars` file with values from your environment. Use `terraform output` to get the project and seed backend bucket value from 0-bootstrap.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../../0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
@@ -1225,7 +1271,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ./tf-wrapper.sh init production
    ./tf-wrapper.sh plan production
    ```
-- In case you face some error related to Source Repo authentication, you need to access your Service Catalog repository `prj-c-mlservice-catalog-ID` `https://source.cloud.google.com/<service_catalog_project_id>/service-catalog` hit the `Clone` button in the right side -> how to setup -> Manually generated credentials and then follow the instructions in the step one `Generate and store your Git credentials`. Then, re-run the previous step again.
+- If you are using Github and you face some error related to Source Repo authentication, you need to access your Service Catalog repository `prj-c-mlservice-catalog-ID` `https://source.cloud.google.com/<service_catalog_project_id>/service-catalog` hit the `Clone` button in the right side -> how to setup -> Manually generated credentials and then follow the instructions in the step one `Generate and store your Git credentials`. Then, re-run the previous step again.
 
 1. Run `validate` and check for violations.
 
@@ -1296,6 +1342,18 @@ For the next step, we need to update the non-production and production VPC-SC pe
 1. Obtain the service accounts to be used:
 
     ```bash
+    cd ../../../gcp-projects/ml_business_unit/non-production
+    git checkout non-production
+
+    export prj_n_machine_learning_project_id=$(terraform output -raw machine_learning_project_id)
+    echo $prj_n_machine_learning_project_id
+
+    cd ../production
+    git checkout production
+
+    export prj_p_machine_learning_project_id=$(terraform output -raw machine_learning_project_id)
+    echo $prj_p_machine_learning_project_id
+
     export TRIGGER_SA="serviceAccount:trigger-sa@$prj_n_machine_learning_project_id.iam.gserviceaccount.com"
     export GCP_SA_AIPLATFORM="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"
     export API_ROBOT_SA="serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com"
@@ -1307,11 +1365,11 @@ For the next step, we need to update the non-production and production VPC-SC pe
 
 **IMPORTANT:** The commands below assumes you are running it on the `terraform-google-enterprise-genai/examples/machine-learning-pipeline` directory.
 
-1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the non-production environment.
+1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the non-production environment. The last line from your `perimeter_additional_members` should end following this format: `"serviceAccount:YOUR-SERVICE-ACCOUNT"]` (with no comma in the and the `]` in the same line from the service account).
 
     ```bash
 
-    cd ../../gcp-networks/env/non-production/
+    cd ../../gcp-networks/envs/non-production/
     git checkout non-production
 
     UPDATE_SA=$(printf '"%s",\n"%s",\n"%s"]' "$TRIGGER_SA" "$GCP_SA_AIPLATFORM" "$API_ROBOT_SA")
@@ -1348,7 +1406,7 @@ For the next step, we need to update the non-production and production VPC-SC pe
     git push origin non-production
     ```
 
-1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the production environment.
+1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the production environment. The last line from your `perimeter_additional_members` should end following this format: `"serviceAccount:YOUR-SERVICE-ACCOUNT"]` (with no comma in the and the `]` in the same line from the service account).
 
     ```bash
 
@@ -1398,6 +1456,12 @@ For the next step, we need to update the non-production and production VPC-SC pe
 1. Obtain the service accounts to be used:
 
     ```bash
+    export prj_n_machine_learning_project_id=$(terraform -chdir="../../4-projects/ml_business_unit/non-production" output -raw machine_learning_project_id)
+    echo $prj_n_machine_learning_project_id
+
+    export prj_p_machine_learning_project_id=$(terraform -chdir="../../4-projects/ml_business_unit/production" output -raw machine_learning_project_id)
+    echo $prj_p_machine_learning_project_id
+
     export TRIGGER_SA="serviceAccount:trigger-sa@$prj_n_machine_learning_project_id.iam.gserviceaccount.com"
     export GCP_SA_AIPLATFORM="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com"
     export API_ROBOT_SA="serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com"
@@ -1407,13 +1471,23 @@ For the next step, we need to update the non-production and production VPC-SC pe
     echo $API_ROBOT_SA
     ```
 
+1. Use `terraform output` to get the Seed project ID and the organization step Terraform service account from 0-bootstrap output. An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set using the Terraform Service Account to enable impersonation.
+
+   ```bash
+   export CLOUD_BUILD_PROJECT_ID=$(terraform -chdir="../0-bootstrap/" output -raw cloudbuild_project_id)
+   echo ${CLOUD_BUILD_PROJECT_ID}
+
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../0-bootstrap/" output -raw networks_step_terraform_service_account_email)
+   echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
+   ```
+
 **IMPORTANT:** The commands below assumes you are running it on the `terraform-google-enterprise-genai/examples/machine-learning-pipeline` directory.
 
-1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the non-production environment.
+1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the non-production environment. The last line from your `perimeter_additional_members` should end following this format: `"serviceAccount:YOUR-SERVICE-ACCOUNT"]` (with no comma in the and the `]` in the same line from the service account).
 
     ```bash
 
-    cd ../../3-networks-dual-svpc/env/non-production/
+    cd ../../3-networks-dual-svpc/envs/non-production/
 
     UPDATE_SA=$(printf '"%s",\n"%s",\n"%s"]' "$TRIGGER_SA" "$GCP_SA_AIPLATFORM" "$API_ROBOT_SA")
 
@@ -1440,7 +1514,7 @@ For the next step, we need to update the non-production and production VPC-SC pe
     cat common.auto.tfvars ; echo ""
     ```
 
-1. Apply the results for development environment on 3-networks-dual-svpc.
+1. Apply the results for non-production environment on 3-networks-dual-svpc.
 
     ```bash
     cd ../..
@@ -1449,54 +1523,26 @@ For the next step, we need to update the non-production and production VPC-SC pe
     ./tf-wrapper.sh apply non-production
     ```
 
-1. Run the command below to update the `perimeter_additional_members` in `common.auto.tfvars` for the production environment.
+1. Apply the results for production environment on 3-networks-dual-svpc.
 
     ```bash
-
-    cd env/production/
-
-    var_global=$(printf '"%s"]' "$GCP_SA_AIPLATFORM")
-
-    TEMP_FILE=$(mktemp)
-
-    awk -v new_entry="$var_global" '
-      /perimeter_additional_members = \[/ {
-        print
-        in_list=1
-        next
-      }
-      in_list && /\]$/ {
-        sub(/\]$/, "")
-        print $0 ","
-        printf "%s\n", new_entry
-        in_list=0
-        next
-      }
-      {print}
-    ' common.auto.tfvars > "$TEMP_FILE"
-
-    mv "$TEMP_FILE" common.auto.tfvars
-
-    cat common.auto.tfvars ; echo ""
-    ```
-
-1. Apply the results for development environment on 3-networks-dual-svpc.
-
-    ```bash
-    cd ../..
-
     ./tf-wrapper.sh plan production
     ./tf-wrapper.sh apply production
     ```
 
-### Permissions
+1. Unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
+
+   ```bash
+   unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+   ```
+
+### Permissions (steps for Cloud build and Local Terraform)
 
 1. The default compute engine from non-production project must have `roles/aiplatform.admin` on the production project. Run the command below to assign the permission:
 
     ```bash
     gcloud projects add-iam-policy-binding $prj_p_machine_learning_project_id \
-                --member="serviceAccount:$prj_n_machine_learning_project_number-compute@developer.gserviceaccount.com" \
-                --role='roles/aiplatform.admin'
+    --member="serviceAccount:$prj_n_machine_learning_project_number-compute@developer.gserviceaccount.com" --role='roles/aiplatform.admin'
     ```
 
 1. The AI Platform Service Agent from production project must have `roles/storage.admin` on the non-production bucket. Run the command below to assign the permission
@@ -1505,9 +1551,8 @@ For the next step, we need to update the non-production and production VPC-SC pe
     export non_production_bucket_name=$(gcloud storage buckets list --project $prj_n_machine_learning_project_id --format="value(name)" |grep bkt)
     echo $non_production_bucket_name
 
-    gcloud storage buckets add-iam-policy-binding gs://$non_production_bucket_name\
-                --member="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com" \
-                --role='roles/storage.admin'
+    gcloud storage buckets add-iam-policy-binding gs://$non_production_bucket_name \
+    --member="serviceAccount:service-$prj_p_machine_learning_project_number@gcp-sa-aiplatform.iam.gserviceaccount.com" --role='roles/storage.admin'
     ```
 **NOTE:** If the return of `$non_production_bucket_name` is empty, you may need to unset your billing quota project with the  command below:
 	```bash
@@ -1561,7 +1606,7 @@ For the next step, we need to update the non-production and production VPC-SC pe
               "from" = {
               "identity_type" = ""
               "identities" = [
-                  "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition
+                  "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com",   // << New Addition
                   "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
                   "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
               ]
@@ -1593,7 +1638,7 @@ For the next step, we need to update the non-production and production VPC-SC pe
 
 ### Big Query with Local Terraform - Only proceed with these if you have not used Cloud Build
 
-  1. In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance.
+  1. In order to avoid having to specify a kms key for every query against a bigquery resource, we set the default project encryption key to the corresponding environment key in advance. The commands below assumes you are running it on the `terraform-google-enterprise-genai/examples/machine-learning-pipeline` directory.
 
       ```bash
       ml_project_dev=$(terraform -chdir="../../4-projects/ml_business_unit/development" output -raw machine_learning_project_id)
@@ -1628,7 +1673,7 @@ For the next step, we need to update the non-production and production VPC-SC pe
               "from" = {
               "identity_type" = ""
               "identities" = [
-                  "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com"   << New Addition
+                  "serviceAccount:bq-[prj-d-ml-machine-learning-project-number]@bigquery-encryption.iam.gserviceaccount.com",   // << New Addition
                   "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@gcp-sa-notebooks.iam.gserviceaccount.com",
                   "serviceAccount:service-[prj-d-ml-machine-learning-project-number]@compute-system.iam.gserviceaccount.com",
               ]
@@ -1648,15 +1693,30 @@ For the next step, we need to update the non-production and production VPC-SC pe
       ]
    ```
 
+1. Use `terraform output` to get the Seed project ID and the organization step Terraform service account from 0-bootstrap output. An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set using the Terraform Service Account to enable impersonation.
+
+   ```bash
+   export CLOUD_BUILD_PROJECT_ID=$(terraform -chdir="../0-bootstrap/" output -raw cloudbuild_project_id)
+   echo ${CLOUD_BUILD_PROJECT_ID}
+
+   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../0-bootstrap/" output -raw networks_step_terraform_service_account_email)
+   echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
+   ```
+
 1. Once this addition has been done, it is necessary apply the changes for `3-networks-dual-svpc` for development environment:
 
     ```bash
-      cd 3-networks-dual-svpc
+      cd ../../3-networks-dual-svpc
 
-      ./tf-wrapper.sh init development
       ./tf-wrapper.sh plan development
+      ./tf-wrapper.sh apply development
     ```
 
+1. Unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
+
+   ```bash
+   unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
+   ```
 
 ## Running the Machine Learning Pipeline
 
@@ -1955,19 +2015,19 @@ After the notebook runs successfully and the pipeline's test run finishes in the
 1. In the next step, you can use the following commands to update the placeholders used in the file `census_pipeline.ipynb`. The commands below assume that you are in the new Git repository you created, on the development branch.
 
     ```bash
-	export prj_d_machine_learning_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/development" output -raw machine_learning_project_id)
+	export prj_d_machine_learning_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/development" output -raw machine_learning_project_id)
 	echo $prj_d_machine_learning_project_id
 
-	export prj_d_machine_learning_project_number=$(terraform -chdir="../gcp-projects/ml_business_unit/development" output -raw machine_learning_project_number)
+	export prj_d_machine_learning_project_number=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/development" output -raw machine_learning_project_number)
 	echo $prj_d_machine_learning_project_number
 
-	export prj_d_shared_restricted_id=$(terraform -chdir="../gcp-networks/envs/development" output -raw restricted_host_project_id)
+	export prj_d_shared_restricted_id=$(terraform -chdir="../terraform-google-enterprise-genai/3-networks-dual-svpc/envs/development" output -raw restricted_host_project_id)
 	echo $prj_d_shared_restricted_id
 
-	export prj_d_kms_id=$(terraform -chdir="../gcp-environments/envs/development" output -raw env_kms_project_id)
+	export prj_d_kms_id=$(terraform -chdir="../terraform-google-enterprise-genai/2-environments/envs/development" output -raw env_kms_project_id)
 	echo $prj_d_kms_id
 
-	export common_artifacts_project_id=$(terraform -chdir="../gcp-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
+	export common_artifacts_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
 	echo $common_artifacts_project_id
 
 	export development_bucket_name=$(gcloud storage buckets list --project $prj_d_machine_learning_project_id --format="value(name)" |grep bkt)
@@ -2253,100 +2313,6 @@ You might encounter this when the vertex pipeline job attempts to run even thoug
 
   - To fix run: `gcloud beta services identity create --service=aiplatform.googleapis.com --project=<project_number>`
 
-#### VPC-SC
-
-- Under NON-PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
-
-    ```text
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:service-[prj-n-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = ["projects/[prj-c-ml-artifacts-number]"]
-        "operations" = {
-          "artifactregistry.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    // DataFlow
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:service-[prj-n-ml-machine-learning-number]@dataflow-service-producer-prod.iam.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = ["projects/[prj-d-shared-restricted-number]"]
-        "operations" = {
-          "compute.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:[prj-n-ml-machine-learning-number]-compute@developer.gserviceaccount.com",
-          "serviceAccount:service-[prj-d-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = ["projects/[prj-p-ml-machine-learning-number]"]
-        "operations" = {
-          "aiplatform.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "storage.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "bigquery.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    ```
-
-- Under PRODUCTION.AUTO.TFVARS, add these entries under `egress_policies`:
-
-    ```
-    {
-      "from" = {
-        "identity_type" = ""
-        "identities" = [
-          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform.iam.gserviceaccount.com",
-          "serviceAccount:service-[prj-p-ml-machine-learning-number]@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
-          "serviceAccount:cloud-cicd-artifact-registry-copier@system.gserviceaccount.com",
-        ]
-      },
-      "to" = {
-        "resources" = [
-          "projects/[prj-n-ml-machine-learning-number]",
-          "projects/[prj-c-ml-artifacts-number]",
-        ]
-        "operations" = {
-          "artifactregistry.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "storage.googleapis.com" = {
-            "methods" = ["*"]
-          },
-          "bigquery.googleapis.com" = {
-            "methods" = ["*"]
-          }
-        }
-      }
-    },
-    ```
 
 #### Service Catalog
 

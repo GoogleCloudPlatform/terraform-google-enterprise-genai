@@ -69,6 +69,7 @@ egress_policies = [
       "identities" = [
         "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-notebooks.iam.gserviceaccount.com",
         "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@compute-system.iam.gserviceaccount.com",
+        "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com",
       ]
     },
     "to" = {
@@ -79,6 +80,36 @@ egress_policies = [
         }
         "cloudkms.googleapis.com" = {
           "methods" = ["*"]
+        }
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com",
+      "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+      "serviceAccount:cloud-cicd-artifact-registry-copier@system.gserviceaccount.com",
+    ]
+  },
+  "to" = {
+    "resources" = [
+      "projects/REPLACE_WITH_NON_PROD_PROJECT_NUMBER",
+      "projects/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER",
+    ]
+    "operations" = {
+      "artifactregistry.googleapis.com" = {
+        "methods" = ["*"]
+        },
+      "storage.googleapis.com" = {
+        "methods" = ["*"]
+        },
+      "bigquery.googleapis.com" = {
+        "methods" = ["*"]
         }
       }
     }

@@ -69,6 +69,8 @@ egress_policies = [
       "identities" = [
         "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-notebooks.iam.gserviceaccount.com",
         "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@compute-system.iam.gserviceaccount.com",
+        "serviceAccount:REPLACE_WITH_ENV_ML_PROJECT_NUMBER-compute@developer.gserviceaccount.com",
+        "serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com",
       ]
     },
     "to" = {
@@ -78,6 +80,9 @@ egress_policies = [
           "methods" = ["*"]
         }
         "cloudkms.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "storage.googleapis.com" = {
           "methods" = ["*"]
         }
       }
@@ -102,11 +107,15 @@ egress_policies = [
   },
   {
     "from" = {
-      "identity_type" = "ANY_IDENTITY"  
+      "identity_type" = "ANY_IDENTITY"
       "identities"    = []
     },
     "to" = {
-      "resources" = ["projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER","projects/REPLACE_WITH_PROD_ML_PROJECT_NUMBER"]
+      "resources" = ["projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_PROD_ML_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_DEV_LOG_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_DEV_ML_PROJECT_NUMBER",
+                    ]
       "operations" = {
         "aiplatform.googleapis.com" = {
           "methods" = ["*"]
@@ -117,9 +126,71 @@ egress_policies = [
         "bigquery.googleapis.com" = {
           "methods" = ["*"]
         }
+        "logging.googleapis.com" = {
+          methods = ["*"]
+        }
+        "cloudbuild.googleapis.com" = {
+          methods = ["*"]
       }
     }
-  },  
+    }
+  },
+  {
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+    ]
+  },
+  "to" = {
+    "resources" = ["projects/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER"]
+    "operations" = {
+      "artifactregistry.googleapis.com" = {
+        "methods" = ["*"]
+        }
+      }
+    }
+  },
+// DataFlow
+  {
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@dataflow-service-producer-prod.iam.gserviceaccount.com",
+    ]
+  },
+  "to" = {
+    "resources" = ["projects/REPLACE_WITH_DEV_SHARED_RESTRICTED_VPC_PROJECT_NUMBER"]
+    "operations" = {
+      "compute.googleapis.com" = {
+        "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:REPLACE_WITH_ENV_ML_PROJECT_NUMBER-compute@developer.gserviceaccount.com",
+      "serviceAccount:service-REPLACE_WITH_DEV_ML_PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com",
+    ]
+  },
+  "to" = {
+    "resources" = ["projects/REPLACE_WITH_PROD_ML_PROJECT_NUMBER"]
+    "operations" = {
+      "aiplatform.googleapis.com" = {
+        "methods" = ["*"]
+      },
+      "storage.googleapis.com" = {
+        "methods" = ["*"]
+      },
+      "bigquery.googleapis.com" = {
+        "methods" = ["*"]
+        }
+      }
+    }
+  },
   {
     "from" = {
       "identity_type" = "ANY_IDENTITY"
