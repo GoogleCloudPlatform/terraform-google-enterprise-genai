@@ -3,7 +3,7 @@ tensorflow-io==0.25.0
 google-cloud-bigquery<3.0.0,>=1.11.1
 pandas==2.0.3
 db-dtypes==1.2.0
-google-cloud-aiplatform==1.36.0
+google-cloud-aiplatform==1.69.0
 google-cloud-storage==2.14.0
 protobuf==3.20.0
 
