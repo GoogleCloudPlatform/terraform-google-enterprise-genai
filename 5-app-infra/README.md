@@ -134,9 +134,9 @@ The Pipeline is connected to a Google Cloud Source Repository with a simple stru
       └── tf2-gpu.2-13:0.1
          └── Dockerfile
    ```
-for the purposes of this example, the pipeline is configured to monitor the `main` branch of this repository.
+For the purposes of this example, the pipeline is configured to monitor the `main` branch of this repository.
 
-each folder under `images` has the full name and tag of the image that must be built.  Once a change to the `main` branch is pushed, the pipeline will analyse which files have changed and build that image out and place it in the artifact repository.  For example, if there is a change to the Dockerfile in the `tf2-cpu-13:0.1` folder, or if the folder itself has been renamed, it will build out an image and tag it based on the folder name that the Dockerfile has been housed in.
+Each folder under `images` has the full name and tag of the image that must be built.  Once a change to the `main` branch is pushed, the pipeline will analyse which files have changed and build that image out and place it in the artifact repository.  For example, if there is a change to the Dockerfile in the `tf2-cpu-13:0.1` folder, or if the folder itself has been renamed, it will build out an image and tag it based on the folder name that the Dockerfile has been housed in.
 
 Once pushed, the pipeline build logs can be accessed by navigating to the artifacts project name created in step-4:
 
