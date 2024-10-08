@@ -12,5 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM tensorflow/tensorflow:2.8.0
-RUN pip install tensorflow-io==0.25.0 protobuf==3.20.0 google-cloud-bigquery==3.13.0 pandas==2.0.3 db-dtypes==1.2.0 google-cloud-aiplatform==1.36.0 google-cloud-storage==2.14.0 kfp google-cloud-pipeline-components
+FROM python:3.10
+
+RUN python3 -m pip install --no-cache-dir tensorflow-cpu==2.8.0
+RUN pip install tensorflow-io==0.25.0 protobuf==3.20.3 google-cloud-bigquery==3.13.0 pandas==2.0.3 db-dtypes==1.2.0 google-cloud-aiplatform==1.36.0 google-cloud-storage==2.14.0 kfp google-cloud-pipeline-components numpy==1.26.4

@@ -15,10 +15,26 @@
  */
 
 locals {
-  machine_learning_project_id = data.terraform_remote_state.projects_env.outputs.machine_learning_project_id
-  machine_learning_kms_keys   = data.terraform_remote_state.projects_env.outputs.machine_learning_kms_keys
-  service_catalog_repo_name   = data.terraform_remote_state.projects_shared.outputs.service_catalog_repo_name
-  service_catalog_project_id  = data.terraform_remote_state.projects_shared.outputs.service_catalog_project_id
+  machine_learning_project_id   = data.terraform_remote_state.projects_env.outputs.machine_learning_project_id
+  machine_learning_kms_keys     = data.terraform_remote_state.projects_env.outputs.machine_learning_kms_keys
+  service_catalog_repo_name     = data.terraform_remote_state.projects_shared.outputs.service_catalog_repo_name
+  service_catalog_project_id    = data.terraform_remote_state.projects_shared.outputs.service_catalog_project_id
+  non_production_project_number = data.terraform_remote_state.projects_nonproduction.outputs.machine_learning_project_number
+  non_production_project_id     = data.terraform_remote_state.projects_nonproduction.outputs.machine_learning_project_id
+  production_project_number     = data.terraform_remote_state.projects_production.outputs.machine_learning_project_number
+  production_project_id         = data.terraform_remote_state.projects_production.outputs.machine_learning_project_id
+  env_log_bucket                = data.terraform_remote_state.environments_env.outputs.env_log_bucket_name
+  env_keyrings                  = data.terraform_remote_state.environments_env.outputs.key_rings
+  common_artifacts_project_id   = data.terraform_remote_state.projects_shared.outputs.common_artifacts_project_id
+}
+
+data "terraform_remote_state" "environments_env" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.seed_state_bucket
+    prefix = "terraform/environments/${local.env}"
+  }
 }
 
 data "terraform_remote_state" "projects_env" {
@@ -36,5 +52,23 @@ data "terraform_remote_state" "projects_shared" {
   config = {
     bucket = var.remote_state_bucket
     prefix = "terraform/projects/${local.business_unit}/shared"
+  }
+}
+
+data "terraform_remote_state" "projects_production" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/projects/${local.business_unit}/production"
+  }
+}
+
+data "terraform_remote_state" "projects_nonproduction" {
+  backend = "gcs"
+
+  config = {
+    bucket = var.remote_state_bucket
+    prefix = "terraform/projects/${local.business_unit}/non-production"
   }
 }

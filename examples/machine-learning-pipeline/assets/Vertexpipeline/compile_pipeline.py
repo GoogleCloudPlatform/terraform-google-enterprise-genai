@@ -21,18 +21,18 @@ from kfp.dsl import Input, Output, Model, Metrics, OutputPath
 from typing import NamedTuple
 
 # Replace with your non-prod project ID
-PROJECT_ID = "{project-id}"
+PROJECT_ID = "{PRJ_N_MACHINE_LEARNING_ID}"
 # Replace with your region only if different
 REGION = "us-central1"
-# Repalce with your bucket's uri
-BUCKET_URI = "gs://{bucket-name}"
+# Replace with your bucket's uri
+BUCKET_URI = "gs://{NON_PROD_BUCKET_NAME}"
 
 KFP_COMPONENTS_PATH = "components"
 SRC = "src"
 BUILD = "build"
 # Replace {artifact-project} and {artifact-repository}
 # with your artifact project and repository
-Image = f"us-central1-docker.pkg.dev/{{artifact-project}}/{{artifact-repository}}/vertexpipeline:v2"
+Image = f"us-central1-docker.pkg.dev/{COMMOM_ARTIFACTS_PRJ_ID}/c-publish-artifacts/vertexpipeline:v2"
 
 
 DATA_URL = f'{BUCKET_URI}/data'
@@ -58,6 +58,7 @@ def build_dataflow_args(
     runner: str,
     bq_project: str,
     subnet: str,
+    dataflow_sa: str,
 ) -> list:
     return [
         "--job_name",
@@ -77,6 +78,8 @@ def build_dataflow_args(
         "--no_use_public_ips",
         "--worker_zone",
         "us-central1-c",
+        "--service_account_email",
+        dataflow_sa,
     ]
 # build_dataflow_args = components.create_component_from_func(
 #     build_dataflow_args_fun, base_image='python:3.8-slim')
@@ -550,6 +553,7 @@ def pipeline(
     min_nodes: int = 2,
     max_nodes: int = 4,
     traffic_split: int = 25,
+    dataflow_sa: str = "",
 ):
     from google_cloud_pipeline_components.v1.bigquery import (
         BigqueryQueryJobOp)
@@ -580,7 +584,8 @@ def pipeline(
         bq_table=bq_train_table,
         runner=runner,
         bq_project=project,
-        subnet=dataflow_subnet
+        subnet=dataflow_subnet,
+        dataflow_sa=dataflow_sa,
     ).after(bq_dataset_op)
     dataflow_args_eval = build_dataflow_args(
         job_name=f"{job_name}eval",
@@ -589,7 +594,8 @@ def pipeline(
         bq_table=bq_eval_table,
         runner=runner,
         bq_project=project,
-        subnet=dataflow_subnet
+        subnet=dataflow_subnet,
+        dataflow_sa=dataflow_sa,
     ).after(bq_dataset_op)
 
     # run dataflow job

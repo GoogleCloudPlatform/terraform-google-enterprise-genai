@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+}
 
 module "base_env" {
   source = "../../modules/base_env"
 
-  env              = local.env
-  environment_code = local.environment_code
-  business_code    = local.business_code
-  project_id       = local.machine_learning_project_id
+  env                           = local.env
+  environment_code              = local.environment_code
+  business_code                 = local.business_code
+  non_production_project_id     = local.non_production_project_id
+  non_production_project_number = local.non_production_project_number
+  production_project_id         = local.production_project_id
+  production_project_number     = local.production_project_number
+  project_id                    = local.machine_learning_project_id
 
   kms_keys = local.machine_learning_kms_keys
 
@@ -50,8 +59,11 @@ module "base_env" {
   metadata_name = "metadata-store-${local.env}"
 
   // Bucket
-  bucket_name = "ml-storage-gvdf"
+  bucket_name = "ml-storage-${random_string.suffix.result}"
 
   // TensorBoard
   tensorboard_name = "ml-tensorboard-${local.env}"
+
+  log_bucket = local.env_log_bucket
+  keyring    = one(local.region_kms_keyring)
 }

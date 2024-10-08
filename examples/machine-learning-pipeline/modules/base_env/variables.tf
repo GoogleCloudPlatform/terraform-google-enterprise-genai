@@ -18,6 +18,16 @@
 #     Global Inputs    #
 ########################
 
+variable "log_bucket" {
+  description = "Log Bucket to be used."
+  type        = string
+}
+
+variable "keyring" {
+  description = "Keyring to be used."
+  type        = string
+}
+
 variable "env" {
   description = "Environment name. (ex. production)"
   type        = string
@@ -36,6 +46,26 @@ variable "business_code" {
 
 variable "project_id" {
   description = "Environments Machine Learning Project ID"
+  type        = string
+}
+
+variable "non_production_project_number" {
+  description = "Non-production Machine Learning Project Number"
+  type        = string
+}
+
+variable "non_production_project_id" {
+  description = "Non-production Machine Learning Project ID"
+  type        = string
+}
+
+variable "production_project_number" {
+  description = "Production Machine Learning Project Number"
+  type        = string
+}
+
+variable "production_project_id" {
+  description = "Production Machine Learning Project ID"
   type        = string
 }
 
@@ -216,7 +246,7 @@ variable "big_query_delete_contents_on_destroy" {
 variable "metadata_name" {
   type        = string
   description = "The name of the metadata store instance"
-  default     = null
+  default     = "default"
 }
 
 ########################

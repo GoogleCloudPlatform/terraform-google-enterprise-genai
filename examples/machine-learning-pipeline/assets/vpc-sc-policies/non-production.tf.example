@@ -1,0 +1,222 @@
+ingress_policies = [
+  // users
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "sources" = {
+        "access_level" = "REPLACE_WITH_ACCESS_LEVEL"
+      }
+    },
+    "to" = {
+      "resources" = [
+        "projects/REPLACE_WITH_SHARED_RESTRICTED_VPC_PROJECT_NUMBER",
+        "projects/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER",
+        "projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER",
+      ]
+      "operations" = {
+        "compute.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "dns.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "dataproc.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "logging.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "cloudkms.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "iam.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "cloudresourcemanager.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "pubsub.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "secretmanager.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "aiplatform.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "composer.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "cloudbuild.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "bigquery.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+]
+
+egress_policies = [
+  // notebooks
+  {
+    "from" = {
+      "identity_type" = ""
+      "identities" = [
+        "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-notebooks.iam.gserviceaccount.com",
+        "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@compute-system.iam.gserviceaccount.com",
+        "serviceAccount:REPLACE_WITH_ENV_ML_PROJECT_NUMBER-compute@developer.gserviceaccount.com",
+        "serviceAccount:cloud-aiplatform-api-robot-prod@system.gserviceaccount.com",
+      ]
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER"]
+      "operations" = {
+        "compute.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "cloudkms.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER"]
+      "operations" = {
+        "artifactregistry.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "cloudbuild.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_ENV_ML_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_PROD_ML_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_DEV_LOG_PROJECT_NUMBER",
+                    "projects/REPLACE_WITH_DEV_ML_PROJECT_NUMBER",
+                    ]
+      "operations" = {
+        "aiplatform.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "bigquery.googleapis.com" = {
+          "methods" = ["*"]
+        }
+        "logging.googleapis.com" = {
+          methods = ["*"]
+        }
+        "cloudbuild.googleapis.com" = {
+          methods = ["*"]
+      }
+    }
+    }
+  },
+  {
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@gcp-sa-aiplatform-cc.iam.gserviceaccount.com",
+    ]
+  },
+  "to" = {
+    "resources" = ["projects/REPLACE_WITH_ARTIFACTS_PROJECT_NUMBER"]
+    "operations" = {
+      "artifactregistry.googleapis.com" = {
+        "methods" = ["*"]
+        }
+      }
+    }
+  },
+// DataFlow
+  {
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:service-REPLACE_WITH_ENV_ML_PROJECT_NUMBER@dataflow-service-producer-prod.iam.gserviceaccount.com",
+    ]
+  },
+  "to" = {
+    "resources" = ["projects/REPLACE_WITH_DEV_SHARED_RESTRICTED_VPC_PROJECT_NUMBER"]
+    "operations" = {
+      "compute.googleapis.com" = {
+        "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+  "from" = {
+    "identity_type" = ""
+    "identities" = [
+      "serviceAccount:REPLACE_WITH_ENV_ML_PROJECT_NUMBER-compute@developer.gserviceaccount.com",
+      "serviceAccount:service-REPLACE_WITH_DEV_ML_PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com",
+    ]
+  },
+  "to" = {
+    "resources" = ["projects/REPLACE_WITH_PROD_ML_PROJECT_NUMBER"]
+    "operations" = {
+      "aiplatform.googleapis.com" = {
+        "methods" = ["*"]
+      },
+      "storage.googleapis.com" = {
+        "methods" = ["*"]
+      },
+      "bigquery.googleapis.com" = {
+        "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_ENV_KMS_PROJECT_NUMBER"]
+      "operations" = {
+        "cloudkms.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+  {
+    "from" = {
+      "identity_type" = "ANY_IDENTITY"
+      "identities"    = []
+    },
+    "to" = {
+      "resources" = ["projects/REPLACE_WITH_LOGGING_PROJECT_NUMBER"]
+      "operations" = {
+        "storage.googleapis.com" = {
+          "methods" = ["*"]
+        }
+      }
+    }
+  },
+]

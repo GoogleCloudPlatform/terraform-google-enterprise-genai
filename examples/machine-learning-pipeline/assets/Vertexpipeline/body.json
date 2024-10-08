@@ -1,0 +1,18 @@
+{
+    "instances": [
+        {
+            "features/gender": "Female",
+            "features/workclass": "Private",
+            "features/occupation": "Tech-support",
+            "features/marital_status": "Married-civ-spouse",
+            "features/race": "White",
+            "features/capital_gain": 0,
+            "features/education": "9th",
+            "features/age": 33,
+            "features/hours_per_week": 40,
+            "features/relationship": "Wife",
+            "features/native_country": "Canada",
+            "features/capital_loss": 0
+        }
+    ]
+}

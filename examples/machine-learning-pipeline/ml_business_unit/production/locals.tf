@@ -15,9 +15,10 @@
  */
 
 locals {
-  business_unit    = "ml_business_unit"
-  business_code    = "ml"
-  env              = "production"
-  environment_code = "p"
+  business_unit      = "ml_business_unit"
+  business_code      = "ml"
+  env                = "production"
+  environment_code   = "p"
+  region_kms_keyring = [for i in local.env_keyrings : i if split("/", i)[3] == var.instance_region]
 }
 

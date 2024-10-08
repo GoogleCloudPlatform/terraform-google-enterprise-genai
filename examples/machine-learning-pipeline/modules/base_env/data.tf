@@ -18,20 +18,12 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-data "google_projects" "non-production" {
-  filter = "labels.application_name:machine-learning labels.env_code:n"
-}
-
-data "google_projects" "production" {
-  filter = "labels.application_name:machine-learning labels.env_code:p"
-}
-
 data "google_service_account" "non-production" {
-  project    = data.google_projects.non-production.projects.0.project_id
-  account_id = "${data.google_projects.non-production.projects.0.number}-compute@developer.gserviceaccount.com"
+  project    = var.non_production_project_id
+  account_id = "${var.non_production_project_number}-compute@developer.gserviceaccount.com"
 }
 
 data "google_service_account" "production" {
-  project    = data.google_projects.production.projects.0.project_id
-  account_id = "${data.google_projects.production.projects.0.number}-compute@developer.gserviceaccount.com"
+  project    = var.production_project_id
+  account_id = "${var.production_project_number}-compute@developer.gserviceaccount.com"
 }

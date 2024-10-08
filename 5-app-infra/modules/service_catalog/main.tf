@@ -57,7 +57,6 @@ resource "google_storage_bucket_iam_member" "bucket_role" {
   role   = "roles/storage.admin"
   member = google_service_account.trigger_sa.member
 }
-
 resource "google_sourcerepo_repository_iam_member" "read" {
   project    = var.project_id
   repository = var.name

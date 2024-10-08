@@ -21,7 +21,7 @@ The following table outlines which of the suggested controls for Vertex Generati
 |------|-------------|------|---------|:--------:|
 | airflow\_config\_overrides | Airflow configuration properties to override. Property keys contain the section and property names, separated by a hyphen, for example "core-dags\_are\_paused\_at\_creation". | `map(string)` | `{}` | no |
 | env\_variables | Additional environment variables to provide to the Apache Airflow scheduler, worker, and webserver processes. Environment variable names must match the regular expression [a-zA-Z\_][a-zA-Z0-9\_]*. They cannot specify Apache Airflow software configuration overrides (they cannot match the regular expression AIRFLOW\_\_[A-Z0-9\_]+\_\_[A-Z0-9\_]+), and they cannot match any of the following reserved names: [AIRFLOW\_HOME,C\_FORCE\_ROOT,CONTAINER\_NAME,DAGS\_FOLDER,GCP\_PROJECT,GCS\_BUCKET,GKE\_CLUSTER\_NAME,SQL\_DATABASE,SQL\_INSTANCE,SQL\_PASSWORD,SQL\_PROJECT,SQL\_REGION,SQL\_USER]. | `map(any)` | `{}` | no |
-| github\_app\_installation\_id | The app installation ID that was created when installing Google Cloud Build in GitHub: https://github.com/apps/google-cloud-build. | `number` | n/a | yes |
+| github\_app\_installation\_id | The app installation ID that was created when installing Google Cloud Build in GitHub: https://github.com/apps/google-cloud-build. | `number` | `null` | no |
 | github\_name\_prefix | A name for your GitHub connection to Cloud Build. | `string` | `"github-modules"` | no |
 | github\_remote\_uri | URL of your GitHub repo. | `string` | n/a | yes |
 | github\_secret\_name | Name of the GitHub secret to extract GitHub token info. | `string` | `"github-api-token"` | no |

@@ -192,6 +192,8 @@ If required, run `terraform output cloudbuild_project_id` in the `0-bootstrap` f
    ```bash
    git checkout -b production
    git push origin production
+
+   cd ..
    ```
 
 1. Proceed to the [2-environments](../2-environments/README.md) step.
