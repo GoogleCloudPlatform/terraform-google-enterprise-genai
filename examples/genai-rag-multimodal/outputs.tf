@@ -25,8 +25,8 @@ output "host_vpc_project_id" {
 }
 
 output "host_vpc_network" {
-  description = "This is the Self-link of the Host VPC network"
-  value       = google_workbench_instance.instance.gce_setup[0].network_interfaces[0].network
+  description = "This is the self-link of the Host VPC network, without the URL prefix (i.e. https://)"
+  value       = var.network
 }
 
 output "notebook_project_id" {
