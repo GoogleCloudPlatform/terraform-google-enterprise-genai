@@ -98,14 +98,6 @@ output "scc_notification_name" {
   value = "test-scc-notif-${random_string.suffix.result}"
 }
 
-output "enable_hub_and_spoke" {
-  value = var.example_foundations_mode == "HubAndSpoke" ? "true" : "false"
-}
-
-output "enable_hub_and_spoke_transitivity" {
-  value = var.example_foundations_mode == "HubAndSpoke" ? "true" : "false"
-}
-
 output "create_access_context_manager_access_policy" {
   value = false
 }

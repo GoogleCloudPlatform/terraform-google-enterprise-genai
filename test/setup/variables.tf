@@ -30,10 +30,6 @@ variable "group_email" {
   description = "The group that will be assigned permissions for testing."
 }
 
-variable "example_foundations_mode" {
-  description = "The example foundations mode used for testing."
-}
-
 variable "domain_to_allow" {
   description = "The test domain_to_allow allow users from in IAM."
 }
