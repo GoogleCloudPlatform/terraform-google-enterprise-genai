@@ -39,7 +39,9 @@ func TestOrg(t *testing.T) {
 	vars := map[string]interface{}{
 		"remote_state_bucket":              backend_bucket,
 		"log_export_storage_force_destroy": "true",
-		"cai_monitoring_kms_force_destroy": "true",
+		"folder_deletion_protection":       false,
+		"project_deletion_policy":          "DELETE",
+		"enable_scc_resources_in_terraform": true,
 	}
 
 	backendConfig := map[string]interface{}{
