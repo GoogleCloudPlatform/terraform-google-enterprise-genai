@@ -27,14 +27,6 @@ import (
 	"github.com/terraform-google-modules/terraform-google-enterprise-genai/test/integration/testutils"
 )
 
-func getNetworkMode(t *testing.T) string {
-	mode := utils.ValFromEnv(t, "TF_VAR_example_foundations_mode")
-	if mode == "HubAndSpoke" {
-		return "-spoke"
-	}
-	return ""
-}
-
 func TestNetworks(t *testing.T) {
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -42,7 +34,6 @@ func TestNetworks(t *testing.T) {
 	)
 
 	orgID := terraform.OutputMap(t, bootstrap.GetTFOptions(), "common_config")["org_id"]
-	networkMode := getNetworkMode(t)
 	policyID := testutils.GetOrgACMPolicyID(t, orgID)
 	require.NotEmpty(t, policyID, "Access Context Manager Policy ID must be configured in the organization for the test to proceed.")
 
@@ -111,15 +102,8 @@ func TestNetworks(t *testing.T) {
 				"perimeter_additional_members":     []string{},
 			}
 
-			var tfdDir string
-			if networkMode == "" {
-				tfdDir = "../../../3-networks-dual-svpc/envs/%s"
-			} else {
-				tfdDir = "../../../3-networks-hub-and-spoke/envs/%s"
-			}
-
 			networks := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(fmt.Sprintf(tfdDir, envName)),
+				tft.WithTFDir(fmt.Sprintf("../../../3-networks-dual-svpc/envs/%s", envName)),
 				tft.WithVars(vars),
 				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 1, 2*time.Minute),
 				tft.WithPolicyLibraryPath("/workspace/policy-library", bootstrap.GetTFSetupStringOutput("project_id")),

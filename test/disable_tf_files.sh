@@ -18,68 +18,47 @@ set -e
 
 function networks(){
 
-    # shellcheck disable=SC2154
-    if [ "$TF_VAR_example_foundations_mode" == "HubAndSpoke" ]; then
-        network_dir="3-networks-hub-and-spoke"
-    else
-        network_dir="3-networks-dual-svpc"
-    fi
-
     # disable access_context.auto.tfvars in main module
-    mv $network_dir/envs/development/access_context.auto.tfvars  $network_dir/envs/development/access_context.auto.tfvars.disabled
-    mv $network_dir/envs/non-production/access_context.auto.tfvars  $network_dir/envs/non-production/access_context.auto.tfvars.disabled
-    mv $network_dir/envs/production/access_context.auto.tfvars  $network_dir/envs/production/access_context.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/development/access_context.auto.tfvars  3-networks-dual-svpc/envs/development/access_context.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/non-production/access_context.auto.tfvars  3-networks-dual-svpc/envs/non-production/access_context.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/production/access_context.auto.tfvars  3-networks-dual-svpc/envs/production/access_context.auto.tfvars.disabled
 
     # disable common.auto.tfvars in main module
-    mv $network_dir/envs/development/common.auto.tfvars $network_dir/envs/development/common.auto.tfvars.disabled
-    mv $network_dir/envs/non-production/common.auto.tfvars  $network_dir/envs/non-production/common.auto.tfvars.disabled
-    mv $network_dir/envs/production/common.auto.tfvars  $network_dir/envs/production/common.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/development/common.auto.tfvars 3-networks-dual-svpc/envs/development/common.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/non-production/common.auto.tfvars  3-networks-dual-svpc/envs/non-production/common.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/production/common.auto.tfvars  3-networks-dual-svpc/envs/production/common.auto.tfvars.disabled
 }
 
 function shared(){
 
-    if [ "$TF_VAR_example_foundations_mode" == "HubAndSpoke" ]; then
-        network_dir="3-networks-hub-and-spoke"
-    else
-        network_dir="3-networks-dual-svpc"
-    fi
-
     # disable access_context.auto.tfvars in main module
-    mv $network_dir/envs/shared/access_context.auto.tfvars $network_dir/envs/shared/access_context.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/shared/access_context.auto.tfvars 3-networks-dual-svpc/envs/shared/access_context.auto.tfvars.disabled
 
     # disable common.auto.tfvars in main module
-    mv $network_dir/envs/shared/common.auto.tfvars  $network_dir/envs/shared/common.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/shared/common.auto.tfvars  3-networks-dual-svpc/envs/shared/common.auto.tfvars.disabled
 
     # disable shared.auto.tfvars in main module
-    mv $network_dir/envs/shared/shared.auto.tfvars  $network_dir/envs/shared/shared.auto.tfvars.disabled
+    mv 3-networks-dual-svpc/envs/shared/shared.auto.tfvars  3-networks-dual-svpc/envs/shared/shared.auto.tfvars.disabled
 }
 
 function projectsshared(){
     # disable shared.auto.tfvars
-    mv 4-projects/business_unit_1/shared/shared.auto.tfvars  4-projects/business_unit_1/shared/shared.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/shared/shared.auto.tfvars  4-projects/business_unit_2/shared/shared.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/shared/shared.auto.tfvars  4-projects/ml_business_unit/shared/shared.auto.tfvars.disabled
 
     # disable common.auto.tfvars
-    mv 4-projects/business_unit_1/shared/common.auto.tfvars 4-projects/business_unit_1/shared/common.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/shared/common.auto.tfvars 4-projects/business_unit_2/shared/common.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/shared/common.auto.tfvars  4-projects/ml_business_unit/shared/common.auto.tfvars.disabled
 }
 
 function projects(){
     # disable ENVS.auto.tfvars in main module
-    mv 4-projects/business_unit_1/development/development.auto.tfvars 4-projects/business_unit_1/development/development.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/development/development.auto.tfvars 4-projects/business_unit_2/development/development.auto.tfvars.disabled
-    mv 4-projects/business_unit_1/non-production/non-production.auto.tfvars  4-projects/business_unit_1/non-production/non-production.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/non-production/non-production.auto.tfvars  4-projects/business_unit_2/non-production/non-production.auto.tfvars.disabled
-    mv 4-projects/business_unit_1/production/production.auto.tfvars 4-projects/business_unit_1/production/production.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/production/production.auto.tfvars 4-projects/business_unit_2/production/production.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/development/development.auto.tfvars 4-projects/ml_business_unit/development/development.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/non-production/non-production.auto.tfvars  4-projects/ml_business_unit/non-production/non-production.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/production/production.auto.tfvars 4-projects/ml_business_unit/production/production.auto.tfvars.disabled
 
     # disable common.auto.tfvars in main module
-    mv 4-projects/business_unit_1/development/common.auto.tfvars 4-projects/business_unit_1/development/common.auto.tfvars.disabled
-    mv 4-projects/business_unit_1/non-production/common.auto.tfvars  4-projects/business_unit_1/non-production/common.auto.tfvars.disabled
-    mv 4-projects/business_unit_1/production/common.auto.tfvars 4-projects/business_unit_1/production/common.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/development/common.auto.tfvars 4-projects/business_unit_2/development/common.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/non-production/common.auto.tfvars  4-projects/business_unit_2/non-production/common.auto.tfvars.disabled
-    mv 4-projects/business_unit_2/production/common.auto.tfvars 4-projects/business_unit_2/production/common.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/development/common.auto.tfvars 4-projects/ml_business_unit/development/common.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/non-production/common.auto.tfvars  4-projects/ml_business_unit/non-production/common.auto.tfvars.disabled
+    mv 4-projects/ml_business_unit/production/common.auto.tfvars 4-projects/ml_business_unit/production/common.auto.tfvars.disabled
 }
 
 function appinfra(){

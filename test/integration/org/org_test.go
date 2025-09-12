@@ -15,11 +15,14 @@
 package org
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/terraform-google-modules/terraform-google-enterprise-genai/test/integration/testutils"
@@ -46,6 +49,18 @@ func TestOrg(t *testing.T) {
 	// Configure impersonation for test execution
 	terraformSA := bootstrap.GetStringOutput("organization_step_terraform_service_account_email")
 	utils.SetEnv(t, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", terraformSA)
+
+	// Create Access Context Manager Policy ID if needed
+	orgID := terraform.OutputMap(t, bootstrap.GetTFOptions(), "common_config")["org_id"]
+	policyID := testutils.GetOrgACMPolicyID(t, orgID)
+
+	if policyID == "" {
+		_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title %s --impersonate-service-account %s", orgID, "defaultpolicy", terraformSA))
+		// ignore creation error and proceed with the test
+		if err != nil {
+			fmt.Printf("Ignore error in creation of access-context-manager policy ID for organization %s. Error: [%s]", orgID, err.Error())
+		}
+	}
 
 	org := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../1-org/envs/shared"),
