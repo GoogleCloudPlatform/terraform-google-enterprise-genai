@@ -163,7 +163,6 @@ tags:
 - 'integration'
 options:
   env:
-  - 'TF_VAR_example_foundations_mode=$_EXAMPLE_FOUNDATIONS_TEST_MODE'
   - 'TF_VAR_org_id=$_ORG_ID'
   - 'TF_VAR_group_email=test-gcp-org-admins@test.blueprints.joonix.net'
   - 'TF_VAR_create_access_context_manager_access_policy=false'
