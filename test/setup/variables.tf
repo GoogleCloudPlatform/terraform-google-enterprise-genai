@@ -33,3 +33,7 @@ variable "group_email" {
 variable "domain_to_allow" {
   description = "The test domain_to_allow allow users from in IAM."
 }
+
+variable "domain" {
+  description = "The DNS name from instance for testing."
+}

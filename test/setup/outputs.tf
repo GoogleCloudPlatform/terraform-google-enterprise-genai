@@ -106,3 +106,7 @@ output "create_unique_tag_key" {
   description = "Set to true to avoid tag key name colision during integrated tests. Tag keys are organization-wide unique names."
   value       = true
 }
+
+output "domain" {
+  value = var.domain
+}
