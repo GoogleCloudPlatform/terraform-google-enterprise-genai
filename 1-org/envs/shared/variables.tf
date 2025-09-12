@@ -40,6 +40,12 @@ variable "scc_notification_name" {
   type        = string
 }
 
+variable "enable_scc_resources_in_terraform" {
+  description = "Create Security Command Center resources in Terraform. If your organization has newly enabled any preview features for SCC and get an error related to the v2 API, you must set this variable to false because the v2 API does not yet support Terraform resources. See [issue 1189](https://github.com/terraform-google-modules/terraform-example-foundation/issues/1189) for context."
+  type        = bool
+  default     = false
+}
+
 variable "create_access_context_manager_access_policy" {
   description = "Whether to create access context manager access policy."
   type        = bool
