@@ -37,3 +37,11 @@ variable "domain_to_allow" {
 variable "domain" {
   description = "The DNS name from instance for testing."
 }
+
+variable "cloud_source_artifacts_repo_name" {
+  description = "The Artifacts cloud source repository name for testing."
+}
+
+variable "cloud_source_service_catalog_repo_name" {
+  description = "The Service Catalog cloud source repository name for testing."
+}

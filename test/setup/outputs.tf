@@ -110,3 +110,11 @@ output "create_unique_tag_key" {
 output "domain" {
   value = var.domain
 }
+
+output "cloud_source_artifacts_repo_name" {
+  value = var.cloud_source_artifacts_repo_name
+}
+
+output "cloud_source_service_catalog_repo_name" {
+  value = var.cloud_source_service_catalog_repo_name
+}
