@@ -27,14 +27,6 @@ import (
 	"github.com/terraform-google-modules/terraform-google-enterprise-genai/test/integration/testutils"
 )
 
-func getNetworkMode(t *testing.T) string {
-	mode := utils.ValFromEnv(t, "TF_VAR_example_foundations_mode")
-	if mode == "HubAndSpoke" {
-		return "-spoke"
-	}
-	return ""
-}
-
 func TestProjects(t *testing.T) {
 
 	bootstrap := tft.NewTFBlueprintTest(t,
@@ -42,7 +34,6 @@ func TestProjects(t *testing.T) {
 	)
 
 	orgID := terraform.OutputMap(t, bootstrap.GetTFOptions(), "common_config")["org_id"]
-	networkMode := getNetworkMode(t)
 	policyID := testutils.GetOrgACMPolicyID(t, orgID)
 	require.NotEmpty(t, policyID, "Access Context Manager Policy ID must be configured in the organization for the test to proceed.")
 
@@ -64,45 +55,25 @@ func TestProjects(t *testing.T) {
 		restrictedNetwork string
 	}{
 		{
-			name:              "bu1_development",
-			repo:              "bu1-example-app",
-			baseNetwork:       fmt.Sprintf("vpc-d-shared-base%s", networkMode),
-			restrictedNetwork: fmt.Sprintf("vpc-d-shared-restricted%s", networkMode),
+			name:              "ml_development",
+			repo:              "ml-machine-learning",
+			baseDir:           "../../../4-projects/ml_business_unit/%s",
+			baseNetwork:       "vpc-d-shared-base",
+			restrictedNetwork: "vpc-d-shared-restricted",
 		},
 		{
-			name:              "bu1_non-production",
-			repo:              "bu1-example-app",
-			baseDir:           "../../../4-projects/business_unit_1/%s",
-			baseNetwork:       fmt.Sprintf("vpc-n-shared-base%s", networkMode),
-			restrictedNetwork: fmt.Sprintf("vpc-n-shared-restricted%s", networkMode),
+			name:              "ml_non-production",
+			repo:              "ml-machine-learning",
+			baseDir:           "../../../4-projects/ml_business_unit/%s",
+			baseNetwork:       "vpc-n-shared-base",
+			restrictedNetwork: "vpc-n-shared-restricted",
 		},
 		{
-			name:              "bu1_production",
-			repo:              "bu1-example-app",
-			baseDir:           "../../../4-projects/business_unit_1/%s",
-			baseNetwork:       fmt.Sprintf("vpc-p-shared-base%s", networkMode),
-			restrictedNetwork: fmt.Sprintf("vpc-p-shared-restricted%s", networkMode),
-		},
-		{
-			name:              "bu2_development",
-			repo:              "bu2-example-app",
-			baseDir:           "../../../4-projects/business_unit_2/%s",
-			baseNetwork:       fmt.Sprintf("vpc-d-shared-base%s", networkMode),
-			restrictedNetwork: fmt.Sprintf("vpc-d-shared-restricted%s", networkMode),
-		},
-		{
-			name:              "bu2_non-production",
-			repo:              "bu2-example-app",
-			baseDir:           "../../../4-projects/business_unit_2/%s",
-			baseNetwork:       fmt.Sprintf("vpc-n-shared-base%s", networkMode),
-			restrictedNetwork: fmt.Sprintf("vpc-n-shared-restricted%s", networkMode),
-		},
-		{
-			name:              "bu2_production",
-			repo:              "bu2-example-app",
-			baseDir:           "../../../4-projects/business_unit_2/%s",
-			baseNetwork:       fmt.Sprintf("vpc-p-shared-base%s", networkMode),
-			restrictedNetwork: fmt.Sprintf("vpc-p-shared-restricted%s", networkMode),
+			name:              "ml_production",
+			repo:              "ml-machine-learning",
+			baseDir:           "../../../4-projects/ml_business_unit/%s",
+			baseNetwork:       "vpc-p-shared-base",
+			restrictedNetwork: "vpc-p-shared-restricted",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -111,6 +82,7 @@ func TestProjects(t *testing.T) {
 
 			vars := map[string]interface{}{
 				"remote_state_bucket": backend_bucket,
+				"env":                 env,
 			}
 
 			projects := tft.NewTFBlueprintTest(t,
@@ -122,6 +94,5 @@ func TestProjects(t *testing.T) {
 			)
 			projects.Test()
 		})
-
 	}
 }
