@@ -28,42 +28,43 @@ func TestAppInfra(t *testing.T) {
 	bootstrap := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../0-bootstrap"),
 	)
+
+	org := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../1-org/envs/shared"))
+
 	projects_backend_bucket := bootstrap.GetStringOutput("projects_gcs_bucket_tfstate")
+	log_bucket := org.GetStringOutput("logs_export_storage_bucket_name")
+
 	vars := map[string]interface{}{
 		"remote_state_bucket": projects_backend_bucket,
 	}
 
 	shared := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../4-projects/business_unit_1/shared"),
+		tft.WithTFDir("../../../4-projects/ml_business_unit/shared"),
 	)
 
-	// Configure impersonation for test execution
-	terraformSA := terraform.OutputMap(t, shared.GetTFOptions(), "terraform_service_accounts")["bu1-example-app"]
-	backend_bucket := terraform.OutputMap(t, shared.GetTFOptions(), "state_buckets")["bu1-example-app"]
-	utils.SetEnv(t, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", terraformSA)
-	backendConfig := map[string]interface{}{
-		"bucket": backend_bucket,
-	}
-
-	for _, envName := range []string{
-		"development",
-		"non-production",
-		"production",
+	for _, projectName := range []string{
+		"artifact-publish",
+		"service-catalog",
 	} {
-		t.Run(envName, func(t *testing.T) {
+		if projectName == "service-catalog" {
+			vars["log_bucket"] = log_bucket
+		}
 
-			projects := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(fmt.Sprintf("../../../4-projects/business_unit_1/%s", envName)),
-			)
+		t.Run(projectName, func(t *testing.T) {
+			terraformSA := terraform.OutputMap(t, shared.GetTFOptions(), "terraform_service_accounts")[fmt.Sprintf("ml-%s", projectName)]
+			backend_bucket := terraform.OutputMap(t, shared.GetTFOptions(), "state_buckets")[fmt.Sprintf("ml-%s", projectName)]
+			utils.SetEnv(t, "GOOGLE_IMPERSONATE_SERVICE_ACCOUNT", terraformSA)
+			backendConfig := map[string]interface{}{
+				"bucket": backend_bucket,
+			}
 
 			appInfra := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(fmt.Sprintf("../../../5-app-infra/business_unit_1/%s", envName)),
+				tft.WithTFDir(fmt.Sprintf("../../../5-app-infra/projects/%s/ml_business_unit/shared/", projectName)),
 				tft.WithBackendConfig(backendConfig),
-				tft.WithPolicyLibraryPath("/workspace/policy-library", projects.GetStringOutput("base_shared_vpc_project")),
 				tft.WithVars(vars),
 			)
 			appInfra.Test()
 		})
-
 	}
 }

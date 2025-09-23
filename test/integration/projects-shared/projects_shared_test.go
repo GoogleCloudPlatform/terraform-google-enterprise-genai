@@ -46,20 +46,26 @@ func TestProjectsShared(t *testing.T) {
 		tfDir string
 	}{
 		{
-			name:  "bu1",
-			repo:  "bu1-example-app",
-			tfDir: "../../../4-projects/business_unit_1/shared",
+			name:  "ml",
+			repo:  "ml-artifact-publish",
+			tfDir: "../../../4-projects/ml_business_unit/shared",
 		},
 		{
-			name:  "bu2",
-			repo:  "bu2-example-app",
-			tfDir: "../../../4-projects/business_unit_2/shared",
+			name:  "ml",
+			repo:  "ml-service-catalog",
+			tfDir: "../../../4-projects/ml_business_unit/shared",
+		},
+		{
+			name:  "ml",
+			repo:  "ml-machine-learning",
+			tfDir: "../../../4-projects/ml_business_unit/shared",
 		},
 	} {
 		t.Run(tts.name, func(t *testing.T) {
 
 			sharedVars := map[string]interface{}{
 				"remote_state_bucket": backend_bucket,
+				"prevent_destroy":     false,
 			}
 
 			shared := tft.NewTFBlueprintTest(t,
