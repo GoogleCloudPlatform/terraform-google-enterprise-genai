@@ -41,6 +41,7 @@ func TestEnvs(t *testing.T) {
 	vars := map[string]interface{}{
 		"remote_state_bucket":        backend_bucket,
 		"monitoring_workspace_users": monitoringWorkspaceUsers,
+		"kms_prevent_destroy":        false,
 	}
 
 	backendConfig := map[string]interface{}{
