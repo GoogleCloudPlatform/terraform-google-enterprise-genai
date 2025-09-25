@@ -20,6 +20,7 @@
 | gcp\_user | Users to grant specific roles in the Organization.<br>  org\_admin: Identity that has organization administrator permissions.<br>  billing\_creator: Identity that can create billing accounts.<br>  billing\_admin: Identity that has billing administrator permissions. | <pre>object({<br>    org_admin       = optional(string, null)<br>    billing_creator = optional(string, null)<br>    billing_admin   = optional(string, null)<br>  })</pre> | `{}` | no |
 | keyring\_name | Name to be used for KMS Keyring | `string` | `"sample-keyring"` | no |
 | keyring\_regions | Regions to create keyrings in | `list(string)` | <pre>[<br>  "us-central1",<br>  "us-east4"<br>]</pre> | no |
+| kms\_prevent\_destroy | If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
 | log\_export\_storage\_force\_destroy | (Optional) If set to true, delete all contents when destroying the resource; otherwise, destroying the resource will fail if contents are present. | `bool` | `false` | no |
 | log\_export\_storage\_location | The location of the storage bucket used to export logs. | `string` | `"US"` | no |
 | log\_export\_storage\_retention\_policy | Configuration of the bucket's data retention policy for how long objects in the bucket should be retained. | <pre>object({<br>    is_locked             = bool<br>    retention_period_days = number<br>  })</pre> | `null` | no |
