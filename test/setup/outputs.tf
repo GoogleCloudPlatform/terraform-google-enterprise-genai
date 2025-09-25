@@ -118,3 +118,7 @@ output "cloud_source_artifacts_repo_name" {
 output "cloud_source_service_catalog_repo_name" {
   value = var.cloud_source_service_catalog_repo_name
 }
+
+output "instance_region" {
+  value = var.instance_region
+}
