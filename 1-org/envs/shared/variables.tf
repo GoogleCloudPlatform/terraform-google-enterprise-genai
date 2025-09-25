@@ -258,3 +258,9 @@ variable "keyring_regions" {
     "us-east4"
   ]
 }
+
+variable "kms_prevent_destroy" {
+  description = "If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  type        = bool
+  default     = true
+}
