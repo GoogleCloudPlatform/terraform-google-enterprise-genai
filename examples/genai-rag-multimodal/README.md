@@ -127,7 +127,7 @@ After ensuring all requirements are satisfied you can follow one of the two depl
     ```bash
     echo "serviceAccount:$SERVICE_ACCOUNT"
     ```
-  
+
   - Add "serviceAccount:<YOUR_SA_HERE>" to `perimeter_additional_members` field in `common.auto.tfvars` at `gcp-networks` repository on the development branch.
 
   - Commit and push the result by running the commands below:
