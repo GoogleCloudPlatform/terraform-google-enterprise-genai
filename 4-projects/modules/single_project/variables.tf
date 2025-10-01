@@ -45,7 +45,7 @@ variable "billing_code" {
 }
 
 variable "primary_contact" {
-  description = "The primary email contact for the project"
+  description = "The primary email contact for the project."
   type        = string
 }
 
