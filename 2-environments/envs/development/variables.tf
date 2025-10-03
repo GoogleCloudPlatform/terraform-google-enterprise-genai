@@ -29,3 +29,9 @@ variable "tfc_org_name" {
   type        = string
   default     = ""
 }
+
+variable "kms_prevent_destroy" {
+  description = "Wheter to prevent keyring and keys destruction. Must be set to false if the user wants to disable accidental terraform deletions protection."
+  type        = bool
+  default     = true
+}

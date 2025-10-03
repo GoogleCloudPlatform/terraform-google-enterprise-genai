@@ -126,9 +126,13 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestAppInfra --stage verify --verbose --test-dir /workspace/test/integration']
 
-- id: destroy-appinfra
+- id: create-appsource-artifact-registry
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestAppInfra --stage destroy --verbose --test-dir /workspace/test/integration']
+  args: ['/bin/bash', '-c', 'cft test run TestArtifactRegistrySource --stage apply --verbose --test-dir /workspace/test/integration']
+
+- id: create-appsource-service-catalog
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestServiceCatalogSource --stage apply --verbose --test-dir /workspace/test/integration']
 
 - id: destroy-projects
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
@@ -163,7 +167,6 @@ tags:
 - 'integration'
 options:
   env:
-  - 'TF_VAR_example_foundations_mode=$_EXAMPLE_FOUNDATIONS_TEST_MODE'
   - 'TF_VAR_org_id=$_ORG_ID'
   - 'TF_VAR_group_email=test-gcp-org-admins@test.blueprints.joonix.net'
   - 'TF_VAR_create_access_context_manager_access_policy=false'

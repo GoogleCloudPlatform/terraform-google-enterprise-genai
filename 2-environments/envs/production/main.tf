@@ -23,6 +23,8 @@ module "env" {
   remote_state_bucket        = var.remote_state_bucket
   tfc_org_name               = var.tfc_org_name
 
+  kms_prevent_destroy = var.kms_prevent_destroy
+
   assured_workload_configuration = {
     enabled           = false
     location          = "us-central1"

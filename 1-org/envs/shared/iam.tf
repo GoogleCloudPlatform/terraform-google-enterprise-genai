@@ -170,7 +170,7 @@ resource "google_project_iam_member" "audit_bq_data_viewer" {
 }
 
 resource "google_project_iam_member" "scc_admin" {
-  count   = var.gcp_groups.scc_admin != null ? 1 : 0
+  count   = var.gcp_groups.scc_admin != null && var.enable_scc_resources_in_terraform ? 1 : 0
   project = module.scc_notifications.project_id
   role    = "roles/securitycenter.adminEditor"
   member  = "group:${var.gcp_groups.scc_admin}"

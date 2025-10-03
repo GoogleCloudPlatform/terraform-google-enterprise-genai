@@ -22,7 +22,8 @@ module "kms_keyring" {
     "serviceAccount:${local.projects_step_terraform_service_account_email}"
   ]
 
-  project_id      = module.org_kms.project_id
-  keyring_regions = var.keyring_regions
-  keyring_name    = var.keyring_name
+  project_id          = module.org_kms.project_id
+  keyring_regions     = var.keyring_regions
+  keyring_name        = var.keyring_name
+  kms_prevent_destroy = var.kms_prevent_destroy
 }

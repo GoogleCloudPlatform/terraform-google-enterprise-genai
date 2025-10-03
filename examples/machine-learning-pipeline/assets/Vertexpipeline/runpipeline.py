@@ -52,7 +52,7 @@ class vertex_ai_pipeline:
                  # Replace the {PRJ_N_SHARED_RESTRICTED_ID} with your project_id
                  DATAFLOW_SUBNET: str = "https://www.googleapis.com/compute/v1/projects/{PRJ_N_SHARED_RESTRICTED_ID}/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1",
                  JOB_NAME: str = "census-ingest",
-                 # Replace the {PRJ_N_MACHINE_LEARNING_NUMBER} with your prj_n_machine_learning_number 
+                 # Replace the {PRJ_N_MACHINE_LEARNING_NUMBER} with your prj_n_machine_learning_number
                  SERVICE_ACCOUNT: str = "{PRJ_N_MACHINE_LEARNING_NUMBER}-compute@developer.gserviceaccount.com",
                  # Replace the {PRJ_P_MACHINE_LEARNING_NUMBER} with your prj_p_machine_learning_project_number
                  PROD_SERVICE_ACCOUNT: str = "{PRJ_P_MACHINE_LEARNING_NUMBER}-compute@developer.gserviceaccount.com",
