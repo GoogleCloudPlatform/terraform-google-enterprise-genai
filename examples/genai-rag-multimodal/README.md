@@ -424,7 +424,7 @@ You can save some time adjusting the notebook by running the commands below:
 
 | Name | Description |
 |------|-------------|
-| host\_vpc\_network | This is the Self-link of the Host VPC network |
+| host\_vpc\_network | This is the self-link of the Host VPC network, without the URL prefix (i.e. https://) |
 | host\_vpc\_project\_id | This is the Project ID where the Host VPC network is located |
 | notebook\_project\_id | The Project ID where the notebook will be run on |
 | private\_endpoint\_ip\_address | The private IP address of the vector search endpoint |
