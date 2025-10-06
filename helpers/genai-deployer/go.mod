@@ -1,4 +1,4 @@
-module github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer
+module github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer
 
 go 1.20
 
@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.16.1
 	github.com/mitchellh/go-testing-interface v1.14.2-0.20210821155943-2d9075ca8770
 	github.com/stretchr/testify v1.8.2
-	github.com/terraform-google-modules/terraform-google-enterprise-genai/test/integration v0.0.0-20230503230051-e9e2618ef515
+	github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration v0.0.0-20230503230051-e9e2618ef515
 	github.com/tidwall/gjson v1.14.4
 )
 

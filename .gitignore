@@ -70,8 +70,8 @@ test/integration/tmp
 
 credentials.json
 
-helpers/foundation-deployer/foundation-deployer
-helpers/foundation-deployer/.steps.json
+helpers/genai-deployer/genai-deployer
+helpers/genai-deployer/.steps.json
 
 # File to populate env vars used by Docker test runs
 .envrc

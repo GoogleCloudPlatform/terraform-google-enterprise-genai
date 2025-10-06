@@ -21,7 +21,7 @@ import (
 
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/gcp"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/gcp"
 )
 
 const (
