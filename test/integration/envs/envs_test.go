@@ -24,7 +24,7 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration/testutils"
+	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
 )
 
 func TestEnvs(t *testing.T) {

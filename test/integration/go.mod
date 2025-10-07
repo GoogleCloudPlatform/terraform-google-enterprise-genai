@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration
+module github.com/terraform-google-modules/terraform-example-foundation/test/integration
 
 go 1.20
 
