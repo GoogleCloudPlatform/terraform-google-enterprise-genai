@@ -95,7 +95,7 @@ variable "groups" {
   description = "Contain the details of the Groups to be created."
   type = object({
     create_groups   = bool
-    billing_project = string
+    billing_project = optional(string, null)
     required_groups = object({
       group_org_admins           = string
       group_billing_admins       = string
@@ -104,17 +104,16 @@ variable "groups" {
       monitoring_workspace_users = string
     })
     optional_groups = object({
-      gcp_platform_viewer      = string
-      gcp_security_reviewer    = string
-      gcp_network_viewer       = string
-      gcp_scc_admin            = string
-      gcp_global_secrets_admin = string
-      gcp_audit_viewer         = string
+      gcp_platform_viewer      = optional(string, "")
+      gcp_security_reviewer    = optional(string, "")
+      gcp_network_viewer       = optional(string, "")
+      gcp_scc_admin            = optional(string, "")
+      gcp_global_secrets_admin = optional(string, "")
+      gcp_audit_viewer         = optional(string, "")
     })
   })
   default = {
     create_groups   = false
-    billing_project = ""
     required_groups = {
       group_org_admins           = ""
       group_billing_admins       = ""
