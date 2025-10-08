@@ -98,25 +98,25 @@ Im addition to the variables declared in the file `global.tfvars` for configurin
 - Validate the tfvars file. If you configured a `validator_project_id` in the `global.tfvars` file `validate` will do additional checks for the Secure Command Center notification name and for the Tag Key name. For these extra check you need at least the roles *Security Center Notification Configurations Viewer* (`roles/securitycenter.notificationConfigViewer`) and *Tag Viewer* (`roles/resourcemanager.tagViewer`):
 
     ```bash
-    $HOME/go/bin/foundation-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -validate
+    $HOME/go/bin/genai-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -validate
     ```
 
 - Run the helper:
 
     ```bash
-    $HOME/go/bin/foundation-deployer -tfvars_file <PATH TO 'global.tfvars' FILE>
+    $HOME/go/bin/genai-deployer -tfvars_file <PATH TO 'global.tfvars' FILE>
     ```
 
 - To Suppress additional output use:
 
     ```bash
-    $HOME/go/bin/foundation-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -quiet
+    $HOME/go/bin/genai-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -quiet
     ```
 
 - To destroy the deployment run:
 
     ```bash
-    $HOME/go/bin/foundation-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
+    $HOME/go/bin/genai-deployer -tfvars_file <PATH TO 'global.tfvars' FILE> -destroy
     ```
 
 - After deployment:

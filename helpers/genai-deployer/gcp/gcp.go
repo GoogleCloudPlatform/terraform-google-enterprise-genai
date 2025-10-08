@@ -23,7 +23,7 @@ import (
 	"github.com/mitchellh/go-testing-interface"
 	"github.com/tidwall/gjson"
 
-	"github.com/terraform-google-modules/terraform-google-enterprise-genai/test/integration/testutils"
+	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
 )
 
 const (
@@ -116,12 +116,12 @@ func (g GCP) WaitBuildSuccess(t testing.TB, project, region, repo, commitSha, fa
 			return err
 		}
 		if status != StatusSuccess {
-			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details.\n", failureMsg, region, build, project)
+			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details", failureMsg, region, build, project)
 		}
 	} else {
 		status := g.GetLastBuildStatus(t, project, region, filter)
 		if status != StatusSuccess {
-			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details.\n", failureMsg, region, build, project)
+			return fmt.Errorf("%s\nSee:\nhttps://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s\nfor details", failureMsg, region, build, project)
 		}
 	}
 	return nil
@@ -129,8 +129,8 @@ func (g GCP) WaitBuildSuccess(t testing.TB, project, region, repo, commitSha, fa
 
 // HasSccNotification checks if a Security Command Center notification exists
 func (g GCP) HasSccNotification(t testing.TB, orgID, sccName string) bool {
-	filter := fmt.Sprintf("name=organizations/%s/notificationConfigs/%s", orgID, sccName)
-	scc := g.Runf(t, "scc notifications list organizations/%s --filter %s --quiet", orgID, filter).Array()
+	filter := fmt.Sprintf("name=organizations/%s/locations/global/notificationConfigs/%s", orgID, sccName)
+	scc := g.Runf(t, "scc notifications list organizations/%s --filter %s --location=global --quiet", orgID, filter).Array()
 	if len(scc) == 0 {
 		return false
 	}

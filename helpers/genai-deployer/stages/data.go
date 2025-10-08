@@ -24,7 +24,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/utils"
 )
 
 const (
@@ -302,15 +302,15 @@ func GetInfraPipelineOutputs(t testing.TB, checkoutPath, workspace string) Infra
 func ReadGlobalTFVars(file string) (GlobalTFVars, error) {
 	var globalTfvars GlobalTFVars
 	if file == "" {
-		return globalTfvars, fmt.Errorf("tfvars file is required.")
+		return globalTfvars, fmt.Errorf("tfvars file is required")
 	}
 	_, err := os.Stat(file)
 	if os.IsNotExist(err) {
-		return globalTfvars, fmt.Errorf("tfvars file '%s' does not exits\n", file)
+		return globalTfvars, fmt.Errorf("tfvars file '%s' does not exits", file)
 	}
 	err = utils.ReadTfvars(file, &globalTfvars)
 	if err != nil {
-		return globalTfvars, fmt.Errorf("Failed to load tfvars file %s. Error: %s\n", file, err.Error())
+		return globalTfvars, fmt.Errorf("failed to load tfvars file %s. Error: %s", file, err.Error())
 	}
 	return globalTfvars, nil
 }

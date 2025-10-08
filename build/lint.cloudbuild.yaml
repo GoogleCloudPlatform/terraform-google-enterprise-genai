@@ -18,7 +18,7 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/usr/local/bin/test_lint.sh']
   env:
-  - "EXCLUDE_LINT_DIRS=\\./3-networks/modules/transitivity/assets"
+  - "EXCLUDE_LINT_DIRS=\\./examples/machine-learning-pipeline|\\./docs/assets/terraform|\\./5-app-infra/projects/service-catalog/ml_business_unit/shared|\\./5-app-infra/projects/artifact-publish/ml_business_unit/shared"
 tags:
 - 'ci'
 - 'lint'

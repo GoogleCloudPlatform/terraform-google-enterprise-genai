@@ -21,7 +21,7 @@ import (
 
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/terraform-google-modules/terraform-google-enterprise-genai/helpers/foundation-deployer/gcp"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/gcp"
 )
 
 const (
@@ -33,11 +33,11 @@ const (
 func ValidateDirectories(g GlobalTFVars) error {
 	_, err := os.Stat(g.FoundationCodePath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("Stopping execution, FoundationCodePath directory '%s' does not exits\n", g.FoundationCodePath)
+		return fmt.Errorf("stopping execution, FoundationCodePath directory '%s' does not exits", g.FoundationCodePath)
 	}
 	_, err = os.Stat(g.CodeCheckoutPath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("Stopping execution, CodeCheckoutPath directory '%s' does not exits\n", g.CodeCheckoutPath)
+		return fmt.Errorf("stopping execution, CodeCheckoutPath directory '%s' does not exits", g.CodeCheckoutPath)
 	}
 	return nil
 }
