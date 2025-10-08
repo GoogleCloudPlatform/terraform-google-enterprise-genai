@@ -25,11 +25,11 @@ import (
 
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/gcp"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/msg"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/stages"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/steps"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/gcp"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/msg"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/stages"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/steps"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/utils"
 )
 
 var (
