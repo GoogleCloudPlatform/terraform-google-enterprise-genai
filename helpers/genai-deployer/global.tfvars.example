@@ -41,6 +41,7 @@ org_project_creators = []
 
 bucket_force_destroy             = false
 bucket_tfstate_kms_force_destroy = false
+workflow_deletion_protection     = true
 
 project_prefix = "prj"
 folder_prefix  = "fldr"

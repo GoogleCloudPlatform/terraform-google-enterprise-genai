@@ -172,6 +172,9 @@ type GlobalTFVars struct {
 	ValidatorProjectId                    *string         `hcl:"validator_project_id"`
 	Groups                                *Groups         `hcl:"groups"`
 	InitialGroupConfig                    *string         `hcl:"initial_group_config"`
+	WorkflowDeletionProtection            *bool           `hcl:"workflow_deletion_protection"`
+	FolderDeletionProtection              *bool           `hcl:"folder_deletion_protection"`
+	ProjectDeletionPolicy                 string          `hcl:"project_deletion_policy"`
 }
 
 // HasValidatorProj checks if a Validator Project was provided
@@ -208,6 +211,9 @@ type BootstrapTfvars struct {
 	OrgProjectCreators           []string `hcl:"org_project_creators"`
 	Groups                       *Groups  `hcl:"groups"`
 	InitialGroupConfig           *string  `hcl:"initial_group_config"`
+	WorkflowDeletionProtection   *bool    `hcl:"workflow_deletion_protection"`
+	FolderDeletionProtection     *bool    `hcl:"folder_deletion_protection"`
+	ProjectDeletionPolicy        string   `hcl:"project_deletion_policy"`
 }
 
 type OrgTfvars struct {

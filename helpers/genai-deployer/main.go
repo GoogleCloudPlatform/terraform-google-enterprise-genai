@@ -95,12 +95,11 @@ func main() {
 	gotest.Init()
 	t := &testing.RuntimeT{}
 	conf := stages.CommonConf{
-		FoundationPath:    globalTFVars.FoundationCodePath,
-		CheckoutPath:      globalTFVars.CodeCheckoutPath,
-		PolicyPath:        filepath.Join(globalTFVars.FoundationCodePath, "policy-library"),
-		EnableHubAndSpoke: globalTFVars.EnableHubAndSpoke,
-		DisablePrompt:     cfg.disablePrompt,
-		Logger:            utils.GetLogger(cfg.quiet),
+		FoundationPath: globalTFVars.FoundationCodePath,
+		CheckoutPath:   globalTFVars.CodeCheckoutPath,
+		PolicyPath:     filepath.Join(globalTFVars.FoundationCodePath, "policy-library"),
+		DisablePrompt:  cfg.disablePrompt,
+		Logger:         utils.GetLogger(cfg.quiet),
 	}
 
 	// only enable services if they are not already enabled
