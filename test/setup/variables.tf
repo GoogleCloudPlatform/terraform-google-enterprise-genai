@@ -44,8 +44,14 @@ variable "cloud_source_artifacts_repo_name" {
 
 variable "cloud_source_service_catalog_repo_name" {
   description = "Name to give the cloud source repository for Service Catalog"
+  default = "service-catalog"
 }
 
+
+variable "cloud_source_artifacts_repo_name"{
+  description = "Name to give the cloud source repository for Artifacts"
+  default = "publish-artifacts"
+}
 variable "instance_region" {
   description = "Instance region use for testing. Should be one of the regions used to create network on step 3-networks."
   default     = "us-central1"
