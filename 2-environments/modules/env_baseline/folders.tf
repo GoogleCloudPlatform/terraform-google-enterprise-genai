@@ -19,9 +19,8 @@
 *****************************************/
 
 resource "google_folder" "env" {
-  display_name        = "${local.folder_prefix}-${var.env}"
-  parent              = local.parent
-  deletion_protection = var.folder_deletion_protection
+  display_name = "${local.folder_prefix}-${var.env}"
+  parent       = local.parent
 }
 
 resource "time_sleep" "wait_60_seconds" {

@@ -42,7 +42,6 @@ func TestEnvs(t *testing.T) {
 		"remote_state_bucket":        backend_bucket,
 		"monitoring_workspace_users": monitoringWorkspaceUsers,
 		"kms_prevent_destroy":        false,
-		"folder_deletion_protection": false,
 	}
 
 	backendConfig := map[string]interface{}{
