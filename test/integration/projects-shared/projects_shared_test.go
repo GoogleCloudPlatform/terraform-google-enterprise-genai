@@ -20,6 +20,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration/testutils"
 )
@@ -40,43 +41,21 @@ func TestProjectsShared(t *testing.T) {
 		"bucket": projects_backend_bucket,
 	}
 
-	for _, tts := range []struct {
-		name  string
-		repo  string
-		tfDir string
-	}{
-		{
-			name:  "ml",
-			repo:  "ml-artifact-publish",
-			tfDir: "../../../4-projects/ml_business_unit/shared",
-		},
-		{
-			name:  "ml",
-			repo:  "ml-service-catalog",
-			tfDir: "../../../4-projects/ml_business_unit/shared",
-		},
-		{
-			name:  "ml",
-			repo:  "ml-machine-learning",
-			tfDir: "../../../4-projects/ml_business_unit/shared",
-		},
-	} {
-		t.Run(tts.name, func(t *testing.T) {
-
-			sharedVars := map[string]interface{}{
-				"remote_state_bucket": backend_bucket,
-				"prevent_destroy":     false,
-			}
-
-			shared := tft.NewTFBlueprintTest(t,
-				tft.WithTFDir(tts.tfDir),
-				tft.WithVars(sharedVars),
-				tft.WithBackendConfig(backendConfig),
-				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 1, 2*time.Minute),
-				tft.WithPolicyLibraryPath("/workspace/policy-library", bootstrap.GetTFSetupStringOutput("project_id")),
-			)
-			shared.Test()
-		})
-
+	sharedVars := map[string]interface{}{
+		"remote_state_bucket": backend_bucket,
+		"prevent_destroy":     false,
 	}
+
+	shared := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../4-projects/ml_business_unit/shared"),
+		tft.WithVars(sharedVars),
+		tft.WithBackendConfig(backendConfig),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 1, 2*time.Minute),
+		tft.WithPolicyLibraryPath("/workspace/policy-library", bootstrap.GetTFSetupStringOutput("project_id")),
+	)
+	shared.DefineVerify(
+		func(assert *assert.Assertions) {
+			shared.DefaultVerify(assert)
+		})
+	shared.Test()
 }
