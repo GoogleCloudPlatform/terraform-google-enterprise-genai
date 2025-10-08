@@ -25,7 +25,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/terraform-google-modules/terraform-google-enterprise-genai/test/integration/testutils"
+	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
 )
 
 func TestOrg(t *testing.T) {
