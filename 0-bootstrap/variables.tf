@@ -113,7 +113,7 @@ variable "groups" {
     })
   })
   default = {
-    create_groups   = false
+    create_groups = false
     required_groups = {
       group_org_admins           = ""
       group_billing_admins       = ""
