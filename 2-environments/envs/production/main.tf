@@ -23,8 +23,7 @@ module "env" {
   remote_state_bucket        = var.remote_state_bucket
   tfc_org_name               = var.tfc_org_name
 
-  kms_prevent_destroy        = var.kms_prevent_destroy
-  folder_deletion_protection = var.folder_deletion_protection
+  kms_prevent_destroy = var.kms_prevent_destroy
 
   assured_workload_configuration = {
     enabled           = false
