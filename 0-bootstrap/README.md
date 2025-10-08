@@ -292,6 +292,7 @@ Each step has instructions for this change.
 | bucket\_prefix | Name prefix to use for state bucket created. | `string` | `"bkt"` | no |
 | bucket\_tfstate\_kms\_force\_destroy | When deleting a bucket, this boolean option will delete the KMS keys used for the Terraform state bucket. | `bool` | `false` | no |
 | default\_region | Default region to create resources where applicable. | `string` | `"us-central1"` | no |
+| folder\_deletion\_protection | Prevent Terraform from destroying or recreating the folder. | `string` | `true` | no |
 | folder\_prefix | Name prefix to use for folders created. Should be the same in all steps. | `string` | `"fldr"` | no |
 | group\_billing\_admins | Google Group for GCP Billing Administrators | `string` | n/a | yes |
 | group\_org\_admins | Google Group for GCP Organization Administrators | `string` | n/a | yes |
@@ -301,7 +302,9 @@ Each step has instructions for this change.
 | org\_policy\_admin\_role | Additional Org Policy Admin role for admin group. You can use this for testing purposes. | `bool` | `false` | no |
 | org\_project\_creators | Additional list of members to have project creator role across the organization. Prefix of group: user: or serviceAccount: is required. | `list(string)` | `[]` | no |
 | parent\_folder | Optional - for an organization with existing projects or for development/validation. It will place all the example foundation resources under the provided folder instead of the root organization. The value is the numeric folder ID. The folder must already exist. | `string` | `""` | no |
+| project\_deletion\_policy | The deletion policy for the project created. | `string` | `"PREVENT"` | no |
 | project\_prefix | Name prefix to use for projects created. Should be the same in all steps. Max size is 3 characters. | `string` | `"prj"` | no |
+| workflow\_deletion\_protection | Whether Terraform will be prevented from destroying a workflow. When the field is set to true or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete the workflow will fail. When the field is set to false, deleting the workflow is allowed. | `bool` | `true` | no |
 
 ## Outputs
 

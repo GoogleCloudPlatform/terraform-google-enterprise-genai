@@ -88,6 +88,24 @@ variable "bucket_tfstate_kms_force_destroy" {
   default     = false
 }
 
+variable "project_deletion_policy" {
+  description = "The deletion policy for the project created."
+  type        = string
+  default     = "PREVENT"
+}
+
+variable "folder_deletion_protection" {
+  description = "Prevent Terraform from destroying or recreating the folder."
+  type        = string
+  default     = true
+}
+
+variable "workflow_deletion_protection" {
+  description = "Whether Terraform will be prevented from destroying a workflow. When the field is set to true or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete the workflow will fail. When the field is set to false, deleting the workflow is allowed."
+  type        = bool
+  default     = true
+}
+
 /* ----------------------------------------
     Specific to Groups creation
    ---------------------------------------- */
