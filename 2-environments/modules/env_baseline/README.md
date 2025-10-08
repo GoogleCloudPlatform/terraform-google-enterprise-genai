@@ -6,6 +6,7 @@
 | assured\_workload\_configuration | Assured Workload configuration. See https://cloud.google.com/assured-workloads ."<br>  enabled: If the assured workload should be created.<br>  location: The location where the workload will be created.<br>  display\_name: User-assigned resource display name.<br>  compliance\_regime: Supported Compliance Regimes. See https://cloud.google.com/assured-workloads/docs/reference/rest/Shared.Types/ComplianceRegime .<br>  resource\_type: The type of resource. One of CONSUMER\_FOLDER, KEYRING, or ENCRYPTION\_KEYS\_PROJECT. | <pre>object({<br>    enabled           = optional(bool, false)<br>    location          = optional(string, "us-central1")<br>    display_name      = optional(string, "FEDRAMP-MODERATE")<br>    compliance_regime = optional(string, "FEDRAMP_MODERATE")<br>    resource_type     = optional(string, "CONSUMER_FOLDER")<br>  })</pre> | `{}` | no |
 | env | The environment to prepare (ex. development) | `string` | n/a | yes |
 | environment\_code | A short form of the folder level resources (environment) within the Google Cloud organization (ex. d). | `string` | n/a | yes |
+| folder\_deletion\_protection | Prevent Terraform from destroying or recreating the folder. | `string` | `true` | no |
 | gcs\_bucket\_prefix | Bucket Prefix | `string` | `"bkt"` | no |
 | gcs\_logging\_bucket\_location | Location of environment logging bucket | `string` | `"us-central1"` | no |
 | gcs\_logging\_key\_rotation\_period | Rotation period in seconds to be used for KMS Key | `string` | `"7776000s"` | no |

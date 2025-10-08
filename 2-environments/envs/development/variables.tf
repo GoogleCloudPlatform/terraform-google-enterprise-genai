@@ -35,3 +35,9 @@ variable "kms_prevent_destroy" {
   type        = bool
   default     = true
 }
+
+variable "folder_deletion_protection" {
+  description = "Prevent Terraform from destroying or recreating the folder."
+  type        = string
+  default     = true
+}

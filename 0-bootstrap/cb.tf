@@ -171,7 +171,7 @@ module "tf_cloud_builder" {
   build_timeout                = "1200s"
 
   workflow_deletion_protection = var.workflow_deletion_protection
-  depends_on = [module.tf_source]
+  depends_on                   = [module.tf_source]
 }
 
 module "bootstrap_csr_repo" {

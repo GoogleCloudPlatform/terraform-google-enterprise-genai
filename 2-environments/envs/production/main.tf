@@ -24,6 +24,7 @@ module "env" {
   tfc_org_name               = var.tfc_org_name
 
   kms_prevent_destroy = var.kms_prevent_destroy
+  folder_deletion_protection = var.folder_deletion_protection
 
   assured_workload_configuration = {
     enabled           = false
