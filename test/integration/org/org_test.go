@@ -42,6 +42,7 @@ func TestOrg(t *testing.T) {
 		"enable_scc_resources_in_terraform": true,
 		"kms_prevent_destroy":               false,
 		"cai_monitoring_kms_force_destroy":  true,
+		"folder_deletion_protection":        false,
 	}
 
 	backendConfig := map[string]interface{}{
