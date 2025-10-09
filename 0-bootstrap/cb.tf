@@ -172,10 +172,16 @@ module "tf_cloud_builder" {
 
   workflow_deletion_protection = var.workflow_deletion_protection
 
-  depends_on = [
-    module.tf_source,
-    module.tf_private_pool
-  ]
+  depends_on = [module.tf_source]
+}
+
+resource "google_project_service_identity" "workflows_identity" {
+  provider = google-beta
+
+  project = module.tf_source.cloudbuild_project_id
+  service = "workflows.googleapis.com"
+
+  depends_on = [module.tf_source]
 }
 
 module "bootstrap_csr_repo" {
