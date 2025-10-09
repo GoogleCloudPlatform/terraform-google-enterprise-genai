@@ -162,6 +162,8 @@ module "tf_cloud_builder" {
   dockerfile_repo_uri          = module.tf_source.csr_repos[local.cloudbuilder_repo].url
   gar_repo_location            = var.default_region
   workflow_region              = var.default_region
+    trigger_location             = var.default_region
+
   terraform_version            = local.terraform_version
   cb_logs_bucket_force_destroy = var.bucket_force_destroy
   trigger_location             = var.default_region
@@ -171,7 +173,7 @@ module "tf_cloud_builder" {
   build_timeout                = "1200s"
 
   workflow_deletion_protection = var.workflow_deletion_protection
-  depends_on                   = [module.tf_source]
+  # depends_on                   = [module.tf_source]
 }
 
 module "bootstrap_csr_repo" {
