@@ -255,7 +255,6 @@ module "tf_workspace" {
     module.tf_source,
     module.tf_cloud_builder,
   ]
-
 }
 
 resource "google_artifact_registry_repository_iam_member" "terraform_sa_artifact_registry_reader" {
