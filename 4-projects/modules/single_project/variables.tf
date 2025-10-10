@@ -170,3 +170,9 @@ variable "default_service_account" {
   default     = "disable"
   type        = string
 }
+
+variable "project_deletion_policy" {
+  description = "The deletion policy for the project created."
+  type        = string
+  default     = "PREVENT"
+}

@@ -34,3 +34,9 @@ variable "folder_prefix" {
   type        = string
   default     = "fldr"
 }
+
+variable "folder_deletion_protection" {
+  description = "Prevent Terraform from destroying or recreating the folder."
+  type        = string
+  default     = true
+}
