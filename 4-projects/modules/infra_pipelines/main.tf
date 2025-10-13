@@ -55,12 +55,11 @@ resource "google_storage_bucket" "cloudbuild_bucket" {
 
 module "tf_workspace" {
   source   = "terraform-google-modules/bootstrap/google//modules/tf_cloudbuild_workspace"
-  version  = "~> 11.0"
+  version  = "~> 6.4"
   for_each = toset(var.app_infra_repos)
 
-  project_id       = var.cloudbuild_project_id
-  location         = var.default_region
-  trigger_location = var.default_region
+  project_id = var.cloudbuild_project_id
+  location   = var.default_region
 
   # using bucket custom names for compliance with bucket naming conventions
   create_state_bucket       = true

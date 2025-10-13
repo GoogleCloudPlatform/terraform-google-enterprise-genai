@@ -26,15 +26,14 @@ module "app_infra_cloudbuild_project" {
   source = "../../modules/single_project"
   count  = local.enable_cloudbuild_deploy ? 1 : 0
 
-  org_id                  = local.org_id
-  billing_account         = local.billing_account
-  folder_id               = local.common_folder_name
-  environment             = "common"
-  project_budget          = var.project_budget
-  project_prefix          = local.project_prefix
-  key_rings               = local.shared_kms_key_ring
-  remote_state_bucket     = var.remote_state_bucket
-  project_deletion_policy = var.project_deletion_policy
+  org_id              = local.org_id
+  billing_account     = local.billing_account
+  folder_id           = local.common_folder_name
+  environment         = "common"
+  project_budget      = var.project_budget
+  project_prefix      = local.project_prefix
+  key_rings           = local.shared_kms_key_ring
+  remote_state_bucket = var.remote_state_bucket
 
   activate_apis = [
     "cloudbuild.googleapis.com",
