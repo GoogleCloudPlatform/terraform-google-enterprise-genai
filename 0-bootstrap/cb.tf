@@ -96,6 +96,8 @@ module "tf_source" {
   group_org_admins      = local.group_org_admins
   buckets_force_destroy = var.bucket_force_destroy
 
+  project_deletion_policy = var.project_deletion_policy
+
   activate_apis = [
     "serviceusage.googleapis.com",
     "servicenetworking.googleapis.com",

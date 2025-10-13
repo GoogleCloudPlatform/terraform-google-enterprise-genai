@@ -67,6 +67,8 @@ module "seed_bootstrap" {
   key_rotation_period            = "7776000s"
   kms_prevent_destroy            = !var.bucket_tfstate_kms_force_destroy
 
+  project_deletion_policy = var.project_deletion_policy
+
   project_labels = {
     environment       = "bootstrap"
     application_name  = "seed-bootstrap"
