@@ -40,14 +40,13 @@ resource "random_string" "two_alphanumeric" {
 }
 
 resource "google_folder" "test_folder" {
-  display_name        = "test_foundation_folder_${random_string.suffix.result}"
-  parent              = "folders/${var.folder_id}"
-  deletion_protection = false
+  display_name = "test_foundation_folder_${random_string.suffix.result}"
+  parent       = "folders/${var.folder_id}"
 }
 
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 14.1"
 
   name                     = "ci-foundation-${random_string.suffix.result}"
   random_project_id        = true
@@ -55,7 +54,6 @@ module "project" {
   org_id                   = var.org_id
   folder_id                = var.folder_id
   billing_account          = var.billing_account
-  deletion_policy          = "DELETE"
 
   activate_apis = [
     "cloudresourcemanager.googleapis.com",
