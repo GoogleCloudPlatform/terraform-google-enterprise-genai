@@ -57,9 +57,5 @@ resource "google_secret_manager_secret" "secret" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [rotation[0].next_rotation_time]
-  }
-
   depends_on = [google_kms_crypto_key_iam_member.secrets, google_pubsub_topic_iam_member.pubsub_binding]
 }
