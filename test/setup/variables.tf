@@ -40,12 +40,12 @@ variable "domain" {
 
 variable "cloud_source_artifacts_repo_name" {
   description = "Name to give the could source repository for Artifacts"
-  default     = "service-catalog"
+  default     = "publish-artifacts"
 }
 
 variable "cloud_source_service_catalog_repo_name" {
   description = "Name to give the cloud source repository for Service Catalog"
-  default     = "publish-artifacts"
+  default     = "service-catalog"
 }
 
 variable "instance_region" {
