@@ -128,7 +128,9 @@ resource "google_kms_crypto_key" "kms_keys" {
   name            = module.project.project_name
   key_ring        = each.key
   rotation_period = var.key_rotation_period
-  labels          = var.kms_labels
+  labels = {
+    crypto_key = "ml_crypto_key"
+  }
   lifecycle {
     prevent_destroy = false
   }

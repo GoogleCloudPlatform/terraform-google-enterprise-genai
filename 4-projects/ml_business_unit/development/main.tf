@@ -32,4 +32,3 @@ module "ml_env" {
   tfc_org_name         = var.tfc_org_name
   business_unit_folder = module.bu_folder.business_unit_folder
 }
-
