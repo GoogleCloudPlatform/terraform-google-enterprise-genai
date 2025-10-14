@@ -170,3 +170,9 @@ variable "default_service_account" {
   default     = "disable"
   type        = string
 }
+
+variable "kms_labels" {
+  description = "Labels to be assigned to KMS crypto keys."
+  type        = map(string)
+  default     = {}
+}
