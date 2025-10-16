@@ -37,7 +37,6 @@ func TestAppInfra(t *testing.T) {
 
 	vars := map[string]interface{}{
 		"remote_state_bucket": projects_backend_bucket,
-		"instance_region":     "us-central1",
 	}
 
 	shared := tft.NewTFBlueprintTest(t,
