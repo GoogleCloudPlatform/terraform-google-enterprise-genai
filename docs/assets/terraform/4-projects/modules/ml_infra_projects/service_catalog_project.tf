@@ -85,6 +85,7 @@ resource "google_project_service_identity" "storage" {
   project  = module.app_service_catalog_project.project_id
   service  = "storage.googleapis.com"
 }
+
 // Add Service Agent for Storage
 resource "google_kms_crypto_key_iam_member" "storage_agent" {
   for_each      = module.app_service_catalog_project.kms_keys
