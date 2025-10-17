@@ -93,3 +93,9 @@ variable "prevent_destroy" {
   type        = bool
   default     = true
 }
+
+variable "project_deletion_policy" {
+  description = "The deletion policy for the project created."
+  type        = string
+  default     = "PREVENT"
+}

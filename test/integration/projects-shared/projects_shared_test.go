@@ -42,8 +42,9 @@ func TestProjectsShared(t *testing.T) {
 	}
 
 	sharedVars := map[string]interface{}{
-		"remote_state_bucket": backend_bucket,
-		"prevent_destroy":     false,
+		"remote_state_bucket":     backend_bucket,
+		"prevent_destroy":         false,
+		"project_deletion_policy": "DELETE",
 	}
 
 	shared := tft.NewTFBlueprintTest(t,

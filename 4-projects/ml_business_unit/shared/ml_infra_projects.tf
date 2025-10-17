@@ -33,4 +33,5 @@ module "ml_infra_projects" {
   service_catalog_infra_pipeline_sa      = module.infra_pipelines[0].terraform_service_accounts["ml-service-catalog"]
   environment_kms_project_id             = ""
   prevent_destroy                        = var.prevent_destroy
+  project_deletion_policy                = var.project_deletion_policy
 }

@@ -81,8 +81,9 @@ func TestProjects(t *testing.T) {
 			env := testutils.GetLastSplitElement(tt.name, "_")
 
 			vars := map[string]interface{}{
-				"remote_state_bucket": backend_bucket,
-				"env":                 env,
+				"remote_state_bucket":     backend_bucket,
+				"env":                     env,
+				"project_deletion_policy": "DELETE",
 			}
 
 			projects := tft.NewTFBlueprintTest(t,

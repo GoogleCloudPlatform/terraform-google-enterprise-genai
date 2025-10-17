@@ -108,3 +108,9 @@ variable "business_unit" {
   description = "The business (ex. ml_business_unit)."
   type        = string
 }
+
+variable "project_deletion_policy" {
+  description = "The deletion policy for the project created."
+  type        = string
+  default     = "PREVENT"
+}

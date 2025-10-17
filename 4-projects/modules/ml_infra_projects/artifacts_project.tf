@@ -29,15 +29,16 @@ locals {
 module "app_infra_artifacts_project" {
   source = "../ml_single_project"
 
-  org_id              = var.org_id
-  billing_account     = var.billing_account
-  folder_id           = var.folder_id
-  environment         = var.environment
-  project_budget      = var.project_budget
-  project_prefix      = var.project_prefix
-  key_rings           = var.key_rings
-  remote_state_bucket = var.remote_state_bucket
-  prevent_destroy     = var.prevent_destroy
+  org_id                  = var.org_id
+  billing_account         = var.billing_account
+  folder_id               = var.folder_id
+  environment             = var.environment
+  project_budget          = var.project_budget
+  project_prefix          = var.project_prefix
+  key_rings               = var.key_rings
+  remote_state_bucket     = var.remote_state_bucket
+  prevent_destroy         = var.prevent_destroy
+  project_deletion_policy = var.project_deletion_policy
 
   activate_apis = [
     "artifactregistry.googleapis.com",

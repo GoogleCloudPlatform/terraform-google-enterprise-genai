@@ -48,6 +48,8 @@ module "machine_learning_project" {
   vpc_service_control_attach_enabled = "true"
   vpc_service_control_perimeter_name = "accessPolicies/${local.access_context_manager_policy_id}/servicePerimeters/${local.perimeter_name}"
   vpc_service_control_sleep_duration = "60s"
+  project_deletion_policy            = var.project_deletion_policy
+
   // Enabling Cloud Build Deploy to use Service Accounts during the build and give permissions to the SA.
   // The permissions will be the ones necessary for the deployment of the step 5-app-infra
   enable_cloudbuild_deploy = local.enable_cloudbuild_deploy
