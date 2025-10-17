@@ -25,15 +25,14 @@
 module "app_cloudbuild_project" {
   source = "../single_project"
 
-  org_id                  = local.org_id
-  billing_account         = local.billing_account
-  folder_id               = var.folder_id
-  environment             = var.env
-  project_budget          = var.project_budget
-  project_prefix          = local.project_prefix
-  key_rings               = var.shared_kms_key_ring
-  remote_state_bucket     = var.remote_state_bucket
-  project_deletion_policy = var.project_deletion_policy
+  org_id              = local.org_id
+  billing_account     = local.billing_account
+  folder_id           = var.folder_id
+  environment         = var.env
+  project_budget      = var.project_budget
+  project_prefix      = local.project_prefix
+  key_rings           = var.shared_kms_key_ring
+  remote_state_bucket = var.remote_state_bucket
 
   activate_apis = [
     "artifactregistry.googleapis.com",

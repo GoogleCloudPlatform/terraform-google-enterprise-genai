@@ -201,9 +201,3 @@ variable "artifacts_application_name" {
   type        = string
   default     = "app-infra-artifacts"
 }
-
-variable "project_deletion_policy" {
-  description = "The deletion policy for the project created."
-  type        = string
-  default     = "PREVENT"
-}

@@ -19,7 +19,6 @@ locals {
 }
 
 resource "google_folder" "env_business_unit" {
-  display_name        = local.env_business_unit_folder_name
-  parent              = local.env_folder_name
-  deletion_protection = var.folder_deletion_protection
+  display_name = local.env_business_unit_folder_name
+  parent       = local.env_folder_name
 }

@@ -15,22 +15,20 @@
  */
 
 module "bu_folder" {
-  source                     = "../../modules/env_folders"
-  business_code              = local.business_code
-  remote_state_bucket        = var.remote_state_bucket
-  env                        = var.env
-  folder_deletion_protection = var.folder_deletion_protection
+  source              = "../../modules/env_folders"
+  business_code       = local.business_code
+  remote_state_bucket = var.remote_state_bucket
+  env                 = var.env
 }
 
 module "ml_env" {
   source = "../../modules/ml_env"
 
-  env                     = var.env
-  business_code           = local.business_code
-  business_unit           = local.business_unit
-  remote_state_bucket     = var.remote_state_bucket
-  location_gcs            = var.location_gcs
-  tfc_org_name            = var.tfc_org_name
-  business_unit_folder    = module.bu_folder.business_unit_folder
-  project_deletion_policy = var.project_deletion_policy
+  env                  = var.env
+  business_code        = local.business_code
+  business_unit        = local.business_unit
+  remote_state_bucket  = var.remote_state_bucket
+  location_gcs         = var.location_gcs
+  tfc_org_name         = var.tfc_org_name
+  business_unit_folder = module.bu_folder.business_unit_folder
 }

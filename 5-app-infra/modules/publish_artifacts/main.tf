@@ -105,6 +105,14 @@ resource "google_service_account_iam_member" "impersonate" {
   member             = local.current_member
 }
 
+resource "google_project_iam_member" "sa_logging_writer" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = google_service_account.trigger_sa.member
+
+  depends_on = [google_service_account.trigger_sa]
+}
+
 resource "random_string" "suffix" {
   length  = 10
   special = false

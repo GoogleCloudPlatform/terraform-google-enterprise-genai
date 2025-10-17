@@ -260,14 +260,12 @@ type ProjCommonTfvars struct {
 }
 
 type ProjSharedTfvars struct {
-	DefaultRegion         string `hcl:"default_region"`
-	ProjectDeletionPolicy string `hcl:"project_deletion_policy"`
+	DefaultRegion string `hcl:"default_region"`
 }
 
 type ProjEnvTfvars struct {
-	ProjectsKMSLocation   string `hcl:"projects_kms_location"`
-	ProjectsGCSLocation   string `hcl:"projects_gcs_location"`
-	ProjectDeletionPolicy string `hcl:"project_deletion_policy"`
+	ProjectsKMSLocation string `hcl:"projects_kms_location"`
+	ProjectsGCSLocation string `hcl:"projects_gcs_location"`
 }
 
 type AppInfraCommonTfvars struct {
