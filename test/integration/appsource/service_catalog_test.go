@@ -30,25 +30,24 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-func TestArtifactRegistrySource(t *testing.T) {
-
+func TestServiceCatalogSource(t *testing.T) {
 	shared := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../4-projects/ml_business_unit/shared"),
 	)
 
-	artifactProject := shared.GetStringOutput("common_artifacts_project_id")
-	artifactSourcePath := ("../../../5-app-infra/source_repos/artifact-publish")
-	artifactRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/publish-artifacts", artifactProject)
+	serviceCatalogProject := shared.GetStringOutput("service_catalog_project_id")
+	serviceCatalogPath := ("../../../5-app-infra/source_repos/service-catalog")
+	serviceCaralogRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/service-catalog", serviceCatalogProject)
 
 	tmpDir := t.TempDir()
-	if err := cp.Copy(artifactSourcePath, tmpDir); err != nil {
+	if err := cp.Copy(serviceCatalogPath, tmpDir); err != nil {
 		t.Fatal(err)
 	}
 
 	region := "us-central1"
 
 	appsource := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir(artifactSourcePath),
+		tft.WithTFDir(serviceCatalogPath),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 	)
 
@@ -60,7 +59,7 @@ func TestArtifactRegistrySource(t *testing.T) {
 
 	appsource.DefineVerify(func(assert *assert.Assertions) {
 
-		// Push docker images to artifact repository
+		//Push service catalog img and modules
 		gitApp := git.NewCmdConfig(t, git.WithDir(tmpDir))
 		gitAppRun := func(args ...string) {
 			_, err := gitApp.RunCmdE(args...)
@@ -75,16 +74,19 @@ func TestArtifactRegistrySource(t *testing.T) {
 		gitAppRun("config", "credential.https://source.developers.google.com.helper", "gcloud.sh")
 		gitAppRun("checkout", "-b", "main")
 
-		gitAppRun("remote", "add", "google", artifactRepo)
-		gitApp.CommitWithMsg("initial commit", []string{"--allow-empty"})
+		gitAppRun("remote", "add", "google", serviceCaralogRepo)
 
-		gitAppRun("add", ".")
-		gitApp.CommitWithMsg("Build Images", nil)
+		gitAppRun("add", "img")
+		gitApp.CommitWithMsg("Add img directory", nil)
+
+		gitAppRun("add", "modules")
+		gitApp.CommitWithMsg("Initialize Service Catalog Build Repo", nil)
+
 		gitAppRun("push", "--all", "google", "-f")
 
 		lastCommit := gitApp.GetLatestCommit()
 		// filter builds triggered based on pushed commit sha
-		buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, artifactProject)
+		buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, serviceCatalogProject)
 		// poll build until complete
 
 		pollCloudBuild := func(cmd string) func() (bool, error) {

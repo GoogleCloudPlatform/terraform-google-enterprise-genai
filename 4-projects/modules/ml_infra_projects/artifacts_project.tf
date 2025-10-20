@@ -24,8 +24,8 @@ locals {
     "roles/source.admin",
     "roles/storage.admin",
   ]
-
 }
+
 module "app_infra_artifacts_project" {
   source = "../ml_single_project"
 
