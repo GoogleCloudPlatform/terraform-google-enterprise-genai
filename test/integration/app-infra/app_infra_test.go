@@ -17,9 +17,11 @@ package appinfra
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration/testutils"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
@@ -62,6 +64,7 @@ func TestAppInfra(t *testing.T) {
 
 			appInfra := tft.NewTFBlueprintTest(t,
 				tft.WithTFDir(fmt.Sprintf("../../../5-app-infra/projects/%s/ml_business_unit/shared/", projectName)),
+				tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 1, 2*time.Minute),
 				tft.WithBackendConfig(backendConfig),
 				tft.WithVars(vars),
 			)
