@@ -86,7 +86,6 @@ func TestArtifactRegistrySource(t *testing.T) {
 		// filter builds triggered based on pushed commit sha
 		buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, artifactProject)
 		// poll build until complete
-
 		pollCloudBuild := func(cmd string) func() (bool, error) {
 			return func() (bool, error) {
 				build := gcloud.Runf(t, cmd).Array()

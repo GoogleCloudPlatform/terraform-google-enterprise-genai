@@ -32,13 +32,6 @@ Interconnect, and baseline firewall rules for each environment. It also sets
 up the global DNS hub.</td>
 </tr>
 <tr>
-<td><a href="../3-networks-hub-and-spoke">3-networks-hub-and-spoke</a></td>
-<td>Sets up base and restricted shared VPCs with all the default configuration
-found on step 3-networks-dual-svpc, but here the architecture will be based on the
-hub-and-spoke network model. It also sets up the global DNS hub.</td>
-</tr>
-</tr>
-<tr>
 <td><a href="../4-projects">4-projects</a></td>
 <td>Sets up a folder structure, projects, and application infrastructure pipeline for applications,
  which are connected as service projects to the shared VPC created in the previous stage.</td>
@@ -84,8 +77,6 @@ to Bigquery and Pub/Sub. This will result in additional charges for those copies
 - This module implements but does not enable [object versioning](https://cloud.google.com/storage/docs/object-versioning) for organization logs. If needed, enable object versioning by setting the `log_export_storage_versioning` variable to true.
 
 - Bucket policy retention and object versioning are **mutually exclusive**.
-
-- To use the **hub-and-spoke** architecture described in the **Networking** section of the [Google Cloud security foundations guide](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke), set the `enable_hub_and_spoke` variable to `true`.
 
 - If you are using MacOS, replace `cp -RT` with `cp -R` in the relevant
 commands. The `-T` flag is required for Linux, but causes problems for MacOS.
@@ -149,7 +140,7 @@ If required, run `terraform output cloudbuild_project_id` in the `0-bootstrap` f
 1. Check if a Security Command Center notification with the default name, **scc-notify**, already exists. If it exists, choose a different value for the `scc_notification_name` variable in the `./envs/shared/terraform.tfvars` file.
 
    ```bash
-   export ORGANIZATION_ID=$(terraform -chdir="../terraform-example-foundation/0-bootstrap/" output -json common_config | jq '.org_id' --raw-output)
+   export ORGANIZATION_ID=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -json common_config | jq '.org_id' --raw-output)
    gcloud scc notifications describe "scc-notify" --organization=${ORGANIZATION_ID} --location=global
    ```
 
@@ -233,7 +224,7 @@ Change into the `1-org` folder, copy the Terraform wrapper script, and ensure it
 1. Check if a Security Command Center notification with the default name, **scc-notify**, already exists. If it exists, choose a different value for the `scc_notification_name` variable in the `./envs/shared/terraform.tfvars` file.
 
    ```bash
-   export ORGANIZATION_ID=$(terraform -chdir="../gcp-bootstrap/" output -json common_config | jq '.org_id' --raw-output)
+   export ORGANIZATION_ID=$(terraform -chdir="../0-bootstrap/" output -json common_config | jq '.org_id' --raw-output)
    gcloud scc notifications describe "scc-notify" --organization=${ORGANIZATION_ID} --location=global
    ```
 

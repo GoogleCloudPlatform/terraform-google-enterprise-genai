@@ -129,7 +129,7 @@ resource "google_kms_crypto_key" "kms_keys" {
   key_ring        = each.key
   rotation_period = var.key_rotation_period
   labels = {
-    crypto_key = "ml_crypto_key"
+    crypto_key = var.kms_label
   }
   lifecycle {
     prevent_destroy = false

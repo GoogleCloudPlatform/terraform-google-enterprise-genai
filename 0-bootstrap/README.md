@@ -32,13 +32,6 @@ Interconnect, and baseline firewall rules for each environment. It also sets
 up the global DNS hub.</td>
 </tr>
 <tr>
-<td><a href="../3-networks-hub-and-spoke">3-networks-hub-and-spoke</a></td>
-<td>Sets up base and restricted shared VPCs with all the default configuration
-found on step 3-networks-dual-svpc, but here the architecture will be based on the
-Hub and Spoke network model. It also sets up the global DNS hub.</td>
-</tr>
-</tr>
-<tr>
 <td><a href="../4-projects">4-projects</a></td>
 <td>Set up a folder structure, projects, and application infrastructure pipeline for applications,
  which are connected as service projects to the shared VPC created in the previous stage.</td>
@@ -178,7 +171,7 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
    terraform apply bootstrap.tfplan
    ```
 
-1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, `3-networks-hub-and-spoke`, and `4-projects` and the state bucket that will be used by step 4-projects.
+1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, and `4-projects` and the state bucket that will be used by step 4-projects.
 
    ```bash
    export network_step_sa=$(terraform output -raw networks_step_terraform_service_account_email)

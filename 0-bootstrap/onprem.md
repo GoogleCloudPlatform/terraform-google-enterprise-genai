@@ -8,7 +8,7 @@ The infrastructure created for Cloud Build allows access to on-prem resources by
 
 In all the three connection options it is necessary to configure a router using the [Custom route advertisement mode](https://cloud.google.com/network-connectivity/docs/router/concepts/overview#route-advertisement-custom) so that the Google service network private pool instance that executes the Cloud build jobs can reach instances in the on-prem network.
 
-HA VPN, Dedicated Interconnect and Partner Interconnect configuration can be setup in one of the two network modes: [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) or [Hub and Spoke](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke).
+HA VPN, Dedicated Interconnect and Partner Interconnect configuration can be setup in the network mode: [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-).
 
 For Cloud Build jobs to access on-prem infrastructure, [Import and export custom routes](https://cloud.google.com/vpc/docs/vpc-peering#importing-exporting-routes) are also configured in the peering setup.
 

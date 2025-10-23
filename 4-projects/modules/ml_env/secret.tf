@@ -29,6 +29,8 @@ resource "google_secret_manager_secret" "secret" {
   #Control ID: SM-CO-6.2
   #NIST 800-53: SC-12 SC-13
 
+  // Temporary change to avoid updating the resource on every plan/apply. Will be replaced by time.static
+
   # rotation {
   #   next_rotation_time = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timeadd(timestamp(), "720h"))
   #   rotation_period    = "43200s"
