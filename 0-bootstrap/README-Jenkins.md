@@ -353,8 +353,8 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
 1. Check if a Security Command Center Notification with the default name, **scc-notify**, already exists. If it exists, choose a different value for the `scc_notification_name` variable in the `./envs/shared/terraform.tfvars` file.
 
    ```bash
-   export ORGANIZATION_ID=$(terraform -chdir="../0-bootstrap/" output -json common_config | jq '.org_id' --raw-output)
-   gcloud scc notifications describe "scc-notify" --organization=${ORGANIZATION_ID}
+   export ORGANIZATION_ID=$(terraform -chdir="../0-bootstrap/envs/shared" output -json common_config | jq '.org_id' --raw-output)
+   gcloud scc notifications describe "scc-notify" --organization=${ORGANIZATION_ID} --location=global
    ```
 
 1. Check if your organization already has an Access Context Manager Policy.
@@ -503,7 +503,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. You can now move to the instructions in the next step, go to [Deploying step 3-networks-dual-svpc](#deploying-step-3-networks-dual-svpc) to use the Dual Shared VPC mode, or go to [Deploying step  3-networks-hub-and-spoke](#deploying-step-3-networks-hub-and-spoke) to use the Hub and Spoke network mode.
+1. You can now move to the instructions in the next step, go to [Deploying step 3-networks-dual-svpc](#deploying-step-3-networks-dual-svpc) to use the Dual Shared VPC mode.
 
 ## Deploying step 3-networks-dual-svpc
 
@@ -568,159 +568,6 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
 1. Update `shared.auto.tfvars` file with the `target_name_server_addresses`.
 1. Update `access_context.auto.tfvars` file with the `access_context_manager_policy_id`.
 1. Use `terraform output` to get the backend bucket and networks step Terraform Service Account values from 0-bootstrap output.
-
-   ```bash
-   export ORGANIZATION_ID=$(terraform -chdir="../0-bootstrap/" output -json common_config | jq '.org_id' --raw-output)
-   export ACCESS_CONTEXT_MANAGER_ID=$(gcloud access-context-manager policies list --organization ${ORGANIZATION_ID} --format="value(name)")
-   echo "access_context_manager_policy_id = ${ACCESS_CONTEXT_MANAGER_ID}"
-   sed -i "s/ACCESS_CONTEXT_MANAGER_ID/${ACCESS_CONTEXT_MANAGER_ID}/" ./access_context.auto.tfvars
-
-   export backend_bucket=$(terraform -chdir="../0-bootstrap/" output -raw gcs_bucket_tfstate)
-   echo "remote_state_bucket = ${backend_bucket}"
-   sed -i "s/REMOTE_STATE_BUCKET/${backend_bucket}/" ./common.auto.tfvars
-   ```
-
-1. Commit changes.
-
-   ```bash
-   git add .
-   git commit -m 'Initialize networks repo'
-   ```
-
-1. You must manually plan and apply the `shared` environment (only once) since the `development`, `non-production` and `production` environments depend on it.
-1. To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
-1. Also update `backend.tf` with your backend bucket from 0-bootstrap output.
-
-   ```bash
-   for i in `find -name 'backend.tf'`; do sed -i "s/UPDATE_ME/${backend_bucket}/" $i; done
-   ```
-
-1. Use `terraform output` to get the Cloud Build project ID and the networks step Terraform Service Account from 0-bootstrap output. An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set using the Terraform Service Account to enable impersonation.
-
-   ```bash
-   export CICD_PROJECT_ID=$(terraform -chdir="../0-bootstrap/" output -raw cicd_project_id)
-   echo ${CICD_PROJECT_ID}
-
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../0-bootstrap/" output -raw networks_step_terraform_service_account_email)
-   echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
-   ```
-
-1. Run `init` and `plan` and review output for environment shared.
-
-   ```bash
-   ./tf-wrapper.sh init shared
-   ./tf-wrapper.sh plan shared
-   ```
-
-1. Run `validate` and check for violations.
-
-   ```bash
-   ./tf-wrapper.sh validate shared $(pwd)/policy-library ${CICD_PROJECT_ID}
-   ```
-
-1. Run `apply` shared.
-
-   ```bash
-   ./tf-wrapper.sh apply shared
-   ```
-
-1. Push your plan branch.
-
-   ```bash
-   git push --set-upstream origin plan
-   ```
-
-   - Assuming you configured an automatic trigger in your Jenkins Controller (see [Jenkins sub-module README](./modules/jenkins-agent/README.md)), this will trigger a plan. You can also trigger a Jenkins job manually. Given the many options to do this in Jenkins, it is out of the scope of this document see [Jenkins website](https://www.jenkins.io) for more details.
-1. Review the plan output in your Controller's web UI.
-1. Merge changes to production branch.
-
-   ```bash
-   git checkout -b production
-   git push origin production
-   ```
-
-1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. After production has been applied, apply development and non-production.
-1. Merge changes to development
-
-   ```bash
-   git checkout -b development
-   git push origin development
-   ```
-
-1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. Merge changes to non-production.
-
-   ```bash
-   git checkout -b non-production
-   git push origin non-production
-   ```
-
-1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-
-## Deploying step 3-networks-hub-and-spoke
-
-1. Clone the repo you created manually in 0-bootstrap.
-
-   ```bash
-   git clone <YOUR_NEW_REPO-3-networks>
-   ```
-
-1. Navigate into the repo and change to a non-production branch. All subsequent
-   steps assume you are running them from the <YOUR_NEW_REPO-3-networks> directory. If
-   you run them from another directory, adjust your copy paths accordingly.
-
-   ```bash
-   cd YOUR_NEW_REPO_CLONE-3-networks
-   git checkout -b plan
-   ```
-
-1. Copy contents of foundation to new repo.
-
-   ```bash
-   cp -RT ../terraform-google-enterprise-genai/3-networks-hub-and-spoke/ .
-   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
-   cp ../terraform-google-enterprise-genai/build/Jenkinsfile .
-   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
-   chmod 755 ./tf-wrapper.sh
-   ```
-
-1. Update the variables located in the `environment {}` section of the `Jenkinsfile` with values from your environment:
-
-   ```text
-   _TF_SA_EMAIL
-   _STATE_BUCKET_NAME
-   _PROJECT_ID (the CI/CD project ID)
-   ```
-
-1. You can re-run `terraform output` in the 0-bootstrap directory to find these values.
-
-   ```bash
-   BACKEND_STATE_BUCKET_NAME=$(terraform -chdir="../0-bootstrap/" output -raw gcs_bucket_tfstate)
-   echo "_STATE_BUCKET_NAME = ${BACKEND_STATE_BUCKET_NAME}"
-   sed -i "s/BACKEND_STATE_BUCKET_NAME/${BACKEND_STATE_BUCKET_NAME}/" ./Jenkinsfile
-
-   TERRAFORM_SA_EMAIL=$(terraform -chdir="../0-bootstrap/" output -raw networks_step_terraform_service_account_email)
-   echo "_TF_SA_EMAIL = ${TERRAFORM_SA_EMAIL}"
-   sed -i "s/TERRAFORM_SA_EMAIL/${TERRAFORM_SA_EMAIL}/" ./Jenkinsfile
-
-   CICD_PROJECT_ID=$(terraform -chdir="../0-bootstrap/" output -raw cicd_project_id)
-   echo "_PROJECT_ID = ${CICD_PROJECT_ID}"
-   sed -i "s/CICD_PROJECT_ID/${CICD_PROJECT_ID}/" ./Jenkinsfile
-   ```
-
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`, rename `shared.auto.example.tfvars` to `shared.auto.tfvars` and rename `access_context.auto.example.tfvars` to `access_context.auto.tfvars`.
-
-   ```bash
-   mv common.auto.example.tfvars common.auto.tfvars
-   mv shared.auto.example.tfvars shared.auto.tfvars
-   mv access_context.auto.example.tfvars access_context.auto.tfvars
-   ```
-
-1. Update `common.auto.tfvars` file with values from your environment and bootstrap. See any of the envs folder [README.md](../3-networks-hub-and-spoke/envs/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
-1. Update `shared.auto.tfvars` file with the `target_name_server_addresses`.
-1. Update `access_context.auto.tfvars` file with the `access_context_manager_policy_id`.
-1. Use `terraform output` to get the backend bucket value from 0-bootstrap output.
 
    ```bash
    export ORGANIZATION_ID=$(terraform -chdir="../0-bootstrap/" output -json common_config | jq '.org_id' --raw-output)

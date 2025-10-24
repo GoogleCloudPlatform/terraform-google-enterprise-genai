@@ -28,6 +28,7 @@ module "kms" {
 module "cai_monitoring" {
   source = "../../modules/cai-monitoring"
 
+  count                = var.enable_scc_resources_in_terraform ? 1 : 0
   org_id               = local.org_id
   billing_account      = local.billing_account
   project_id           = module.scc_notifications.project_id

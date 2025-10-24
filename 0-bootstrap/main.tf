@@ -38,13 +38,15 @@ locals {
 }
 
 resource "google_folder" "bootstrap" {
-  display_name = "${var.folder_prefix}-bootstrap"
-  parent       = local.parent
+  display_name        = "${var.folder_prefix}-bootstrap"
+  parent              = local.parent
+  deletion_protection = var.folder_deletion_protection
+
 }
 
 module "seed_bootstrap" {
   source  = "terraform-google-modules/bootstrap/google"
-  version = "~> 6.3"
+  version = "~> 11.0"
 
   org_id                         = var.org_id
   folder_id                      = google_folder.bootstrap.id
@@ -64,6 +66,8 @@ module "seed_bootstrap" {
   encrypt_gcs_bucket_tfstate     = true
   key_rotation_period            = "7776000s"
   kms_prevent_destroy            = !var.bucket_tfstate_kms_force_destroy
+
+  project_deletion_policy = var.project_deletion_policy
 
   project_labels = {
     environment       = "bootstrap"

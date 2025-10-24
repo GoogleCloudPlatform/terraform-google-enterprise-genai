@@ -211,7 +211,7 @@ export the OAuth Token ID as an environment variable:
     1. Run `terraform plan -input=false -out bootstrap_2.tfplan`
     1. Run `terraform apply bootstrap_2.tfplan`
 
-1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, `3-networks-hub-and-spoke`, and `4-projects`.
+1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, and `4-projects`.
 
    ```bash
    export network_step_sa=$(terraform output -raw networks_step_terraform_service_account_email)
@@ -228,7 +228,7 @@ export the OAuth Token ID as an environment variable:
    echo "CI/CD Project ID = ${cicd_project_id}"
    ```
 
-1. Run `terraform output` to get the name of the TFC organization and export it as environment variables. `TF_CLOUD_ORGANIZATION` variable will be used by the `cloud` block in order to move the local Terraform's state to TFC and `TF_VAR_tfc_org_name` will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, `3-networks-hub-and-spoke`, and `4-projects`
+1. Run `terraform output` to get the name of the TFC organization and export it as environment variables. `TF_CLOUD_ORGANIZATION` variable will be used by the `cloud` block in order to move the local Terraform's state to TFC and `TF_VAR_tfc_org_name` will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, and `4-projects`
 
    ```bash
    export TF_CLOUD_ORGANIZATION=$(terraform output -raw tfc_org_name)
@@ -322,7 +322,7 @@ See the shared folder [README.md](../1-org/envs/shared/README.md#inputs) for add
    ```bash
    export ORG_STEP_SA=$(terraform -chdir="../gcp-bootstrap/envs/shared" output -raw organization_step_terraform_service_account_email)
 
-   gcloud scc notifications describe "scc-notify" --format="value(name)" --organization=${ORGANIZATION_ID} --impersonate-service-account=${ORG_STEP_SA}
+   gcloud scc notifications describe "scc-notify" --format="value(name)" --organization=${ORGANIZATION_ID} --location=global --impersonate-service-account=${ORG_STEP_SA}
    ```
 
 1. If the notification exists the output will be:
@@ -429,9 +429,7 @@ See any of the envs folder [README.md](../2-environments/envs/production/README.
 1. Review apply output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/2-production/runs under `Run List` item.
 
 1. You can now move to the instructions in the network stage.
-To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [Deploying step 3-networks-dual-svpc](#deploying-step-3-networks-dual-svpc),
-or go to [Deploying step 3-networks-hub-and-spoke](#deploying-step-3-networks-hub-and-spoke) to use the [Hub and Spoke](https://cloud.google.com/architecture/security-foundations/networking#hub-and-spoke) network mode.
-
+To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [Deploying step 3-networks-dual-svpc](#deploying-step-3-networks-dual-svpc).
 ## Deploying step 3-networks-dual-svpc
 
 **Note:** For all purposes we treat `shared` environment as `production` environment due to the possible impacts into `production`. So `3-production` TFC workspace have a [Run Trigger](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings/run-triggers) sourcing `3-shared` TFC workspace, which means that every time you successfully run an apply job in `3-shared` TFC workspace, a `Plan and apply` job will be triggered automatically for `3-production` TFC workspace. (All the applies will continue requiring manual approvals in TFC console).
@@ -580,151 +578,6 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 1. If the speculative plan is successful, merge the pull request in to the `production` branch.
 1. The merge will trigger a Terraform Cloud `Plan and Apply` run, that will run the plan and apply the terraform configuration for the `production` environment. You need to approve the apply in the `Runs` menu.
 1. Review apply output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/3-production/runs under `Run List` item.
-
-1. Before executing the next steps, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
-
-   ```bash
-   unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
-   ```
-
-1. You can now move to the instructions in the [4-projects](#deploying-step-4-projects) stage.
-
-## Deploying step 3-networks-hub-and-spoke
-
-**Note:** For all purposes we treat `shared` environment as `production` environment due to the possible impacts into `production`. So `3-production` TFC workspace have a [Run Trigger](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings/run-triggers) sourcing `3-shared` TFC workspace, which means that every time you successfully run an apply job in `3-shared` TFC workspace, a `Plan and apply` job will be triggered automatically for `3-production` TFC workspace. (All the applies will continue requiring manual approvals in TFC console).
-
-1. Navigate into the repo. All subsequent steps assume you are running them from the `gcp-networks` directory.
-   If you run them from another directory, adjust your copy paths accordingly.
-
-   ```bash
-   cd gcp-networks
-   ```
-
-1. change to a non-production branch.
-
-   ```bash
-   git checkout -b plan
-   ```
-
-1. Copy contents of foundation to new repo.
-
-   ```bash
-   cp -RT ../terraform-google-enterprise-genai/3-networks-hub-and-spoke/ .
-   cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
-   cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
-   chmod 755 ./tf-wrapper.sh
-   ```
-
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`, rename `shared.auto.example.tfvars` to `shared.auto.tfvars` and rename `access_context.auto.example.tfvars` to `access_context.auto.tfvars`.
-
-   ```bash
-   mv common.auto.example.tfvars common.auto.tfvars
-   mv shared.auto.example.tfvars shared.auto.tfvars
-   mv access_context.auto.example.tfvars access_context.auto.tfvars
-   ```
-
-1. Update `common.auto.tfvars` file with values from your GCP environment.
-See any of the envs folder [README.md](../3-networks-hub-and-spoke/envs/production/README.md#inputs) files for additional information on the values in the `common.auto.tfvars` file.
-1. You must add your user email in the variable `perimeter_additional_members` to be able to see the resources created in the restricted project.
-
-1. You must manually plan and apply the `shared` environment (only once) since the `development`, `non-production` and `production` environments depend on it.
-
-1. In order to manually run the apply for shared workspace from your local we need to temporary unset the TFC backend by renaming `envs/shared/backend.tf` to `envs/shared/backend.tf.temporary_disabled`.
-
-   ```bash
-   mv envs/shared/backend.tf envs/shared/backend.tf.temporary_disabled
-   ```
-
-1. Use `terraform output` to get the CI/CD project ID and the networks step Terraform Service Account from gcp-bootstrap output.
-1. The CI/CD project ID will be used in the [validation](https://cloud.google.com/docs/terraform/policy-validation/quickstart) of the Terraform configuration
-
-   ```bash
-   export CICD_PROJECT_ID=$(terraform -chdir="../gcp-bootstrap/envs/shared/" output -raw cicd_project_id)
-   echo ${CICD_PROJECT_ID}
-   ```
-
-1. Use `terraform output` to get the name of the TFC organization from gcp-bootstrap output and export it as environment variables. The TFC organization  will be used during the manual apply process by `tfe_outputs` resource in order to grab the outputs from previous steps.
-
-   ```bash
-   export TF_VAR_tfc_org_name=$(terraform -chdir="../gcp-bootstrap/envs/shared/" output -raw tfc_org_name)
-   echo "TFC Organization = ${TF_VAR_tfc_org_name}"
-   ```
-
-1. The networks step Terraform Service Account will be used for [Service Account impersonation](https://cloud.google.com/docs/authentication/use-service-account-impersonation) in the following steps.
-An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with the Terraform Service Account to enable impersonation.
-
-   ```bash
-   export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(terraform -chdir="../gcp-bootstrap/envs/shared/" output -raw networks_step_terraform_service_account_email)
-   echo ${GOOGLE_IMPERSONATE_SERVICE_ACCOUNT}
-   ```
-
-1. Run `init` and `plan` and review output for environment shared.
-
-   ```bash
-   ./tf-wrapper.sh init shared
-   ./tf-wrapper.sh plan shared
-   ```
-
-1. To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
-1. Run `validate` and check for violations.
-
-   ```bash
-   ./tf-wrapper.sh validate shared $(pwd)/policy-library ${CICD_PROJECT_ID}
-   ```
-
-1. Run `apply` shared.
-
-   ```bash
-   ./tf-wrapper.sh apply shared
-   ```
-   **Note:** Because we are running an apply locally instead of in the TFC workspace, this apply to shared won't be triggerring the [TFC Run Trigger](https://developer.hashicorp.com/terraform/cloud-docs/workspaces/settings/run-triggers) for `3-production` TFC workspace.
-
-1. In order to set the TFC backend for shared workspace we now can rename `envs/shared/backend.tf.temporary_disabled` to `envs/shared/backend.tf` and run `terraform init`. When you're prompted, agree to copy Terraform state to Terraform Cloud.
-
-   ```bash
-   cd envs/shared/
-   mv backend.tf.temporary_disabled backend.tf
-   terraform init
-   cd ../..
-   ```
-
-1. Commit changes
-
-   ```bash
-   git add .
-   git commit -m 'Initialize networks repo'
-   ```
-
-1. Push your plan branch.
-
-   ```bash
-   git push --set-upstream origin plan
-   cd ..
-   ```
-
-1. Open a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) (for GitHub) or a [merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html) (for GitLab) from the `plan` branch to the `development` branch and review the output.
-1. The pull request (or merge request) will trigger a Terraform Cloud [speculative plan](https://developer.hashicorp.com/terraform/cloud-docs/run/remote-operations#speculative-plans) in the `development` environment.
-1. Review the speculative plan output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/3-development/runs under `Run List` item.
-1. If the speculative plan is successful, merge the pull request in to the `development` branch.
-1. The merge will trigger a Terraform Cloud `Plan and Apply` run, that will run the plan and apply the terraform configuration for the `development` environment. You need to approve the apply in the `Runs` menu.
-1. Review apply output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/3-development/runs under `Run List` item.
-1. If the TFC Apply is successful, you can open the pull request (or merge request) for the next environment.
-
-1. Open a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) (for GitHub) or a [merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html) (for GitLab) from the `development` branch to the `non-production` branch and review the output.
-1. The pull request (or merge request) will trigger a Terraform Cloud [speculative plan](https://developer.hashicorp.com/terraform/cloud-docs/run/remote-operations#speculative-plans) in the `non-production` environment.
-1. Review the speculative plan output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/3-non-production/runs under `Run List` item.
-1. If the speculative plan is successful, merge the pull request in to the `non-production` branch.
-1. The merge will trigger a Terraform Cloud `Plan and Apply` run, that will run the plan and apply the terraform configuration for the `non-production` environment. You need to approve the apply in the `Runs` menu.
-1. Review apply output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/3-non-production/runs under `Run List` item.
-1. If the TFC Apply is successful, you can open the pull request (or merge request) for the next environment.
-
-1. Open a [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) (for GitHub) or a [merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html) (for GitLab) from the `non-production` branch to the `production` branch and review the output.
-1. The pull request (or merge request) will trigger a Terraform Cloud [speculative plan](https://developer.hashicorp.com/terraform/cloud-docs/run/remote-operations#speculative-plans) in the `production` environment.
-1. Review the speculative plan output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/3-production/runs under `Run List` item.
-1. If the speculative plan is successful, merge the pull request in to the `production` branch.
-1. The merge will trigger a Terraform Cloud `Plan and Apply` run, that will run the plan and apply the terraform configuration for the `production` environment. You need to approve the apply in the `Runs` menu.
-1. Review apply output in Terraform Cloud https://app.terraform.io/app/TFC-ORGANIZATION-NAME/workspaces/3-production/runs under `Run List` item.
-
 
 1. Before executing the next steps, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
 

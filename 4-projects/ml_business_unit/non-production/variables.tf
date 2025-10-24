@@ -75,4 +75,3 @@ variable "key_rotation_period" {
   type        = string
   default     = "7776000s"
 }
-

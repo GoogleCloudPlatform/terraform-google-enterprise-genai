@@ -29,8 +29,6 @@ remote_state_bucket = "REMOTE_STATE_BUCKET"
 
 //scc_notification_filter = "state=\\\"ACTIVE\\\""
 
-//enable_hub_and_spoke = true
-
 //create_access_context_manager_access_policy = false
 
 // Optional - If you are deploying Foundation Example in a parent folder

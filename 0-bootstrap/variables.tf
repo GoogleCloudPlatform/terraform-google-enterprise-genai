@@ -88,6 +88,24 @@ variable "bucket_tfstate_kms_force_destroy" {
   default     = false
 }
 
+variable "project_deletion_policy" {
+  description = "The deletion policy for the project created."
+  type        = string
+  default     = "PREVENT"
+}
+
+variable "folder_deletion_protection" {
+  description = "Prevent Terraform from destroying or recreating the folder."
+  type        = string
+  default     = true
+}
+
+variable "workflow_deletion_protection" {
+  description = "Whether Terraform will be prevented from destroying a workflow. When the field is set to true or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete the workflow will fail. When the field is set to false, deleting the workflow is allowed."
+  type        = bool
+  default     = true
+}
+
 /* ----------------------------------------
     Specific to Groups creation
    ---------------------------------------- */
@@ -95,7 +113,7 @@ variable "groups" {
   description = "Contain the details of the Groups to be created."
   type = object({
     create_groups   = bool
-    billing_project = string
+    billing_project = optional(string, null)
     required_groups = object({
       group_org_admins           = string
       group_billing_admins       = string
@@ -104,17 +122,16 @@ variable "groups" {
       monitoring_workspace_users = string
     })
     optional_groups = object({
-      gcp_platform_viewer      = string
-      gcp_security_reviewer    = string
-      gcp_network_viewer       = string
-      gcp_scc_admin            = string
-      gcp_global_secrets_admin = string
-      gcp_audit_viewer         = string
+      gcp_platform_viewer      = optional(string, "")
+      gcp_security_reviewer    = optional(string, "")
+      gcp_network_viewer       = optional(string, "")
+      gcp_scc_admin            = optional(string, "")
+      gcp_global_secrets_admin = optional(string, "")
+      gcp_audit_viewer         = optional(string, "")
     })
   })
   default = {
-    create_groups   = false
-    billing_project = ""
+    create_groups = false
     required_groups = {
       group_org_admins           = ""
       group_billing_admins       = ""

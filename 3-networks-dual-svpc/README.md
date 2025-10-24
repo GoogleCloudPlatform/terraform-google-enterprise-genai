@@ -32,13 +32,6 @@ Interconnect, and baseline firewall rules for each environment. It also sets
 up the global DNS hub.</td>
 </tr>
 <tr>
-<td><a href="../3-networks-hub-and-spoke">3-networks-hub-and-spoke</a></td>
-<td>Sets up base and restricted shared VPCs with all the default configuration
-found on step 3-networks-dual-svpc, but here the architecture will be based on the
-Hub and Spoke network model. It also sets up the global DNS hub</td>
-</tr>
-</tr>
-<tr>
 <td><a href="../4-projects">4-projects</a></td>
 <td>Sets up a folder structure, projects, and application infrastructure pipeline for applications,
  which are connected as service projects to the shared VPC created in the previous stage.</td>
@@ -88,7 +81,7 @@ commands. The `-T` flag is needed for Linux, but causes problems for MacOS.
 
 ### Networking Architecture
 
-This step makes use of the **Dual Shared VPC** architecture, and more details can be found described at the **Networking** section of the [Google cloud security foundations guide](https://cloud.google.com/architecture/security-foundations/networking). To see the version that makes use the Hub and Spoke mode, check the step [3-networks-hub-and-spoke](../3-networks-hub-and-spoke).
+This step makes use of the **Dual Shared VPC** architecture, and more details can be found described at the **Networking** section of the [Google cloud security foundations guide](https://cloud.google.com/architecture/security-foundations/networking).
 
 ### Using Dedicated Interconnect
 

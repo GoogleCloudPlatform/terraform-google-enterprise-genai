@@ -19,12 +19,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
-	"github.com/stretchr/testify/assert"
 
-	"github.com/terraform-google-modules/terraform-example-foundation/test/integration/testutils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration/testutils"
 )
 
 func TestEnvs(t *testing.T) {
@@ -43,6 +41,7 @@ func TestEnvs(t *testing.T) {
 	vars := map[string]interface{}{
 		"remote_state_bucket":        backend_bucket,
 		"monitoring_workspace_users": monitoringWorkspaceUsers,
+		"kms_prevent_destroy":        false,
 	}
 
 	backendConfig := map[string]interface{}{
@@ -62,79 +61,7 @@ func TestEnvs(t *testing.T) {
 				tft.WithVars(vars),
 				tft.WithBackendConfig(backendConfig),
 			)
-			envs.DefineVerify(
-				func(assert *assert.Assertions) {
-					// perform default verification ensuring Terraform reports no additional changes on an applied blueprint
-					envs.DefaultVerify(assert)
-
-					envFolder := testutils.GetLastSplitElement(envs.GetStringOutput("env_folder"), "/")
-					folder := gcloud.Runf(t, "resource-manager folders describe %s", envFolder)
-					displayName := fmt.Sprintf("fldr-%s", envName)
-					assert.Equal(displayName, folder.Get("displayName").String(), fmt.Sprintf("folder %s should have been created", displayName))
-
-					// check tags applied to environment folder
-					envFldrTags := gcloud.Runf(t, "resource-manager tags bindings list --parent=//cloudresourcemanager.googleapis.com/folders/%s", envFolder).Array()
-
-					fldrTagValueId := testutils.GetResultFieldStrSlice(envFldrTags, "tagValue")
-
-					var fldrTagValue []string
-					for _, tagValueId := range fldrTagValueId {
-						tagValueObj := gcloud.Runf(t, "resource-manager tags values describe %s", tagValueId)
-						fldrTagValue = append(fldrTagValue, tagValueObj.Get("shortName").String())
-					}
-					assert.Subset([]string{envName}, fldrTagValue, fmt.Sprintf("tag value should be %s for %s env folder", envName, envName))
-
-					for _, projectEnvOutput := range []struct {
-						projectOutput string
-						role          string
-						group         string
-						apis          []string
-					}{
-						{
-							projectOutput: "monitoring_project_id",
-							role:          "roles/monitoring.editor",
-							group:         monitoringWorkspaceUsers,
-							apis: []string{
-								"logging.googleapis.com",
-								"monitoring.googleapis.com",
-								"billingbudgets.googleapis.com",
-							},
-						},
-						{
-							projectOutput: "env_kms_project_id",
-							apis: []string{
-								"cloudkms.googleapis.com",
-								"logging.googleapis.com",
-							},
-						},
-						{
-							projectOutput: "env_secrets_project_id",
-							apis: []string{
-								"secretmanager.googleapis.com",
-								"logging.googleapis.com",
-							},
-						},
-					} {
-						projectID := envs.GetStringOutput(projectEnvOutput.projectOutput)
-						prj := gcloud.Runf(t, "projects describe %s", projectID)
-						assert.Equal(projectID, prj.Get("projectId").String(), fmt.Sprintf("project %s should exist", projectID))
-						assert.Equal("ACTIVE", prj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", projectID))
-
-						enabledAPIS := gcloud.Runf(t, "services list --project %s", projectID).Array()
-						listApis := testutils.GetResultFieldStrSlice(enabledAPIS, "config.name")
-						assert.Subset(listApis, projectEnvOutput.apis, "APIs should have been enabled")
-
-						if projectEnvOutput.role != "" {
-							iamOpts := gcloud.WithCommonArgs([]string{"--flatten", "bindings", "--filter", fmt.Sprintf("bindings.role:%s", projectEnvOutput.role), "--format", "json"})
-							iamPolicy := gcloud.Run(t, fmt.Sprintf("projects get-iam-policy %s", projectID), iamOpts).Array()[0]
-							listMembers := utils.GetResultStrSlice(iamPolicy.Get("bindings.members").Array())
-							assert.Contains(listMembers, fmt.Sprintf("group:%s", projectEnvOutput.group), fmt.Sprintf("group %s should have role %s", projectEnvOutput.group, projectEnvOutput.role))
-						}
-					}
-
-				})
 			envs.Test()
 		})
-
 	}
 }

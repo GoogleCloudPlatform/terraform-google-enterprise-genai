@@ -30,10 +30,25 @@ variable "group_email" {
   description = "The group that will be assigned permissions for testing."
 }
 
-variable "example_foundations_mode" {
-  description = "The example foundations mode used for testing."
-}
-
 variable "domain_to_allow" {
   description = "The test domain_to_allow allow users from in IAM."
+}
+
+variable "domain" {
+  description = "The DNS name from instance for testing."
+}
+
+variable "cloud_source_artifacts_repo_name" {
+  description = "Name to give the could source repository for Artifacts"
+  default     = "publish-artifacts"
+}
+
+variable "cloud_source_service_catalog_repo_name" {
+  description = "Name to give the cloud source repository for Service Catalog"
+  default     = "service-catalog"
+}
+
+variable "instance_region" {
+  description = "Instance region use for testing. Should be one of the regions used to create network on step 3-networks."
+  default     = "us-central1"
 }

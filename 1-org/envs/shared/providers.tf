@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+/******************************************
+  Provider request timeout configuration
+ *****************************************/
 provider "google" {
-  impersonate_service_account = var.impersonate_sa_email
-  request_timeout             = "60s"
+  request_timeout = "5m"
 }
 
 provider "google-beta" {
-  impersonate_service_account = var.impersonate_sa_email
-  request_timeout             = "60s"
+  request_timeout = "5m"
 }

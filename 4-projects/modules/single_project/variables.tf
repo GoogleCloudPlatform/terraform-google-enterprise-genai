@@ -170,3 +170,9 @@ variable "default_service_account" {
   default     = "disable"
   type        = string
 }
+
+variable "kms_label" {
+  description = "Label for kms key in cloud build project."
+  default     = "ml_crypto_key"
+  type        = string
+}

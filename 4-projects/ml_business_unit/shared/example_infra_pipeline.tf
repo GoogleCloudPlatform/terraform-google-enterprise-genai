@@ -34,6 +34,7 @@ module "app_infra_cloudbuild_project" {
   project_prefix      = local.project_prefix
   key_rings           = local.shared_kms_key_ring
   remote_state_bucket = var.remote_state_bucket
+
   activate_apis = [
     "cloudbuild.googleapis.com",
     "sourcerepo.googleapis.com",
@@ -44,6 +45,7 @@ module "app_infra_cloudbuild_project" {
     "serviceusage.googleapis.com",
     "bigquery.googleapis.com",
   ]
+
   # Metadata
   project_suffix    = "infra-pipeline"
   application_name  = "app-infra-pipelines"

@@ -25,11 +25,11 @@ import (
 
 	"github.com/mitchellh/go-testing-interface"
 
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/gcp"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/msg"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/stages"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/steps"
-	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/foundation-deployer/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/gcp"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/msg"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/stages"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/steps"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/helpers/genai-deployer/utils"
 )
 
 var (
@@ -95,12 +95,11 @@ func main() {
 	gotest.Init()
 	t := &testing.RuntimeT{}
 	conf := stages.CommonConf{
-		FoundationPath:    globalTFVars.FoundationCodePath,
-		CheckoutPath:      globalTFVars.CodeCheckoutPath,
-		PolicyPath:        filepath.Join(globalTFVars.FoundationCodePath, "policy-library"),
-		EnableHubAndSpoke: globalTFVars.EnableHubAndSpoke,
-		DisablePrompt:     cfg.disablePrompt,
-		Logger:            utils.GetLogger(cfg.quiet),
+		FoundationPath: globalTFVars.FoundationCodePath,
+		CheckoutPath:   globalTFVars.CodeCheckoutPath,
+		PolicyPath:     filepath.Join(globalTFVars.FoundationCodePath, "policy-library"),
+		DisablePrompt:  cfg.disablePrompt,
+		Logger:         utils.GetLogger(cfg.quiet),
 	}
 
 	// only enable services if they are not already enabled

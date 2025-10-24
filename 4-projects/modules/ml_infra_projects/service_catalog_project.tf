@@ -36,6 +36,7 @@ module "app_service_catalog_project" {
   project_prefix      = var.project_prefix
   key_rings           = var.key_rings
   remote_state_bucket = var.remote_state_bucket
+
   activate_apis = [
     "logging.googleapis.com",
     "storage.googleapis.com",

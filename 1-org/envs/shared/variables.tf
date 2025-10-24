@@ -25,6 +25,12 @@ variable "billing_data_users" {
   type        = string
 }
 
+variable "enable_scc_resources_in_terraform" {
+  description = "Create Security Command Center resources in Terraform. Security Command Center must be activated before the creation of the resources. See [Overview of activating Security Command Center](https://cloud.google.com/security-command-center/docs/activate-scc-overview) before enabling this feature."
+  type        = bool
+  default     = false
+}
+
 variable "audit_data_users" {
   description = "Google Workspace or Cloud Identity group that have access to audit logs."
   type        = string
@@ -36,7 +42,7 @@ variable "domains_to_allow" {
 }
 
 variable "scc_notification_name" {
-  description = "Name of the Security Command Center Notification. It must be unique in the organization. Run `gcloud scc notifications describe <scc_notification_name> --organization=org_id` to check if it already exists."
+  description = "Name of the Security Command Center Notification. It must be unique in the organization. Run `gcloud scc notifications describe <scc_notification_name> --organization=org_id --location=global` to check if it already exists."
   type        = string
 }
 
@@ -245,4 +251,16 @@ variable "keyring_regions" {
     "us-central1",
     "us-east4"
   ]
+}
+
+variable "kms_prevent_destroy" {
+  description = "If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  type        = bool
+  default     = true
+}
+
+variable "folder_deletion_protection" {
+  description = "Prevent Terraform from destroying or recreating the folder."
+  type        = string
+  default     = true
 }

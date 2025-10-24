@@ -53,7 +53,6 @@ Helper tool to deploy the Terraform example foundation.
   - [1-org](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/1-org/README.md)
   - [2-environments](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/2-environments/README.md)
   - [3-networks-dual-svpc](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc)
-  - [3-networks-hub-and-spoke](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke)
   - [4-projects](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/4-projects)
   - [5-app-infra](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/5-app-infra)
 
@@ -61,7 +60,7 @@ Helper tool to deploy the Terraform example foundation.
 
 By default the foundation regional resources are deployed in `us-west1` and `us-central1` regions and multi-regional resources are deployed in the `US` multi-region.
 
-Im addition to the variables declared in the file `global.tfvars` for configuring location, there are two locals, `default_region1` and `default_region2`, in each one of the environments (`production`, `non-production`, and `development`) in the network steps (`3-networks-dual-svpc` and `3-networks-hub-and-spoke`) . They are located in the [main.tf](../../3-networks-dual-svpc/envs/production/main.tf#L20-L21) files for each environments.
+Im addition to the variables declared in the file `global.tfvars` for configuring location, there are two locals, `default_region1` and `default_region2`, in each one of the environments (`production`, `non-production`, and `development`) in the network step (`3-networks-dual-svpc`) . They are located in the [main.tf](../../3-networks-dual-svpc/envs/production/main.tf#L20-L21) files for each environments.
 
 **Note:** the region used for the variable `default_region` in the file `global.tfvars` **MUST** be one of the regions used for the `default_region1` and `default_region2` locals.
 

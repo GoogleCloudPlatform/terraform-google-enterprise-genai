@@ -24,8 +24,8 @@ locals {
     "roles/source.admin",
     "roles/storage.admin",
   ]
-
 }
+
 module "app_infra_artifacts_project" {
   source = "../ml_single_project"
 
@@ -37,6 +37,8 @@ module "app_infra_artifacts_project" {
   project_prefix      = var.project_prefix
   key_rings           = var.key_rings
   remote_state_bucket = var.remote_state_bucket
+  prevent_destroy     = var.prevent_destroy
+
   activate_apis = [
     "artifactregistry.googleapis.com",
     "logging.googleapis.com",
@@ -56,7 +58,6 @@ module "app_infra_artifacts_project" {
   business_code              = var.business_code
   environment_kms_project_id = var.environment_kms_project_id
   project_name               = "${var.project_prefix}-${local.env_code}-${var.business_code}${var.artifacts_project_suffix}"
-  prevent_destroy            = var.prevent_destroy
 }
 
 resource "google_kms_crypto_key_iam_member" "ml_key" {

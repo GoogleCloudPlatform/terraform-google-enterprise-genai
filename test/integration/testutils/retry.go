@@ -17,6 +17,12 @@ package testutils
 var (
 	RetryableTransientErrors = map[string]string{
 
+		// Error 400: There is a peering operation in progress on the local or peer network.
+		".*Error 400.*There is a peering operation in progress on the local or peer network.*": "Peering operation in progress.",
+
+		// Error code 409 for concurrent policy changes.
+		".*Error 409.*There were concurrent policy changes.*": "Concurrent policy changes.",
+
 		// API Rate limit exceeded errors can be retried.
 		".*rateLimitExceeded.*": "Rate limit exceeded.",
 
@@ -28,5 +34,20 @@ var (
 
 		// Editing VPC Service Controls is eventually consistent.
 		".*Error 403.*Request is prohibited by organization's policy.*vpcServiceControlsUniqueIdentifier.*": "Request is prohibited by organization's policy.",
+
+		// Error code 13 during the creation of a Resource Manager Tag Value.
+		".*Error getting operation for committing purpose for TagValue.*": "Failed creating TagValue.",
+
+		// Error 403: Compute Engine API has not been used in project {} before or it is disabled.
+		".*Error 403.*Compute Engine API has not been used in project.*": "Compute Engine API not enabled",
+
+		// Error 400: Service account {} does not exist.
+		".*Error 400.*Service account.*does not exist.*": "Error setting IAM policy",
+
+		// Error waiting for creating service network connection. This happens randomly for development, production and non-production environments
+		".*Error waiting for Create Service Networking Connection.*Error code 16.*Expected OAuth 2 access token.*": "Request had invalid authentication credentials.",
+
+		// Error 400: The eTag provided {} does not match the eTag of the current version of the Access Policy, which is {}.
+		".*Error 400: The eTag provided.*does not match the eTag of the current version of the Access Policy, which is.*": "Conflict during Access Policy configuration.",
 	}
 )
