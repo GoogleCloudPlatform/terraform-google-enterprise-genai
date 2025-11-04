@@ -20,13 +20,16 @@
 // host the code for each one of the stages
 code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITORIES"
 
-// The directory where the user has created a fresh git clone of the Terraform Example Foundation repository
-foundation_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EXAMPLE_FOUNDATION_CODE_WAS_CHECKED_OUT"
+// The directory where the user has created a fresh git clone of the Terraform Google Enterprise Genai repository
+genai_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EXAMPLE_GENAI_CODE_WAS_CHECKED_OUT"
 
 // An existing project configured as the default project in the local Cloud SDK configuration
 // See https://cloud.google.com/sdk/gcloud/reference/config/set#EXAMPLES
 validator_project_id = "EXISTING_PROJECT_ID"
 
+project_deletion_policy    = "PREVENT" # Use "DELETE" to allow deletion of the projects
+folder_deletion_protection = true
+kms_prevent_destroy        = true
 
 // 0-bootstrap inputs
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#inputs
@@ -47,15 +50,14 @@ project_prefix = "prj"
 folder_prefix  = "fldr"
 
 // Optional - for an organization with existing projects or for development/validation.
-// Uncomment this variable to place all the example foundation resources under
+// Uncomment this variable to place all the example genai resources under
 // the provided folder instead of the root organization.
 // The variable value is the numeric folder ID
 // The folder must already exist.
 
 //parent_folder = "01234567890"
 
-// Optional - for enabling the automatic groups creation, uncomment the groups
-// variable and update the values with the desired group names
+// Optional - for enabling the automatic groups creation, update the empty values with the group names
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/0-bootstrap/README.md#optional---automatic-creation-of-google-cloud-identity-groups
 
 // After deploy, the Bootstrap service account will need to be granted "Group Admin" role in the
@@ -63,27 +65,25 @@ folder_prefix  = "fldr"
 // https://github.com/terraform-google-modules/terraform-google-group/blob/main/README.md#google-workspace-formerly-known-as-g-suite-roles
 
 //initial_group_config = "WITH_INITIAL_OWNER"
-//groups = {
-//  create_groups   = true,
-//  billing_project = "BILLING-PROJECT",
-//  required_groups = {
-//    group_org_admins           = "group_org_admins_local_test@example.com"
-//    group_billing_admins       = "group_billing_admins_local_test@example.com"
-//    billing_data_users         = "billing_data_users_local_test@example.com"
-//    audit_data_users           = "audit_data_users_local_test@example.com"
-//    monitoring_workspace_users = "monitoring_workspace_users_local_test@example.com"
-//  },
-//  optional_groups = { # fill in only the groups to be created
-//    gcp_platform_viewer      = ""
-//    gcp_security_reviewer    = ""
-//    gcp_network_viewer       = ""
-//    gcp_scc_admin            = ""
-//    gcp_global_secrets_admin = ""
-//    gcp_audit_viewer         = ""
-//  }
-//}
-//
-
+groups = {
+  create_groups   = true,
+  billing_project = null # Fill to create required or optional groups
+  required_groups = {
+    group_org_admins           = "REPLACE_ME" # "gcp-organization-admins@example.com"
+    group_billing_admins       = "REPLACE_ME" # "gcp-billing-admins@example.com"
+    billing_data_users         = "REPLACE_ME" #"billing_data_users_local_test@example.com"
+    audit_data_users           = "REPLACE_ME" #"audit_data_users_local_test@example.com"
+    monitoring_workspace_users = "REPLACE_ME" # "gcp-monitoring-admins@example.com"
+  }
+  optional_groups = {
+    gcp_security_reviewer    = "" #"gcp_security_reviewer_local_test@example.com"
+    gcp_network_viewer       = "" #"gcp_network_viewer_local_test@example.com"
+    gcp_scc_admin            = "" #"gcp_scc_admin_local_test@example.com"
+    gcp_global_secrets_admin = "" #"gcp_global_secrets_admin_local_test@example.com"
+    gcp_platform_viewer      = "" #"gcp_platform_viewer_local_test@example.com"
+    gcp_audit_viewer         = "" #"gcp_audit_viewer_local_test@example.com"
+  }
+}
 
 // 1-org inputs
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/1-org/envs/shared/README.md#inputs
@@ -91,8 +91,10 @@ folder_prefix  = "fldr"
 audit_data_users   = "REPLACE_ME" # "gcp-security-admins@example.com"
 billing_data_users = "REPLACE_ME" # "gcp-billing-data-users@example.com"
 
-domains_to_allow                    = ["example.com"] # Must include the domain of the organization you are deploying the foundation.
+domains_to_allow                    = ["example.com"] # Must include the domain of the organization you are deploying the genai.
 essential_contacts_domains_to_allow = ["@example.com"]
+
+cai_monitoring_kms_force_destroy = false
 
 scc_notification_name                       = "scc-notify"
 enable_scc_resources_in_terraform           = false # See https://cloud.google.com/security-command-center/docs/activate-scc-overview before enabling this feature
@@ -101,38 +103,27 @@ log_export_storage_force_destroy            = false
 log_export_storage_location                 = "US"
 billing_export_dataset_location             = "US"
 
-// Choose witch network architecture to use:
-// Dual Shared VPC: https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-dual-svpc/README.md
-// Hub And Spoke: https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke/README.md
-
-enable_hub_and_spoke = false
-
-// Optional - If you are deploying Foundation Example in a parent folder
+// Optional - If you are deploying Google Enterprise Genai in a parent folder
 // consider setting 'create_unique_tag_key' to 'true' because as Tag Keys are
 // unique organization-wide it will add a random suffix at each tag key
 
 create_unique_tag_key = false
-
-
 
 // 2-environments inputs
 // https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/2-environments/envs/production/README.md#inputs
 
 monitoring_workspace_users = "REPLACE_ME" # "gcp-monitoring-admins@example.com"
 
-
 // 3-networks inputs
-// https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke/envs/production/README.md#inputs
-// https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-hub-and-spoke/envs/shared/README.md#inputs
+// https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-svpc/envs/production/README.md#inputs
+// https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/3-networks-svpc/envs/shared/README.md#inputs
 
 domain = "example.com." # The DNS name of peering managed zone. Must end with a period.
 
-// Add you email in the perimeter_additional_members list.
+// Add your email in the perimeter_additional_members list.
 // You must be in this list to be able to view/access resources in the project protected by the VPC service controls.
 
 perimeter_additional_members = ["user:YOUR-USER-EMAIL@example.com"]
-
-enable_hub_and_spoke_transitivity = false
 
 // List of IPv4 address of target name servers for the forwarding zone configuration.
 // See https://cloud.google.com/dns/docs/overview#dns-forwarding-zones
@@ -150,7 +141,18 @@ target_name_server_addresses = [
 
 
 // 4-projects inputs
-// https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/4-projects/business_unit_1/production/README.md#inputs
+// https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/4-projects/ml_business_unit/production/README.md#inputs
+// Can be used to override the default region set in 0-bootstrap
+// See https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/master/4-projects/ml_business_unit/production/README.md#outputs
 
-projects_gcs_location = "US"
-projects_kms_location = "us"
+location_kms    = "us"
+location_gcs    = "US"
+prevent_destroy = true
+
+cloud_source_service_catalog_repo_name = "service-catalog"
+cloud_source_artifacts_repo_name       = "publish-artifacts"
+
+// 5-app-infra inputs
+// https://github.com/terraform-google-modules/terraform-example-foundation/blob/main/5-app-infra/README.md
+
+//instance_region = "us-central1"
