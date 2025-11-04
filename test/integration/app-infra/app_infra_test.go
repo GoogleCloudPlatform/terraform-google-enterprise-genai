@@ -38,8 +38,9 @@ func TestAppInfra(t *testing.T) {
 	log_bucket := org.GetStringOutput("logs_export_storage_bucket_name")
 
 	vars := map[string]interface{}{
-		"remote_state_bucket": projects_backend_bucket,
-		"instance_region":     "us-central1",
+		"remote_state_bucket":  projects_backend_bucket,
+		"instance_region":      "us-central1",
+		"bucket_force_destroy": true,
 	}
 
 	shared := tft.NewTFBlueprintTest(t,

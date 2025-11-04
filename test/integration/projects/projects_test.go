@@ -62,7 +62,7 @@ func TestProjects(t *testing.T) {
 			restrictedNetwork: "vpc-d-shared-restricted",
 		},
 		{
-			name:              "ml_non-production",
+			name:              "ml_nonproduction",
 			repo:              "ml-machine-learning",
 			baseDir:           "../../../4-projects/ml_business_unit/%s",
 			baseNetwork:       "vpc-n-shared-base",
