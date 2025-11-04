@@ -21,11 +21,11 @@ organizational policy.</td>
 </tr>
 <tr>
 <td><span style="white-space: nowrap;">2-environments</span> (this file)</td>
-<td>Sets up development, non-production, and production environments within the
+<td>Sets up development, nonproduction, and production environments within the
 Google Cloud organization that you've created.</td>
 </tr>
 <tr>
-<td><a href="../3-networks-dual-svpc">3-networks-dual-svpc</a></td>
+<td><a href="../3-networks-svpc">3-networks-svpc</a></td>
 <td>Sets up base and restricted shared VPCs with default DNS, NAT (optional),
 Private Service networking, VPC service controls, on-premises Dedicated
 Interconnect, and baseline firewall rules for each environment. It also sets
@@ -48,7 +48,7 @@ For an overview of the architecture and the parts, see the
 
 ## Purpose
 
-The purpose of this step is to setup development, non-production, and production environments within the Google Cloud organization that you've created.
+The purpose of this step is to setup development, nonproduction, and production environments within the Google Cloud organization that you've created.
 
 ## Prerequisites
 
@@ -148,12 +148,12 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 1. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
 
-1. Merge changes to non-production. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
+1. Merge changes to nonproduction. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
    pushing to this branch triggers both _terraform plan_ and _terraform apply_. Review the apply output in your cloud build project https://console.cloud.google.com/cloud-build/builds;region=DEFAULT_REGION?project=YOUR_CLOUD_BUILD_PROJECT_ID
 
    ```bash
-   git checkout -b non-production
-   git push origin non-production
+   git checkout -b nonproduction
+   git push origin nonproduction
    ```
 
 1. Merge changes to production branch. Because this is a [named environment branch](../docs/FAQ.md#what-is-a-named-branch),
@@ -166,7 +166,7 @@ Run `terraform output cloudbuild_project_id` in the `0-bootstrap` folder to get 
 
 ### `N.B.` Read this before continuing further
 
-A logging project will be created in every environment (`development`, `non-production`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
+A logging project will be created in every environment (`development`, `nonproduction`, `production`) when running this code. This project contains a storage bucket for the purposes of project logging within its respective environment.  This requires the `cloud-storage-analytics@google.com` group permissions for the storage bucket.  Since foundations has more restricted security measures, a domain restriction constraint is enforced.  This restraint will prevent the google cloud-storage-analytics group to be added to any permissions.  In order for this terraform code to execute without error, manual intervention must be made to ensure everything applies without issue.
 
 You must disable the contraint, assign the permission on the bucket and then apply the contraint again. This step-by-step presents you with two different options (`Option 1` and `Option 2`) and only one of them should be executed.
 
@@ -176,7 +176,7 @@ The first and the recommended option is making the changes by using `gcloud` cli
 
 #### Option 1: Use `gcloud` cli to disable/enable organization policy constraint
 
-You will be doing this procedure for each environment (`development`, `non-production` & `production`)
+You will be doing this procedure for each environment (`development`, `nonproduction` & `production`)
 
 ##### `development` environment configuration
 
@@ -226,7 +226,7 @@ You will be doing this procedure for each environment (`development`, `non-produ
     gcloud org-policies delete iam.allowedPolicyMemberDomains --project=$ENV_LOG_PROJECT_ID
     ```
 
-##### `non-production` environment configuration
+##### `nonproduction` environment configuration
 
 1. Configure the following variable below with the value of `gcp-environments` repository path.
 
@@ -234,17 +234,17 @@ You will be doing this procedure for each environment (`development`, `non-produ
     export GCP_ENVIRONMENTS_PATH=INSERT_YOUR_PATH_HERE
     ```
 
-    Make sure your git is checked out to the `non-production` branch by running `git checkout non-production` on `GCP_ENVIRONMENTS_PATH`.
+    Make sure your git is checked out to the `nonproduction` branch by running `git checkout nonproduction` on `GCP_ENVIRONMENTS_PATH`.
 
     ```bash
-    (cd $GCP_ENVIRONMENTS_PATH && git checkout non-production && ./tf-wrapper.sh init non-production)
+    (cd $GCP_ENVIRONMENTS_PATH && git checkout nonproduction && ./tf-wrapper.sh init nonproduction)
     ```
 
 2. Retrieve the bucket name and project id from terraform outputs.
 
     ```bash
-    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_bucket_name)
-    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/non-production" output -raw env_log_project_id)
+    export ENV_LOG_BUCKET_NAME=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_bucket_name)
+    export ENV_LOG_PROJECT_ID=$(terraform -chdir="$GCP_ENVIRONMENTS_PATH/envs/nonproduction" output -raw env_log_project_id)
     ```
 
 3. Validate the variable values.
@@ -344,11 +344,11 @@ Proceed with these steps only if `Option 1` is not chosen.
 
     ![edit-policy](../2-environments/imgs/edit-policy.png)
 
-4. Follow the instructions on checking out `development`, `non-production` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
+4. Follow the instructions on checking out `development`, `nonproduction` & `production` branches. Once environments terraform code has successfully applied, edit the policy again and select 'Inherit parent's policy' and Click `SET POLICY`.
 
 After making these modifications, you can follow the README.md procedure for `2-environment` step on foundation, make sure you **change the organization policy after running the steps on foundation**.
 
-1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md).
+1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-svpc](../3-networks-svpc/README.md).
 
 ### Deploying with Jenkins
 
@@ -384,7 +384,7 @@ See `0-bootstrap` [README-GitHub.md](../0-bootstrap/README-GitHub.md#deploying-s
    sed -i "s/REMOTE_STATE_BUCKET/${backend_bucket}/" ./terraform.tfvars
    ```
 
-We will now deploy each of our environments(development/production/non-production) using this script.
+We will now deploy each of our environments(development/production/nonproduction) using this script.
 When using Cloud Build or Jenkins as your CI/CD tool each environment corresponds to a branch is the repository for 2-environments step and only the corresponding environment is applied.
 
 To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
@@ -419,27 +419,27 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ./tf-wrapper.sh apply development
    ```
 
-1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `non-production` folder before continuing further.
+1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `nonproduction` folder before continuing further.
 
-1. Run `init` and `plan` and review output for environment non-production.
+1. Run `init` and `plan` and review output for environment nonproduction.
 
    ```bash
-   ./tf-wrapper.sh init non-production
-   ./tf-wrapper.sh plan non-production
+   ./tf-wrapper.sh init nonproduction
+   ./tf-wrapper.sh plan nonproduction
    ```
 
 1. Run `validate` and check for violations.
 
    ```bash
-   ./tf-wrapper.sh validate non-production $(pwd)/../policy-library ${CLOUD_BUILD_PROJECT_ID}
+   ./tf-wrapper.sh validate nonproduction $(pwd)/../policy-library ${CLOUD_BUILD_PROJECT_ID}
    ```
 
-1. Run `apply` non-production.
+1. Run `apply` nonproduction.
 
    ```bash
-   ./tf-wrapper.sh apply non-production
+   ./tf-wrapper.sh apply nonproduction
    ```
-1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `non-production` folder before continuing further.
+1. Ensure you [disable The Organization Policy](#read-this-before-continuing-further) on the `nonproduction` folder before continuing further.
 
 1. Run `init` and `plan` and review output for environment production.
 
@@ -470,4 +470,4 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
 cd ../..
  ```
 
-1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-dual-svpc](../3-networks-dual-svpc/README.md).
+1. You can now move to the instructions in the network step. To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [3-networks-svpc](../3-networks-svpc/README.md).

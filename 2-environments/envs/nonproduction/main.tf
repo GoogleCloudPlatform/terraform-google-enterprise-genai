@@ -17,7 +17,7 @@
 module "env" {
   source = "../../modules/env_baseline"
 
-  env                        = "non-production"
+  env                        = "nonproduction"
   environment_code           = "n"
   monitoring_workspace_users = var.monitoring_workspace_users
   remote_state_bucket        = var.remote_state_bucket
