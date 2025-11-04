@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-    bucket = "UPDATE_APP_INFRA_BUCKET"
-    prefix = "terraform/app-infra/ml_business_unit/non-production"
-  }
+locals {
+  business_unit      = "ml_business_unit"
+  business_code      = "ml"
+  env                = "nonproduction"
+  environment_code   = "n"
+  region_kms_keyring = [for i in local.env_keyrings : i if split("/", i)[3] == var.instance_region]
 }
+

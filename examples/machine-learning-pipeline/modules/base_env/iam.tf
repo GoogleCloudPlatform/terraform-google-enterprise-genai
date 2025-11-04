@@ -129,7 +129,7 @@ resource "google_kms_crypto_key_iam_member" "composer_kms_key_binding" {
 }
 
 resource "google_kms_crypto_key_iam_member" "composer_kms_key_binding_non_prod" {
-  for_each      = { for k, v in var.kms_keys : k => v if var.env == "non-production" }
+  for_each      = { for k, v in var.kms_keys : k => v if var.env == "nonproduction" }
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
@@ -143,9 +143,9 @@ resource "google_service_account_iam_member" "composer_service_agent" {
 }
 
 resource "google_service_account_iam_member" "compute_non_production" {
-  count = var.env == "non-production" ? 1 : 0
+  count = var.env == "nonproduction" ? 1 : 0
   # provider           = google-beta
-  service_account_id = data.google_service_account.non-production.name
+  service_account_id = data.google_service_account.nonproduction.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${var.production_project_number}-compute@developer.gserviceaccount.com"
 }
@@ -189,7 +189,7 @@ resource "google_kms_crypto_key_iam_member" "service_agent_kms_key_binding" {
 # Service Catalog & Pipelines #
 ###############################
 resource "google_project_iam_member" "cloud_build" {
-  for_each = { for k, v in toset(local.cloudbuild_roles) : k => v if var.env == "development" || var.env == "non-production" }
+  for_each = { for k, v in toset(local.cloudbuild_roles) : k => v if var.env == "development" || var.env == "nonproduction" }
   project  = var.project_id
   role     = each.key
   member   = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
@@ -220,7 +220,7 @@ resource "google_project_iam_member" "get_iam_policy_prod" {
 }
 
 resource "google_project_iam_member" "bq_pipeline_non_prod" {
-  for_each = { for k, v in toset(local.aiplatform_prod_sa) : k => v if var.env == "non-production" }
+  for_each = { for k, v in toset(local.aiplatform_prod_sa) : k => v if var.env == "nonproduction" }
   provider = google-beta
   project  = var.project_id
   member   = each.key
@@ -228,7 +228,7 @@ resource "google_project_iam_member" "bq_pipeline_non_prod" {
 }
 
 resource "google_project_iam_member" "monitoring" {
-  count   = var.env == "non-production" ? 1 : 0
+  count   = var.env == "nonproduction" ? 1 : 0
   project = var.project_id
   role    = "roles/bigquery.admin"
   member  = "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
@@ -258,7 +258,7 @@ resource "google_project_iam_member" "compute" {
 ########################
 
 resource "google_storage_bucket_iam_member" "prod_access" {
-  count  = var.env == "non-production" ? 1 : 0
+  count  = var.env == "nonproduction" ? 1 : 0
   bucket = join("-", [var.gcs_bucket_prefix, data.google_project.project.labels.env_code, var.bucket_name])
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:service-${var.production_project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"

@@ -69,6 +69,6 @@ data "terraform_remote_state" "projects_nonproduction" {
 
   config = {
     bucket = var.remote_state_bucket
-    prefix = "terraform/projects/${local.business_unit}/non-production"
+    prefix = "terraform/projects/${local.business_unit}/nonproduction"
   }
 }
