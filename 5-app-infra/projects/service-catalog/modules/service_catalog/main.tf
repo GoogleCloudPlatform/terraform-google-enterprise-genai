@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-# resource "google_project_service_identity" "storage_agent" {
-#   provider = google-beta
+resource "google_project_service_identity" "storage_agent" {
+  provider = google-beta
 
-#   project = var.project_id
-#   service = "storage.googleapis.com"
-# }
-# resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
-#   crypto_key_id = var.kms_crypto_key
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   member        = "serviceAccount:${google_project_service_identity.storage_agent.email}"
-# }
+  project = var.project_id
+  service = "storage.googleapis.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "storage_agent" {
+  crypto_key_id = var.kms_crypto_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service_identity.storage_agent]
+}
 
 resource "random_string" "bucket_name" {
   length  = 4
@@ -39,7 +42,7 @@ resource "google_storage_bucket" "bucket" {
   name                        = "${var.gcs_bucket_prefix}-${var.project_id}-${lower(var.region)}-${random_string.bucket_name.result}"
   project                     = var.project_id
   uniform_bucket_level_access = true
-
+  force_destroy               = var.bucket_force_destroy
   encryption {
     default_kms_key_name = var.kms_crypto_key
   }
@@ -50,6 +53,7 @@ resource "google_storage_bucket" "bucket" {
     log_bucket = var.log_bucket
   }
 
+  depends_on = [google_kms_crypto_key_iam_member.storage_agent]
 }
 
 resource "google_storage_bucket_iam_member" "bucket_role" {
@@ -88,6 +92,7 @@ resource "google_storage_bucket" "cloud_build_logs" {
   project                     = var.project_id
   location                    = var.region
   uniform_bucket_level_access = true
+  force_destroy               = var.bucket_force_destroy
 
   encryption {
     default_kms_key_name = var.kms_crypto_key

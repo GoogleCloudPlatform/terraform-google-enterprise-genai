@@ -127,6 +127,7 @@ resource "google_storage_bucket" "cloud_build_logs" {
   project                     = var.project_id
   location                    = var.region
   uniform_bucket_level_access = true
+  force_destroy               = var.bucket_force_destroy
 
   encryption {
     default_kms_key_name = var.kms_crypto_key
