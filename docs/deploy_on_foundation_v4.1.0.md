@@ -1063,7 +1063,7 @@ Make sure you **change the organization policy** back to the original state.
 
 ## 3-network: Configure private DNS zone for Vertex Workbench Instances, Enable NAT and Attach projects to perimeter
 
-This step corresponds to modifications made to `3-networks-dual-svpc` step on foundation.
+This step corresponds to modifications made to `3-networks-svpc` step on foundation.
 
 Please note that the steps below are assuming you are checked out on `terraform-google-enterprise-genai/`.
 
@@ -1092,13 +1092,13 @@ cd ../terraform-google-enterprise-genai
 - Copy DNS notebook network module from this repo to `gcp-networks` repository.
 
 ```bash
-cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
+cp -r 3-networks-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
 ```
 
 - Create a file named `ml_dns_notebooks.tf` on path `gcp-networks/modules/base_env`:
 
 ```bash
-cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
+cp docs/assets/terraform/3-networks-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
 ```
 
 Commit and push files to git repo.
@@ -1352,13 +1352,13 @@ cd ../terraform-google-enterprise-genai
 - Copy DNS notebook network module from this repo to `gcp-networks` repository.
 
 ```bash
-cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
+cp -r 3-networks-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
 ```
 
 - Create a file named `ml_dns_notebooks.tf` on path `gcp-networks/modules/base_env`:
 
 ```bash
-cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
+cp docs/assets/terraform/3-networks-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
 ```
 
 Commit and push files to git repo.
@@ -1612,13 +1612,13 @@ cd ../terraform-google-enterprise-genai
 - Copy DNS notebook network module from this repo to `gcp-networks` repository.
 
 ```bash
-cp -r 3-networks-dual-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
+cp -r 3-networks-svpc/modules/ml_dns_notebooks ../gcp-networks/modules
 ```
 
 - Create a file named `ml_dns_notebooks.tf` on path `gcp-networks/modules/base_env`:
 
 ```bash
-cp docs/assets/terraform/3-networks-dual-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
+cp docs/assets/terraform/3-networks-svpc/ml_dns_notebooks.tf ../gcp-networks/modules/base_env
 ```
 
 Commit and push files to git repo.
