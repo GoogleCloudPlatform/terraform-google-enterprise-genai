@@ -11,7 +11,6 @@
 | create\_unique\_tag\_key | Creates unique organization-wide tag keys by adding a random suffix to each key. | `bool` | `false` | no |
 | data\_access\_logs\_enabled | Enable Data Access logs of types DATA\_READ, DATA\_WRITE for all GCP services. Enabling Data Access logs might result in your organization being charged for the additional logs usage. See https://cloud.google.com/logging/docs/audit#data-access The ADMIN\_READ logs are enabled by default. | `bool` | `false` | no |
 | domains\_to\_allow | The list of domains to allow users from in IAM. Used by Domain Restricted Sharing Organization Policy. Must include the domain of the organization you are deploying the foundation. To add other domains you must also grant access to these domains to the Terraform Service Account used in the deploy. | `list(string)` | n/a | yes |
-| enable\_hub\_and\_spoke | Enable Hub-and-Spoke architecture. | `bool` | `false` | no |
 | enable\_scc\_resources\_in\_terraform | Create Security Command Center resources in Terraform. Security Command Center must be activated before the creation of the resources. See [Overview of activating Security Command Center](https://cloud.google.com/security-command-center/docs/activate-scc-overview) before enabling this feature. | `bool` | `false` | no |
 | enforce\_allowed\_worker\_pools | Whether to enforce the organization policy restriction on allowed worker pools for Cloud Build. | `bool` | `false` | no |
 | essential\_contacts\_domains\_to\_allow | The list of domains that email addresses added to Essential Contacts can have. | `list(string)` | n/a | yes |
@@ -36,7 +35,6 @@
 
 | Name | Description |
 |------|-------------|
-| base\_net\_hub\_project\_id | The Base Network hub project ID |
 | cai\_monitoring\_artifact\_registry | CAI Monitoring Cloud Function Artifact Registry name. |
 | cai\_monitoring\_asset\_feed | CAI Monitoring Cloud Function Organization Asset Feed name. |
 | cai\_monitoring\_bucket | CAI Monitoring Cloud Function Source Bucket name. |
@@ -59,11 +57,9 @@
 | org\_secrets\_project\_id | The org secrets project ID |
 | parent\_resource\_id | The parent resource id |
 | parent\_resource\_type | The parent resource type |
-| restricted\_net\_hub\_project\_id | The Restricted Network hub project ID |
-| restricted\_net\_hub\_project\_number | The Restricted Network hub project number |
 | scc\_notification\_name | Name of SCC Notification |
 | scc\_notifications\_project\_id | The SCC notifications project ID |
-| shared\_vpc\_projects | Base and restricted shared VPC Projects info grouped by environment (development, non-production, production). |
+| shared\_vpc\_projects | Base and restricted shared VPC Projects info grouped by environment (development, nonproduction, production). |
 | tags | Tag Values to be applied on next steps. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
