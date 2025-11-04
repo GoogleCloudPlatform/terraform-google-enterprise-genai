@@ -53,18 +53,18 @@ locals {
     },
     "env" = {
       "2-production"     = { vcs_branch = "production", directory = "/envs/production" },
-      "2-non-production" = { vcs_branch = "non-production", directory = "/envs/non-production" },
+      "2-nonproduction" = { vcs_branch = "nonproduction", directory = "/envs/nonproduction" },
       "2-development"    = { vcs_branch = "development", directory = "/envs/development" },
     },
     "net" = {
       "3-production"     = { vcs_branch = "production", directory = "/envs/production" },
-      "3-non-production" = { vcs_branch = "non-production", directory = "/envs/non-production" },
+      "3-nonproduction" = { vcs_branch = "nonproduction", directory = "/envs/nonproduction" },
       "3-development"    = { vcs_branch = "development", directory = "/envs/development" },
       "3-shared"         = { vcs_branch = "production", directory = "/envs/shared" },
     },
     "proj" = {
       "4-ml-production"     = { vcs_branch = "production", directory = "/ml_business_unit/production" },
-      "4-ml-non-production" = { vcs_branch = "non-production", directory = "/ml_business_unit/non-production" },
+      "4-ml-nonproduction" = { vcs_branch = "nonproduction", directory = "/ml_business_unit/nonproduction" },
       "4-ml-development"    = { vcs_branch = "development", directory = "/ml_business_unit/development" },
       "4-ml-shared"         = { vcs_branch = "production", directory = "/ml_business_unit/shared" },
 
