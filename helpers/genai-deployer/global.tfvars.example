@@ -66,8 +66,8 @@ folder_prefix  = "fldr"
 
 //initial_group_config = "WITH_INITIAL_OWNER"
 groups = {
-  create_groups   = true,
-  billing_project = null # Fill to create required or optional groups
+  create_groups   = false, # Change to true to create the required_groups
+  billing_project = "BILLING/QUOTA_PROJECT" # Fill to create required or optional groups
   required_groups = {
     group_org_admins           = "REPLACE_ME" # "gcp-organization-admins@example.com"
     group_billing_admins       = "REPLACE_ME" # "gcp-billing-admins@example.com"
