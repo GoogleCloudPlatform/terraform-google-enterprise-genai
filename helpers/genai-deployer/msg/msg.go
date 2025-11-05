@@ -27,7 +27,7 @@ const (
 	cloudBuildURL   = "https://console.cloud.google.com/cloud-build/builds;region=%s?project=%s"
 	buildErrorURL   = "https://console.cloud.google.com/cloud-build/builds;region=%s/%s?project=%s"
 	quotaURL        = "https://support.google.com/code/contact/billing_quota_increase"
-	troubleQuotaURL = "https://github.com/terraform-google-modules/terraform-example-foundation/blob/master/docs/TROUBLESHOOTING.md#billing-quota-exceeded"
+	troubleQuotaURL = "https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/blob/main/docs/TROUBLESHOOTING.md#billing-quota-exceeded"
 	groupAdminURL   = "https://cloud.google.com/identity/docs/how-to/setup#assigning_an_admin_role_to_the_service_account"
 )
 

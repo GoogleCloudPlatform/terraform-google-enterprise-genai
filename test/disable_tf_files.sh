@@ -33,24 +33,19 @@ function shared(){
 
     # disable access_context.auto.tfvars in main module
     mv 3-networks-svpc/envs/shared/access_context.auto.tfvars 3-networks-svpc/envs/shared/access_context.auto.tfvars.disabled
-    mv 3-networks-svpc/envs/shared/access_context.auto.tfvars 3-networks-svpc/envs/shared/access_context.auto.tfvars.disabled
 
     # disable common.auto.tfvars in main module
     mv 3-networks-svpc/envs/shared/common.auto.tfvars  3-networks-svpc/envs/shared/common.auto.tfvars.disabled
-    mv 3-networks-svpc/envs/shared/common.auto.tfvars  3-networks-svpc/envs/shared/common.auto.tfvars.disabled
 
     # disable shared.auto.tfvars in main module
-    mv 3-networks-svpc/envs/shared/shared.auto.tfvars  3-networks-svpc/envs/shared/shared.auto.tfvars.disabled
     mv 3-networks-svpc/envs/shared/shared.auto.tfvars  3-networks-svpc/envs/shared/shared.auto.tfvars.disabled
 }
 
 function projectsshared(){
     # disable shared.auto.tfvars
     mv 4-projects/ml_business_unit/shared/shared.auto.tfvars  4-projects/ml_business_unit/shared/shared.auto.tfvars.disabled
-    mv 4-projects/ml_business_unit/shared/shared.auto.tfvars  4-projects/ml_business_unit/shared/shared.auto.tfvars.disabled
 
     # disable common.auto.tfvars
-    mv 4-projects/ml_business_unit/shared/common.auto.tfvars  4-projects/ml_business_unit/shared/common.auto.tfvars.disabled
     mv 4-projects/ml_business_unit/shared/common.auto.tfvars  4-projects/ml_business_unit/shared/common.auto.tfvars.disabled
 }
 
