@@ -1,6 +1,6 @@
-# Terraform Google Enterprise Genai deploy helper
+# Terraform Google Enterprise GenAI deploy helper
 
-Helper tool to deploy the Google Enterprise Genai using Cloud Build and Cloud Source repositories.
+Helper tool to deploy the Google Enterprise GenAI using Cloud Build and Cloud Source repositories.
 
 ## Usage
 

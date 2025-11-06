@@ -72,7 +72,7 @@ func main() {
 
 	cfg := parseFlags()
 	if cfg.help {
-		fmt.Println("Deploys the Terraform Google Enterprise Genai")
+		fmt.Println("Deploys the Terraform Google Enterprise GenAI")
 		flag.PrintDefaults()
 		return
 	}
