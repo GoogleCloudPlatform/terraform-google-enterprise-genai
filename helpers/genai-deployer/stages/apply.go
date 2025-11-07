@@ -437,8 +437,9 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}
 		}
 		// update backend bucket
-		backendPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "ml_business_unit", "shared", "backend.tf")
-		_ = utils.ReplaceStringInFile(backendPath, "UPDATE_APP_INFRA_BUCKET", perRepo.StateBucket)
+		if err := utils.ReplaceStringInFile(filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "ml_business_unit", "shared", "backend.tf"), "UPDATE_APP_INFRA_BUCKET", perRepo.StateBucket); err != nil {
+			return err
+		}
 
 		checkoutDir := filepath.Join(c.CheckoutPath, repo)
 		conf := utils.CloneCSR(t, repo, checkoutDir, io.InfraPipeProj, c.Logger)
