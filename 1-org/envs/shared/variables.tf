@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-variable "enable_hub_and_spoke" {
-  description = "Enable Hub-and-Spoke architecture."
-  type        = bool
-  default     = false
-}
-
 variable "billing_data_users" {
   description = "Google Workspace or Cloud Identity group that have access to billing data set."
   type        = string

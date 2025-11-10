@@ -23,14 +23,15 @@ data "google_project" "common_artifacts" {
 }
 
 module "artifact_publish" {
-  source = "../../../../modules/publish_artifacts"
+  source = "../../modules/publish_artifacts"
 
-  environment = local.environment
-  description = "Publish Artifacts for ML Projects"
-  project_id  = local.common_artifacts_project_id
-  name        = local.artifacts_repo_name
-  format      = "DOCKER"
-  region      = var.instance_region
+  environment          = local.environment
+  description          = "Publish Artifacts for ML Projects"
+  project_id           = local.common_artifacts_project_id
+  name                 = local.artifacts_repo_name
+  format               = "DOCKER"
+  region               = var.instance_region
+  bucket_force_destroy = var.bucket_force_destroy
   cleanup_policies = [{
     id     = "keep-tagged-release"
     action = "KEEP"

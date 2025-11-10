@@ -129,7 +129,7 @@ You arrived to these instructions because you are using the `jenkins_bootstrap` 
    git checkout -b my-0-bootstrap
    ```
 
-1. Copy contents of foundation to new repo (modify accordingly based on your current directory).
+1. Copy contents of genai to new repo (modify accordingly based on your current directory).
 
    ```bash
    cp -RT ../terraform-google-enterprise-genai/0-bootstrap/ .
@@ -301,7 +301,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git clone <YOUR_NEW_REPO-1-org>
    ```
 
-1. Navigate into the repo and change to a non-production branch. All subsequent
+1. Navigate into the repo and change to a nonproduction branch. All subsequent
    steps assume you are running them from the <YOUR_NEW_REPO-1-org> directory. If
    you run them from another directory, adjust your copy paths accordingly.
 
@@ -310,7 +310,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
    cp -RT ../terraform-google-enterprise-genai/1-org/ .
@@ -407,7 +407,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git clone <YOUR_NEW_REPO-2-environments>
    ```
 
-1. Navigate into the repo and change to a non-production branch. All subsequent
+1. Navigate into the repo and change to a nonproduction branch. All subsequent
    steps assume you are running them from the <YOUR_NEW_REPO-2-environments> directory. If
    you run them from another directory, adjust your copy paths accordingly.
 
@@ -416,7 +416,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
    cp -RT ../terraform-google-enterprise-genai/2-environments/ .
@@ -487,11 +487,11 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. Merge changes to non-production with.
+1. Merge changes to nonproduction with.
 
    ```bash
-   git checkout -b non-production
-   git push origin non-production
+   git checkout -b nonproduction
+   git push origin nonproduction
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
@@ -503,9 +503,9 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. You can now move to the instructions in the next step, go to [Deploying step 3-networks-dual-svpc](#deploying-step-3-networks-dual-svpc) to use the Dual Shared VPC mode.
+1. You can now move to the instructions in the next step, go to [Deploying step 3-networks-svpc](#deploying-step-3-networks-svpc) to use the Dual Shared VPC mode.
 
-## Deploying step 3-networks-dual-svpc
+## Deploying step 3-networks-svpc
 
 1. Clone the repo you created manually in 0-bootstrap.
 
@@ -513,7 +513,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git clone <YOUR_NEW_REPO-3-networks>
    ```
 
-1. Navigate into the repo and change to a non-production branch. All subsequent
+1. Navigate into the repo and change to a nonproduction branch. All subsequent
    steps assume you are running them from the <YOUR_NEW_REPO-3-networks> directory. If
    you run them from another directory, adjust your copy paths accordingly.
 
@@ -522,10 +522,10 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
-   cp -RT ../terraform-google-enterprise-genai/3-networks-dual-svpc/ .
+   cp -RT ../terraform-google-enterprise-genai/3-networks-svpc/ .
    cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    cp ../terraform-google-enterprise-genai/build/Jenkinsfile .
    cp ../terraform-google-enterprise-genai/build/tf-wrapper.sh .
@@ -564,7 +564,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    mv access_context.auto.example.tfvars access_context.auto.tfvars
    ```
 
-1. Update `common.auto.tfvars` file with values from your environment and bootstrap. See any of the envs folder [README.md](../3-networks-dual-svpc/envs/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+1. Update `common.auto.tfvars` file with values from your environment and bootstrap. See any of the envs folder [README.md](../3-networks-svpc/envs/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
 1. Update `shared.auto.tfvars` file with the `target_name_server_addresses`.
 1. Update `access_context.auto.tfvars` file with the `access_context_manager_policy_id`.
 1. Use `terraform output` to get the backend bucket and networks step Terraform Service Account values from 0-bootstrap output.
@@ -587,7 +587,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git commit -m 'Initialize networks repo'
    ```
 
-1. You must manually plan and apply the `shared` environment (only once) since the `development`, `non-production` and `production` environments depend on it.
+1. You must manually plan and apply the `shared` environment (only once) since the `development`, `nonproduction` and `production` environments depend on it.
 1. To use the `validate` option of the `tf-wrapper.sh` script, please follow the [instructions](https://cloud.google.com/docs/terraform/policy-validation/validate-policies#install) to install the terraform-tools component.
 1. Also update `backend.tf` with your backend bucket from 0-bootstrap output.
 
@@ -640,7 +640,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. After production has been applied, apply development and non-production.
+1. After production has been applied, apply development and nonproduction.
 1. Merge changes to development
 
    ```bash
@@ -649,11 +649,11 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. Merge changes to non-production.
+1. Merge changes to nonproduction.
 
    ```bash
-   git checkout -b non-production
-   git push origin non-production
+   git checkout -b nonproduction
+   git push origin nonproduction
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
@@ -666,7 +666,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git clone <YOUR_NEW_REPO-4-projects>
    ```
 
-1. Navigate into the repo and change to a non-production branch. All subsequent
+1. Navigate into the repo and change to a nonproduction branch. All subsequent
    steps assume you are running them from the <YOUR_NEW_REPO-4-projects> directory. If
    you run them from another directory, adjust your copy paths accordingly.
 
@@ -675,7 +675,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
    cp -RT ../terraform-google-enterprise-genai/4-projects/ .
@@ -715,11 +715,11 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    mv common.auto.example.tfvars common.auto.tfvars
    mv shared.auto.example.tfvars shared.auto.tfvars
    mv development.auto.example.tfvars development.auto.tfvars
-   mv non-production.auto.example.tfvars non-production.auto.tfvars
+   mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
    mv production.auto.example.tfvars production.auto.tfvars
    ```
 
-1. See any of the envs folder [README.md](../4-projects/ml_business_unit/production/README.md) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
+1. See any of the envs folder [README.md](../4-projects/ml_business_unit/production/README.md) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `nonproduction.auto.tfvars`, and `production.auto.tfvars` files.
 1. See any of the shared folder [README.md](../4-projects/ml_business_unit/shared/README.md) files for additional information on the values in the `shared.auto.tfvars` file.
 1. Use `terraform output` to get the backend bucket value from 0-bootstrap output.
 
@@ -742,7 +742,7 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    for i in `find -name 'backend.tf'`; do sed -r -i "s/UPDATE_ME|UPDATE_PROJECTS_BACKEND/${backend_bucket}/" $i; done
    ```
 
-1. You need to manually plan and apply only once the `shared` environments since `development`, `non-production`, and `production` depend on it.
+1. You need to manually plan and apply only once the `shared` environments since `development`, `nonproduction`, and `production` depend on it.
 1. Use `terraform output` to get the Cloud Build project ID and the projects step Terraform Service Account from 0-bootstrap output. An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set using the Terraform Service Account to enable impersonation.
 
    ```bash
@@ -797,12 +797,12 @@ Here you will configure a VPN Network tunnel to enable connectivity between the 
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).
-1. After development has been applied, apply non-production.
-1. Merge changes to non-production branch.
+1. After development has been applied, apply nonproduction.
+1. Merge changes to nonproduction branch.
 
    ```bash
-   git checkout -b non-production
-   git push origin non-production
+   git checkout -b nonproduction
+   git push origin nonproduction
    ```
 
 1. Review the apply output in your Controller's web UI (you might want to use the option to "Scan Multibranch Pipeline Now" in your Jenkins Controller UI).

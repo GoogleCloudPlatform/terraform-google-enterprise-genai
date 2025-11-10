@@ -27,6 +27,8 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/utils"
+
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration/testutils"
 )
 
 // TerraformVet runs gcloud terraform vet on the plan of the provided terraform directory
@@ -37,10 +39,13 @@ func TerraformVet(t testing.TB, terraformDir, policyPath, project string) error 
 	fmt.Println("")
 
 	options := &terraform.Options{
-		TerraformDir: terraformDir,
-		Logger:       logger.Discard,
-		NoColor:      true,
-		PlanFilePath: filepath.Join(os.TempDir(), "plan.tfplan"),
+		TerraformDir:             terraformDir,
+		Logger:                   logger.Discard,
+		NoColor:                  true,
+		PlanFilePath:             filepath.Join(os.TempDir(), "plan.tfplan"),
+		RetryableTerraformErrors: testutils.RetryableTransientErrors,
+		MaxRetries:               MaxErrorRetries,
+		TimeBetweenRetries:       TimeBetweenErrorRetries,
 	}
 	_, err := terraform.PlanE(t, options)
 	if err != nil {

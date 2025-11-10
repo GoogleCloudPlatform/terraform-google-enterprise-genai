@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/mitchellh/go-testing-interface"
@@ -37,7 +39,6 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		BillingAccount:               tfvars.BillingAccount,
 		GroupOrgAdmins:               tfvars.GroupOrgAdmins,
 		GroupBillingAdmins:           tfvars.GroupBillingAdmins,
-		OrgProjectCreators:           tfvars.OrgProjectCreators,
 		ParentFolder:                 tfvars.ParentFolder,
 		ProjectPrefix:                tfvars.ProjectPrefix,
 		FolderPrefix:                 tfvars.FolderPrefix,
@@ -45,15 +46,18 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		BucketTfstateKmsForceDestroy: tfvars.BucketTfstateKmsForceDestroy,
 		Groups:                       tfvars.Groups,
 		InitialGroupConfig:           tfvars.InitialGroupConfig,
+		FolderDeletionProtection:     tfvars.FolderDeletionProtection,
+		ProjectDeletionPolicy:        tfvars.ProjectDeletionPolicy,
+		WorkflowDeletionProtection:   tfvars.WorkflowDeletionProtection,
 	}
 
-	err := utils.WriteTfvars(filepath.Join(c.FoundationPath, BootstrapStep, "terraform.tfvars"), bootstrapTfvars)
+	err := utils.WriteTfvars(filepath.Join(c.GenaiPath, BootstrapStep, "terraform.tfvars"), bootstrapTfvars)
 	if err != nil {
 		return err
 	}
 
 	// delete README-Jenkins.md due to private key checker false positive
-	jenkinsReadme := filepath.Join(c.FoundationPath, BootstrapStep, "README-Jenkins.md")
+	jenkinsReadme := filepath.Join(c.GenaiPath, BootstrapStep, "README-Jenkins.md")
 	exist, err := utils.FileExists(jenkinsReadme)
 	if err != nil {
 		return err
@@ -65,7 +69,7 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 		}
 	}
 
-	terraformDir := filepath.Join(c.FoundationPath, BootstrapStep)
+	terraformDir := filepath.Join(c.GenaiPath, BootstrapStep)
 	options := &terraform.Options{
 		TerraformDir: terraformDir,
 		Logger:       c.Logger,
@@ -103,7 +107,7 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 
 	// replace all backend files
 	err = s.RunStep("gcp-bootstrap.replace-backend-files", func() error {
-		files, err := utils.FindFiles(c.FoundationPath, "backend.tf")
+		files, err := utils.FindFiles(c.GenaiPath, "backend.tf")
 		if err != nil {
 			return err
 		}
@@ -126,7 +130,7 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 	msg.PrintBuildMsg(cbProjectID, defaultRegion, c.DisablePrompt)
 
 	// Check if image build was successful.
-	err = gcp.NewGCP().WaitBuildSuccess(t, cbProjectID, defaultRegion, "tf-cloudbuilder", "", "Terraform Image builder Build Failed for tf-cloudbuilder repository.", MaxBuildRetries)
+	err = gcp.NewGCP().WaitBuildSuccess(t, cbProjectID, defaultRegion, "tf-cloudbuilder", "", "Terraform Image builder Build Failed for tf-cloudbuilder repository.", MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
 	if err != nil {
 		return err
 	}
@@ -137,7 +141,7 @@ func DeployBootstrapStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, c Co
 	policiesBranch := "main"
 
 	err = s.RunStep("gcp-bootstrap.gcp-policies", func() error {
-		return preparePoliciesRepo(policiesConf, policiesBranch, c.FoundationPath, gcpPoliciesPath)
+		return preparePoliciesRepo(policiesConf, policiesBranch, c.GenaiPath, gcpPoliciesPath)
 	})
 	if err != nil {
 		return err
@@ -196,47 +200,37 @@ func DeployOrgStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs Bo
 	orgTfvars := OrgTfvars{
 		DomainsToAllow:                        tfvars.DomainsToAllow,
 		EssentialContactsDomains:              tfvars.EssentialContactsDomains,
-		BillingDataUsers:                      tfvars.BillingDataUsers,
-		AuditDataUsers:                        tfvars.AuditDataUsers,
 		SccNotificationName:                   tfvars.SccNotificationName,
 		RemoteStateBucket:                     outputs.RemoteStateBucket,
-		EnableHubAndSpoke:                     tfvars.EnableHubAndSpoke,
 		CreateACMAPolicy:                      createACMAPolicy,
 		CreateUniqueTagKey:                    tfvars.CreateUniqueTagKey,
-		CaiMonitoringKmsForceDestroy:          tfvars.CaiMonitoringKmsForceDestroy,
 		AuditLogsTableDeleteContentsOnDestroy: tfvars.AuditLogsTableDeleteContentsOnDestroy,
 		EnableSccResourcesInTerraform:         tfvars.EnableSccResourcesInTerraform,
 		LogExportStorageForceDestroy:          tfvars.LogExportStorageForceDestroy,
 		LogExportStorageLocation:              tfvars.LogExportStorageLocation,
 		BillingExportDatasetLocation:          tfvars.BillingExportDatasetLocation,
+		BillingDataUsers:                      tfvars.BillingDataUsers,
+		AuditDataUsers:                        tfvars.AuditDataUsers,
+		KmsPreventDestroy:                     tfvars.KmsPreventDestroy,
+		CaiMonitoringKmsForceDestroy:          tfvars.CaiMonitoringKmsForceDestroy,
 	}
 	if tfvars.HasGroupsCreation() {
-		orgTfvars.BillingDataUsers = (*tfvars.Groups).RequiredGroups.BillingDataUsers
-		orgTfvars.AuditDataUsers = (*tfvars.Groups).RequiredGroups.AuditDataUsers
 		orgTfvars.GcpGroups = GcpGroups{}
-		if *(*tfvars.Groups).OptionalGroups.GcpPlatformViewer != "" {
-			orgTfvars.GcpGroups.PlatformViewer = (*tfvars.Groups).OptionalGroups.GcpPlatformViewer
+		if (*tfvars.Groups.OptionalGroups.GcpSecurityReviewer) != "" {
+			orgTfvars.GcpGroups.SecurityReviewer = tfvars.Groups.OptionalGroups.GcpSecurityReviewer
 		}
-		if *(*tfvars.Groups).OptionalGroups.GcpSecurityReviewer != "" {
-			orgTfvars.GcpGroups.SecurityReviewer = (*tfvars.Groups).OptionalGroups.GcpSecurityReviewer
+		if (*tfvars.Groups.OptionalGroups.GcpNetworkViewer) != "" {
+			orgTfvars.GcpGroups.NetworkViewer = tfvars.Groups.OptionalGroups.GcpNetworkViewer
 		}
-		if *(*tfvars.Groups).OptionalGroups.GcpNetworkViewer != "" {
-			orgTfvars.GcpGroups.NetworkViewer = (*tfvars.Groups).OptionalGroups.GcpNetworkViewer
+		if (*tfvars.Groups.OptionalGroups.GcpSccAdmin) != "" {
+			orgTfvars.GcpGroups.SccAdmin = tfvars.Groups.OptionalGroups.GcpSccAdmin
 		}
-		if *(*tfvars.Groups).OptionalGroups.GcpSccAdmin != "" {
-			orgTfvars.GcpGroups.SccAdmin = (*tfvars.Groups).OptionalGroups.GcpSccAdmin
+		if (*tfvars.Groups.OptionalGroups.GcpGlobalSecretsAdmin) != "" {
+			orgTfvars.GcpGroups.GlobalSecretsAdmin = tfvars.Groups.OptionalGroups.GcpGlobalSecretsAdmin
 		}
-		if *(*tfvars.Groups).OptionalGroups.GcpGlobalSecretsAdmin != "" {
-			orgTfvars.GcpGroups.GlobalSecretsAdmin = (*tfvars.Groups).OptionalGroups.GcpGlobalSecretsAdmin
-		}
-		if *(*tfvars.Groups).OptionalGroups.GcpAuditViewer != "" {
-			orgTfvars.GcpGroups.AuditViewer = (*tfvars.Groups).OptionalGroups.GcpAuditViewer
-		}
-	} else {
-		orgTfvars.GcpGroups = GcpGroups{}
 	}
 
-	err := utils.WriteTfvars(filepath.Join(c.FoundationPath, OrgStep, "envs", "shared", "terraform.tfvars"), orgTfvars)
+	err := utils.WriteTfvars(filepath.Join(c.GenaiPath, OrgStep, "envs", "shared", "terraform.tfvars"), orgTfvars)
 	if err != nil {
 		return err
 	}
@@ -260,11 +254,12 @@ func DeployEnvStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs Bo
 	envsTfvars := EnvsTfvars{
 		MonitoringWorkspaceUsers: tfvars.MonitoringWorkspaceUsers,
 		RemoteStateBucket:        outputs.RemoteStateBucket,
+		KmsPreventDestroy:        tfvars.KmsPreventDestroy,
 	}
 	if tfvars.HasGroupsCreation() {
 		envsTfvars.MonitoringWorkspaceUsers = (*tfvars.Groups).RequiredGroups.MonitoringWorkspaceUsers
 	}
-	err := utils.WriteTfvars(filepath.Join(c.FoundationPath, EnvironmentsStep, "terraform.tfvars"), envsTfvars)
+	err := utils.WriteTfvars(filepath.Join(c.GenaiPath, EnvironmentsStep, "terraform.tfvars"), envsTfvars)
 	if err != nil {
 		return err
 	}
@@ -277,7 +272,7 @@ func DeployEnvStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs Bo
 		Step:          EnvironmentsStep,
 		Repo:          EnvironmentsRepo,
 		GitConf:       conf,
-		Envs:          []string{"production", "non-production", "development"},
+		Envs:          []string{"production", "nonproduction", "development"},
 	}
 
 	return deployStage(t, stageConf, s, c)
@@ -285,13 +280,21 @@ func DeployEnvStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs Bo
 
 func DeployNetworksStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
 
-	step := GetNetworkStep(c.EnableHubAndSpoke)
+	localStep := []string{"shared"}
 
 	// shared
 	sharedTfvars := NetSharedTfvars{
 		TargetNameServerAddresses: tfvars.TargetNameServerAddresses,
 	}
-	err := utils.WriteTfvars(filepath.Join(c.FoundationPath, step, "shared.auto.tfvars"), sharedTfvars)
+	err := utils.WriteTfvars(filepath.Join(c.GenaiPath, DualSvpcStep, "shared.auto.tfvars"), sharedTfvars)
+	if err != nil {
+		return err
+	}
+	// production
+	productionTfvars := NetProductionTfvars{
+		TargetNameServerAddresses: tfvars.TargetNameServerAddresses,
+	}
+	err = utils.WriteTfvars(filepath.Join(c.GenaiPath, DualSvpcStep, "production.auto.tfvars"), productionTfvars)
 	if err != nil {
 		return err
 	}
@@ -301,10 +304,7 @@ func DeployNetworksStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 		PerimeterAdditionalMembers: tfvars.PerimeterAdditionalMembers,
 		RemoteStateBucket:          outputs.RemoteStateBucket,
 	}
-	if tfvars.EnableHubAndSpoke {
-		commonTfvars.EnableHubAndSpokeTransitivity = &tfvars.EnableHubAndSpokeTransitivity
-	}
-	err = utils.WriteTfvars(filepath.Join(c.FoundationPath, step, "common.auto.tfvars"), commonTfvars)
+	err = utils.WriteTfvars(filepath.Join(c.GenaiPath, DualSvpcStep, "common.auto.tfvars"), commonTfvars)
 	if err != nil {
 		return err
 	}
@@ -312,7 +312,7 @@ func DeployNetworksStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 	accessContextTfvars := NetAccessContextTfvars{
 		AccessContextManagerPolicyID: testutils.GetOrgACMPolicyID(t, tfvars.OrgID),
 	}
-	err = utils.WriteTfvars(filepath.Join(c.FoundationPath, step, "access_context.auto.tfvars"), accessContextTfvars)
+	err = utils.WriteTfvars(filepath.Join(c.GenaiPath, DualSvpcStep, "access_context.auto.tfvars"), accessContextTfvars)
 	if err != nil {
 		return err
 	}
@@ -323,23 +323,27 @@ func DeployNetworksStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 		StageSA:       outputs.NetworkSA,
 		CICDProject:   outputs.CICDProject,
 		DefaultRegion: outputs.DefaultRegion,
-		Step:          step,
+		Step:          DualSvpcStep,
 		Repo:          NetworksRepo,
 		GitConf:       conf,
-		HasManualStep: true,
+		HasLocalStep:  true,
+		LocalSteps:    localStep,
 		GroupingUnits: []string{"envs"},
-		Envs:          []string{"production", "non-production", "development"},
+		Envs:          []string{"production", "nonproduction", "development"},
 	}
-
 	return deployStage(t, stageConf, s, c)
 }
 
 func DeployProjectsStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs BootstrapOutputs, c CommonConf) error {
+
 	// shared
 	sharedTfvars := ProjSharedTfvars{
-		DefaultRegion: tfvars.DefaultRegion,
+		DefaultRegion:      tfvars.DefaultRegion,
+		ServiceCatalogRepo: tfvars.ServiceCatalogRepo,
+		ArtifactsRepoName:  tfvars.ArtifactsRepoName,
+		PreventDestroy:     tfvars.PreventDestroy,
 	}
-	err := utils.WriteTfvars(filepath.Join(c.FoundationPath, ProjectsStep, "shared.auto.tfvars"), sharedTfvars)
+	err := utils.WriteTfvars(filepath.Join(c.GenaiPath, ProjectsStep, "shared.auto.tfvars"), sharedTfvars)
 	if err != nil {
 		return err
 	}
@@ -347,20 +351,26 @@ func DeployProjectsStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 	commonTfvars := ProjCommonTfvars{
 		RemoteStateBucket: outputs.RemoteStateBucket,
 	}
-	err = utils.WriteTfvars(filepath.Join(c.FoundationPath, ProjectsStep, "common.auto.tfvars"), commonTfvars)
+	err = utils.WriteTfvars(filepath.Join(c.GenaiPath, ProjectsStep, "common.auto.tfvars"), commonTfvars)
 	if err != nil {
 		return err
 	}
+
 	//for each environment
-	envTfvars := ProjEnvTfvars{
-		ProjectsKMSLocation: tfvars.ProjectsKMSLocation,
-		ProjectsGCSLocation: tfvars.ProjectsGCSLocation,
-	}
 	for _, envfile := range []string{
 		"development.auto.tfvars",
-		"non-production.auto.tfvars",
-		"production.auto.tfvars"} {
-		err = utils.WriteTfvars(filepath.Join(c.FoundationPath, ProjectsStep, envfile), envTfvars)
+		"nonproduction.auto.tfvars",
+		"production.auto.tfvars",
+	} {
+		envName := strings.TrimSuffix(envfile, ".auto.tfvars")
+
+		envTfvars := ProjEnvTfvars{
+			LocationKMS: tfvars.LocationKMS,
+			LocationGCS: tfvars.LocationGCS,
+			Env:         envName,
+		}
+
+		err = utils.WriteTfvars(filepath.Join(c.GenaiPath, ProjectsStep, envfile), envTfvars)
 		if err != nil {
 			return err
 		}
@@ -375,55 +385,199 @@ func DeployProjectsStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outpu
 		Step:          ProjectsStep,
 		Repo:          ProjectsRepo,
 		GitConf:       conf,
-		HasManualStep: true,
-		GroupingUnits: []string{"business_unit_1", "business_unit_2"},
-		Envs:          []string{"production", "non-production", "development"},
+		HasLocalStep:  true,
+		LocalSteps:    []string{"shared"},
+		GroupingUnits: []string{"ml_business_unit"},
+		Envs:          []string{"production", "nonproduction", "development"},
 	}
 
 	return deployStage(t, stageConf, s, c)
 
 }
 
-func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, outputs InfraPipelineOutputs, c CommonConf) error {
-	// create tfvars file
-	commonTfvars := AppInfraCommonTfvars{
-		InstanceRegion:    tfvars.DefaultRegion,
-		RemoteStateBucket: outputs.RemoteStateBucket,
-	}
-	err := utils.WriteTfvars(filepath.Join(c.FoundationPath, AppInfraStep, "common.auto.tfvars"), commonTfvars)
-	if err != nil {
-		return err
-	}
-	// update backend bucket
-	for _, e := range []string{"production", "non-production", "development"} {
-		err = utils.ReplaceStringInFile(filepath.Join(c.FoundationPath, AppInfraStep, "business_unit_1", e, "backend.tf"), "UPDATE_APP_INFRA_BUCKET", outputs.StateBucket)
-		if err != nil {
-			return err
-		}
-	}
+func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io InfraPipelineOutputs, c CommonConf) error {
 	//prepare policies repo
 	gcpPoliciesPath := filepath.Join(c.CheckoutPath, "gcp-policies-app-infra")
-	policiesConf := utils.CloneCSR(t, PoliciesRepo, gcpPoliciesPath, outputs.InfraPipeProj, c.Logger)
-	policiesBranch := "main"
-	err = s.RunStep("bu1-example-app.gcp-policies-app-infra", func() error {
-		return preparePoliciesRepo(policiesConf, policiesBranch, c.FoundationPath, gcpPoliciesPath)
-	})
-	if err != nil {
+	policiesConf := utils.CloneCSR(t, PoliciesRepo, gcpPoliciesPath, io.InfraPipeProj, c.Logger)
+	if err := s.RunStep("ml_business_unit.gcp-policies-app-infra", func() error {
+		return preparePoliciesRepo(policiesConf, "main", c.GenaiPath, gcpPoliciesPath)
+	}); err != nil {
 		return err
 	}
 
-	conf := utils.CloneCSR(t, AppInfraRepo, filepath.Join(c.CheckoutPath, AppInfraRepo), outputs.InfraPipeProj, c.Logger)
-	stageConf := StageConf{
-		Stage:         AppInfraRepo,
-		CICDProject:   outputs.InfraPipeProj,
-		DefaultRegion: outputs.DefaultRegion,
-		Step:          AppInfraStep,
-		Repo:          AppInfraRepo,
-		GitConf:       conf,
-		Envs:          []string{"production", "non-production", "development"},
+	var repos []string
+	for repo := range io.Repos {
+		repos = append(repos, repo)
 	}
+	sort.Strings(repos)
 
-	return deployStage(t, stageConf, s, c)
+	for _, repo := range repos {
+		perRepo := io.Repos[repo]
+		project := strings.TrimPrefix(repo, "ml-")
+		// create tfvars files
+		tfvarsPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "common.auto.tfvars")
+		if project == "service-catalog" {
+			tf := ServiceCatalogTfvars{
+				InstanceRegion:     tfvars.InstanceRegion,
+				RemoteStateBucket:  io.RemoteStateBucket,
+				LogBucket:          io.LogBucket,
+				BucketForceDestroy: tfvars.BucketForceDestroy,
+			}
+			if err := utils.WriteTfvars(tfvarsPath, tf); err != nil {
+				return err
+			}
+		} else {
+			tf := AppInfraCommonTfvars{
+				InstanceRegion:     tfvars.InstanceRegion,
+				RemoteStateBucket:  io.RemoteStateBucket,
+				BucketForceDestroy: tfvars.BucketForceDestroy,
+			}
+			if err := utils.WriteTfvars(tfvarsPath, tf); err != nil {
+				return err
+			}
+		}
+		// update backend bucket
+		backendPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "ml_business_unit", "shared", "backend.tf")
+		_ = utils.ReplaceStringInFile(backendPath, "UPDATE_APP_INFRA_BUCKET", perRepo.StateBucket)
+
+		checkoutDir := filepath.Join(c.CheckoutPath, repo)
+		conf := utils.CloneCSR(t, repo, checkoutDir, io.InfraPipeProj, c.Logger)
+
+		stageConf := StageConf{
+			Stage:         repo,
+			CICDProject:   io.InfraPipeProj,
+			DefaultRegion: io.DefaultRegion,
+			Step:          filepath.Join(AppInfraStep, "projects", project),
+			Repo:          repo,
+			GitConf:       conf,
+			Envs:          []string{"shared"},
+			StageSA:       perRepo.TerraformSA,
+		}
+		if err := deployStage(t, stageConf, s, c); err != nil {
+			return err
+		}
+
+		switch project {
+		//configuring service catalog solutions cloud source repository
+		case "service-catalog":
+			if strings.TrimSpace(io.ServiceCatalogProjID) == "" {
+				break
+			}
+			repoPath := filepath.Join(c.CheckoutPath, ServiceCatalogRepo)
+			sourcePath := filepath.Join(c.GenaiPath, AppInfraStep, "source_repos", "service-catalog")
+			if err := s.RunStep("service-catalog.clone", func() error {
+				utils.CloneCSR(t, ServiceCatalogRepo, repoPath, io.ServiceCatalogProjID, c.Logger)
+				return nil
+			}); err != nil {
+				return err
+			}
+			gitConf := utils.CloneCSR(t, ServiceCatalogRepo, repoPath, io.ServiceCatalogProjID, c.Logger)
+
+			if err := s.RunStep("service-catalog.checkout-main", func() error {
+				return gitConf.CheckoutBranch("main")
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("service-catalog.copy-template", func() error {
+				return utils.CopyDirectory(sourcePath, repoPath)
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("service-catalog.commit-img", func() error {
+				imgDst := filepath.Join(repoPath, "img")
+				if ok, _ := utils.FileExists(imgDst); !ok {
+					return nil
+				}
+				return gitConf.CommitPaths("Add img directory", "img")
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("service-catalog.commit-modules", func() error {
+				modDst := filepath.Join(repoPath, "modules")
+				if ok, _ := utils.FileExists(modDst); !ok {
+					return nil
+				}
+				return gitConf.CommitPaths("Initialize Service Catalog Build Repo", "modules")
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("service-catalog.push", func() error {
+				return gitConf.PushBranch("main", "origin")
+			}); err != nil {
+				return err
+			}
+			if err := s.RunStep("service-catalog.wait-build", func() error {
+				sha, err := gitConf.GetCommitSha()
+				if err != nil {
+					return err
+				}
+				return gcp.NewGCP().WaitBuildSuccess(t, io.ServiceCatalogProjID, io.DefaultRegion, io.ServiceCatalogProjID, sha, "Service Catalog build failed.", MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
+			}); err != nil {
+				return err
+			}
+
+		//configuring artifact application cloud source repository
+		case "artifact-publish":
+			if strings.TrimSpace(io.ArtifactPublishProjID) == "" {
+				break
+			}
+
+			repoPath := filepath.Join(c.CheckoutPath, ArtifactPublishRepo)
+			sourcePath := filepath.Join(c.GenaiPath, AppInfraStep, "source_repos", "artifact-publish")
+
+			if err := s.RunStep("publish-artifacts.clone", func() error {
+				utils.CloneCSR(t, ArtifactPublishRepo, repoPath, io.ArtifactPublishProjID, c.Logger)
+				return nil
+			}); err != nil {
+				return err
+			}
+
+			gitConf := utils.CloneCSR(t, ArtifactPublishRepo, repoPath, io.ArtifactPublishProjID, c.Logger)
+			if err := s.RunStep("publish-artifacts.checkout-main", func() error {
+				return gitConf.CheckoutBranch("main")
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("publish-artifacts.empty-commit", func() error {
+				return gitConf.CommitAllowEmpty("Initialize Repository")
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("publish-artifacts.copy-template", func() error {
+				return utils.CopyDirectory(sourcePath, repoPath)
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("publish-artifacts.commit-files", func() error {
+				return gitConf.CommitFiles("Build Images")
+			}); err != nil {
+				return err
+			}
+
+			if err := s.RunStep("publish-artifacts.push", func() error {
+				return gitConf.PushBranch("main", "origin")
+			}); err != nil {
+				return err
+			}
+			if err := s.RunStep("publish-artifacts.wait-build", func() error {
+				sha, err := gitConf.GetCommitSha()
+				if err != nil {
+					return err
+				}
+				return gcp.NewGCP().WaitBuildSuccess(t, io.ArtifactPublishProjID, io.DefaultRegion, ArtifactPublishRepo, sha, "Publish Artifacts build failed.", MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
+			}); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func deployStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error {
@@ -434,28 +588,31 @@ func deployStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error 
 	}
 
 	err = s.RunStep(fmt.Sprintf("%s.copy-code", sc.Stage), func() error {
-		return copyStepCode(t, sc.GitConf, c.FoundationPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath)
+		return copyStepCode(t, sc.GitConf, c.GenaiPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath)
 	})
 	if err != nil {
 		return err
 	}
 
-	shared := []string{}
-	if sc.HasManualStep {
-		shared = sc.GroupingUnits
+	groupunit := []string{}
+	if sc.HasLocalStep {
+		groupunit = sc.GroupingUnits
 	}
-	for _, bu := range shared {
-		buOptions := &terraform.Options{
-			TerraformDir: filepath.Join(filepath.Join(c.CheckoutPath, sc.Repo), bu, "shared"),
-			Logger:       c.Logger,
-			NoColor:      true,
-		}
 
-		err := s.RunStep(fmt.Sprintf("%s.%s.apply-shared", sc.Stage, bu), func() error {
-			return applyLocal(t, buOptions, sc.StageSA, c.PolicyPath, c.ValidatorProject)
-		})
-		if err != nil {
-			return err
+	for _, bu := range groupunit {
+		for _, localStep := range sc.LocalSteps {
+			buOptions := &terraform.Options{
+				TerraformDir: filepath.Join(filepath.Join(c.CheckoutPath, sc.Repo), bu, localStep),
+				Logger:       c.Logger,
+				NoColor:      true,
+			}
+
+			err := s.RunStep(fmt.Sprintf("%s.%s.apply-%s", sc.Stage, bu, localStep), func() error {
+				return applyLocal(t, buOptions, sc.StageSA, c.PolicyPath, c.ValidatorProject)
+			})
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -483,12 +640,12 @@ func deployStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error 
 	return nil
 }
 
-func preparePoliciesRepo(policiesConf utils.GitRepo, policiesBranch, foundationPath, gcpPoliciesPath string) error {
+func preparePoliciesRepo(policiesConf utils.GitRepo, policiesBranch, genaiPath, gcpPoliciesPath string) error {
 	err := policiesConf.CheckoutBranch(policiesBranch)
 	if err != nil {
 		return err
 	}
-	err = utils.CopyDirectory(filepath.Join(foundationPath, "policy-library"), gcpPoliciesPath)
+	err = utils.CopyDirectory(filepath.Join(genaiPath, "policy-library"), gcpPoliciesPath)
 	if err != nil {
 		return err
 	}
@@ -499,28 +656,29 @@ func preparePoliciesRepo(policiesConf utils.GitRepo, policiesBranch, foundationP
 	return policiesConf.PushBranch(policiesBranch, "origin")
 }
 
-func copyStepCode(t testing.TB, conf utils.GitRepo, foundationPath, checkoutPath, repo, step, customPath string) error {
+func copyStepCode(t testing.TB, conf utils.GitRepo, genaiPath, checkoutPath, repo, step, customPath string) error {
 	gcpPath := filepath.Join(checkoutPath, repo)
 	targetDir := gcpPath
 	if customPath != "" {
 		targetDir = filepath.Join(gcpPath, customPath)
 	}
-	err := utils.CopyDirectory(filepath.Join(foundationPath, step), targetDir)
+	err := utils.CopyDirectory(filepath.Join(genaiPath, step), targetDir)
 	if err != nil {
 		return err
 	}
-	err = utils.CopyFile(filepath.Join(foundationPath, "build/cloudbuild-tf-apply.yaml"), filepath.Join(gcpPath, "cloudbuild-tf-apply.yaml"))
+	err = utils.CopyFile(filepath.Join(genaiPath, "build/cloudbuild-tf-apply.yaml"), filepath.Join(gcpPath, "cloudbuild-tf-apply.yaml"))
 	if err != nil {
 		return err
 	}
-	err = utils.CopyFile(filepath.Join(foundationPath, "build/cloudbuild-tf-plan.yaml"), filepath.Join(gcpPath, "cloudbuild-tf-plan.yaml"))
+	err = utils.CopyFile(filepath.Join(genaiPath, "build/cloudbuild-tf-plan.yaml"), filepath.Join(gcpPath, "cloudbuild-tf-plan.yaml"))
 	if err != nil {
 		return err
 	}
-	return utils.CopyFile(filepath.Join(foundationPath, "build/tf-wrapper.sh"), filepath.Join(gcpPath, "tf-wrapper.sh"))
+	return utils.CopyFile(filepath.Join(genaiPath, "build/tf-wrapper.sh"), filepath.Join(gcpPath, "tf-wrapper.sh"))
 }
 
 func planStage(t testing.TB, conf utils.GitRepo, project, region, repo string) error {
+
 	err := conf.CommitFiles(fmt.Sprintf("Initialize %s repo", repo))
 	if err != nil {
 		return err
@@ -535,7 +693,7 @@ func planStage(t testing.TB, conf utils.GitRepo, project, region, repo string) e
 		return err
 	}
 
-	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s plan build Failed.", repo), MaxBuildRetries)
+	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s plan build Failed.", repo), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
 }
 
 func saveBootstrapCodeOnly(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error {
@@ -546,7 +704,7 @@ func saveBootstrapCodeOnly(t testing.TB, sc StageConf, s steps.Steps, c CommonCo
 	}
 
 	err = s.RunStep(fmt.Sprintf("%s.copy-code", sc.Stage), func() error {
-		return copyStepCode(t, sc.GitConf, c.FoundationPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath)
+		return copyStepCode(t, sc.GitConf, c.GenaiPath, c.CheckoutPath, sc.Repo, sc.Step, sc.CustomTargetDirPath)
 	})
 	if err != nil {
 		return err
@@ -599,10 +757,10 @@ func applyEnv(t testing.TB, conf utils.GitRepo, project, region, repo, environme
 		return err
 	}
 
-	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s apply %s build Failed.", repo, environment), MaxBuildRetries)
+	return gcp.NewGCP().WaitBuildSuccess(t, project, region, repo, commitSha, fmt.Sprintf("Terraform %s apply %s build Failed.", repo, environment), MaxBuildRetries, MaxErrorRetries, TimeBetweenErrorRetries)
 }
 
-func applyLocal(t testing.TB, options *terraform.Options, serviceAccount, policyPath, validatorProjectId string) error {
+func applyLocal(t testing.TB, options *terraform.Options, serviceAccount, policyPath, ValidatorProjectID string) error {
 	var err error
 
 	if serviceAccount != "" {
@@ -622,8 +780,8 @@ func applyLocal(t testing.TB, options *terraform.Options, serviceAccount, policy
 	}
 
 	// Runs gcloud terraform vet
-	if validatorProjectId != "" {
-		err = TerraformVet(t, options.TerraformDir, policyPath, validatorProjectId)
+	if ValidatorProjectID != "" {
+		err = TerraformVet(t, options.TerraformDir, policyPath, ValidatorProjectID)
 		if err != nil {
 			return err
 		}

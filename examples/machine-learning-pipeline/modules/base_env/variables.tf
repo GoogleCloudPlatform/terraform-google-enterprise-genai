@@ -50,12 +50,12 @@ variable "project_id" {
 }
 
 variable "non_production_project_number" {
-  description = "Non-production Machine Learning Project Number"
+  description = "nonproduction Machine Learning Project Number"
   type        = string
 }
 
 variable "non_production_project_id" {
-  description = "Non-production Machine Learning Project ID"
+  description = "nonproduction Machine Learning Project ID"
   type        = string
 }
 

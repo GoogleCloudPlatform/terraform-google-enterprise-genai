@@ -97,3 +97,8 @@ output "shared_level_keyrings" {
   description = "Keyrings used on shared level project creation"
   value       = local.shared_kms_key_ring
 }
+
+output "log_bucket" {
+  description = "Log bucket to be used by Service Catalog Bucket."
+  value       = local.log_bucket
+}

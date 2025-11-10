@@ -24,3 +24,9 @@ variable "remote_state_bucket" {
   description = "Backend bucket to load remote state information from previous steps."
   type        = string
 }
+
+variable "bucket_force_destroy" {
+  description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
+  type        = bool
+  default     = false
+}

@@ -28,6 +28,7 @@
 | common\_artifacts\_project\_id | App Infra Artifacts Project ID |
 | default\_region | Default region to create resources where applicable. |
 | enable\_cloudbuild\_deploy | Enable infra deployment using Cloud Build. |
+| log\_bucket | Log bucket to be used by Service Catalog Bucket. |
 | log\_buckets | GCS Buckets to store Cloud Build logs |
 | plan\_triggers\_id | CB plan triggers |
 | repos | CSRs to store source code |

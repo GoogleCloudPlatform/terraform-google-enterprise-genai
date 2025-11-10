@@ -29,3 +29,9 @@ variable "log_bucket" {
   description = "Log bucket to be used by Service Catalog Bucket"
   type        = string
 }
+
+variable "bucket_force_destroy" {
+  description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
+  type        = bool
+  default     = false
+}

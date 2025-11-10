@@ -206,11 +206,11 @@ if __name__ == "__main__":
         # Replace with the name of the subnet in your shared-restricted project in the non-prod environment
         DATAFLOW_SUBNET="https://www.googleapis.com/compute/v1/projects/{PRJ_N_SHARED_RESTRICTED_ID}/regions/us-central1/subnetworks/sb-n-shared-restricted-us-central1", \
         JOB_NAME="census-ingest", \
-        # Replace the {PRJ_N_MACHINE_LEARNING_NUMBER} with your Non-production Machine Learning Project Number
+        # Replace the {PRJ_N_MACHINE_LEARNING_NUMBER} with your nonproduction Machine Learning Project Number
         SERVICE_ACCOUNT="{PRJ_N_MACHINE_LEARNING_NUMBER}-compute@developer.gserviceaccount.com", \
         # Replace the {PRJ_P_MACHINE_LEARNING_NUMBER} with your Production Machine Learning Project Number
         PROD_SERVICE_ACCOUNT="{PRJ_P_MACHINE_LEARNING_NUMBER}-compute@developer.gserviceaccount.com",
-        # Replace the {PRJ_N_MACHINE_LEARNING_ID} with your Non-production Machine Learning Project ID
+        # Replace the {PRJ_N_MACHINE_LEARNING_ID} with your nonproduction Machine Learning Project ID
         DATAFLOW_SA="dataflow-sa@{PRJ_N_MACHINE_LEARNING_ID}.iam.gserviceaccount.com",
     )
 
