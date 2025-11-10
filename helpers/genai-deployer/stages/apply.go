@@ -525,14 +525,8 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			repoPath := filepath.Join(c.CheckoutPath, ArtifactPublishRepo)
 			sourcePath := filepath.Join(c.GenaiPath, AppInfraStep, "source_repos", "artifact-publish")
 
-			if err := s.RunStep("publish-artifacts.clone", func() error {
-				utils.CloneCSR(t, ArtifactPublishRepo, repoPath, io.ArtifactPublishProjID, c.Logger)
-				return nil
-			}); err != nil {
-				return err
-			}
-
 			gitConf := utils.CloneCSR(t, ArtifactPublishRepo, repoPath, io.ArtifactPublishProjID, c.Logger)
+
 			if err := s.RunStep("publish-artifacts.checkout-main", func() error {
 				return gitConf.CheckoutBranch("main")
 			}); err != nil {
