@@ -415,7 +415,7 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 		perRepo := io.Repos[repo]
 		project := strings.TrimPrefix(repo, "ml-")
 		// create tfvars files
-		tfvarsPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "common.auto.tfvars")
+		tfvarsPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "terraform.tfvars")
 		if project == "service-catalog" {
 			tf := ServiceCatalogTfvars{
 				InstanceRegion:     tfvars.InstanceRegion,
@@ -466,12 +466,7 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}
 			repoPath := filepath.Join(c.CheckoutPath, ServiceCatalogRepo)
 			sourcePath := filepath.Join(c.GenaiPath, AppInfraStep, "source_repos", "service-catalog")
-			if err := s.RunStep("service-catalog.clone", func() error {
-				utils.CloneCSR(t, ServiceCatalogRepo, repoPath, io.ServiceCatalogProjID, c.Logger)
-				return nil
-			}); err != nil {
-				return err
-			}
+
 			gitConf := utils.CloneCSR(t, ServiceCatalogRepo, repoPath, io.ServiceCatalogProjID, c.Logger)
 
 			if err := s.RunStep("service-catalog.checkout-main", func() error {
@@ -495,7 +490,7 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}); err != nil {
 				return err
 			}
-
+			//This module need to be in an isolated commit
 			if err := s.RunStep("service-catalog.commit-modules", func() error {
 				modDst := filepath.Join(repoPath, "modules")
 				if ok, _ := utils.FileExists(modDst); !ok {

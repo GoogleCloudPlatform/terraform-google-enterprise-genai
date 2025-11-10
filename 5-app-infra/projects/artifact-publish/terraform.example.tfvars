@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,3 @@
 instance_region = "us-central1" // should be one of the regions used to create network on step 3-networks
 
 remote_state_bucket = "REMOTE_STATE_BUCKET"
-
-log_bucket = "REPLACE_LOG_BUCKET"
-
-# github_ api_ token = "GITHUB_APP_TOKEN"
-
-# github_app_installation_id = "GITHUB_APP_ID"
-
-# github_remote_uri = "GITHUB_REMOTE_URI"
-

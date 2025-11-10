@@ -102,9 +102,9 @@ function appinfra(){
     mv 5-app-infra/ml_business_unit/production/bu1-production.auto.tfvars.disabled 5-app-infra/ml_business_unit/production/bu1-production.auto.tfvars
 
     # restore common.auto.tfvars in main module
-    mv 5-app-infra/ml_business_unit/development/common.auto.tfvars.disabled 5-app-infra/ml_business_unit/development/common.auto.tfvars
-    mv 5-app-infra/ml_business_unit/nonproduction/common.auto.tfvars.disabled 5-app-infra/ml_business_unit/nonproduction/common.auto.tfvars
-    mv 5-app-infra/ml_business_unit/production/common.auto.tfvars.disabled 5-app-infra/ml_business_unit/production/common.auto.tfvars
+    mv 5-app-infra/ml_business_unit/development/terraform.tfvars.disabled 5-app-infra/ml_business_unit/development/terraform.tfvars
+    mv 5-app-infra/ml_business_unit/nonproduction/terraform.tfvars.disabled 5-app-infra/ml_business_unit/nonproduction/terraform.tfvars
+    mv 5-app-infra/ml_business_unit/production/terraform.tfvars.disabled 5-app-infra/ml_business_unit/production/terraform.tfvars
 }
 
 # parse args
