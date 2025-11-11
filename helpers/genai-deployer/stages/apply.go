@@ -415,7 +415,7 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 		perRepo := io.Repos[repo]
 		project := strings.TrimPrefix(repo, "ml-")
 		// create tfvars files
-		tfvarsPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "common.auto.tfvars")
+		tfvarsPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "terraform.tfvars")
 		if project == "service-catalog" {
 			tf := ServiceCatalogTfvars{
 				InstanceRegion:     tfvars.InstanceRegion,
@@ -437,8 +437,9 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}
 		}
 		// update backend bucket
-		backendPath := filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "ml_business_unit", "shared", "backend.tf")
-		_ = utils.ReplaceStringInFile(backendPath, "UPDATE_APP_INFRA_BUCKET", perRepo.StateBucket)
+		if err := utils.ReplaceStringInFile(filepath.Join(c.GenaiPath, AppInfraStep, "projects", project, "ml_business_unit", "shared", "backend.tf"), "UPDATE_APP_INFRA_BUCKET", perRepo.StateBucket); err != nil {
+			return err
+		}
 
 		checkoutDir := filepath.Join(c.CheckoutPath, repo)
 		conf := utils.CloneCSR(t, repo, checkoutDir, io.InfraPipeProj, c.Logger)
@@ -465,12 +466,7 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}
 			repoPath := filepath.Join(c.CheckoutPath, ServiceCatalogRepo)
 			sourcePath := filepath.Join(c.GenaiPath, AppInfraStep, "source_repos", "service-catalog")
-			if err := s.RunStep("service-catalog.clone", func() error {
-				utils.CloneCSR(t, ServiceCatalogRepo, repoPath, io.ServiceCatalogProjID, c.Logger)
-				return nil
-			}); err != nil {
-				return err
-			}
+
 			gitConf := utils.CloneCSR(t, ServiceCatalogRepo, repoPath, io.ServiceCatalogProjID, c.Logger)
 
 			if err := s.RunStep("service-catalog.checkout-main", func() error {
@@ -486,20 +482,12 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}
 
 			if err := s.RunStep("service-catalog.commit-img", func() error {
-				imgDst := filepath.Join(repoPath, "img")
-				if ok, _ := utils.FileExists(imgDst); !ok {
-					return nil
-				}
 				return gitConf.CommitPaths("Add img directory", "img")
 			}); err != nil {
 				return err
 			}
-
+			//This module need to be in an isolated commit
 			if err := s.RunStep("service-catalog.commit-modules", func() error {
-				modDst := filepath.Join(repoPath, "modules")
-				if ok, _ := utils.FileExists(modDst); !ok {
-					return nil
-				}
 				return gitConf.CommitPaths("Initialize Service Catalog Build Repo", "modules")
 			}); err != nil {
 				return err
@@ -529,14 +517,8 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			repoPath := filepath.Join(c.CheckoutPath, ArtifactPublishRepo)
 			sourcePath := filepath.Join(c.GenaiPath, AppInfraStep, "source_repos", "artifact-publish")
 
-			if err := s.RunStep("publish-artifacts.clone", func() error {
-				utils.CloneCSR(t, ArtifactPublishRepo, repoPath, io.ArtifactPublishProjID, c.Logger)
-				return nil
-			}); err != nil {
-				return err
-			}
-
 			gitConf := utils.CloneCSR(t, ArtifactPublishRepo, repoPath, io.ArtifactPublishProjID, c.Logger)
+
 			if err := s.RunStep("publish-artifacts.checkout-main", func() error {
 				return gitConf.CheckoutBranch("main")
 			}); err != nil {

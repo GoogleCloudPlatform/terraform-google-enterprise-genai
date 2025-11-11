@@ -155,13 +155,6 @@ func DestroyExampleAppStage(t testing.TB, s steps.Steps, outputs InfraPipelineOu
 		}
 		subStep := fmt.Sprintf("%s.shared", repo)
 		err := s.RunDestroyStep(subStep, func() error {
-			msg := fmt.Sprintf("Destroying %s (repo=%s, env=%s, path=%s)",
-				subStep, repo, "shared", filepath.Join(c.CheckoutPath, stageConf.Step))
-			if c.Logger != nil {
-				c.Logger.Logf(t, msg)
-			} else {
-				t.Logf(msg)
-			}
 			return destroyStage(t, stageConf, s, c)
 		})
 		if err != nil {

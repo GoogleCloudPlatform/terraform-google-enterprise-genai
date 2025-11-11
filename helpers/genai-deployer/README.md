@@ -1,6 +1,6 @@
-# Terraform Google Enterprise Genai deploy helper
+# Terraform Google Enterprise GenAI deploy helper
 
-Helper tool to deploy the Google Enterprise Genai using Cloud Build and Cloud Source repositories.
+Helper tool to deploy the Google Enterprise GenAI using Cloud Build and Cloud Source repositories.
 
 ## Usage
 
@@ -170,7 +170,10 @@ For these extra check you need at least the roles *Security Center Notification 
 
     ```text
     deploy-directory/
-    └── bu1-example-app
+    └── ml-artifact-publish
+    └── ml-service-catalog
+    └── publish-artifacts
+    └── service-catalog
     └── gcp-bootstrap
     └── gcp-environments
     └── gcp-networks
