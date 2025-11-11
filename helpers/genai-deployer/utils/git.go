@@ -123,14 +123,6 @@ func (g GitRepo) CommitPaths(msg string, paths ...string) error {
 	if _, err := g.conf.RunCmdE(args...); err != nil {
 		return err
 	}
-	args = append([]string{"diff", "--cached", "--name-only", "--"}, paths...)
-	out, err := g.conf.RunCmdE(args...)
-	if err != nil {
-		return err
-	}
-	if strings.TrimSpace(out) == "" {
-		return nil
-	}
-	_, err = g.conf.RunCmdE("commit", "-m", fmt.Sprintf("'%s'", msg))
+	_, err := g.conf.RunCmdE("commit", "-m", fmt.Sprintf("'%s'", msg))
 	return err
 }

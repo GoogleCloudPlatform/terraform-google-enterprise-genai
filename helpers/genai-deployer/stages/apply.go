@@ -482,20 +482,12 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}
 
 			if err := s.RunStep("service-catalog.commit-img", func() error {
-				imgDst := filepath.Join(repoPath, "img")
-				if ok, _ := utils.FileExists(imgDst); !ok {
-					return nil
-				}
 				return gitConf.CommitPaths("Add img directory", "img")
 			}); err != nil {
 				return err
 			}
 			//This module need to be in an isolated commit
 			if err := s.RunStep("service-catalog.commit-modules", func() error {
-				modDst := filepath.Join(repoPath, "modules")
-				if ok, _ := utils.FileExists(modDst); !ok {
-					return nil
-				}
 				return gitConf.CommitPaths("Initialize Service Catalog Build Repo", "modules")
 			}); err != nil {
 				return err
