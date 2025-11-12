@@ -112,7 +112,7 @@ module "gitlab_oidc" {
   pool_id     = "foundation-pool"
   provider_id = "foundation-gl-provider"
   sa_mapping  = local.sa_mapping
-  attribute_condition = "assertion.user_login=='${var.gl_repos.owner}'"
+  attribute_condition = "assertion.project_path.startsWith('${var.gl_repos.owner}/')"
 }
 
 resource "gitlab_project_variable" "variables" {
