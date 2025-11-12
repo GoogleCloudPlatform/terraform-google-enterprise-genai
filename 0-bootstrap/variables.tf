@@ -15,7 +15,7 @@
  */
 
 variable "org_id" {
-  description = "GCP Organization ID"
+  description = "GCP Organization ID."
   type        = string
 }
 
@@ -25,12 +25,12 @@ variable "billing_account" {
 }
 
 variable "group_org_admins" {
-  description = "Google Group for GCP Organization Administrators"
+  description = "Google Group for GCP Organization Administrators."
   type        = string
 }
 
 variable "group_billing_admins" {
-  description = "Google Group for GCP Billing Administrators"
+  description = "Google Group for GCP Billing Administrators."
   type        = string
 }
 

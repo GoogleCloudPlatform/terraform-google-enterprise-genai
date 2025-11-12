@@ -18,7 +18,7 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-data "google_service_account" "non-production" {
+data "google_service_account" "nonproduction" {
   project    = var.non_production_project_id
   account_id = "${var.non_production_project_number}-compute@developer.gserviceaccount.com"
 }

@@ -18,7 +18,7 @@ The repository is divided into distinct Terraform projects, each located in its 
 - [2. environments](./2-environments/)
   - This repository will also establish organization and environment-level Cloud Key Management Service (KMS) keyrings during this stage.
   - Create support for environment-level logging.
-- [3. networks-dual-svpc](./3-networks-dual-svpc/)
+- [3. networks-svpc](./3-networks-svpc/)
   - On this repository, it will also configure a private DNS zone for workbench instances to use either `private.googleapis.com` or `restricted.googleapis.com`.
   - Custom Firewall Rules (`allow_all_ingress_ranges` and `allow_all_egress_ranges`).
   - Enable Cloud NAT.

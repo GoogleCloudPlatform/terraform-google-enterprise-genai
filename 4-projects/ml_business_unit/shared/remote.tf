@@ -30,6 +30,7 @@ locals {
   cloud_builder_artifact_repo        = try(data.terraform_remote_state.bootstrap.outputs.cloud_builder_artifact_repo, "")
   enable_cloudbuild_deploy           = local.cloud_builder_artifact_repo != ""
   shared_kms_key_ring                = data.terraform_remote_state.org.outputs.key_rings
+  log_bucket                         = data.terraform_remote_state.org.outputs.logs_export_storage_bucket_name
 }
 
 data "terraform_remote_state" "bootstrap" {

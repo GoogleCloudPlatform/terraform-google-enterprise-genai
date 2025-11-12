@@ -31,13 +31,32 @@ const (
 
 // ValidateDirectories checks if the required directories exist
 func ValidateDirectories(g GlobalTFVars) error {
-	_, err := os.Stat(g.FoundationCodePath)
+	_, err := os.Stat(g.GenaiCodePath)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("stopping execution, FoundationCodePath directory '%s' does not exits", g.FoundationCodePath)
+		return fmt.Errorf("stopping execution, GenaiCodePath directory '%s' does not exits", g.GenaiCodePath)
 	}
 	_, err = os.Stat(g.CodeCheckoutPath)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("stopping execution, CodeCheckoutPath directory '%s' does not exits", g.CodeCheckoutPath)
+	}
+	return nil
+}
+
+// ValidateComponents checks if gcloud Beta Components and Terraform Tools are installed
+func ValidateComponents(t testing.TB) error {
+	gcpConf := gcp.NewGCP()
+	components := []string{
+		"beta",
+		"terraform-tools",
+	}
+	missing := []string{}
+	for _, c := range components {
+		if !gcpConf.IsComponentInstalled(t, c) {
+			missing = append(missing, fmt.Sprintf("'%s' not installed", c))
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("missing Google Cloud SDK component:%v", missing)
 	}
 	return nil
 }
@@ -110,11 +129,20 @@ func ValidateDestroyFlags(t testing.TB, g GlobalTFVars) {
 	if g.BucketTfstateKmsForceDestroy == nil || !*g.BucketTfstateKmsForceDestroy {
 		trueFlags = append(trueFlags, "bucket_tfstate_kms_force_destroy")
 	}
+	if g.CaiMonitoringKmsForceDestroy == nil || !*g.CaiMonitoringKmsForceDestroy {
+		trueFlags = append(trueFlags, "cai_monitoring_kms_force_destroy")
+	}
 	if g.FolderDeletionProtection != nil && *g.FolderDeletionProtection {
 		falseFlags = append(falseFlags, "folder_deletion_protection")
 	}
 	if g.WorkflowDeletionProtection != nil && *g.WorkflowDeletionProtection {
 		falseFlags = append(falseFlags, "workflow_deletion_protection")
+	}
+	if g.PreventDestroy != nil && *g.PreventDestroy {
+		falseFlags = append(falseFlags, "prevent_destroy")
+	}
+	if g.KmsPreventDestroy != nil && *g.KmsPreventDestroy {
+		falseFlags = append(falseFlags, "kms_prevent_destroy")
 	}
 	projectDeletion = g.ProjectDeletionPolicy != "DELETE"
 

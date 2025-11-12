@@ -51,7 +51,7 @@ func TestShared(t *testing.T) {
 	}
 
 	shared := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../3-networks-dual-svpc/envs/shared"),
+		tft.WithTFDir("../../../3-networks-svpc/envs/shared"),
 		tft.WithVars(vars),
 		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 1, 2*time.Minute),
 		tft.WithPolicyLibraryPath("/workspace/policy-library", bootstrap.GetTFSetupStringOutput("project_id")),

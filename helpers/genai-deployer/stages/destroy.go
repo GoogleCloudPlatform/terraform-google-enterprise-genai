@@ -28,10 +28,6 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration/testutils"
 )
 
-const (
-	MaxBuildRetries = 40
-)
-
 func DestroyBootstrapStage(t testing.TB, s steps.Steps, c CommonConf) error {
 
 	if err := forceBackendMigration(t, BootstrapRepo, "envs", "shared", c); err != nil {
@@ -107,22 +103,21 @@ func DestroyEnvStage(t testing.TB, s steps.Steps, outputs BootstrapOutputs, c Co
 		Step:          EnvironmentsStep,
 		Repo:          EnvironmentsRepo,
 		GroupingUnits: []string{"envs"},
-		Envs:          []string{"development", "non-production", "production"},
+		Envs:          []string{"development", "nonproduction", "production"},
 	}
 	return destroyStage(t, stageConf, s, c)
 }
 
 func DestroyNetworksStage(t testing.TB, s steps.Steps, outputs BootstrapOutputs, c CommonConf) error {
-	step := GetNetworkStep(c.EnableHubAndSpoke)
 	stageConf := StageConf{
 		Stage:         NetworksRepo,
 		StageSA:       outputs.NetworkSA,
 		CICDProject:   outputs.CICDProject,
-		Step:          step,
+		Step:          DualSvpcStep,
 		Repo:          NetworksRepo,
-		HasManualStep: true,
+		HasLocalStep:  true,
 		GroupingUnits: []string{"envs"},
-		Envs:          []string{"development", "non-production", "production"},
+		Envs:          []string{"development", "nonproduction", "production"},
 	}
 	return destroyStage(t, stageConf, s, c)
 }
@@ -134,24 +129,39 @@ func DestroyProjectsStage(t testing.TB, s steps.Steps, outputs BootstrapOutputs,
 		CICDProject:   outputs.CICDProject,
 		Step:          ProjectsStep,
 		Repo:          ProjectsRepo,
-		HasManualStep: true,
-		GroupingUnits: []string{"business_unit_1", "business_unit_2"},
-		Envs:          []string{"development", "non-production", "production"},
+		HasLocalStep:  true,
+		GroupingUnits: []string{"ml_business_unit"},
+		Envs:          []string{"development", "nonproduction", "production"},
 	}
 	return destroyStage(t, stageConf, s, c)
 }
 
 func DestroyExampleAppStage(t testing.TB, s steps.Steps, outputs InfraPipelineOutputs, c CommonConf) error {
-	stageConf := StageConf{
-		Stage:         AppInfraRepo,
-		StageSA:       outputs.TerraformSA,
-		CICDProject:   outputs.InfraPipeProj,
-		Step:          AppInfraStep,
-		Repo:          AppInfraRepo,
-		GroupingUnits: []string{"business_unit_1"},
-		Envs:          []string{"development", "non-production", "production"},
+	targets := []string{"ml-artifact-publish", "ml-service-catalog"}
+	for _, repo := range targets {
+		perRepo := outputs.Repos[repo]
+		checkoutDir := filepath.Join(c.CheckoutPath, repo)
+		gitConf := utils.CloneCSR(t, repo, checkoutDir, outputs.InfraPipeProj, c.Logger)
+		stageConf := StageConf{
+			Stage:         AppInfraStep,
+			Repo:          repo,
+			GitConf:       gitConf,
+			StageSA:       perRepo.TerraformSA,
+			CICDProject:   outputs.InfraPipeProj,
+			DefaultRegion: outputs.DefaultRegion,
+			GroupingUnits: []string{"ml_business_unit"},
+			Step:          filepath.Join(repo, "ml_business_unit", "shared"),
+			Envs:          []string{"shared"},
+		}
+		subStep := fmt.Sprintf("%s.shared", repo)
+		err := s.RunDestroyStep(subStep, func() error {
+			return destroyStage(t, stageConf, s, c)
+		})
+		if err != nil {
+			return fmt.Errorf("destroy step 5 failed for %s: %w", subStep, err)
+		}
 	}
-	return destroyStage(t, stageConf, s, c)
+	return nil
 }
 
 func destroyStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error {
@@ -188,7 +198,7 @@ func destroyStage(t testing.TB, sc StageConf, s steps.Steps, c CommonConf) error
 		}
 	}
 	groupingUnits := []string{}
-	if sc.HasManualStep {
+	if sc.HasLocalStep {
 		groupingUnits = sc.GroupingUnits
 	}
 	for _, g := range groupingUnits {

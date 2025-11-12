@@ -1,7 +1,7 @@
 # Deploying a GitHub actions compatible environment
 
 The objective of the instructions below is to configure the infrastructure that allows you to run CI/CD deployments using
-GitHub Actions for the Terraform Example Foundation stages (`0-bootstrap`, `1-org`, `2-environments`, `3-networks`, `4-projects`).
+GitHub Actions for the Terraform Example GenAI stages (`0-bootstrap`, `1-org`, `2-environments`, `3-networks`, `4-projects`).
 The infrastructure consists in two Google Cloud Platform projects (`prj-b-seed` and `prj-b-cicd-wif-gh`).
 
 It is a best practice to have two separate projects here (`prj-b-seed` and `prj-b-cicd-wif-gh`) for separation of concerns.
@@ -20,7 +20,7 @@ To run the instructions described in this document, install the following:
 Also make sure that you have the following:
 
 - A [GitHub account](https://docs.github.com/en/get-started/onboarding/getting-started-with-your-github-account) for your User or [Organization](https://docs.github.com/en/organizations/collaborating-with-groups-in-organizations/creating-a-new-organization-from-scratch).
-- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the stages of Foundation:
+- A **private** [GitHub repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) for each one of the stages of GenAI:
     - Bootstrap
     - Organization
     - Environments
@@ -99,13 +99,13 @@ You must be [authenticated to GitHub](https://docs.github.com/en/authentication/
    git push --set-upstream origin production
    ```
 
-1. change to a non-production branch.
+1. change to a nonproduction branch.
 
    ```bash
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo (modify accordingly based on your current directory).
+1. Copy contents of genai to new repo (modify accordingly based on your current directory).
 
    ```bash
    mkdir -p envs/shared
@@ -186,7 +186,7 @@ export the GitHub fine grained access token as an environment variable:
    terraform apply bootstrap.tfplan
    ```
 
-1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, and `4-projects`.
+1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-svpc`, and `4-projects`.
 
    ```bash
    export network_step_sa=$(terraform output -raw networks_step_terraform_service_account_email)
@@ -272,13 +272,13 @@ we recommend that you request 50 additional projects for the **projects step ser
    git push --set-upstream origin production
    ```
 
-1. change to a non-production branch.
+1. change to a nonproduction branch.
 
    ```bash
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
    cp -RT ../terraform-google-enterprise-genai/1-org/ .
@@ -388,20 +388,20 @@ See the shared folder [README.md](../1-org/envs/shared/README.md#inputs) for add
    git checkout -b production
    git push --set-upstream origin production
 
-   git checkout -b non-production
-   git push --set-upstream origin non-production
+   git checkout -b nonproduction
+   git push --set-upstream origin nonproduction
 
    git checkout -b development
    git push --set-upstream origin development
    ```
 
-1. change to a non-production branch.
+1. change to a nonproduction branch.
 
    ```bash
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
    cp -RT ../terraform-google-enterprise-genai/2-environments/ .
@@ -451,15 +451,15 @@ See any of the envs folder [README.md](../2-environments/envs/production/README.
 1. Review merge output in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/actions under `tf-apply`.
 1. If the GitHub action is successful, apply the next environment.
 
-1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/pull/new/development from the `development` branch to the `non-production` branch and review the output.
-1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `non-production` environment.
+1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/pull/new/development from the `development` branch to the `nonproduction` branch and review the output.
+1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `nonproduction` environment.
 1. Review the GitHub Action output in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/actions under `tf-pull-request`.
-1. If the GitHub action is successful, merge the pull request in to the `non-production` branch.
-1. The merge will trigger a GitHub Action that will apply the terraform configuration for the `non-production` environment.
+1. If the GitHub action is successful, merge the pull request in to the `nonproduction` branch.
+1. The merge will trigger a GitHub Action that will apply the terraform configuration for the `nonproduction` environment.
 1. Review merge output in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/actions under `tf-apply`.
 1. If the GitHub action is successful, apply the next environment.
 
-1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/pull/new/non-production from the `non-production` branch to the `production` branch and review the output.
+1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/pull/new/nonproduction from the `nonproduction` branch to the `production` branch and review the output.
 1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `production` environment.
 1. Review the GitHub Action output in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/actions under `tf-pull-request`.
 1. If the GitHub action is successful, merge the pull request in to the `production` branch.
@@ -467,11 +467,11 @@ See any of the envs folder [README.md](../2-environments/envs/production/README.
 1. Review merge output in GitHub https://github.com/GITHUB-OWNER/GITHUB-ENVIRONMENTS-REPO/actions under `tf-apply`.
 
 1. You can now move to the instructions in the network stage.
-To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [Deploying step 3-networks-dual-svpc](#deploying-step-3-networks-dual-svpc).
+To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foundations/networking#vpcsharedvpc-id7-1-shared-vpc-) network mode go to [Deploying step 3-networks-svpc](#deploying-step-3-networks-svpc).
 
-## Deploying step 3-networks-dual-svpc
+## Deploying step 3-networks-svpc
 
-1. Clone the repository you created to host the `3-networks-dual-svpc` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
+1. Clone the repository you created to host the `3-networks-svpc` terraform configuration at the same level of the `terraform-google-enterprise-genai` folder.
 
    ```bash
    git clone git@github.com:<GITHUB-OWNER>/<GITHUB-NETWORKS-REPO>.git gcp-networks
@@ -493,23 +493,23 @@ To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foun
    git checkout -b production
    git push --set-upstream origin production
 
-   git checkout -b non-production
-   git push --set-upstream origin non-production
+   git checkout -b nonproduction
+   git push --set-upstream origin nonproduction
 
    git checkout -b development
    git push --set-upstream origin development
    ```
 
-1. change to a non-production branch.
+1. change to a nonproduction branch.
 
    ```bash
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
-   cp -RT ../terraform-google-enterprise-genai/3-networks-dual-svpc/ .
+   cp -RT ../terraform-google-enterprise-genai/3-networks-svpc/ .
    cp -RT ../terraform-google-enterprise-genai/policy-library/ ./policy-library
    mkdir -p .github/workflows
    cp ../terraform-google-enterprise-genai/build/github-tf-* ./.github/workflows/
@@ -539,7 +539,7 @@ To use the [Dual Shared VPC](https://cloud.google.com/architecture/security-foun
    ```
 
 1. Update `common.auto.tfvars` file with values from your GCP environment.
-See any of the envs folder [README.md](../3-networks-dual-svpc/envs/production/README.md#inputs) files for additional information on the values in the `common.auto.tfvars` file.
+See any of the envs folder [README.md](../3-networks-svpc/envs/production/README.md#inputs) files for additional information on the values in the `common.auto.tfvars` file.
 1. You must add your user email in the variable `perimeter_additional_members` to be able to see the resources created in the restricted project.
 1. Update the `remote_state_bucket` variable with the backend bucket from step Bootstrap in the `common.auto.tfvars` file.
 
@@ -558,7 +558,7 @@ See any of the envs folder [README.md](../3-networks-dual-svpc/envs/production/R
    git commit -m 'Initialize networks repo'
    ```
 
-1. You must manually plan and apply the `shared` environment (only once) since the `development`, `non-production` and `production` environments depend on it.
+1. You must manually plan and apply the `shared` environment (only once) since the `development`, `nonproduction` and `production` environments depend on it.
 1. Use `terraform output` to get the CI/CD project ID and the networks step Terraform Service Account from gcp-bootstrap output.
 1. The CI/CD project ID will be used in the [validation](https://cloud.google.com/docs/terraform/policy-validation/quickstart) of the Terraform configuration
 
@@ -609,15 +609,15 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 1. Review merge output in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/actions under `tf-apply`.
 1. If the GitHub action is successful, apply the next environment.
 
-1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/pull/new/development from the `development` branch to the `non-production` branch and review the output.
-1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `non-production` environment.
+1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/pull/new/development from the `development` branch to the `nonproduction` branch and review the output.
+1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `nonproduction` environment.
 1. Review the GitHub Action output in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/actions under `tf-pull-request`.
-1. If the GitHub action is successful, merge the pull request in to the `non-production` branch.
-1. The merge will trigger a GitHub Action that will apply the terraform configuration for the `non-production` environment.
+1. If the GitHub action is successful, merge the pull request in to the `nonproduction` branch.
+1. The merge will trigger a GitHub Action that will apply the terraform configuration for the `nonproduction` environment.
 1. Review merge output in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/actions under `tf-apply`.
 1. If the GitHub action is successful, apply the next environment.
 
-1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/pull/new/non-production from the `non-production` branch to the `production` branch and review the output.
+1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/pull/new/nonproduction from the `nonproduction` branch to the `production` branch and review the output.
 1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `production` environment.
 1. Review the GitHub Action output in GitHub https://github.com/GITHUB-OWNER/GITHUB-NETWORKS-REPO/actions under `tf-pull-request`.
 1. If the GitHub action is successful, merge the pull request in to the `production` branch.
@@ -657,20 +657,20 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
    git checkout -b production
    git push --set-upstream origin production
 
-   git checkout -b non-production
-   git push --set-upstream origin non-production
+   git checkout -b nonproduction
+   git push --set-upstream origin nonproduction
 
    git checkout -b development
    git push --set-upstream origin development
    ```
 
-1. change to a non-production branch.
+1. change to a nonproduction branch.
 
    ```bash
    git checkout -b plan
    ```
 
-1. Copy contents of foundation to new repo.
+1. Copy contents of genai to new repo.
 
    ```bash
    cp -RT ../terraform-google-enterprise-genai/4-projects/ .
@@ -687,11 +687,11 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
    mv common.auto.example.tfvars common.auto.tfvars
    mv shared.auto.example.tfvars shared.auto.tfvars
    mv development.auto.example.tfvars development.auto.tfvars
-   mv non-production.auto.example.tfvars non-production.auto.tfvars
+   mv nonproduction.auto.example.tfvars nonproduction.auto.tfvars
    mv production.auto.example.tfvars production.auto.tfvars
    ```
 
-1. See any of the envs folder [README.md](../4-projects/ml_business_unit/production/README.md#inputs) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `non-production.auto.tfvars`, and `production.auto.tfvars` files.
+1. See any of the envs folder [README.md](../4-projects/ml_business_unit/production/README.md#inputs) files for additional information on the values in the `common.auto.tfvars`, `development.auto.tfvars`, `nonproduction.auto.tfvars`, and `production.auto.tfvars` files.
 1. See any of the shared folder [README.md](../4-projects/ml_business_unit/shared/README.md#inputs) files for additional information on the values in the `shared.auto.tfvars` file.
 
 1. Use `terraform output` to get the backend bucket value from bootstrap output.
@@ -710,7 +710,7 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
    git commit -m 'Initialize projects repo'
    ```
 
-1. You need to manually plan and apply only once the `ml_business_unit/shared` environments since `development`, `non-production`, and `production` depend on them.
+1. You need to manually plan and apply only once the `ml_business_unit/shared` environments since `development`, `nonproduction`, and `production` depend on them.
 
 1. Use `terraform output` to get the CI/CD project ID and the projects step Terraform Service Account from gcp-bootstrap output.
 1. The CI/CD project ID will be used in the [validation](https://cloud.google.com/docs/terraform/policy-validation/quickstart) of the Terraform configuration
@@ -762,15 +762,15 @@ An environment variable `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` will be set with th
 1. Review merge output in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/actions under `tf-apply`.
 1. If the GitHub action is successful, apply the next environment.
 
-1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/pull/new/development from the `development` branch to the `non-production` branch and review the output.
-1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `non-production` environment.
+1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/pull/new/development from the `development` branch to the `nonproduction` branch and review the output.
+1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `nonproduction` environment.
 1. Review the GitHub Action output in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/actions under `tf-pull-request`.
-1. If the GitHub action is successful, merge the pull request in to the `non-production` branch.
-1. The merge will trigger a GitHub Action that will apply the terraform configuration for the `non-production` environment.
+1. If the GitHub action is successful, merge the pull request in to the `nonproduction` branch.
+1. The merge will trigger a GitHub Action that will apply the terraform configuration for the `nonproduction` environment.
 1. Review merge output in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/actions under `tf-apply`.
 1. If the GitHub action is successful, apply the next environment.
 
-1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/pull/new/non-production from the `non-production` branch to the `production` branch and review the output.
+1. Open a pull request in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/pull/new/nonproduction from the `nonproduction` branch to the `production` branch and review the output.
 1. The Pull request will trigger a GitHub Action that will run Terraform `init`/`plan`/`validate` in the `production` environment.
 1. Review the GitHub Action output in GitHub https://github.com/GITHUB-OWNER/GITHUB-PROJECTS-REPO/actions under `tf-pull-request`.
 1. If the GitHub action is successful, merge the pull request in to the `production` branch.

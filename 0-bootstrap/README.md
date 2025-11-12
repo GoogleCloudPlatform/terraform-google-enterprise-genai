@@ -21,11 +21,11 @@ organizational policy.</td>
 </tr>
 <tr>
 <td><a href="../2-environments"><span style="white-space: nowrap;">2-environments</span></a></td>
-<td>Sets up development, non-production, and production environments within the
+<td>Sets up development, nonproduction, and production environments within the
 Google Cloud organization that you've created.</td>
 </tr>
 <tr>
-<td><a href="../3-networks-dual-svpc">3-networks-dual-svpc</a></td>
+<td><a href="../3-networks-svpc">3-networks-svpc</a></td>
 <td>Sets up base and restricted shared VPCs with default DNS, NAT (optional),
 Private Service networking, VPC service controls, on-premises Dedicated
 Interconnect, and baseline firewall rules for each environment. It also sets
@@ -171,7 +171,7 @@ Using GitHub Actions requires manual creation of the GitHub repositories used in
    terraform apply bootstrap.tfplan
    ```
 
-1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-dual-svpc`, and `4-projects` and the state bucket that will be used by step 4-projects.
+1. Run `terraform output` to get the email address of the terraform service accounts that will be used to run manual steps for `shared` environments in steps `3-networks-svpc`, and `4-projects` and the state bucket that will be used by step 4-projects.
 
    ```bash
    export network_step_sa=$(terraform output -raw networks_step_terraform_service_account_email)
@@ -287,11 +287,11 @@ Each step has instructions for this change.
 | default\_region | Default region to create resources where applicable. | `string` | `"us-central1"` | no |
 | folder\_deletion\_protection | Prevent Terraform from destroying or recreating the folder. | `string` | `true` | no |
 | folder\_prefix | Name prefix to use for folders created. Should be the same in all steps. | `string` | `"fldr"` | no |
-| group\_billing\_admins | Google Group for GCP Billing Administrators | `string` | n/a | yes |
-| group\_org\_admins | Google Group for GCP Organization Administrators | `string` | n/a | yes |
+| group\_billing\_admins | Google Group for GCP Billing Administrators. | `string` | n/a | yes |
+| group\_org\_admins | Google Group for GCP Organization Administrators. | `string` | n/a | yes |
 | groups | Contain the details of the Groups to be created. | <pre>object({<br>    create_groups   = bool<br>    billing_project = optional(string, null)<br>    required_groups = object({<br>      group_org_admins           = string<br>      group_billing_admins       = string<br>      billing_data_users         = string<br>      audit_data_users           = string<br>      monitoring_workspace_users = string<br>    })<br>    optional_groups = object({<br>      gcp_platform_viewer      = optional(string, "")<br>      gcp_security_reviewer    = optional(string, "")<br>      gcp_network_viewer       = optional(string, "")<br>      gcp_scc_admin            = optional(string, "")<br>      gcp_global_secrets_admin = optional(string, "")<br>      gcp_audit_viewer         = optional(string, "")<br>    })<br>  })</pre> | <pre>{<br>  "create_groups": false,<br>  "optional_groups": {<br>    "gcp_audit_viewer": "",<br>    "gcp_global_secrets_admin": "",<br>    "gcp_network_viewer": "",<br>    "gcp_platform_viewer": "",<br>    "gcp_scc_admin": "",<br>    "gcp_security_reviewer": ""<br>  },<br>  "required_groups": {<br>    "audit_data_users": "",<br>    "billing_data_users": "",<br>    "group_billing_admins": "",<br>    "group_org_admins": "",<br>    "monitoring_workspace_users": ""<br>  }<br>}</pre> | no |
 | initial\_group\_config | Define the group configuration when it is initialized. Valid values are: WITH\_INITIAL\_OWNER, EMPTY and INITIAL\_GROUP\_CONFIG\_UNSPECIFIED. | `string` | `"WITH_INITIAL_OWNER"` | no |
-| org\_id | GCP Organization ID | `string` | n/a | yes |
+| org\_id | GCP Organization ID. | `string` | n/a | yes |
 | org\_policy\_admin\_role | Additional Org Policy Admin role for admin group. You can use this for testing purposes. | `bool` | `false` | no |
 | org\_project\_creators | Additional list of members to have project creator role across the organization. Prefix of group: user: or serviceAccount: is required. | `list(string)` | `[]` | no |
 | parent\_folder | Optional - for an organization with existing projects or for development/validation. It will place all the example foundation resources under the provided folder instead of the root organization. The value is the numeric folder ID. The folder must already exist. | `string` | `""` | no |

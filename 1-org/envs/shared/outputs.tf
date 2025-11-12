@@ -84,21 +84,6 @@ output "dns_hub_project_id" {
   description = "The DNS hub project ID"
 }
 
-output "base_net_hub_project_id" {
-  value       = try(module.base_network_hub[0].project_id, null)
-  description = "The Base Network hub project ID"
-}
-
-output "restricted_net_hub_project_id" {
-  value       = try(module.restricted_network_hub[0].project_id, null)
-  description = "The Restricted Network hub project ID"
-}
-
-output "restricted_net_hub_project_number" {
-  value       = try(module.restricted_network_hub[0].project_number, null)
-  description = "The Restricted Network hub project number"
-}
-
 output "domains_to_allow" {
   value       = var.domains_to_allow
   description = "The list of domains to allow users from in IAM."
@@ -131,7 +116,7 @@ output "tags" {
 
 output "shared_vpc_projects" {
   value       = { for k, v in module.base_restricted_environment_network : k => v }
-  description = "Base and restricted shared VPC Projects info grouped by environment (development, non-production, production)."
+  description = "Base and restricted shared VPC Projects info grouped by environment (development, nonproduction, production)."
 }
 
 output "cai_monitoring_artifact_registry" {
