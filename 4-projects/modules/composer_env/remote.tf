@@ -29,7 +29,6 @@ locals {
   enable_cloudbuild_deploy            = local.cloud_builder_artifact_repo != ""
   environment_kms_key_ring            = data.terraform_remote_state.environments_env.outputs.key_rings
   app_infra_pipeline_service_accounts = data.terraform_remote_state.business_unit_shared.outputs.terraform_service_accounts
-  infra_sa_map                        = try(local.app_infra_pipeline_service_accounts, {})
 }
 
 data "terraform_remote_state" "bootstrap" {
