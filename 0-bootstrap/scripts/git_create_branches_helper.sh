@@ -84,9 +84,8 @@ create_branches_and_push() {
       git add .gitignore
       git commit -m "seed commit"
       git push --set-upstream origin nonproduction
-      echo "Branch (nonproduction) created and pushed for $repo_name"
 
-      echo "All branches created and pushed for $repo_name"
+      echo "Branches (development, nonproduction, production) created and pushed for $repo_name"
     fi
   else
     echo "Skipping non-Git directory: $repo_path"

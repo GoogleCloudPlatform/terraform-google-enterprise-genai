@@ -20,8 +20,8 @@
 // host the code for each one of the stages
 code_checkout_path = "FULL_PATH_TO_FOLDER_WHERE_TO_CHECK_OUT_THE_SOURCE_REPOSITORIES"
 
-// The directory where the user has created a fresh git clone of the Terraform Google Enterprise Genai repository
-genai_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_EXAMPLE_GENAI_CODE_WAS_CHECKED_OUT"
+// The directory where the user has created a fresh git clone of the Terraform Google Enterprise GenAI repository
+genai_code_path = "FULL_PATH_TO_FOLDER_WHERE_THE_ENTERPRISE_GENAI_CODE_WAS_CHECKED_OUT"
 
 // An existing project configured as the default project in the local Cloud SDK configuration
 // See https://cloud.google.com/sdk/gcloud/reference/config/set#EXAMPLES
@@ -50,7 +50,11 @@ project_prefix = "prj"
 folder_prefix  = "fldr"
 
 // Optional - for an organization with existing projects or for development/validation.
+<<<<<<< HEAD
 // Uncomment this variable to place all the example genai resources under
+=======
+// Uncomment this variable to place all the enterprise genai resources under
+>>>>>>> main
 // the provided folder instead of the root organization.
 // The variable value is the numeric folder ID
 // The folder must already exist.
@@ -103,7 +107,11 @@ log_export_storage_force_destroy            = false
 log_export_storage_location                 = "US"
 billing_export_dataset_location             = "US"
 
+<<<<<<< HEAD
 // Optional - If you are deploying Google Enterprise Genai in a parent folder
+=======
+// Optional - If you are deploying Google Enterprise GenAI in a parent folder
+>>>>>>> main
 // consider setting 'create_unique_tag_key' to 'true' because as Tag Keys are
 // unique organization-wide it will add a random suffix at each tag key
 

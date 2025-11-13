@@ -164,18 +164,18 @@ Once pushed, the pipeline build logs can be accessed by navigating to the artifa
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
+1. Rename `terraform.example.tfvars` to `terraform.tfvars`.
 
    ```bash
-   mv common.auto.example.tfvars common.auto.tfvars
+   mv terraform.example.tfvars terraform.tfvars
    ```
 
-1. Update the file with values from your environment and 0-bootstrap. See machine learning business unit env folder [README.md](./ml_business_unit/production/README.md) file for additional information on the values in the `common.auto.tfvars` file.
+1. Update the file with values from your environment and 0-bootstrap. See machine learning business unit env folder [README.md](./ml_business_unit/production/README.md) file for additional information on the values in the `terraform.tfvars` file.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
-   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
    ```
 
 1. Update `backend.tf` with your bucket from the infra pipeline output.
@@ -335,18 +335,18 @@ The pipeline also listens for changes made to `plan`, `development`, `nonproduct
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
+1. Rename `terraform.example.tfvars` to `terraform.tfvars`.
 
    ```bash
-   mv common.auto.example.tfvars common.auto.tfvars
+   mv terraform.example.tfvars terraform.tfvars
    ```
 
-1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./ml_business_unit/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./ml_business_unit/production/README.md) files for additional information on the values in the `terraform.tfvars` file.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
-   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
    ```
 
 1. Update `backend.tf` with your bucket from the infra pipeline output.
@@ -364,7 +364,7 @@ The pipeline also listens for changes made to `plan`, `development`, `nonproduct
    terraform -chdir="../gcp-org/envs/shared" init
    export log_bucket=$(terraform -chdir="../gcp-org/envs/shared" output -raw logs_export_storage_bucket_name)
    echo "log_bucket = ${log_bucket}"
-   sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./common.auto.tfvars
+   sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./terraform.tfvars
    ```
 
 1. Commit changes.
@@ -461,20 +461,20 @@ The pipeline also listens for changes made to `plan`, `development`, `nonproduct
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` files to `common.auto.tfvars`.
+1. Rename `terraform.example.tfvars` files to `terraform.tfvars`.
 
    ```bash
-   mv common.auto.example.tfvars common.auto.tfvars
+   mv terraform.example.tfvars terraform.tfvars
    ```
 
-1. Update `common.auto.tfvars` file with values from your environment.
+1. Update `terraform.tfvars` file with values from your environment.
 
 1. Use `terraform output` to get the project backend bucket value from 0-bootstrap.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
-   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
    ```
 
 1. Provide the user that will be running `./tf-wrapper.sh` the Service Account Token Creator role to the ml Terraform service account.
@@ -537,7 +537,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ./tf-wrapper.sh apply shared
    ```
 
-If you received any errors or made any changes to the Terraform config or `common.auto.tfvars` you must re-run `./tf-wrapper.sh plan <env>` before running `./tf-wrapper.sh apply <env>`.
+If you received any errors or made any changes to the Terraform config or `terraform.tfvars` you must re-run `./tf-wrapper.sh plan <env>` before running `./tf-wrapper.sh apply <env>`.
 
 After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
 
@@ -615,18 +615,18 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    chmod 755 ./tf-wrapper.sh
    ```
 
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`.
+1. Rename `terraform.example.tfvars` to `terraform.tfvars`.
 
    ```bash
-   mv common.auto.example.tfvars common.auto.tfvars
+   mv terraform.example.tfvars terraform.tfvars
    ```
 
-1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./ml_business_unit/production/README.md) files for additional information on the values in the `common.auto.tfvars` file.
+1. Update the file with values from your environment and 0-bootstrap. See any of the business unit 1 envs folders [README.md](./ml_business_unit/production/README.md) files for additional information on the values in the `terraform.tfvars` file.
 
    ```bash
    export remote_state_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/0-bootstrap/" output -raw projects_gcs_bucket_tfstate)
    echo "remote_state_bucket = ${remote_state_bucket}"
-   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./common.auto.tfvars
+   sed -i "s/REMOTE_STATE_BUCKET/${remote_state_bucket}/" ./terraform.tfvars
    ```
 
 1. Update `backend.tf` with your bucket from the infra pipeline output.
@@ -643,7 +643,7 @@ unset GOOGLE_IMPERSONATE_SERVICE_ACCOUNT
    ```bash
    export log_bucket=$(terraform -chdir="../terraform-google-enterprise-genai/1-org/envs/shared" output -raw logs_export_storage_bucket_name)
    echo "log_bucket = ${log_bucket}"
-   sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./common.auto.tfvars
+   sed -i "s/REPLACE_LOG_BUCKET/${log_bucket}/" ./terraform.tfvars
    ```
 
 1. Provide the user permissions to run the terraform locally with the `serviceAccountTokenCreator` permission.
@@ -697,7 +697,7 @@ To use the `validate` option of the `tf-wrapper.sh` script, please follow the [i
    ./tf-wrapper.sh apply shared
    ```
 
-If you received any errors or made any changes to the Terraform config or `common.auto.tfvars` you must re-run `./tf-wrapper.sh plan <env>` before running `./tf-wrapper.sh apply <env>`.
+If you received any errors or made any changes to the Terraform config or `terraform.tfvars` you must re-run `./tf-wrapper.sh plan <env>` before running `./tf-wrapper.sh apply <env>`.
 
 After executing this stage, unset the `GOOGLE_IMPERSONATE_SERVICE_ACCOUNT` environment variable.
 
