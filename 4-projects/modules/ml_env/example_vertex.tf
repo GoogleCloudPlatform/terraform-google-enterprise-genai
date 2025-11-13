@@ -28,8 +28,8 @@ locals {
     "cloudbuild.googleapis.com",
     "notebooks.googleapis.com"
   ]
-  ml_pipeline_sa              = try(local.app_infra_pipeline_service_accounts["ml-machine-learning"], null)
-  enable_ml_bindings          = try(local.ml_pipeline_sa != null && local.ml_pipeline_sa != "", false)
+  ml_pipeline_sa     = try(local.app_infra_pipeline_service_accounts["ml-machine-learning"], null)
+  enable_ml_bindings = try(local.ml_pipeline_sa != null && local.ml_pipeline_sa != "", false)
 }
 
 module "machine_learning_project" {
@@ -211,7 +211,7 @@ resource "google_kms_crypto_key_iam_member" "secrets" {
 
 // Allow machine-learning sa access to service catalog cloud source repository
 resource "google_sourcerepo_repository_iam_member" "read" {
-  count = local.enable_cloudbuild_deploy ? 1 : 0
+  count      = local.enable_cloudbuild_deploy ? 1 : 0
   project    = local.service_catalog_project_id
   repository = local.service_catalog_repo_name
   role       = "roles/viewer"
