@@ -205,6 +205,11 @@ output "cloud_build_peered_network_id" {
 #   value       = module.gitlab_cicd.project_id
 # }
 
+# output "projects_gcs_bucket_tfstate" {
+#   description = "Bucket used for storing terraform state for stage 4-projects foundations pipelines in seed project."
+#   value       = module.gcp_projects_state_bucket.bucket.name
+# }
+
 /* ----------------------------------------
     Specific to tfc_bootstrap
    ---------------------------------------- */
