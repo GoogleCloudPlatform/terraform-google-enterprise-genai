@@ -50,11 +50,7 @@ project_prefix = "prj"
 folder_prefix  = "fldr"
 
 // Optional - for an organization with existing projects or for development/validation.
-<<<<<<< HEAD
-// Uncomment this variable to place all the example genai resources under
-=======
 // Uncomment this variable to place all the enterprise genai resources under
->>>>>>> main
 // the provided folder instead of the root organization.
 // The variable value is the numeric folder ID
 // The folder must already exist.
@@ -107,11 +103,7 @@ log_export_storage_force_destroy            = false
 log_export_storage_location                 = "US"
 billing_export_dataset_location             = "US"
 
-<<<<<<< HEAD
-// Optional - If you are deploying Google Enterprise Genai in a parent folder
-=======
 // Optional - If you are deploying Google Enterprise GenAI in a parent folder
->>>>>>> main
 // consider setting 'create_unique_tag_key' to 'true' because as Tag Keys are
 // unique organization-wide it will add a random suffix at each tag key
 
