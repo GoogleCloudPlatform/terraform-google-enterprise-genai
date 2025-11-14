@@ -31,8 +31,6 @@ module "ml_infra_projects" {
   remote_state_bucket                    = var.remote_state_bucket
   artifacts_infra_pipeline_sa            = local.artifacts_pipeline_sa
   service_catalog_infra_pipeline_sa      = local.service_catalog_pipeline_sa
-  # artifacts_infra_pipeline_sa            = module.infra_pipelines[0].terraform_service_accounts["ml-artifact-publish"]
-  # service_catalog_infra_pipeline_sa      = module.infra_pipelines[0].terraform_service_accounts["ml-service-catalog"]
   environment_kms_project_id = ""
   prevent_destroy            = var.prevent_destroy
 }
