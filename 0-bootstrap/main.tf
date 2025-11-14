@@ -35,6 +35,8 @@ locals {
   ] : ["roles/resourcemanager.organizationAdmin", "roles/billing.user"]
   group_org_admins     = var.groups.create_groups ? module.required_group["group_org_admins"].id : var.group_org_admins
   group_billing_admins = var.groups.create_groups ? module.required_group["group_billing_admins"].id : var.group_billing_admins
+
+  state_bucket_kms_key = "projects/${module.seed_bootstrap.seed_project_id}/locations/${var.default_region}/keyRings/${var.project_prefix}-keyring/cryptoKeys/${var.project_prefix}-key"
 }
 
 resource "google_folder" "bootstrap" {
