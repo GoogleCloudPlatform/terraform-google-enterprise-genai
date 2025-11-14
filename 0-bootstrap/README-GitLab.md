@@ -94,7 +94,7 @@ Also make sure that you have the following:
 
 1. The instructions described in this document require that the branches used in the Terraform Example GenAI  deploy to exist and to be [protected](https://docs.gitlab.com/ee/user/project/protected_branches.html). Follow the instructions on this section to create all the branches.
 1. Clone all the private projects you created at the same level of the `terraform-google-enterprise-genai` folder.
-You must have [SSH keys](https://docs.gitlab.com/ee/user/ssh.html) configured with GitLab for [authentication](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github).
+You must have [SSH keys](https://docs.gitlab.com/ee/user/ssh.html) configured with GitLab for [authentication](https://docs.gitlab.com/ee/user/ssh.html).
 
    ```bash
    git clone git@gitlab.com:<GITLAB-OWNER>/<GITLAB-BOOTSTRAP-REPO>.git gcp-bootstrap
@@ -566,7 +566,7 @@ See any of the envs folder [README.md](../2-environments/envs/production/README.
    chmod 755 ./*.sh
    ```
 
-1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`, rename `production.auto.example.tfvars` to `production.auto.tfvars` and rename `access_context.auto.example.tfvars` to `access_context.auto.tfvars`.
+1. Rename `common.auto.example.tfvars` to `common.auto.tfvars`, rename `shared.auto.example.tfvars` to `shared.auto.tfvars` and rename `access_context.auto.example.tfvars` to `access_context.auto.tfvars`.
 
    ```bash
    mv common.auto.example.tfvars common.auto.tfvars
@@ -574,7 +574,7 @@ See any of the envs folder [README.md](../2-environments/envs/production/README.
    mv access_context.auto.example.tfvars access_context.auto.tfvars
    ```
 
-1. Update the file `production.auto.tfvars` with the values for the `target_name_server_addresses`.
+1. Update the file `shared.auto.tfvars` with the values for the `target_name_server_addresses`.
 1. Update the file `access_context.auto.tfvars` with the organization's `access_context_manager_policy_id`.
 
    ```bash

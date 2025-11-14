@@ -29,15 +29,12 @@ SA="$3"
 # System folder to save the temporary files
 SAVE_PATH="$4"
 
-# TODO
 echo "${OIDC_TOKEN}" > "${SAVE_PATH}"/.ci_job_token_file
 
-# TODO
 gcloud iam workload-identity-pools \
 create-cred-config "${WIF_PROVIDER}" \
 --service-account="${SA}" \
 --output-file="${SAVE_PATH}"/.gcp_generated_credentials.json \
 --credential-source-file="${SAVE_PATH}"/.ci_job_token_file \
 
-# TODO
 gcloud auth login --cred-file="${SAVE_PATH}"/.gcp_generated_credentials.json --update-adc
