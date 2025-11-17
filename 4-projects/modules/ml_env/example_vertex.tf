@@ -180,10 +180,10 @@ resource "google_project_iam_member" "cloud_build_kms_viewer" {
 // Cloud Build's Service Agent permissions on Shared VPC
 resource "google_project_iam_member" "cloud_build_network_user" {
   for_each = toset(local.shared_vpc_roles)
-  project  = local.shared_vpc_host_project_id
 
-  role   = each.value
-  member = "serviceAccount:${google_project_service_identity.cloud_build.email}"
+  project = local.shared_vpc_host_project_id
+  role    = each.value
+  member  = "serviceAccount:${google_project_service_identity.cloud_build.email}"
 
   depends_on = [time_sleep.wait_30_seconds]
 }
