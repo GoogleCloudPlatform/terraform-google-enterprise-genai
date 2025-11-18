@@ -29,7 +29,7 @@ locals {
     "notebooks.googleapis.com"
   ]
   ml_pipeline_sa     = try(local.app_infra_pipeline_service_accounts["ml-machine-learning"], null)
-  enable_ml_bindings = try(local.ml_pipeline_sa != null && local.ml_pipeline_sa != "", false)
+  enable_ml_bindings = local.ml_pipeline_sa != null && local.ml_pipeline_sa != ""
 }
 
 module "machine_learning_project" {
