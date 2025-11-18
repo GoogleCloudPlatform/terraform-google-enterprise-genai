@@ -15,8 +15,9 @@
  */
 
 resource "google_project_service" "services" {
+  count = length(var.service_list)
+
   project            = var.project_id
-  count              = length(var.service_list)
   service            = var.service_list[count.index]
   disable_on_destroy = false
 }
@@ -44,7 +45,8 @@ resource "google_iam_workload_identity_pool_provider" "main" {
 }
 
 resource "google_service_account_iam_member" "wif-sa" {
-  for_each           = var.sa_mapping
+  for_each = var.sa_mapping
+
   service_account_id = each.value.sa_name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.main.name}/${each.value.attribute}"
