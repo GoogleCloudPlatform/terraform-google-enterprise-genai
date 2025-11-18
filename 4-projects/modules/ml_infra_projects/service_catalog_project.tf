@@ -24,7 +24,7 @@ locals {
     "roles/source.admin",
   ]
 
-  enable_service_catalog_bindings = var.service_catalog_infra_pipeline_sa != null && var.service_catalog_infra_pipeline_sa != ""
+  enable_service_catalog_bindings = try(var.service_catalog_infra_pipeline_sa != null && var.service_catalog_infra_pipeline_sa != "", false)
 }
 
 module "app_service_catalog_project" {

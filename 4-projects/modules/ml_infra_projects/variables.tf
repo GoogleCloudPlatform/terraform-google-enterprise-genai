@@ -161,13 +161,11 @@ variable "cloud_source_artifacts_repo_name" {
 variable "artifacts_infra_pipeline_sa" {
   description = "Artifacts SA to be used by the Infra Pipeline CloudBuild trigger."
   type        = string
-  default     = null
 }
 
 variable "service_catalog_infra_pipeline_sa" {
   description = "Service Catalog SA to be used by the Infra Pipeline CloudBuild trigger."
   type        = string
-  default     = null
 }
 
 variable "environment_kms_project_id" {
