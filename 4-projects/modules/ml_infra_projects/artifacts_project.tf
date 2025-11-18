@@ -25,7 +25,7 @@ locals {
     "roles/storage.admin",
   ]
 
-  enable_artifacts_bindings = try(var.artifacts_infra_pipeline_sa != null && var.artifacts_infra_pipeline_sa != "", false)
+  enable_artifacts_bindings = var.artifacts_infra_pipeline_sa != null && var.artifacts_infra_pipeline_sa != ""
 }
 
 module "app_infra_artifacts_project" {
