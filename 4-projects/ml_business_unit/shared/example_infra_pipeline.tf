@@ -85,7 +85,7 @@ module "infra_pipelines" {
 }
 
 resource "google_kms_key_ring_iam_member" "key_ring" {
-  for_each    = { for k in(local.enable_cloudbuild_deploy ? local.kms_sa_pairs : []) : k.key => k }
+  for_each = { for k in(local.enable_cloudbuild_deploy ? local.kms_sa_pairs : []) : k.key => k }
 
   key_ring_id = each.value.kms
   role        = "roles/cloudkms.admin"
