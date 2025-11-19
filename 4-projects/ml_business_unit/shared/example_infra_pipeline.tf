@@ -25,16 +25,6 @@ locals {
 
   artifacts_pipeline_sa       = try(local.app_infra_sa["ml-artifact-publish"], null)
   service_catalog_pipeline_sa = try(local.app_infra_sa["ml-service-catalog"], null)
-
-  kms_sa_pairs = local.enable_cloudbuild_deploy ? flatten([
-    for kms in local.shared_kms_key_ring : [
-      for name, email in local.app_infra_sa : {
-        key   = "${kms}--${name}"
-        kms   = kms
-        email = email
-      }
-    ]
-  ]) : []
 }
 
 module "app_infra_cloudbuild_project" {
@@ -85,7 +75,7 @@ module "infra_pipelines" {
 }
 
 resource "google_kms_key_ring_iam_member" "key_ring" {
-  for_each = { for k in(local.enable_cloudbuild_deploy ? local.kms_sa_pairs : []) : k.key => k }
+  for_each    = local.enable_cloudbuild_deploy ? { for k in flatten([for kms in local.shared_kms_key_ring : [for name, email in module.infra_pipelines[0].terraform_service_accounts : { key = "${kms}--${name}", kms = kms, email = email }]]) : k.key => k } : {}
 
   key_ring_id = each.value.kms
   role        = "roles/cloudkms.admin"
