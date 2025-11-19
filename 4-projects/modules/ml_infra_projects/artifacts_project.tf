@@ -24,8 +24,6 @@ locals {
     "roles/source.admin",
     "roles/storage.admin",
   ]
-
-  enable_artifacts_bindings = var.artifacts_infra_pipeline_sa != null && var.artifacts_infra_pipeline_sa != ""
 }
 
 module "app_infra_artifacts_project" {
@@ -63,7 +61,7 @@ module "app_infra_artifacts_project" {
 }
 
 resource "google_kms_crypto_key_iam_member" "ml_key" {
-  for_each = local.enable_artifacts_bindings ? module.app_infra_artifacts_project.kms_keys : {}
+  for_each = var.enable_cloudbuild_deploy ? module.app_infra_artifacts_project.kms_keys : {}
 
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
@@ -71,7 +69,7 @@ resource "google_kms_crypto_key_iam_member" "ml_key" {
 }
 
 resource "google_project_iam_member" "artifact_tf_sa_roles" {
-  for_each = local.enable_artifacts_bindings ? toset(local.artifact_tf_sa_roles) : toset([])
+  for_each = var.enable_cloudbuild_deploy ? toset(local.artifact_tf_sa_roles) : toset([])
 
   project = module.app_infra_artifacts_project.project_id
   role    = each.key
