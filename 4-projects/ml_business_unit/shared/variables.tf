@@ -27,7 +27,7 @@ variable "location_gcs" {
 }
 
 variable "location_kms" {
-  description = "Case-Sensitive Location for KMS Keyring"
+  description = "Case-Sensitive Location for KMS Keyring."
   type        = string
   default     = "us"
 }
