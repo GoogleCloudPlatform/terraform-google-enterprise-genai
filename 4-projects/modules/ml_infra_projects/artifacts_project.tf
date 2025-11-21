@@ -61,17 +61,19 @@ module "app_infra_artifacts_project" {
 }
 
 resource "google_kms_crypto_key_iam_member" "ml_key" {
-  for_each      = module.app_infra_artifacts_project.kms_keys
+  for_each = var.enable_cloudbuild_deploy ? module.app_infra_artifacts_project.kms_keys : {}
+
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${var.artifacts_infra_pipeline_sa}"
 }
 
 resource "google_project_iam_member" "artifact_tf_sa_roles" {
-  for_each = toset(local.artifact_tf_sa_roles)
-  project  = module.app_infra_artifacts_project.project_id
-  role     = each.key
-  member   = "serviceAccount:${var.artifacts_infra_pipeline_sa}"
+  for_each = var.enable_cloudbuild_deploy ? toset(local.artifact_tf_sa_roles) : toset([])
+
+  project = module.app_infra_artifacts_project.project_id
+  role    = each.key
+  member  = "serviceAccount:${var.artifacts_infra_pipeline_sa}"
 }
 
 // Add Service Agent for Cloud Build

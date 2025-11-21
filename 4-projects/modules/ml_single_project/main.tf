@@ -135,7 +135,8 @@ module "kms_keys" {
 // Add crypto key viewer role to kms environment project
 resource "google_project_iam_member" "kms_viewer" {
   for_each = var.environment != "common" ? toset(local.pipeline_kms_sas) : toset([])
-  project  = var.environment_kms_project_id
-  role     = "roles/cloudkms.viewer"
-  member   = "serviceAccount:${each.key}"
+
+  project = var.environment_kms_project_id
+  role    = "roles/cloudkms.viewer"
+  member  = "serviceAccount:${each.key}"
 }
