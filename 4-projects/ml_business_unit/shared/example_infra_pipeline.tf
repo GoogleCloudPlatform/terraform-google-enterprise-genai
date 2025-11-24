@@ -20,11 +20,6 @@ locals {
     "ml-service-catalog",
     "ml-machine-learning",
   ]
-
-  app_infra_sa = local.enable_cloudbuild_deploy ? try(module.infra_pipelines[0].terraform_service_accounts, {}) : {}
-
-  artifacts_pipeline_sa       = try(local.app_infra_sa["ml-artifact-publish"], null)
-  service_catalog_pipeline_sa = try(local.app_infra_sa["ml-service-catalog"], null)
 }
 
 module "app_infra_cloudbuild_project" {

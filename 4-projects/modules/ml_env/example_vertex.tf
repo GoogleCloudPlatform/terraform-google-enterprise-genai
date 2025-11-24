@@ -28,9 +28,6 @@ locals {
     "cloudbuild.googleapis.com",
     "notebooks.googleapis.com"
   ]
-
-  ml_pipeline_sa     = try(local.app_infra_pipeline_service_accounts["ml-machine-learning"], null)
-  enable_ml_bindings = try(local.ml_pipeline_sa != null && local.ml_pipeline_sa != "", false)
 }
 
 module "machine_learning_project" {
@@ -162,7 +159,7 @@ resource "time_sleep" "wait_30_seconds" {
 
 // Add cloudkms admin to sa
 resource "google_kms_crypto_key_iam_member" "kms_admin" {
-  for_each      = local.enable_ml_bindings ? module.machine_learning_project.kms_keys : {}
+  for_each      = local.enable_cloudbuild_deploy ? module.machine_learning_project.kms_keys : {}
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${local.app_infra_pipeline_service_accounts["ml-machine-learning"]}"
