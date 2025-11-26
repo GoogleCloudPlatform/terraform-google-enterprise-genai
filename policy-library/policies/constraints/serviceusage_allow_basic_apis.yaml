@@ -81,3 +81,4 @@ spec:
     - "notebooks.googleapis.com"
     - "composer.googleapis.com"
     - "containerscanning.googleapis.com"
+    - "sts.googleapis.com"

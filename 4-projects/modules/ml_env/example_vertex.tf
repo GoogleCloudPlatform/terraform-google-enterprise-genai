@@ -159,7 +159,7 @@ resource "time_sleep" "wait_30_seconds" {
 
 // Add cloudkms admin to sa
 resource "google_kms_crypto_key_iam_member" "kms_admin" {
-  for_each      = module.machine_learning_project.kms_keys
+  for_each      = local.enable_cloudbuild_deploy ? module.machine_learning_project.kms_keys : {}
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${local.app_infra_pipeline_service_accounts["ml-machine-learning"]}"
@@ -177,10 +177,10 @@ resource "google_project_iam_member" "cloud_build_kms_viewer" {
 // Cloud Build's Service Agent permissions on Shared VPC
 resource "google_project_iam_member" "cloud_build_network_user" {
   for_each = toset(local.shared_vpc_roles)
-  project  = local.shared_vpc_host_project_id
 
-  role   = each.value
-  member = "serviceAccount:${google_project_service_identity.cloud_build.email}"
+  project = local.shared_vpc_host_project_id
+  role    = each.value
+  member  = "serviceAccount:${google_project_service_identity.cloud_build.email}"
 
   depends_on = [time_sleep.wait_30_seconds]
 }
@@ -209,6 +209,7 @@ resource "google_kms_crypto_key_iam_member" "secrets" {
 
 // Allow machine-learning sa access to service catalog cloud source repository
 resource "google_sourcerepo_repository_iam_member" "read" {
+  count      = local.enable_cloudbuild_deploy ? 1 : 0
   project    = local.service_catalog_project_id
   repository = local.service_catalog_repo_name
   role       = "roles/viewer"

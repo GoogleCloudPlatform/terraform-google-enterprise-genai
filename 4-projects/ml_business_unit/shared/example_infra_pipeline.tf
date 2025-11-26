@@ -70,7 +70,8 @@ module "infra_pipelines" {
 }
 
 resource "google_kms_key_ring_iam_member" "key_ring" {
-  for_each    = { for k in flatten([for kms in local.shared_kms_key_ring : [for name, email in module.infra_pipelines[0].terraform_service_accounts : { key = "${kms}--${name}", kms = kms, email = email }]]) : k.key => k }
+  for_each = local.enable_cloudbuild_deploy ? { for k in flatten([for kms in local.shared_kms_key_ring : [for name, email in module.infra_pipelines[0].terraform_service_accounts : { key = "${kms}--${name}", kms = kms, email = email }]]) : k.key => k } : {}
+
   key_ring_id = each.value.kms
   role        = "roles/cloudkms.admin"
   member      = "serviceAccount:${each.value.email}"

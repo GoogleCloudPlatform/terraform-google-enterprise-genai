@@ -466,7 +466,6 @@ func DeployExampleAppStage(t testing.TB, s steps.Steps, tfvars GlobalTFVars, io 
 			}
 			repoPath := filepath.Join(c.CheckoutPath, ServiceCatalogRepo)
 			sourcePath := filepath.Join(c.GenaiPath, AppInfraStep, "source_repos", "service-catalog")
-
 			gitConf := utils.CloneCSR(t, ServiceCatalogRepo, repoPath, io.ServiceCatalogProjID, c.Logger)
 
 			if err := s.RunStep("service-catalog.checkout-main", func() error {

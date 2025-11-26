@@ -197,6 +197,20 @@ output "cloud_build_peered_network_id" {
 # }
 
 /* ----------------------------------------
+    Specific to gitlab_bootstrap
+   ---------------------------------------- */
+# Un-comment gitlab_bootstrap and its outputs if you want to use GitLab CI/CD instead of Cloud Build
+# output "cicd_project_id" {
+#   description = "Project where the CI/CD infrastructure for GitLab CI/CD resides."
+#   value       = module.gitlab_cicd.project_id
+# }
+
+# output "projects_gcs_bucket_tfstate" {
+#   description = "Bucket used for storing terraform state for stage 4-projects foundations pipelines in seed project."
+#   value       = module.gcp_projects_state_bucket.bucket.name
+# }
+
+/* ----------------------------------------
     Specific to tfc_bootstrap
    ---------------------------------------- */
 # Un-comment tfc_bootstrap and its outputs if you want to use Terraform Cloud instead of Cloud Build

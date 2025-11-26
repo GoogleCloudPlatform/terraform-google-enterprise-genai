@@ -35,6 +35,8 @@ locals {
   ] : ["roles/resourcemanager.organizationAdmin", "roles/billing.user"]
   group_org_admins     = var.groups.create_groups ? module.required_group["group_org_admins"].id : var.group_org_admins
   group_billing_admins = var.groups.create_groups ? module.required_group["group_billing_admins"].id : var.group_billing_admins
+
+  state_bucket_kms_key = "projects/${module.seed_bootstrap.seed_project_id}/locations/${var.default_region}/keyRings/${var.project_prefix}-keyring/cryptoKeys/${var.project_prefix}-key"
 }
 
 resource "google_folder" "bootstrap" {
@@ -106,3 +108,18 @@ module "seed_bootstrap" {
   sa_org_iam_permissions = []
 }
 
+module "gcp_projects_state_bucket" {
+  source  = "terraform-google-modules/cloud-storage/google//modules/simple_bucket"
+  version = "~> 9.0"
+
+  name          = "${var.bucket_prefix}-${module.seed_bootstrap.seed_project_id}-gcp-projects-tfstate"
+  project_id    = module.seed_bootstrap.seed_project_id
+  location      = var.default_region
+  force_destroy = var.bucket_force_destroy
+
+  encryption = {
+    default_kms_key_name = local.state_bucket_kms_key
+  }
+
+  depends_on = [module.seed_bootstrap.gcs_bucket_tfstate]
+}
