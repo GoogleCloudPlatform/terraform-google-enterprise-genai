@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+locals {
+  app_infra_sa = local.enable_cloudbuild_deploy ? try(module.infra_pipelines[0].terraform_service_accounts, {}) : {}
+
+  artifacts_pipeline_sa       = try(local.app_infra_sa["ml-artifact-publish"], null)
+  service_catalog_pipeline_sa = try(local.app_infra_sa["ml-service-catalog"], null)
+}
+
 module "ml_infra_projects" {
   source = "../../modules/ml_infra_projects"
 
@@ -33,4 +40,5 @@ module "ml_infra_projects" {
   service_catalog_infra_pipeline_sa      = local.service_catalog_pipeline_sa
   environment_kms_project_id             = ""
   prevent_destroy                        = var.prevent_destroy
+  enable_cloudbuild_deploy               = local.enable_cloudbuild_deploy
 }
