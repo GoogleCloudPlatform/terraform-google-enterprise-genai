@@ -59,7 +59,8 @@ module "app_service_catalog_project" {
 }
 
 resource "google_kms_crypto_key_iam_member" "sc_key" {
-  for_each      = module.app_service_catalog_project.kms_keys
+  for_each = var.enable_cloudbuild_deploy ? module.app_service_catalog_project.kms_keys : {}
+
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.admin"
   member        = "serviceAccount:${var.service_catalog_infra_pipeline_sa}"
@@ -74,7 +75,8 @@ resource "google_project_service_identity" "secretmanager_agent" {
 
 // Add Secret Manager Service Agent to key with encrypt/decrypt permissions
 resource "google_kms_crypto_key_iam_member" "secretmanager_agent" {
-  for_each      = module.app_service_catalog_project.kms_keys
+  for_each = module.app_service_catalog_project.kms_keys
+
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_project_service_identity.secretmanager_agent.email}"
@@ -88,7 +90,8 @@ resource "google_project_service_identity" "storage" {
 }
 // Add Service Agent for Storage
 resource "google_kms_crypto_key_iam_member" "storage_agent" {
-  for_each      = module.app_service_catalog_project.kms_keys
+  for_each = module.app_service_catalog_project.kms_keys
+
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${module.app_service_catalog_project.project_number}@gs-project-accounts.iam.gserviceaccount.com"
@@ -98,17 +101,19 @@ resource "google_kms_crypto_key_iam_member" "storage_agent" {
 
 // Add infra pipeline SA encrypt/decrypt permissions
 resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
-  for_each      = module.app_service_catalog_project.kms_keys
+  for_each = var.enable_cloudbuild_deploy ? module.app_service_catalog_project.kms_keys : {}
+
   crypto_key_id = each.value.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${var.service_catalog_infra_pipeline_sa}"
 }
 
 resource "google_project_iam_member" "service_catalog_tf_sa_roles" {
-  for_each = toset(local.service_catalog_tf_sa_roles)
-  project  = module.app_service_catalog_project.project_id
-  role     = each.key
-  member   = "serviceAccount:${var.service_catalog_infra_pipeline_sa}"
+  for_each = var.enable_cloudbuild_deploy ? toset(local.service_catalog_tf_sa_roles) : toset([])
+
+  project = module.app_service_catalog_project.project_id
+  role    = each.key
+  member  = "serviceAccount:${var.service_catalog_infra_pipeline_sa}"
 }
 
 // Add Service Agent for Cloud Build
