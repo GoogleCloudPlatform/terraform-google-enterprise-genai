@@ -16,9 +16,9 @@ name: "tf-pull-request"
 on:
   pull_request:
     branches:
-      - 'development'
-      - 'production'
-      - 'nonproduction'
+      - "development"
+      - "production"
+      - "nonproduction"
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }}
