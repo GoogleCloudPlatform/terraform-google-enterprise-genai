@@ -152,11 +152,6 @@ output "cloud_build_peered_network_id" {
 #   value       = module.gh_cicd.project_id
 # }
 
-# output "projects_gcs_bucket_tfstate" {
-#   description = "Bucket used for storing terraform state for stage 4-projects foundations pipelines in seed project."
-#   value       = module.seed_bootstrap.gcs_bucket_tfstate
-# }
-
 /* ----------------------------------------
     Specific to jenkins_bootstrap module
    ---------------------------------------- */
@@ -174,11 +169,6 @@ output "cloud_build_peered_network_id" {
 # output "jenkins_agent_vpc_id" {
 #   description = "Jenkins Agent VPC name."
 #   value       = module.jenkins_bootstrap.jenkins_agent_vpc_id
-# }
-
-# output "projects_gcs_bucket_tfstate" {
-#   description = "Bucket used for storing terraform state for stage 4-projects foundations pipelines in seed project."
-#   value       = module.seed_bootstrap.gcs_bucket_tfstate
 # }
 
 # output "jenkins_agent_sa_email" {
@@ -203,11 +193,6 @@ output "cloud_build_peered_network_id" {
 # output "cicd_project_id" {
 #   description = "Project where the CI/CD infrastructure for GitLab CI/CD resides."
 #   value       = module.gitlab_cicd.project_id
-# }
-
-# output "projects_gcs_bucket_tfstate" {
-#   description = "Bucket used for storing terraform state for stage 4-projects foundations pipelines in seed project."
-#   value       = module.gcp_projects_state_bucket.bucket.name
 # }
 
 /* ----------------------------------------
