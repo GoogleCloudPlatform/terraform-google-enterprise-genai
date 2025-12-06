@@ -16,7 +16,7 @@
 
 module "bigquery" {
   source         = "terraform-google-modules/bigquery/google"
-  version        = "7.0.0"
+  version        = "10.2.1"
   dataset_id     = var.dataset_id
   project_id     = data.google_project.project.project_id
   location       = var.region
