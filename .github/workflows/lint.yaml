@@ -35,7 +35,7 @@ jobs:
     name: 'lint'
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: 'actions/checkout@v5'
+      - uses: 'actions/checkout@v6'
       - id: variables
         run: |
           MAKEFILE=$(find . -name Makefile -print -quit)
@@ -62,7 +62,7 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Setup node
@@ -71,7 +71,7 @@ jobs:
           node-version: lts/*
       - name: Install commitlint
         run: |
-          npm install -D @commitlint/cli@20.1.0 @commitlint/config-conventional@20.0.0
+          npm install -D @commitlint/cli@20.2.0 @commitlint/config-conventional@20.2.0
           echo "module.exports = { extends: ['@commitlint/config-conventional'], rules: {'subject-case': [0], 'header-max-length': [0]} };" > commitlint.config.js
           npx commitlint --version
       - name: Validate PR commits with commitlint
