@@ -112,8 +112,8 @@ resource "google_cloudbuild_trigger" "zip_files" {
     }
     step {
       id   = "push-to-bucket"
-      name = "gcr.io/cloud-builders/gsutil"
-      args = ["cp", "/workspace/*.zip", "${google_composer_environment.cluster.config.0.dag_gcs_prefix}/"]
+      name = "gcr.io/cloud-builders/gcloud"
+      args = ["storage", "cp", "/workspace/*.zip", "${google_composer_environment.cluster.config.0.dag_gcs_prefix}/"]
     }
   }
 

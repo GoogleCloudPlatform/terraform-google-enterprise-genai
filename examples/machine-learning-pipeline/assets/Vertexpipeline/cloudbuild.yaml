@@ -15,12 +15,12 @@
 steps:
   # Upload dataflow src file to bucket
   # Replace the {your-bucket-name} from non-prod in the bucket name
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', '-r', './src', 'gs://{NON_PROD_BUCKET_NAME}']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['storage', 'cp', '--recursive', './src', 'gs://{NON_PROD_BUCKET_NAME}']
 
-  - name: 'gcr.io/cloud-builders/gsutil'
+  - name: 'gcr.io/cloud-builders/gcloud'
   # Replace the {your-bucket-name} from non-prod in the bucket name
-    args: ['cp', '-r', './data', 'gs://{NON_PROD_BUCKET_NAME}']
+    args: ['storage', 'cp', '--recursive', './data', 'gs://{NON_PROD_BUCKET_NAME}']
 
   # compile pipeline
   # Replace the {your-artifact-project} for your artifact project ID
@@ -38,15 +38,15 @@ steps:
     waitFor: ['compile_job']
 
   #   # upload pipeline yaml to composer
-  # - name: 'gcr.io/cloud-builders/gsutil'
+  # - name: 'gcr.io/cloud-builders/gcloud'
   # Replace the {your-composer-bucket} for your composer bucket
-  #   args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://{your-composer-bucket}/dags/common/vertex-ai-pipeline/']
+  #   args: ['storage', 'cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://{your-composer-bucket}/dags/common/vertex-ai-pipeline/']
   #   id: 'upload_composer_file'
 
   #   # upload pipeline dag to composer
-  # - name: 'gcr.io/cloud-builders/gsutil'
+  # - name: 'gcr.io/cloud-builders/gcloud'
   # Replace the {your-composer-bucket} for your composer bucket
-  #   args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
+  #   args: ['storage', 'cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
   #   id: 'upload dag'
 
 options:
