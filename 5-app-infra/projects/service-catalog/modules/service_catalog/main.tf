@@ -156,8 +156,8 @@ resource "google_cloudbuild_trigger" "zip_files" {
     }
     step {
       id   = "push-to-bucket"
-      name = "gcr.io/cloud-builders/gsutil"
-      args = ["cp", "/workspace/*.tar.gz", "gs://${google_storage_bucket.bucket.name}/modules/"]
+      name = "gcr.io/cloud-builders/gcloud"
+      args = ["storage", "cp", "/workspace/*.tar.gz", "gs://${google_storage_bucket.bucket.name}/modules/"]
     }
   }
 

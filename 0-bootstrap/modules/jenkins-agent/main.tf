@@ -248,7 +248,7 @@ resource "google_storage_bucket" "gcs_jenkins_artifacts" {
  ***********************************************/
 
 // Allow the Jenkins Agent (GCE Instance) custom Service Account to store artifacts in GCS
-// The pipeline must use gsutil to store artifacts in the GCS bucket
+// The pipeline must use gcloud storage to store artifacts in the GCS bucket
 resource "google_storage_bucket_iam_member" "jenkins_artifacts_iam" {
   bucket = google_storage_bucket.gcs_jenkins_artifacts.name
   role   = "roles/storage.admin"

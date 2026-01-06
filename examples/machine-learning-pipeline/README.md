@@ -1911,8 +1911,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
     export prj_n_machine_learning_project_id=$(terraform -chdir=$directory output -raw machine_learning_project_id)
     echo $prj_n_machine_learning_project_id
 
-    export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
-    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+    export non_prod_bucket_name=$(gcloud storage ls --project $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
     echo $non_prod_bucket_name
 
     export directory="../gcp-projects/ml_business_unit/shared"
@@ -1931,13 +1930,11 @@ After the notebook runs successfully and the pipeline's test run finishes in the
 
     ```yaml
     # upload to composer
-      - name: 'gcr.io/cloud-builders/gsutil'
-        args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://{your-composer-bucket}/dags/common/vertex-ai-pipeline/']
+      - name: 'gcr.io/cloud-builders/gcloud'        args: ['cp', './common/vertex-ai-pipeline/pipeline_package.yaml', 'gs://{your-composer-bucket}/dags/common/vertex-ai-pipeline/']
         id: 'upload_composer_file'
 
     # upload pipeline dag to composer
-        - name: 'gcr.io/cloud-builders/gsutil'
-          args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
+        - name: 'gcr.io/cloud-builders/gcloud'          args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
           id: 'upload dag'
     ```
 
@@ -1971,8 +1968,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
     export prj_n_machine_learning_project_id=$(terraform -chdir=$directory output -raw machine_learning_project_id)
     echo $prj_n_machine_learning_project_id
 
-    export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
-    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+    export non_prod_bucket_name=$(gcloud storage ls --project=$prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
     echo $non_prod_bucket_name
 
     export dataflow_sa="dataflow-sa@${prj_n_machine_learning_project_id}.iam.gserviceaccount.com"
@@ -2023,8 +2019,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
     export prj_n_machine_learning_project_id=$(terraform -chdir=$directory output -raw machine_learning_project_id)
     echo $prj_n_machine_learning_project_id
 
-    export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
-    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+    export non_prod_bucket_name=$(gcloud storage ls --project $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
     echo $non_prod_bucket_name
 
     sed -i \
@@ -2128,8 +2123,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
     export prj_n_machine_learning_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/nonproduction" output -raw machine_learning_project_id)
     echo $prj_n_machine_learning_project_id
 
-    export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
-    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+    export non_prod_bucket_name=$(gcloud storage ls --project $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
     echo $non_prod_bucket_name
 
     export common_artifacts_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/shared" output -raw common_artifacts_project_id)
@@ -2150,8 +2144,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
         id: 'upload_composer_file'
 
     # upload pipeline dag to composer
-        - name: 'gcr.io/cloud-builders/gsutil'
-          args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
+        - name: 'gcr.io/cloud-builders/gcloud'          args: ['cp', './composer/dags/dag.py', 'gs://{your-composer-bucket}/dags/']
           id: 'upload dag'
     ```
 
@@ -2173,8 +2166,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
     export prj_n_machine_learning_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/nonproduction" output -raw machine_learning_project_id)
     echo $prj_n_machine_learning_project_id
 
-    export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
-    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+    export non_prod_bucket_name=$(gcloud storage ls --project $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
     echo $non_prod_bucket_name
 
     export dataflow_sa="dataflow-sa@${prj_n_machine_learning_project_id}.iam.gserviceaccount.com"
@@ -2213,8 +2205,7 @@ After the notebook runs successfully and the pipeline's test run finishes in the
     export prj_n_machine_learning_project_id=$(terraform -chdir="../terraform-google-enterprise-genai/4-projects/ml_business_unit/nonproduction" output -raw machine_learning_project_id)
     echo $prj_n_machine_learning_project_id
 
-    export non_prod_bucket_name=$(gsutil ls -p $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')
-    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
+    export non_prod_bucket_name=$(gcloud storage ls --project $prj_n_machine_learning_project_id | grep -o 'gs://bkt-n-ml[^/]*')    non_prod_bucket_name=$(echo $non_prod_bucket_name | sed 's#gs://##')
     echo $non_prod_bucket_name
 
     sed -i \
