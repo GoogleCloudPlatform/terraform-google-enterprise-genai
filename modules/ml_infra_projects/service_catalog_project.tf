@@ -26,7 +26,7 @@ locals {
 }
 
 module "app_service_catalog_project" {
-  source = "../../modules/ml_single_project"
+  source = "../../4-projects/modules/ml_single_project"
 
   org_id              = var.org_id
   billing_account     = var.billing_account

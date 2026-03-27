@@ -1,5 +1,5 @@
 /**
- * Copyright 2022-2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-  required_providers {
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.3"
-    }
-  }
+output "key_rings" {
+  description = "Keyring Names created"
+  value       = values(module.kms_keyrings)[*].keyring
+}
 
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:projects/v0.11.0"
-  }
+output "keys_by_region" {
+  description = "Map of key name => key selflink, indexed by region"
+  value       = local.kms_keys_by_region
 }

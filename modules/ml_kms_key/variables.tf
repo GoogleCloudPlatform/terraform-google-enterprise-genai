@@ -1,5 +1,5 @@
 /**
- * Copyright 2022-2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-  required_providers {
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.3"
-    }
-  }
+variable "key_rings" {
+  description = "Keyrings to attach project key to."
+  type        = list(string)
+}
 
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:projects/v0.11.0"
-  }
+variable "project_name" {
+  description = "Project Name."
+  type        = string
+}
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key."
+  type        = string
+  default     = "7776000s"
+}
+
+variable "prevent_destroy" {
+  description = "Prevent Key destruction."
+  type        = bool
 }

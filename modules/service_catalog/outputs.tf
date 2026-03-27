@@ -1,5 +1,5 @@
 /**
- * Copyright 2022-2023 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
-  required_providers {
-    random = {
-      source  = "hashicorp/random"
-      version = ">= 3.3"
-    }
-  }
+output "storage_bucket_name" {
+  description = "Name of storage bucket created"
+  value       = google_storage_bucket.bucket.name
+}
 
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:projects/v0.11.0"
-  }
+output "cloudbuild_trigger_id" {
+  description = "Id of Cloud Build Trigger"
+  value       = google_cloudbuild_trigger.zip_files.id
 }
