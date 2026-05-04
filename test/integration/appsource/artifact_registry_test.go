@@ -32,12 +32,12 @@ import (
 
 func TestArtifactRegistrySource(t *testing.T) {
 
-	shared := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../4-projects/ml_business_unit/shared"),
+	standalone := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../examples/standalone"),
 	)
 
-	artifactProject := shared.GetStringOutput("common_artifacts_project_id")
-	artifactSourcePath := ("../../../5-app-infra/source_repos/artifact-publish")
+	artifactProject := standalone.GetStringOutput("artifact_publish_project_id")
+	artifactSourcePath := ("../../../examples/standalone/assets/artifact-publish")
 	artifactRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/publish-artifacts", artifactProject)
 
 	tmpDir := t.TempDir()
@@ -45,7 +45,7 @@ func TestArtifactRegistrySource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	region := "us-central1"
+	instanceRegion := standalone.GetTFSetupStringOutput("instance_region")
 
 	appsource := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(artifactSourcePath),
@@ -84,7 +84,7 @@ func TestArtifactRegistrySource(t *testing.T) {
 
 		lastCommit := gitApp.GetLatestCommit()
 		// filter builds triggered based on pushed commit sha
-		buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, artifactProject)
+		buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", instanceRegion, lastCommit, artifactProject)
 		// poll build until complete
 		pollCloudBuild := func(cmd string) func() (bool, error) {
 			return func() (bool, error) {
