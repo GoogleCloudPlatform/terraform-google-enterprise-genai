@@ -69,7 +69,7 @@ def get_args():
     parser.add_argument('--bq-table', dest='table_id', required=False,
                         default='census_train_table', help='Table name used in BigQuery.')
     parser.add_argument('--bq-project', dest='project_id', required=False,
-                        default='majid-test-407120', help='project id')
+                        default='PROJECT_ID', help='project id')
     args, pipeline_args = parser.parse_known_args()
     return args, pipeline_args
 

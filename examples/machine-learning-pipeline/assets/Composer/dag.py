@@ -28,18 +28,18 @@ from common.components.deployment import deploy_model
 from common.components.monitoring import create_monitoring
 
 REGION = "us-central1"
-BUCKET_URI = "gs://testairflowpipe"
-PROJECT_ID = "majid-test-407120"
+BUCKET_URI = "gs://YOUR-BUCKET-URI"
+PROJECT_ID = "PROJECT_ID"
 DATASET_ID = 'census_dataset_composer'
 TRAINING_TABLE_ID = 'census_train_table_composer'
 EVAL_TABLE_ID = 'census_eval_table_composer'
 RUNNER = "DataflowRunner"
 REGION = "us-central1"
 JOB_NAME = "census-ingest-composer"
-default_kms_key_name = "projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-ml-machine-learning"
+default_kms_key_name = "projects/KMS_PROJECT_ID/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-ml-machine-learning"
 deployment_image = "us-docker.pkg.dev/cloud-aiplatform/prediction/tf2-cpu.2-8:latest"
-service_account = "728034955955-compute@developer.gserviceaccount.com"
-prod_service_account = "728034955955-compute@developer.gserviceaccount.com"
+service_account = "PRJ_P_MACHINE_LEARNING_NUMBER-compute@developer.gserviceaccount.com"
+prod_service_account = "PRJ_P_MACHINE_LEARNING_NUMBER-compute@developer.gserviceaccount.com"
 
 default_args = {
     'owner': 'airflow',
@@ -193,7 +193,7 @@ monitoring_op = PythonOperator(
         'region': REGION,
         'bq_data_uri': f"bq://{PROJECT_ID}.{DATASET_ID}.{TRAINING_TABLE_ID}",
         'bucket_name': BUCKET_URI[5:],
-        'email': 'majid.alikhani@badal.io',
+        'email': 'YOUR-USER-EMAIL@example.com',
         'encryption_keyname': default_kms_key_name,
         'service_account': service_account,
     },

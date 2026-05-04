@@ -1,7 +1,7 @@
 region                 = "us-central1"
 environment            = "development"
 project_id             = "prj-c-composer"
-cmek_project_id        = "prj-c-bu3cmek-wo8w"
+cmek_project_id        = "CMEK-PROJECT-ID"
 name                   = "test-repo"
 description            = "Artifact Repository"
 format                 = "DOCKER"
