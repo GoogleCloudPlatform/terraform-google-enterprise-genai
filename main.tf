@@ -155,6 +155,12 @@ module "ml_dns_vertex_ai" {
   }
 }
 
+resource "time_sleep" "wait_for_kms" {
+  create_duration = "60"
+
+  depends_on = [module.kms_keyrings]
+}
+
 /******************************************
   Machine Learning project
 *****************************************/
@@ -174,7 +180,7 @@ module "machine_learning_env" {
   machine_learning_pipeline_sa     = var.terraform_service_account
   kms_crypto_key                   = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.machine_learning_project_name]
 
-  depends_on = [module.service_catalog]
+  depends_on = [time_sleep.wait_for_kms]
 }
 
 /******************************************
@@ -207,6 +213,8 @@ module "artifact_publish" {
   }]
 
   kms_crypto_key = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.artifact_publish_project_name]
+
+  depends_on = [time_sleep.wait_for_kms]
 }
 
 module "service_catalog" {
@@ -224,4 +232,6 @@ module "service_catalog" {
 
   log_bucket     = module.ml_logging.name
   kms_crypto_key = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.service_catalog_project_name]
+
+  depends_on = [time_sleep.wait_for_kms]
 }

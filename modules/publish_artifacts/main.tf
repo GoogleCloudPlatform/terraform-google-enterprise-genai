@@ -39,7 +39,7 @@ resource "google_kms_crypto_key_iam_member" "artifact-kms-key-binding" {
 resource "google_kms_crypto_key_iam_member" "storage_agent" {
   crypto_key_id = var.kms_crypto_key
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+  member        = "serviceAccount:service-${var.project_number}@gs-project-accounts.iam.gserviceaccount.com"
 
   depends_on = [google_project_service_identity.storage_agent]
 }
@@ -90,7 +90,7 @@ resource "google_project_iam_member" "artifact_pipeline_sa_roles" {
 resource "google_project_iam_member" "artifact_cloudbuild_agent" {
   project = var.project_id
   role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
 }
 
 /******************************************
@@ -126,7 +126,7 @@ resource "google_artifact_registry_repository" "repo" {
   description            = var.description
   format                 = var.format
   cleanup_policy_dry_run = var.cleanup_policy_dry_run
-  project                = data.google_project.project.project_id
+  project                = var.project_id
 
   kms_key_name = var.kms_crypto_key
 
@@ -157,6 +157,7 @@ resource "google_artifact_registry_repository" "repo" {
   }
 
   depends_on = [
+    google_sourcerepo_repository.artifact_repo,
     google_kms_crypto_key_iam_member.artifact-kms-key-binding,
   ]
 }

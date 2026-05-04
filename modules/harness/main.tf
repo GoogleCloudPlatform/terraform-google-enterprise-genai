@@ -23,8 +23,14 @@ locals {
   artifact_publish_project_name = var.artifact_publish_project_name != "" ? var.artifact_publish_project_name : "prj-publish-artifacts-${random_id.project_id_suffix.hex}"
   bucket_name                   = format("%s-%s", "tfstate", random_id.project_id_suffix.hex)
 
-  state_bucket_kms_key = "projects/${module.seed_project.project_id}/locations/${var.default_region}/keyRings/${var.project_prefix}-keyring/cryptoKeys/${var.project_prefix}-key"
+  terraform_sa_project_roles = [
+    "roles/storage.admin",
+    "roles/cloudkms.admin",
+  ]
+
+  terraform_state_kms_key = module.kms[0].keys["${var.project_prefix}-key"]
 }
+
 
 resource "random_id" "project_id_suffix" {
   byte_length = 2
@@ -47,6 +53,19 @@ module "seed_project" {
   activate_apis           = ["cloudkms.googleapis.com", "serviceusage.googleapis.com", "iamcredentials.googleapis.com", "storage.googleapis.com"]
 }
 
+module "kms" {
+  source  = "terraform-google-modules/kms/google"
+  version = "~> 4.0"
+
+  project_id          = module.seed_project.project_id
+  location            = var.default_region
+  keyring             = "${var.project_prefix}-keyring"
+  keys                = ["${var.project_prefix}-key"]
+  key_rotation_period = "7776000s"
+
+  prevent_destroy = var.kms_prevent_destroy
+}
+
 resource "google_storage_bucket" "terraform_state" {
   project                     = module.seed_project.project_id
   name                        = local.bucket_name
@@ -58,12 +77,32 @@ resource "google_storage_bucket" "terraform_state" {
     enabled = true
   }
 
-  # dynamic "encryption" {
-  #   for_each = var.encrypt_gcs_bucket_tfstate ? ["encryption"] : []
-  #   content {
-  #     default_kms_key_name = module.kms[0].keys["state-key"]
-  #   }
-  # }
+  dynamic "encryption" {
+    for_each = var.encrypt_gcs_bucket_tfstate ? ["encryption"] : []
+    content {
+      default_kms_key_name = module.kms[0].keys["${var.project_prefix}-key"]
+    }
+  }
+
+  depends_on = [google_kms_crypto_key_iam_member.terraform_state_gcs_kms]
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+  project = module.seed_project.project_id
+}
+
+resource "google_kms_crypto_key_iam_member" "terraform_state_gcs_kms" {
+  crypto_key_id = local.terraform_state_kms_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
+
+resource "google_project_iam_member" "terraform_sa_project_roles" {
+  for_each = toset(local.terraform_sa_project_roles)
+
+  project = module.seed_project.project_id
+  role    = each.value
+  member  = "serviceAccount:${var.terraform_service_account}"
 }
 
 /******************************************

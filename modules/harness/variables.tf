@@ -89,6 +89,12 @@ variable "project_prefix" {
   default     = "prj"
 }
 
+variable "kms_prevent_destroy" {
+  description = "If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  type        = bool
+  default     = true
+}
+
 /******************************************
   Network variables
 *****************************************/
@@ -118,7 +124,7 @@ variable "bucket_force_destroy" {
 variable "encrypt_gcs_bucket_tfstate" {
   description = "Encrypt bucket used for storing terraform state files in seed project."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "terraform_service_account" {

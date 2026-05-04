@@ -8,8 +8,9 @@
 | billing\_account | The ID of the billing account to associated this project with | `string` | n/a | yes |
 | bucket\_force\_destroy | If supplied, the state bucket will be deleted even while containing objects. | `bool` | `false` | no |
 | default\_region | The region in which the subnetwork will be created. | `string` | n/a | yes |
-| encrypt\_gcs\_bucket\_tfstate | Encrypt bucket used for storing terraform state files in seed project. | `bool` | `false` | no |
+| encrypt\_gcs\_bucket\_tfstate | Encrypt bucket used for storing terraform state files in seed project. | `bool` | `true` | no |
 | folder\_id | The folder id where project will be created | `string` | n/a | yes |
+| kms\_prevent\_destroy | If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
 | kms\_project\_name | Custom project name for kms project. | `string` | `""` | no |
 | logging\_project\_name | Custom project name for the logging project. | `string` | `""` | no |
 | machine\_learning\_project\_name | Custom project name for machine learning project. | `string` | `""` | no |

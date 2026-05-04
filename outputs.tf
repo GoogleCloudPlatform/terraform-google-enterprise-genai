@@ -96,7 +96,7 @@ output "storage_bucket_name" {
 
 output "log_bucket" {
   description = "Log bucket to be used by Service Catalog Bucket."
-  value       = module.ml_logging.bucket
+  value       = module.ml_logging.name
 }
 
 /******************************************

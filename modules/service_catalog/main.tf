@@ -63,13 +63,13 @@ resource "google_project_iam_member" "service_catalog_pipeline_sa_roles" {
 resource "google_project_iam_member" "cloudbuild_agent" {
   project = var.project_id
   role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
 }
 
 resource "google_project_iam_member" "cloudbuild_admin" {
   project = var.project_id
   role    = "roles/cloudbuild.admin"
-  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
 }
 
 /******************************************
@@ -114,7 +114,7 @@ resource "google_kms_crypto_key_iam_member" "storage_agent" {
 
   crypto_key_id = var.kms_crypto_key
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+  member        = "serviceAccount:service-${var.project_number}@gs-project-accounts.iam.gserviceaccount.com"
 
   depends_on = [google_project_service_identity.storage_agent]
 }
@@ -198,7 +198,7 @@ resource "google_sourcerepo_repository_iam_member" "read" {
 }
 
 resource "google_sourcerepo_repository_iam_member" "repo_reader" {
-  repository = data.google_sourcerepo_repository.artifacts_repo.id
+  repository = google_sourcerepo_repository.service_catalog.id
   role       = "roles/source.reader"
   member     = google_service_account.trigger_sa.member
 

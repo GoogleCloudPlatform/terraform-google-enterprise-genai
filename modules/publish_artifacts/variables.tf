@@ -67,6 +67,11 @@ variable "project_name" {
   type        = string
 }
 
+variable "project_number" {
+  description = "Project number"
+  type        = string
+}
+
 variable "kms_crypto_key" {
   description = "KMS Key to be used"
   type        = string
