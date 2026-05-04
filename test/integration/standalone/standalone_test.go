@@ -23,6 +23,7 @@ import (
 	"path"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
@@ -191,47 +192,71 @@ func TestStandalone(t *testing.T) {
 		tft.WithVars(vars),
 	)
 
-	// Backend setup.
-	cwd, err := os.Getwd()
-	require.NoError(t, err)
-
-	backendFile := path.Join(cwd, "../../../examples/standalone/backend.tf")
-	backendExists, err := fileExists(backendFile)
-	require.NoError(t, err)
-
-	if !backendExists {
-		backendExampleFile := path.Join(cwd, "../../../examples/standalone/backend.tf.example")
-		_, err := exec.Command("cp", backendExampleFile, backendFile).CombinedOutput()
-		require.NoError(t, err)
-	}
-
-	tempOptions := standalone.GetTFOptions()
-	tempOptions.BackendConfig = map[string]interface{}{
-		"bucket": standalone.GetStringOutput("state_bucket"),
-	}
-	tempOptions.MigrateState = true
-
-	terraform.Init(t, tempOptions)
-
-	terraformSA := standalone.GetStringOutput("terraform_service_account")
-	orgID := standalone.GetTFSetupStringOutput("org_id")
-	parentFolder := testutils.GetLastSplitElement(standalone.GetStringOutput("parent_resource_id"), "/")
-
-	// Ensure ACM policy exists.
-	policyID := testutils.GetOrgACMPolicyID(t, orgID)
-	if policyID == "" {
-		_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title defaultpolicy --impersonate-service-account %s", orgID, terraformSA))
-
-		if err != nil {
-			fmt.Printf("Ignore error in creation of access-context-manager policy ID for organization %s. Error: [%s]", orgID, err.Error())
+	standalone.DefineApply(func(a *assert.Assertions) {
+		// check APIs
+		projectID := standalone.GetTFSetupStringOutput("project_id")
+		for _, api := range []string{
+			"cloudresourcemanager.googleapis.com",
+			"cloudbilling.googleapis.com",
+			"iam.googleapis.com",
+			"storage-api.googleapis.com",
+			"serviceusage.googleapis.com",
+			"cloudbuild.googleapis.com",
+			"sourcerepo.googleapis.com",
+			"cloudkms.googleapis.com",
+			"bigquery.googleapis.com",
+			"accesscontextmanager.googleapis.com",
+			"securitycenter.googleapis.com",
+			"servicenetworking.googleapis.com",
+			"billingbudgets.googleapis.com",
+			"essentialcontacts.googleapis.com",
+		} {
+			utils.Poll(t, func() (bool, error) { return testutils.CheckAPIEnabled(t, projectID, api) }, 5, 2*time.Minute)
 		}
 
-		policyID = testutils.GetOrgACMPolicyID(t, orgID)
-	}
+		standalone.DefaultApply(a)
+
+		//backend setup
+		tempOptions := standalone.GetTFOptions()
+		tempOptions.BackendConfig = map[string]interface{}{
+			"bucket": standalone.GetStringOutput("state_bucket"),
+		}
+		tempOptions.MigrateState = true
+
+		cwd, err := os.Getwd()
+		require.NoError(t, err)
+
+		backendFile := path.Join(cwd, "../../../examples/standalone/backend.tf")
+		backendExists, err := fileExists(backendFile)
+		require.NoError(t, err)
+
+		if !backendExists {
+			backendExampleFile := path.Join(cwd, "../../../examples/standalone/backend.tf.example")
+			_, err := exec.Command("cp", backendExampleFile, backendFile).CombinedOutput()
+			require.NoError(t, err)
+		}
+
+		terraform.Init(t, tempOptions)
+	})
 
 	standalone.DefineVerify(func(a *assert.Assertions) {
 		standalone.DefaultVerify(a)
 
+		terraformSA := standalone.GetStringOutput("terraform_service_account")
+		orgID := standalone.GetTFSetupStringOutput("org_id")
+		parentFolder := testutils.GetLastSplitElement(standalone.GetStringOutput("parent_resource_id"), "/")
+
+		// Ensure ACM policy exists.
+		policyID := testutils.GetOrgACMPolicyID(t, orgID)
+		if policyID == "" {
+			_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title defaultpolicy --impersonate-service-account %s", orgID, terraformSA))
+
+			if err != nil {
+				fmt.Printf("Ignore error in creation of access-context-manager policy ID for organization %s. Error: [%s]", orgID, err.Error())
+			}
+
+			policyID = testutils.GetOrgACMPolicyID(t, orgID)
+		}
 		// VPC Service Controls.
 		servicePerimeterName := standalone.GetStringOutput("service_perimeter_name")
 		servicePerimeterLink := fmt.Sprintf("accessPolicies/%s/servicePerimeters/%s", policyID, servicePerimeterName)
