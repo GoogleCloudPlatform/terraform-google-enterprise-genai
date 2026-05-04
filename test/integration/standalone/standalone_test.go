@@ -615,39 +615,29 @@ func TestStandalone(t *testing.T) {
 		for _, r := range allowIngressRule.Get("sourceRanges").Array() {
 			actualIngressRanges = append(actualIngressRanges, r.String())
 		}
-
 		a.ElementsMatch(allowIngressRuleIPRanges, actualIngressRanges, fmt.Sprintf("firewall rule %s source ranges should match expected ranges", allowIngressName))
 
+		triggerRegion := standalone.GetStringOutput("instance_region")
 		// Service Catalog repository and Cloud Build trigger.
 		serviceCatalogProjectID := standalone.GetStringOutput("service_catalog_project_id")
 		serviceCatalogRepoID := standalone.GetStringOutput("service_catalog_repo_id")
 		serviceCatalogRepoName := testutils.GetLastSplitElement(serviceCatalogRepoID, "/")
-
 		serviceCatalogRepo := gcloud.Runf(t, "source repos describe %s --project %s --impersonate-service-account %s", serviceCatalogRepoName, serviceCatalogProjectID, terraformSA)
-
 		a.Equal(serviceCatalogRepoID, serviceCatalogRepo.Get("name").String(), "Service Catalog repository should exist")
-
 		serviceCatalogTriggerID := standalone.GetStringOutput("service_catalog_cloudbuild_trigger_id")
 		a.NotEmpty(serviceCatalogTriggerID, "Service Catalog Cloud Build trigger ID should exist and not be empty")
-
-		serviceCatalogTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", serviceCatalogTriggerID, serviceCatalogProjectID, "global", terraformSA)
-
+		serviceCatalogTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", serviceCatalogTriggerID, serviceCatalogProjectID, triggerRegion, terraformSA)
 		a.Equal(serviceCatalogTriggerID, serviceCatalogTrigger.Get("id").String(), "Service Catalog Cloud Build trigger should exist in GCP")
 
 		// Artifact Publish repository and Cloud Build trigger.
 		artifactProjectID := standalone.GetStringOutput("artifact_publish_project_id")
 		artifactRepoID := standalone.GetStringOutput("artifacts_repo_id")
 		artifactRepoName := testutils.GetLastSplitElement(artifactRepoID, "/")
-
 		artifactRepo := gcloud.Runf(t, "source repos describe %s --project %s --impersonate-service-account %s", artifactRepoName, artifactProjectID, terraformSA)
-
 		a.Equal(artifactRepoID, artifactRepo.Get("name").String(), "Artifact Publish repository should exist")
-
 		artifactTriggerID := standalone.GetStringOutput("artifact_publish_cloudbuild_trigger_id")
 		a.NotEmpty(artifactTriggerID, "Artifact Publish Cloud Build trigger ID should exist and not be empty")
-
-		artifactTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", artifactTriggerID, artifactProjectID, "global", terraformSA)
-
+		artifactTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", artifactTriggerID, artifactProjectID, triggerRegion, terraformSA)
 		a.Equal(artifactTriggerID, artifactTrigger.Get("id").String(), "Artifact Publish Cloud Build trigger should exist in GCP")
 	})
 
