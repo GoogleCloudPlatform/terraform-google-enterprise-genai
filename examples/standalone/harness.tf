@@ -22,6 +22,7 @@ module "harness" {
   billing_account               = var.billing_account
   region                        = var.region
   kms_project_name              = var.kms_project_name
+  kms_prevent_destroy           = var.kms_prevent_destroy
   logging_project_name          = var.logging_project_name
   machine_learning_project_name = var.machine_learning_project_name
   artifact_publish_project_name = var.artifact_publish_project_name
