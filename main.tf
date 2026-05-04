@@ -173,6 +173,8 @@ module "machine_learning_env" {
   artifact_publish_project_id      = var.artifact_publish_project_id
   machine_learning_pipeline_sa     = var.terraform_service_account
   kms_crypto_key                   = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.machine_learning_project_name]
+
+  depends_on = [module.service_catalog]
 }
 
 /******************************************
