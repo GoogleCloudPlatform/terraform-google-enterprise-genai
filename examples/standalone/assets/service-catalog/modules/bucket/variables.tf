@@ -194,7 +194,7 @@ EOF
 
 variable "log_bucket" {
   type        = string
-  description = "Bucket to store logs from the created bucket. This is the Env-level Log Bucket creted on 2-environments."
+  description = "Bucket to store logs from the created bucket. This is the Env-level Log Bucket created on 2-environments."
 }
 
 variable "kms_key_name" {
