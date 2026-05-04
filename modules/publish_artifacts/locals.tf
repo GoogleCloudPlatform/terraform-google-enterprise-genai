@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+data "google_client_openid_userinfo" "current_user" {}
+
 locals {
   current_user_email  = data.google_client_openid_userinfo.current_user.email
   current_user_domain = split("@", local.current_user_email)[1]

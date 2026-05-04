@@ -563,18 +563,25 @@ func TestStandalone(t *testing.T) {
 		a.Equal(expectedNetworkSelfLink, projectNetwork.Get("selfLink").String(), fmt.Sprintf("network self_link should be %s", expectedNetworkSelfLink))
 
 		// Subnetworks self-links.
-		subnets := terraform.OutputList(t, standalone.GetTFOptions(), "machine_learning_subnets_self_link")
-		a.NotEmpty(subnets, "Machine learning subnets self-links list should not be empty")
+		subnetLink := standalone.GetStringOutput("machine_learning_subnets_self_link")
+		a.NotEmpty(subnetLink, "Machine learning subnets self-links list should not be empty")
 
-		for _, subnetLink := range subnets {
-			parts := strings.Split(subnetLink, "/")
-			if len(parts) >= 4 {
-				subnetName := parts[len(parts)-1]
-				region := parts[len(parts)-3]
-				subnetDesc := gcloud.Runf(t, "compute networks subnets describe %s --region %s --project %s --impersonate-service-account %s", subnetName, region, mlProjectID, terraformSA)
-				a.Equal(subnetName, subnetDesc.Get("name").String(), fmt.Sprintf("subnet %s should exist in region %s", subnetName, region))
-				a.Equal(subnetLink, subnetDesc.Get("selfLink").String(), fmt.Sprintf("subnet self link should be %s", subnetLink))
-			}
+		parts := strings.Split(subnetLink, "/")
+		if len(parts) >= 4 {
+			subnetName := parts[len(parts)-1]
+			region := parts[len(parts)-3]
+
+			subnetDesc := gcloud.Runf(
+				t,
+				"compute networks subnets describe %s --region %s --project %s --impersonate-service-account %s",
+				subnetName,
+				region,
+				mlProjectID,
+				terraformSA,
+			)
+
+			a.Equal(subnetName, subnetDesc.Get("name").String(), fmt.Sprintf("subnet %s should exist in region %s", subnetName, region))
+			a.Equal(subnetLink, subnetDesc.Get("selfLink").String(), fmt.Sprintf("subnet self link should be %s", subnetLink))
 		}
 
 		// Firewall egress rule.
