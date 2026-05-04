@@ -28,9 +28,8 @@ locals {
     "roles/cloudkms.admin",
   ]
 
-  terraform_state_kms_key = module.kms[0].keys["${var.project_prefix}-key"]
+  terraform_state_kms_key = module.kms.keys["${var.project_prefix}-key"]
 }
-
 
 resource "random_id" "project_id_suffix" {
   byte_length = 2
@@ -80,7 +79,7 @@ resource "google_storage_bucket" "terraform_state" {
   dynamic "encryption" {
     for_each = var.encrypt_gcs_bucket_tfstate ? ["encryption"] : []
     content {
-      default_kms_key_name = module.kms[0].keys["${var.project_prefix}-key"]
+      default_kms_key_name = local.terraform_state_kms_key
     }
   }
 
