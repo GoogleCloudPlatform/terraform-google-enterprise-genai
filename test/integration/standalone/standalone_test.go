@@ -177,13 +177,31 @@ func TestStandalone(t *testing.T) {
 	ingressPolicies := []map[string]interface{}{}
 	egressPolicies := []map[string]interface{}{}
 
+	temp := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../examples/standalone"),
+	)
+
+	// Create Access Context Manager Policy ID if needed
+	orgID := temp.GetTFSetupStringOutput("org_id")
+	policyID := testutils.GetOrgACMPolicyID(t, orgID)
+	terraformSA := temp.GetTFSetupStringOutput("terraform_service_account")
+
+	if policyID == "" {
+		_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title %s --impersonate-service-account %s", orgID, "defaultpolicy", terraformSA))
+		// ignore creation error and proceed with the test
+		if err != nil {
+			fmt.Printf("Ignore error in creation of access-context-manager policy ID for organization %s. Error: [%s]", orgID, err.Error())
+		}
+	}
+
 	vars := map[string]interface{}{
-		"project_deletion_policy":      "DELETE",
-		"kms_prevent_destroy":          false,
-		"bucket_force_destroy":         true,
-		"ingress_policies":             ingressPolicies,
-		"egress_policies":              egressPolicies,
-		"perimeter_additional_members": []string{},
+		"project_deletion_policy":          "DELETE",
+		"kms_prevent_destroy":              false,
+		"bucket_force_destroy":             true,
+		"access_context_manager_policy_id": policyID,
+		"ingress_policies":                 ingressPolicies,
+		"egress_policies":                  egressPolicies,
+		"perimeter_additional_members":     []string{},
 	}
 
 	// Standalone deployment.
@@ -257,6 +275,7 @@ func TestStandalone(t *testing.T) {
 
 			policyID = testutils.GetOrgACMPolicyID(t, orgID)
 		}
+
 		// VPC Service Controls.
 		servicePerimeterName := standalone.GetStringOutput("service_perimeter_name")
 		servicePerimeterLink := fmt.Sprintf("accessPolicies/%s/servicePerimeters/%s", policyID, servicePerimeterName)
@@ -405,29 +424,25 @@ func TestStandalone(t *testing.T) {
 		// KMS crypto keys.
 		kmsKeys := terraform.OutputMapOfObjects(t, standalone.GetTFOptions(), "kms_keys")
 
-		for groupName, groupVal := range kmsKeys {
-			locationsMap := groupVal.(map[string]interface{})
+		for location, locVal := range kmsKeys {
+			keysMap := locVal.(map[string]interface{})
 
-			for location, locVal := range locationsMap {
-				keysMap := locVal.(map[string]interface{})
+			for keyAlias, cryptoKeyIDRaw := range keysMap {
+				cryptoKeyID := cryptoKeyIDRaw.(string)
 
-				for keyAlias, cryptoKeyIDRaw := range keysMap {
-					cryptoKeyID := cryptoKeyIDRaw.(string)
-
-					parts := strings.Split(cryptoKeyID, "/")
-					if len(parts) < 8 {
-						t.Fatalf("invalid crypto key id for group %s location %s alias %s: %s", groupName, location, keyAlias, cryptoKeyID)
-					}
-
-					keyProjectID := parts[1]
-					keyLocation := parts[3]
-					keyringName := parts[5]
-					cryptoKeyName := parts[7]
-
-					resp := gcloud.Runf(t, "kms keys describe %s --keyring %s --location %s --project %s", cryptoKeyName, keyringName, keyLocation, keyProjectID)
-					expected := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", keyProjectID, keyLocation, keyringName, cryptoKeyName)
-					a.Equal(expected, resp.Get("name").String(), "KMS crypto key should exist for group %s location %s alias %s", groupName, location, keyAlias)
+				parts := strings.Split(cryptoKeyID, "/")
+				if len(parts) < 8 {
+					t.Fatalf("invalid crypto key id for location %s alias %s: %s", location, keyAlias, cryptoKeyID)
 				}
+
+				keyProjectID := parts[1]
+				keyLocation := parts[3]
+				keyringName := parts[5]
+				cryptoKeyName := parts[7]
+
+				resp := gcloud.Runf(t, "kms keys describe %s --keyring %s --location %s --project %s", cryptoKeyName, keyringName, keyLocation, keyProjectID)
+				expected := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", keyProjectID, keyLocation, keyringName, cryptoKeyName)
+				a.Equal(expected, resp.Get("name").String(), "KMS crypto key should exist for location %s alias %s", location, keyAlias)
 			}
 		}
 
