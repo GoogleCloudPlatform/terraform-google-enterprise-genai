@@ -122,7 +122,3 @@ output "cloud_source_service_catalog_repo_name" {
 output "instance_region" {
   value = var.instance_region
 }
-
-output "access_context_manager_policy_id" {
-  value = data.google_access_context_manager_access_policy.main.name
-}
