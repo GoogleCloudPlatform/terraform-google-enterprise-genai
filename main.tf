@@ -156,7 +156,7 @@ module "ml_dns_vertex_ai" {
 }
 
 resource "time_sleep" "wait_for_kms" {
-  create_duration = "60"
+  create_duration = "60s"
 
   depends_on = [module.kms_keyrings]
 }
