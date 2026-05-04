@@ -40,7 +40,7 @@ resource "random_string" "two_alphanumeric" {
 }
 
 resource "google_folder" "test_folder" {
-  display_name = "test_foundation_folder_${random_string.suffix.result}"
+  display_name = "test_genai_folder_${random_string.suffix.result}"
   parent       = "folders/${var.folder_id}"
 }
 
@@ -48,7 +48,7 @@ module "project" {
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 17.0"
 
-  name                     = "ci-foundation-${random_string.suffix.result}"
+  name                     = "ci-genai-${random_string.suffix.result}"
   random_project_id        = true
   random_project_id_length = 4
   org_id                   = var.org_id

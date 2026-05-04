@@ -181,8 +181,8 @@ func TestStandalone(t *testing.T) {
 		"project_deletion_policy":      "DELETE",
 		"kms_prevent_destroy":          false,
 		"bucket_force_destroy":         true,
-		"ingressPolicies":              ingressPolicies,
-		"egressPolicies":               egressPolicies,
+		"ingress_policies":             ingressPolicies,
+		"egress_policies":              egressPolicies,
 		"perimeter_additional_members": []string{},
 	}
 
