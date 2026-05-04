@@ -261,20 +261,7 @@ func TestStandalone(t *testing.T) {
 		standalone.DefaultVerify(a)
 
 		terraformSA := standalone.GetStringOutput("terraform_service_account")
-		orgID := standalone.GetTFSetupStringOutput("org_id")
 		parentFolder := testutils.GetLastSplitElement(standalone.GetStringOutput("parent_resource_id"), "/")
-
-		// Ensure ACM policy exists.
-		policyID := testutils.GetOrgACMPolicyID(t, orgID)
-		if policyID == "" {
-			_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title defaultpolicy --impersonate-service-account %s", orgID, terraformSA))
-
-			if err != nil {
-				fmt.Printf("Ignore error in creation of access-context-manager policy ID for organization %s. Error: [%s]", orgID, err.Error())
-			}
-
-			policyID = testutils.GetOrgACMPolicyID(t, orgID)
-		}
 
 		// VPC Service Controls.
 		servicePerimeterName := standalone.GetStringOutput("service_perimeter_name")
