@@ -13,6 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/******************************************
+  Locals
+*****************************************/
+locals {
+  artifact_tf_sa_roles = [
+    "roles/artifactregistry.admin",
+    "roles/cloudbuild.builds.editor",
+    "roles/cloudbuild.connectionAdmin",
+    "roles/iam.serviceAccountAdmin",
+    "roles/secretmanager.admin",
+    "roles/source.admin",
+    "roles/storage.admin",
+    "roles/cloudkms.admin",
+  ]
+}
+
+resource "google_kms_crypto_key_iam_member" "artifact-kms-key-binding" {
+  crypto_key_id = var.kms_crypto_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_project_service_identity.artifact_registry_agent.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "storage_agent" {
+  crypto_key_id = var.kms_crypto_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service_identity.storage_agent]
+}
+
+/******************************************
+  Service identities
+*****************************************/
 resource "google_project_service_identity" "artifact_registry_agent" {
   provider = google-beta
 
@@ -27,32 +61,74 @@ resource "google_project_service_identity" "storage_agent" {
   service = "storage.googleapis.com"
 }
 
-resource "google_kms_crypto_key_iam_member" "artifact-kms-key-binding" {
-  crypto_key_id = var.kms_crypto_key
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:${google_project_service_identity.artifact_registry_agent.email}"
+/******************************************
+  Service accounts
+*****************************************/
+resource "google_service_account" "artifacts_pipeline_sa" {
+  project      = var.project_id
+  account_id   = "artifacts-pipeline-sa"
+  display_name = "Artifacts Infra Pipeline SA"
 }
 
+resource "google_service_account" "trigger_sa" {
+  account_id   = var.docker_build_sa_id
+  display_name = "Docker Build Service Account"
+  project      = var.project_id
+}
+
+/******************************************
+  Project IAM
+*****************************************/
+resource "google_project_iam_member" "artifact_pipeline_sa_roles" {
+  for_each = toset(local.artifact_tf_sa_roles)
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${var.artifacts_infra_pipeline_sa}"
+}
+
+resource "google_project_iam_member" "artifact_cloudbuild_agent" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${data.google_project.project.number}@cloudbuild.gserviceaccount.com"
+}
+
+/******************************************
+  Service account IAM
+*****************************************/
+resource "google_service_account_iam_member" "impersonate" {
+  service_account_id = google_service_account.trigger_sa.id
+  role               = "roles/iam.serviceAccountUser"
+  member             = local.current_member
+}
+
+/******************************************
+  Source repository
+*****************************************/
+resource "google_sourcerepo_repository" "artifact_repo" {
+  project = var.project_id
+  name    = var.cloud_source_artifacts_repo_name
+}
+
+resource "google_sourcerepo_repository_iam_member" "repo_reader" {
+  repository = google_sourcerepo_repository.artifact_repo.id
+  role       = "roles/source.reader"
+  member     = google_service_account.trigger_sa.member
+}
+
+/******************************************
+  Artifact registry
+*****************************************/
 resource "google_artifact_registry_repository" "repo" {
   provider               = google-beta
   location               = var.region
-  repository_id          = local.name_var
+  repository_id          = "publish-artifacts"
   description            = var.description
   format                 = var.format
   cleanup_policy_dry_run = var.cleanup_policy_dry_run
   project                = data.google_project.project.project_id
 
-  #Customer Managed Encryption Keys
-  #Control ID: COM-CO-2.3
-  #NIST 800-53: SC-12 SC-13
-  #CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
-
   kms_key_name = var.kms_crypto_key
-
-  #Cleanup policy
-  #Control ID:  AR-CO-6.1
-  #NIST 800-53: SI-12
-  #CRI Profile: PR.IP-2.1 PR.IP-2.2 PR.IP-2.3
 
   dynamic "cleanup_policies" {
     for_each = var.cleanup_policies
@@ -79,6 +155,7 @@ resource "google_artifact_registry_repository" "repo" {
       }
     }
   }
+
   depends_on = [
     google_kms_crypto_key_iam_member.artifact-kms-key-binding,
   ]
@@ -93,32 +170,13 @@ resource "google_artifact_registry_repository_iam_member" "project" {
   member     = google_service_account.trigger_sa.member
 }
 
-resource "google_service_account" "trigger_sa" {
-  account_id   = var.docker_build_sa_id
-  display_name = "Docker Build Service Account"
-  project      = var.project_id
-}
-
-resource "google_service_account_iam_member" "impersonate" {
-  service_account_id = google_service_account.trigger_sa.id
-  role               = "roles/iam.serviceAccountUser"
-  member             = local.current_member
-}
-
+/******************************************
+  Storage
+*****************************************/
 resource "random_string" "suffix" {
   length  = 10
   special = false
   upper   = false
-}
-
-// Add Service Agent for Storage
-resource "google_kms_crypto_key_iam_member" "storage_agent" {
-  crypto_key_id = var.kms_crypto_key
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
-
-  depends_on = [google_project_service_identity.storage_agent]
-  #member = "serviceAccount:${google_project_service_identity.storage.email}"
 }
 
 resource "google_storage_bucket" "cloud_build_logs" {
@@ -136,18 +194,15 @@ resource "google_storage_bucket" "cloud_build_logs" {
   depends_on = [google_kms_crypto_key_iam_member.storage_agent]
 }
 
-resource "google_sourcerepo_repository_iam_member" "repo_reader" {
-  repository = data.google_sourcerepo_repository.artifacts_repo.id
-  role       = "roles/source.reader"
-  member     = google_service_account.trigger_sa.member
-}
-
 resource "google_storage_bucket_iam_member" "storage_admin" {
   bucket = google_storage_bucket.cloud_build_logs.name
   role   = "roles/storage.admin"
   member = google_service_account.trigger_sa.member
 }
 
+/******************************************
+  Cloud build
+*****************************************/
 resource "google_cloudbuild_trigger" "docker_build" {
   name            = "docker-build"
   project         = var.project_id
@@ -163,6 +218,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
   build {
     logs_bucket = google_storage_bucket.cloud_build_logs.name
     timeout     = "1800s"
+
     step {
       id         = "unshallow"
       name       = "gcr.io/cloud-builders/git"
@@ -172,6 +228,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
         "git fetch --unshallow"
       ]
     }
+
     step {
       id         = "select-folder"
       name       = "gcr.io/cloud-builders/git"
@@ -188,6 +245,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
         EOT
       ]
     }
+
     step {
       id         = "build-image"
       wait_for   = ["select-folder"]
@@ -198,7 +256,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
         <<-EOT
         build_path="/workspace/docker_build"
         while IFS= read -r line; do
-          docker build -t ${var.region}-docker.pkg.dev/$PROJECT_ID/c-publish-artifacts/$line images/$line
+          docker build -t ${var.region}-docker.pkg.dev/$PROJECT_ID/publish-artifacts/$line images/$line
         done < "$build_path"
         EOT
       ]
@@ -214,7 +272,7 @@ resource "google_cloudbuild_trigger" "docker_build" {
         <<-EOT
         build_path="/workspace/docker_build"
         while IFS= read -r line; do
-          docker push ${var.region}-docker.pkg.dev/$PROJECT_ID/c-publish-artifacts/$line
+          docker push ${var.region}-docker.pkg.dev/$PROJECT_ID/publish-artifacts/$line
         done < "$build_path"
         EOT
       ]

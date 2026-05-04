@@ -69,7 +69,7 @@ locals {
 
 module "ml_organization_policies_type_boolean" {
   source   = "terraform-google-modules/org-policy/google"
-  version  = "~> 5.1"
+  version  = "~> 7.0"
   for_each = local.ml_boolean_type_organization_policies
 
   organization_id = var.org_id
@@ -90,7 +90,7 @@ module "allowed_integrations" {
   #NIST 800-53: AC-3 AC-12 AC-17 AC-20
   #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.AC-7.1 PR.AC-7.2 PR.PT-3.1 PR-PT-4.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id   = var.org_id
   folder_id         = var.folder_id
@@ -112,7 +112,7 @@ module "restrict_tls_versions" {
   #CRI Profile: PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
 
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id  = var.org_id
   folder_id        = var.folder_id
@@ -129,7 +129,7 @@ module "restrict_cmek_key_projects" {
   #NIST 800-53 SC-12 SC-13
   #CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id   = var.org_id
   folder_id         = var.folder_id
@@ -146,7 +146,7 @@ module "restrict_non_cmek_services" {
   #NIST 800-53: SC-12
   #CRI Profile: PR.DS-1.1 PR.DS-1.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id  = var.org_id
   folder_id        = var.folder_id
@@ -163,7 +163,7 @@ module "restrict_service_usage" {
   #NIST 800-53: AC-3 AC-17 AC-20
   #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id  = var.org_id
   folder_id        = var.folder_id
@@ -180,7 +180,7 @@ module "allowed_locations" {
   #NIST 800-53: AC-3 AC-17 AC-20
   #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id   = var.org_id
   folder_id         = var.folder_id
@@ -201,7 +201,7 @@ module "restrict_vm_ip_forwarding" {
   #NIST 800-53: SC-7 SC-8
   #CRI Profile: PR.AC-5.1 PR.AC-5.2 PR.DS-2.1 PR.DS-2.2 PR.DS-5.1 PR.PT-4.1 DE.CM-1.1 DE.CM-1.2 DE.CM-1.3 DE.CM-1.4
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id  = var.org_id
   folder_id        = var.folder_id
@@ -222,7 +222,7 @@ module "vertexai_workbench_access_mode" {
   #NIST 800-53: AC-3 AC-17 AC-20
   #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id   = var.org_id
   folder_id         = var.folder_id
@@ -239,7 +239,7 @@ module "vertexai_allowed_images" {
   #NIST 800-53: AC-3 AC-17 AC-20
   #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id   = var.org_id
   folder_id         = var.folder_id
@@ -256,7 +256,7 @@ module "restrict_vertex_notebook_vpc_networks" {
   #NIST 800-53 SC-7 SC-8
   #CRI Profile: PR.AC-3.1 PR.AC-3.2 PR.AC-4.1 PR.AC-4.2 PR.AC-4.3 PR.AC-6.1 PR.PT-3.1 PR.PT-4.1
   source  = "terraform-google-modules/org-policy/google"
-  version = "~> 5.1"
+  version = "~> 7.0"
 
   organization_id   = var.org_id
   folder_id         = var.folder_id

@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-output "kms_keys" {
-  description = "Keys created for the project."
-  value       = local.output_keys
+terraform {
+  required_version = ">= 1.3"
+  required_providers {
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.3"
+    }
+  }
+
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:projects/v0.11.0"
+  }
+
+  provider_meta "google-beta" {
+    module_name = "blueprints/terraform/terraform-google-enterprise-genai:projects/v0.11.0"
+  }
 }

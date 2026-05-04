@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,26 @@
 terraform {
   required_version = ">= 1.3"
 
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:ml_infra_projects/v0.11.0"
+  required_providers {
+
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 3.77, != 4.31.0, != 6.26.0, != 6.27.0"
+    }
+
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.0"
+    }
+
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12.0"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.0"
+    }
   }
 }

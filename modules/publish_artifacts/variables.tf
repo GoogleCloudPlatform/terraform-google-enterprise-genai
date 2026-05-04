@@ -57,17 +57,14 @@ variable "cleanup_policies" {
   }))
 }
 
-variable "environment" {
-  type        = string
-  description = "development | staging | production | commmon"
-  validation {
-    condition     = contains(["development", "staging", "production", "common"], var.environment)
-    error_message = "Environment must be one of [development, staging, production]."
-  }
-}
-
 variable "project_id" {
   description = "Project ID"
+  type        = string
+}
+
+variable "project_name" {
+  description = "Artifact Publish project name."
+  type        = string
 }
 
 variable "kms_crypto_key" {
@@ -85,4 +82,39 @@ variable "bucket_force_destroy" {
   description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
   type        = bool
   default     = false
+}
+
+variable "artifacts_infra_pipeline_sa" {
+  description = "Full email of the terraform service account for artifact publish"
+  type        = string
+}
+
+variable "cloud_source_artifacts_repo_name" {
+  description = "Name to give the could source repository for Artifacts."
+  type        = string
+  default     = "publish-artifacts"
+}
+
+/******************************************
+  KMS variables
+*****************************************/
+variable "kms_prevent_destroy" {
+  description = "If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  type        = bool
+  default     = true
+}
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+
+variable "key_rings" {
+  description = "Keyrings to attach project key to."
+  type        = map(string)
+}
+
+variable "keyring_regions" {
+  type = list(string)
 }

@@ -15,6 +15,11 @@
  */
 
 output "cloudbuild_trigger_id" {
-  value = google_cloudbuild_trigger.docker_build.id
+  description = "Id of Cloud Build Trigger"
+  value       = google_cloudbuild_trigger.docker_build.id
 }
 
+output "artifacts_repo_id" {
+  description = "ID of the Artifacts repository"
+  value       = google_sourcerepo_repository.artifact_repo.id
+}

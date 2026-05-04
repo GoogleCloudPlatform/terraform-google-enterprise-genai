@@ -15,5 +15,20 @@
  */
 
 locals {
-  env_code = element(split("", var.environment), 0)
+  pubsub_topic_name = "secret-rotation-notifications"
+}
+
+// Secret rotation notification
+resource "google_pubsub_topic" "secret_rotations" {
+  name    = local.pubsub_topic_name
+  project = var.machine_learning_project_id
+}
+
+resource "google_pubsub_topic_iam_member" "pubsub_binding" {
+  topic   = google_pubsub_topic.secret_rotations.name
+  project = var.machine_learning_project_id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:service-${var.machine_learning_project_number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
+
+  depends_on = [time_sleep.wait_30_seconds]
 }

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = ">= 1.3"
+output "machine_learning_project_id" {
+  description = "Project machine learning project."
+  value       = var.machine_learning_project_id
+}
 
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:ml_kms_key/v0.11.0"
-  }
+output "machine_learning_project_number" {
+  description = "Project number of machine learning project."
+  value       = var.machine_learning_project_number
 }
