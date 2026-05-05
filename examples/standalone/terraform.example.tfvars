@@ -23,4 +23,3 @@ perimeter_additional_members           = ["user:YOUR-USER-EMAIL@example.com"]
 default_region                         = "us-central1"
 cloud_source_artifacts_repo_name       = "publish-artifacts"
 cloud_source_service_catalog_repo_name = "service-catalog"
-instance_region                        = "us-central1"

@@ -74,7 +74,6 @@ module "regular_service_perimeter" {
   ingress_policies_keys_dry_run   = !var.enforce_vpcsc ? var.ingress_policies_keys_dry_run : []
   egress_policies_dry_run         = var.egress_policies_dry_run
   egress_policies_keys_dry_run    = !var.enforce_vpcsc ? var.egress_policies_keys_dry_run : []
-
 }
 
 resource "time_sleep" "wait_vpc_sc_propagation" {

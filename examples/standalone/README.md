@@ -1,8 +1,8 @@
 # Standalone Example
 
-The Standalone Example deploys the core Enterprise GenAI Blueprint into a single project for the purposes of simplified demonstration.
+This examples deploys the Enterprise GenAI blueprint.
 
-This example also creates the resources required to deploy the blueprint that are expected to be provided by the user. We call these resources the *external harness*.
+This example also creates the resources required to deploy the blueprint that are expected to be provided by the user. We call these resources the _external harness_.
 
 The External Harness includes:
 
@@ -35,18 +35,14 @@ The Blueprint deployment includes:
 - The configuration of Organization Policies to restrict unapproved services, enforce specific TLS versions, and whitelist allowed Vertex AI notebook base images and access modes.
 - The Cloud KMS infrastructure for Customer-Managed Encryption Keys (CMEK):
   - A Cloud KMS Keyring.
-  - Cloud KMS crypto keys for Artifact Publish and Service Catalog environments.
+  - Cloud KMS crypto keys for Logging, Artifact Publish and Service Catalog projects.
 - The creation of a related Logging bucket in the Logging project.
 - The configuration of Private DNS zones for secure, internal Jupyter Notebook access.
-- The configuration of the Machine Learning Environment Service Accounts and their IAM bindings.
-- The deployment of an Artifact Publish environment, including Artifact Registry for containerized ML pipelines and Cloud Build triggers.
-- The deployment of a Service Catalog environment for deploying ML solutions.
+- The configuration of the Machine Learning environment.
+- The deployment of an Artifact Publish environment, including Artifact Registry for containerized machine learning pipelines and Cloud Build triggers.
+- The deployment of a Service Catalog environment for deploying machine learning solutions.
 
 **Note:** To deploy this example, you must have an existing project or folder where you can create a service account to deploy the example. This service account must be granted the required IAM roles. In accordance with the principle of separation of concerns, the project should not be in the same folder as the projects created in this example.
-
-## Google Cloud Locations
-
-This example is deployed in the `us-central1` location by default. To deploy in another location, change the `region`, `default_region`, and `instance_region` in your `terraform.tfvars` file. By default, the blueprint has an Organization Policy that only allows the creation of resources in `us-locations`. To deploy in other locations, update the `allowed_locations` input in the main module call.
 
 ## Prerequisites and Service Account Setup
 
@@ -59,12 +55,14 @@ You can use the [Project Factory module](https://github.com/terraform-google-mod
 Grant the following roles to the service account:
 
 ### Organization Level Roles
+
 - Access Context Manager Admin: `roles/accesscontextmanager.policyAdmin`
 - Billing Account User: `roles/billing.user`
 - Organization Policy Administrator: `roles/orgpolicy.policyAdmin`
 - Organization Administrator: `roles/resourcemanager.organizationAdmin`
 
 ### Folder Level Roles
+
 - Compute Network Admin: `roles/compute.networkAdmin`
 - Compute Security Admin: `roles/compute.securityAdmin`
 - DNS Administrator: `roles/dns.admin`
@@ -77,6 +75,10 @@ Grant the following roles to the service account:
 - Service Account Admin: `roles/iam.serviceAccountAdmin`
 - Service Usage Admin: `roles/serviceusage.serviceUsageAdmin`
 - Serverless VPC Access Admin: `roles/vpcaccess.admin`
+
+## Google Cloud Locations
+
+This example is deployed in the `us-central1` location by default. To deploy in another location, change the `default_region` in your `terraform.tfvars` file. By default, the blueprint has an Organization Policy that only allows the creation of resources in `us-locations`. To deploy in other locations, update the `allowed_locations` input in the main module call.
 
 ## Usage
 
@@ -115,13 +117,13 @@ Grant the following roles to the service account:
    echo ${ARTIFACT_PROJECT_ID}
    ```
 
-2. Clone the newly created Cloud Source Repository:
+1. Clone the newly created Cloud Source Repository:
 
    ```bash
    gcloud source repos clone publish-artifacts --project=${ARTIFACT_PROJECT_ID}
    ```
 
-3. Copy the artifact files, commit, and push:
+1. Copy the artifact files, commit, and push:
 
    ```bash
    cd publish-artifacts
@@ -147,13 +149,13 @@ Grant the following roles to the service account:
    echo ${SERVICE_CATALOG_PROJECT_ID}
    ```
 
-2. Clone the newly created Cloud Source Repository:
+1. Clone the newly created Cloud Source Repository:
 
    ```bash
    gcloud source repos clone service-catalog --project=${SERVICE_CATALOG_PROJECT_ID}
    ```
 
-3. Copy the service catalog files, commit, and push:
+1. Copy the service catalog files, commit, and push:
 
    ```bash
    cd service-catalog/
@@ -177,7 +179,7 @@ After local deployment, migrate the Terraform state to the remote GCS backend us
 
    ```bash
    cd examples/standalone
-   export backend_bucket=$(terraform output -raw state_bucket)
+   export backend_bucket=$(terraform output -raw remote_state_bucket)
    echo "backend_bucket = ${backend_bucket}"
    ```
 
@@ -214,7 +216,7 @@ If you encounter problems during the `apply` execution, please refer to the [Tro
    ```
 
 2. Destroy the environment:
-   *Note: `bucket_force_destroy` must have been set to `true` during the `apply` phase for this command to work successfully.*
+   _Note: `bucket_force_destroy` must be set to `true`, and `kms_prevent_destroy` must be set to `false` during the `apply` phase for this command to work successfully._
 
    ```bash
    terraform destroy
@@ -236,13 +238,13 @@ If you encounter problems during the `apply` execution, please refer to the [Tro
 | custom\_restricted\_services | List of services to restrict in an enforced perimeter. If empty, all supported services (https://cloud.google.com/vpc-service-controls/docs/supported-products) will be protected. | `list(string)` | `[]` | no |
 | custom\_restricted\_services\_dry\_run | List of custom services to be protected by the dry-run VPC-SC perimeter. If empty, all supported services (https://cloud.google.com/vpc-service-controls/docs/supported-products) will be protected. | `list(string)` | `[]` | no |
 | default\_region | Default region to create resources where applicable. | `string` | `"us-central1"` | no |
-| egress\_policies | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
-| egress\_policies\_dry\_run | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
+| egress\_policies | A list of all [egress policies](https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules#egress-rules-reference), each list object has a `from` and `to` value that describes egress\_from and egress\_to.<br><br>Example: `[{ from={ identities=[], identity_type="ID_TYPE" }, to={ resources=[], operations={ "SRV_NAME"={ OP_TYPE=[] }}}}]`<br><br>Valid Values:<br>`ID_TYPE` = `null` or `IDENTITY_TYPE_UNSPECIFIED` (only allow indentities from list); `ANY_IDENTITY`; `ANY_USER_ACCOUNT`; `ANY_SERVICE_ACCOUNT`<br>`SRV_NAME` = "`*`" (allow all services) or [Specific Services](https://cloud.google.com/vpc-service-controls/docs/supported-products#supported_products)<br>`OP_TYPE` = [methods](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) or [permissions](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
+| egress\_policies\_dry\_run | A list of all [egress policies](https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules#egress-rules-reference), each list object has a `from` and `to` value that describes egress\_from and egress\_to.<br><br>Example: `[{ from={ identities=[], identity_type="ID_TYPE" }, to={ resources=[], operations={ "SRV_NAME"={ OP_TYPE=[] }}}}]`<br><br>Valid Values:<br>`ID_TYPE` = `null` or `IDENTITY_TYPE_UNSPECIFIED` (only allow indentities from list); `ANY_IDENTITY`; `ANY_USER_ACCOUNT`; `ANY_SERVICE_ACCOUNT`<br>`SRV_NAME` = "`*`" (allow all services) or [Specific Services](https://cloud.google.com/vpc-service-controls/docs/supported-products#supported_products)<br>`OP_TYPE` = [methods](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) or [permissions](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
 | enforce\_vpcsc | Enable the enforced mode for VPC Service Controls. It is not recommended to enable VPC-SC on the first run deploying your foundation. Review [best practices for enabling VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/enable), then only enforce the perimeter after you have analyzed the access patterns in your dry-run perimeter and created the necessary exceptions for your use cases. | `bool` | `false` | no |
 | gcs\_bucket\_prefix | Name prefix to be used for the GCS bucket. | `string` | `"bkt"` | no |
 | gcs\_logging\_bucket\_location | Location of the environment logging bucket. | `string` | `"us-central1"` | no |
-| ingress\_policies | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
-| ingress\_policies\_dry\_run | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
+| ingress\_policies | A list of all [ingress policies](https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules#ingress-rules-reference), each list object has a `from` and `to` value that describes ingress\_from and ingress\_to.<br><br>Example: `[{ from={ sources={ resources=[], access_levels=[] }, identities=[], identity_type="ID_TYPE" }, to={ resources=[], operations={ "SRV_NAME"={ OP_TYPE=[] }}}}]`<br><br>Valid Values:<br>`ID_TYPE` = `null` or `IDENTITY_TYPE_UNSPECIFIED` (only allow indentities from list); `ANY_IDENTITY`; `ANY_USER_ACCOUNT`; `ANY_SERVICE_ACCOUNT`<br>`SRV_NAME` = "`*`" (allow all services) or [Specific Services](https://cloud.google.com/vpc-service-controls/docs/supported-products#supported_products)<br>`OP_TYPE` = [methods](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) or [permissions](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
+| ingress\_policies\_dry\_run | A list of all [ingress policies](https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules#ingress-rules-reference) to use in a dry-run perimeter. Each list object has a `from` and `to` value that describes ingress\_from and ingress\_to.<br><br>Example: `[{ from={ sources={ resources=[], access_levels=[] }, identities=[], identity_type="ID_TYPE" }, to={ resources=[], operations={ "SRV_NAME"={ OP_TYPE=[] }}}}]`<br><br>Valid Values:<br>`ID_TYPE` = `null` or `IDENTITY_TYPE_UNSPECIFIED` (only allow indentities from list); `ANY_IDENTITY`; `ANY_USER_ACCOUNT`; `ANY_SERVICE_ACCOUNT`<br>`SRV_NAME` = "`*`" (allow all services) or [Specific Services](https://cloud.google.com/vpc-service-controls/docs/supported-products#supported_products)<br>`OP_TYPE` = [methods](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) or [permissions](https://cloud.google.com/vpc-service-controls/docs/supported-method-restrictions) | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
 | keyring\_name | Name to be used for the KMS key ring. | `string` | `"sample-keyring"` | no |
 | keyring\_regions | Regions to create key rings in. | `list(string)` | <pre>[<br>  "us-central1",<br>  "us-east4"<br>]</pre> | no |
 | kms\_prevent\_destroy | If set to true, delete the KMS key ring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
@@ -251,7 +253,8 @@ If you encounter problems during the `apply` execution, please refer to the [Tro
 | machine\_learning\_project\_name | Custom project name for the Machine Learning project. | `string` | `""` | no |
 | org\_id | The numeric organization ID. | `string` | n/a | yes |
 | parent\_folder | The folder to deploy in. | `string` | n/a | yes |
-| perimeter\_additional\_members | The list of additional members to be added to perimeter access. Prefix user: (user:email@email.com) or serviceAccount: (serviceAccount:my-service-account@email.com) is required. | `list(string)` | `[]` | no |
+| perimeter\_additional\_members | The list of additional members to be added to the enforced perimeter access level members list. Prefix user: (user:email@email.com) or serviceAccount: (serviceAccount:my-service-account@email.com) is required. | `list(string)` | `[]` | no |
+| perimeter\_additional\_members\_dry\_run | The list of additional members to be added to the dry-run perimeter access level members list. To be able to see the resources protected by the VPC Service Controls in the restricted perimeter, add your user in this list. Entries must be in the standard GCP form: `user:email@example.com` or `serviceAccount:my-service-account@example.com`. | `list(string)` | `[]` | no |
 | private\_service\_connect\_ip | Internal IP to be used as the Private Service Connect endpoint. | `string` | `"10.10.64.5"` | no |
 | project\_deletion\_policy | The deletion policy for the project created. | `string` | `"PREVENT"` | no |
 | restricted\_network\_self\_link | The URI of the Machine Learning VPC being created. | `list(string)` | `[]` | no |

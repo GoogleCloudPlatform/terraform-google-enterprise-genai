@@ -96,7 +96,8 @@ The repository is divided into distinct Terraform projects, each located in its 
 | machine\_learning\_project\_number | Machine Learning project number. | `string` | n/a | yes |
 | network\_name | Network name. | `string` | n/a | yes |
 | org\_id | The numeric organization ID. | `string` | n/a | yes |
-| perimeter\_additional\_members | The list of additional members to be added to perimeter access. Prefix user: (user:email@email.com) or serviceAccount: (serviceAccount:my-service-account@email.com) is required. | `list(string)` | `[]` | no |
+| perimeter\_additional\_members | The list of additional members to be added to the enforced perimeter access level members list. Prefix user: (user:email@email.com) or serviceAccount: (serviceAccount:my-service-account@email.com) is required. | `list(string)` | `[]` | no |
+| perimeter\_additional\_members\_dry\_run | The list of additional members to be added to the dry-run perimeter access level members list. To be able to see the resources protected by the VPC Service Controls in the restricted perimeter, add your user in this list. Entries must be in the standard GCP form: `user:email@example.com` or `serviceAccount:my-service-account@example.com`. | `list(string)` | `[]` | no |
 | private\_service\_connect\_ip | Internal IP to be used as the Private Service Connect endpoint. | `string` | `"10.10.64.5"` | no |
 | private\_visibility\_config\_networks | List of VPC self links that can see this zone. | `list(string)` | n/a | yes |
 | projects\_deletion\_policy | Project deletion policy. Possible values are: "PREVENT", "ABANDON", "DELETE". | `string` | `"PREVENT"` | no |

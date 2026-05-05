@@ -364,7 +364,7 @@ module "service_control" {
   ], var.perimeter_additional_members))
   members_dry_run = distinct(concat([
     "serviceAccount:${var.terraform_service_account}",
-  ], var.perimeter_additional_members))
+  ], var.perimeter_additional_members_dry_run))
   resources = [
     for project_key in keys(local.perimeter_projects) :
     "${local.perimeter_projects[project_key]}"
