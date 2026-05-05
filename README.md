@@ -113,24 +113,24 @@ The repository is divided into distinct Terraform projects, each located in its 
 
 | Name | Description |
 |------|-------------|
-| access\_context\_manager\_policy\_id | Access Context Manager Policy ID. |
-| access\_level\_name | Access context manager access level name |
-| access\_level\_name\_dry\_run | Access context manager access level name for the dry-run perimeter |
-| allow\_ingress\_firewall\_rule\_ip\_range | IP range for firewall rule - allow ingress |
-| artifact\_publish\_cloudbuild\_trigger\_id | Cloud Build Trigger ID for Artifact Publish. |
-| artifact\_publish\_project\_id | Artifact Publish Project ID. |
-| artifacts\_repo\_id | ID of the Artifacts repository. |
-| cloud\_source\_artifacts\_repo\_name | Cloud source repository for Artifact Publish name. |
-| cloud\_source\_service\_catalog\_repo\_name | Cloud source repository for Service Catalog name. |
-| key\_rings | Keyring Names created |
+| access\_context\_manager\_policy\_id | Access Context Manager policy ID. |
+| access\_level\_name | Access Context Manager access level name. |
+| access\_level\_name\_dry\_run | Access Context Manager access level name for the dry-run perimeter. |
+| allow\_ingress\_firewall\_rule\_ip\_range | IP range for the allow ingress firewall rule. |
+| artifact\_publish\_cloudbuild\_trigger\_id | Cloud Build trigger ID for artifact publishing. |
+| artifact\_publish\_project\_id | Artifact publishing project ID. |
+| artifacts\_repo\_id | ID of the artifacts repository. |
+| cloud\_source\_artifacts\_repo\_name | Cloud Source repository name for artifact publishing. |
+| cloud\_source\_service\_catalog\_repo\_name | Cloud Source repository name for Service Catalog. |
+| key\_rings | Key ring names created. |
 | kms\_keys | KMS keys created by region and project. |
-| kms\_project\_id | Cloud Key Management Service (KMS) Project ID. |
-| log\_bucket | Log bucket to be used by Service Catalog Bucket. |
-| logging\_project\_id | Logging Project ID. |
-| service\_catalog\_cloudbuild\_trigger\_id | Cloud Build Trigger ID for Service Catalog. |
-| service\_catalog\_project\_id | Service Catalog Project ID. |
+| kms\_project\_id | Cloud Key Management Service (KMS) project ID. |
+| log\_bucket | Log bucket to be used by Service Catalog. |
+| logging\_project\_id | Logging project ID. |
+| service\_catalog\_cloudbuild\_trigger\_id | Cloud Build trigger ID for Service Catalog. |
+| service\_catalog\_project\_id | Service Catalog project ID. |
 | service\_catalog\_repo\_id | ID of the Service Catalog repository. |
-| service\_perimeter\_name | Service Perimeter name. |
-| storage\_bucket\_name | Name of storage bucket created. |
+| service\_perimeter\_name | Service perimeter name. |
+| storage\_bucket\_name | Name of the storage bucket created. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

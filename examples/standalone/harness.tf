@@ -21,6 +21,7 @@ module "harness" {
   folder_id                     = var.parent_folder
   billing_account               = var.billing_account
   kms_project_name              = var.kms_project_name
+  kms_prevent_destroy           = var.kms_prevent_destroy
   logging_project_name          = var.logging_project_name
   machine_learning_project_name = var.machine_learning_project_name
   artifact_publish_project_name = var.artifact_publish_project_name

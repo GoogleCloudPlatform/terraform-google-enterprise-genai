@@ -274,6 +274,7 @@ If you encounter problems during the `apply` execution, please refer to the [Tro
 | artifacts\_repo\_id | Artifacts repository ID. |
 | cloud\_source\_artifacts\_repo\_name | Artifacts Cloud Source repository name. |
 | cloud\_source\_service\_catalog\_repo\_name | Service Catalog Cloud Source repository name. |
+| instance\_region | Region where the resources were created. |
 | keyring\_name | Key ring name. |
 | keyrings\_regions | KMS key ring regions. |
 | kms\_keyrings | KMS key rings. |

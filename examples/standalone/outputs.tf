@@ -29,6 +29,11 @@ output "remote_state_bucket" {
   value       = module.harness.state_bucket
 }
 
+output "instance_region" {
+  description = "Region where the resources were created."
+  value       = var.default_region
+}
+
 /******************************************
   Harness Projects
 *****************************************/

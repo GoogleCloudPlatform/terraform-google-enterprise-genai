@@ -261,20 +261,7 @@ func TestStandalone(t *testing.T) {
 		standalone.DefaultVerify(a)
 
 		terraformSA := standalone.GetStringOutput("terraform_service_account")
-		orgID := standalone.GetTFSetupStringOutput("org_id")
 		parentFolder := testutils.GetLastSplitElement(standalone.GetStringOutput("parent_resource_id"), "/")
-
-		// Ensure ACM policy exists.
-		policyID := testutils.GetOrgACMPolicyID(t, orgID)
-		if policyID == "" {
-			_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title defaultpolicy --impersonate-service-account %s", orgID, terraformSA))
-
-			if err != nil {
-				fmt.Printf("Ignore error in creation of access-context-manager policy ID for organization %s. Error: [%s]", orgID, err.Error())
-			}
-
-			policyID = testutils.GetOrgACMPolicyID(t, orgID)
-		}
 
 		// VPC Service Controls.
 		servicePerimeterName := standalone.GetStringOutput("service_perimeter_name")
@@ -563,18 +550,25 @@ func TestStandalone(t *testing.T) {
 		a.Equal(expectedNetworkSelfLink, projectNetwork.Get("selfLink").String(), fmt.Sprintf("network self_link should be %s", expectedNetworkSelfLink))
 
 		// Subnetworks self-links.
-		subnets := terraform.OutputList(t, standalone.GetTFOptions(), "machine_learning_subnets_self_link")
-		a.NotEmpty(subnets, "Machine learning subnets self-links list should not be empty")
+		subnetLink := standalone.GetStringOutput("machine_learning_subnets_self_link")
+		a.NotEmpty(subnetLink, "Machine learning subnets self-links list should not be empty")
 
-		for _, subnetLink := range subnets {
-			parts := strings.Split(subnetLink, "/")
-			if len(parts) >= 4 {
-				subnetName := parts[len(parts)-1]
-				region := parts[len(parts)-3]
-				subnetDesc := gcloud.Runf(t, "compute networks subnets describe %s --region %s --project %s --impersonate-service-account %s", subnetName, region, mlProjectID, terraformSA)
-				a.Equal(subnetName, subnetDesc.Get("name").String(), fmt.Sprintf("subnet %s should exist in region %s", subnetName, region))
-				a.Equal(subnetLink, subnetDesc.Get("selfLink").String(), fmt.Sprintf("subnet self link should be %s", subnetLink))
-			}
+		parts := strings.Split(subnetLink, "/")
+		if len(parts) >= 4 {
+			subnetName := parts[len(parts)-1]
+			region := parts[len(parts)-3]
+
+			subnetDesc := gcloud.Runf(
+				t,
+				"compute networks subnets describe %s --region %s --project %s --impersonate-service-account %s",
+				subnetName,
+				region,
+				mlProjectID,
+				terraformSA,
+			)
+
+			a.Equal(subnetName, subnetDesc.Get("name").String(), fmt.Sprintf("subnet %s should exist in region %s", subnetName, region))
+			a.Equal(subnetLink, subnetDesc.Get("selfLink").String(), fmt.Sprintf("subnet self link should be %s", subnetLink))
 		}
 
 		// Firewall egress rule.
@@ -608,39 +602,29 @@ func TestStandalone(t *testing.T) {
 		for _, r := range allowIngressRule.Get("sourceRanges").Array() {
 			actualIngressRanges = append(actualIngressRanges, r.String())
 		}
-
 		a.ElementsMatch(allowIngressRuleIPRanges, actualIngressRanges, fmt.Sprintf("firewall rule %s source ranges should match expected ranges", allowIngressName))
 
+		triggerRegion := standalone.GetStringOutput("instance_region")
 		// Service Catalog repository and Cloud Build trigger.
 		serviceCatalogProjectID := standalone.GetStringOutput("service_catalog_project_id")
 		serviceCatalogRepoID := standalone.GetStringOutput("service_catalog_repo_id")
 		serviceCatalogRepoName := testutils.GetLastSplitElement(serviceCatalogRepoID, "/")
-
 		serviceCatalogRepo := gcloud.Runf(t, "source repos describe %s --project %s --impersonate-service-account %s", serviceCatalogRepoName, serviceCatalogProjectID, terraformSA)
-
 		a.Equal(serviceCatalogRepoID, serviceCatalogRepo.Get("name").String(), "Service Catalog repository should exist")
-
 		serviceCatalogTriggerID := standalone.GetStringOutput("service_catalog_cloudbuild_trigger_id")
 		a.NotEmpty(serviceCatalogTriggerID, "Service Catalog Cloud Build trigger ID should exist and not be empty")
-
-		serviceCatalogTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", serviceCatalogTriggerID, serviceCatalogProjectID, "global", terraformSA)
-
+		serviceCatalogTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", serviceCatalogTriggerID, serviceCatalogProjectID, triggerRegion, terraformSA)
 		a.Equal(serviceCatalogTriggerID, serviceCatalogTrigger.Get("id").String(), "Service Catalog Cloud Build trigger should exist in GCP")
 
 		// Artifact Publish repository and Cloud Build trigger.
 		artifactProjectID := standalone.GetStringOutput("artifact_publish_project_id")
 		artifactRepoID := standalone.GetStringOutput("artifacts_repo_id")
 		artifactRepoName := testutils.GetLastSplitElement(artifactRepoID, "/")
-
 		artifactRepo := gcloud.Runf(t, "source repos describe %s --project %s --impersonate-service-account %s", artifactRepoName, artifactProjectID, terraformSA)
-
 		a.Equal(artifactRepoID, artifactRepo.Get("name").String(), "Artifact Publish repository should exist")
-
 		artifactTriggerID := standalone.GetStringOutput("artifact_publish_cloudbuild_trigger_id")
 		a.NotEmpty(artifactTriggerID, "Artifact Publish Cloud Build trigger ID should exist and not be empty")
-
-		artifactTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", artifactTriggerID, artifactProjectID, "global", terraformSA)
-
+		artifactTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", artifactTriggerID, artifactProjectID, triggerRegion, terraformSA)
 		a.Equal(artifactTriggerID, artifactTrigger.Get("id").String(), "Artifact Publish Cloud Build trigger should exist in GCP")
 	})
 

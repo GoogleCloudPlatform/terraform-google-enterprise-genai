@@ -190,11 +190,19 @@ resource "google_sourcerepo_repository" "service_catalog" {
   name    = var.name
 }
 
+resource "time_sleep" "wait_for_sourcerepo" {
+  create_duration = "60s"
+
+  depends_on = [google_sourcerepo_repository.service_catalog]
+}
+
 resource "google_sourcerepo_repository_iam_member" "read" {
   project    = var.project_id
   repository = var.name
   role       = "roles/viewer"
   member     = "serviceAccount:${var.service_catalog_pipeline_sa}"
+
+  depends_on = [time_sleep.wait_for_sourcerepo]
 }
 
 resource "google_sourcerepo_repository_iam_member" "repo_reader" {
@@ -202,7 +210,7 @@ resource "google_sourcerepo_repository_iam_member" "repo_reader" {
   role       = "roles/source.reader"
   member     = google_service_account.trigger_sa.member
 
-  depends_on = [google_sourcerepo_repository.service_catalog]
+  depends_on = [time_sleep.wait_for_sourcerepo]
 }
 
 /******************************************

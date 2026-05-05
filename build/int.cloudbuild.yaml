@@ -193,7 +193,7 @@ options:
   - 'TF_VAR_default_region=us-west1'
   - 'TF_VAR_default_region1=us-west1'
   - 'TF_VAR_default_region2=us-central1'
-  - 'TF_VAR_instance_region=us-west1'
+  - 'TF_VAR_instance_region=us-central1'
   - 'TF_IN_AUTOMATION=true'
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'

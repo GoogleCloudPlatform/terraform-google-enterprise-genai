@@ -24,6 +24,7 @@ locals {
 /******************************************
   Org Policies
 *****************************************/
+
 module "ml_organization_policies" {
   source = "./modules/ml_org_policies"
 
@@ -178,8 +179,6 @@ module "machine_learning_env" {
   artifact_publish_project_id      = var.artifact_publish_project_id
   machine_learning_pipeline_sa     = var.terraform_service_account
   kms_crypto_key                   = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.machine_learning_project_name]
-
-  depends_on = [time_sleep.wait_for_kms]
 }
 
 /******************************************
@@ -213,8 +212,6 @@ module "artifact_publish" {
   }]
 
   kms_crypto_key = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.artifact_publish_project_name]
-
-  depends_on = [time_sleep.wait_for_kms]
 }
 
 module "service_catalog" {
@@ -233,6 +230,4 @@ module "service_catalog" {
 
   log_bucket     = module.ml_logging.name
   kms_crypto_key = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.service_catalog_project_name]
-
-  depends_on = [time_sleep.wait_for_kms]
 }
