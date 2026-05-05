@@ -47,7 +47,7 @@ func fileExists(filePath string) (bool, error) {
 }
 
 func TestStandalone(t *testing.T) {
-	// VPC Service Controls variables.
+
 	restrictedServices := []string{
 		"serviceusage.googleapis.com",
 		"essentialcontacts.googleapis.com",
@@ -270,9 +270,7 @@ func TestStandalone(t *testing.T) {
 
 		servicePerimeter, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager perimeters describe %s --policy %s", servicePerimeterLink, policyID))
 		a.NoError(err)
-
 		a.True(strings.Contains(servicePerimeter, servicePerimeterName), fmt.Sprintf("service perimeter %s should exist", servicePerimeterName))
-
 		a.True(strings.Contains(servicePerimeter, accessLevel), fmt.Sprintf("service perimeter %s should have access level %s", servicePerimeterLink, accessLevel))
 
 		for _, service := range restrictedServices {
@@ -375,18 +373,13 @@ func TestStandalone(t *testing.T) {
 		} {
 			projectID := standalone.GetStringOutput(projectCheck.projectOutput)
 			prj := gcloud.Runf(t, "projects describe %s", projectID)
-
 			projectNumber := prj.Get("projectNumber").String()
-
 			a.Equal(projectID, prj.Get("projectId").String(), fmt.Sprintf("project %s should exist", projectID))
 			a.Equal("ACTIVE", prj.Get("lifecycleState").String(), fmt.Sprintf("project %s should be ACTIVE", projectID))
-
 			enabledAPIs := gcloud.Runf(t, "services list --project %s", projectID).Array()
 			listAPIs := testutils.GetResultFieldStrSlice(enabledAPIs, "config.name")
 			a.Subset(listAPIs, projectCheck.apis, "APIs should have been enabled")
-
 			expectedProjectResource := fmt.Sprintf("projects/%s", projectNumber)
-
 			if projectCheck.shouldBeInPerimeter {
 				a.Contains(perimeterResources, expectedProjectResource, fmt.Sprintf("project %s should be in the perimeter", projectID))
 			} else {
@@ -402,7 +395,6 @@ func TestStandalone(t *testing.T) {
 		for _, location := range kmsLocations {
 			kmsKeyringID := kmsKeyrings[location]
 			kmsKeyringName := path.Base(kmsKeyringID)
-
 			resp := gcloud.Runf(t, "kms keyrings describe %s --location %s --project %s", kmsKeyringName, location, kmsProjectID)
 			expected := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", kmsProjectID, location, kmsKeyringName)
 			a.Equal(expected, resp.Get("name").String(), "KMS keyring should exist")
@@ -413,10 +405,8 @@ func TestStandalone(t *testing.T) {
 
 		for location, locVal := range kmsKeys {
 			keysMap := locVal.(map[string]interface{})
-
 			for keyAlias, cryptoKeyIDRaw := range keysMap {
 				cryptoKeyID := cryptoKeyIDRaw.(string)
-
 				parts := strings.Split(cryptoKeyID, "/")
 				if len(parts) < 8 {
 					t.Fatalf("invalid crypto key id for location %s alias %s: %s", location, keyAlias, cryptoKeyID)
@@ -441,7 +431,6 @@ func TestStandalone(t *testing.T) {
 		}
 
 		mlProjectID := standalone.GetStringOutput("machine_learning_project_id")
-
 		for name := range zones {
 			z := gcloud.Runf(t, "dns managed-zones describe %s --project %s", name, mlProjectID)
 			a.Equal(name, z.Get("name").String())
@@ -457,13 +446,11 @@ func TestStandalone(t *testing.T) {
 			"constraints/cloudfunctions.requireVPCConnector",
 		} {
 			orgPolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", booleanConstraint, parentFolder)
-
 			a.True(orgPolicy.Get("booleanPolicy.enforced").Bool(), fmt.Sprintf("org policy %s should be enforced", booleanConstraint))
 		}
 
 		// Cloud Build allowed integrations.
 		cloudBuildAllowedIntegrationsPolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/cloudbuild.allowedIntegrations", parentFolder)
-
 		for _, allowedIntegration := range []string{
 			"github.com",
 			"source.developers.google.com",
@@ -473,22 +460,18 @@ func TestStandalone(t *testing.T) {
 
 		// Allowed locations.
 		allowedLocationsPolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.resourceLocations", parentFolder)
-
 		a.Contains(utils.GetResultStrSlice(allowedLocationsPolicy.Get("listPolicy.allowedValues").Array()), "in:us-locations")
 
 		// Restrict VPC networks.
 		restrictVpcNetworksPolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/ainotebooks.restrictVpcNetworks", parentFolder)
-
 		a.Contains(utils.GetResultStrSlice(restrictVpcNetworksPolicy.Get("listPolicy.allowedValues").Array()), fmt.Sprintf("under:projects/%s", standalone.GetStringOutput("machine_learning_project_id")))
 
 		// Restrict service usage.
 		restrictServiceUsagePolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.restrictServiceUsage", parentFolder)
-
 		a.Contains(utils.GetResultStrSlice(restrictServiceUsagePolicy.Get("listPolicy.deniedValues").Array()), "alloydb.googleapis.com")
 
 		// Deny restricted TLS versions.
 		restrictTLSVersionPolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.restrictTLSVersion", parentFolder)
-
 		for _, restrictedTLSVersion := range []string{
 			"TLS_VERSION_1",
 			"TLS_VERSION_1_1",
@@ -498,7 +481,6 @@ func TestStandalone(t *testing.T) {
 
 		// Restricted CMEK services.
 		restrictNonCmekServicesPolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/gcp.restrictNonCmekServices", parentFolder)
-
 		for _, restrictedCmekService := range []string{
 			"bigquery.googleapis.com",
 			"aiplatform.googleapis.com",
@@ -508,7 +490,6 @@ func TestStandalone(t *testing.T) {
 
 		// Allowed Vertex access modes.
 		vertexAccessModePolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/ainotebooks.accessMode", parentFolder)
-
 		for _, allowedVertexAccessMode := range []string{
 			"single-user",
 			"service-account",
@@ -518,7 +499,6 @@ func TestStandalone(t *testing.T) {
 
 		// Vertex AI allowed images.
 		vertexEnvironmentOptionsPolicy := gcloud.Runf(t, "resource-manager org-policies describe %s --folder %s", "constraints/ainotebooks.environmentOptions", parentFolder)
-
 		for _, vertexAIAllowedImage := range []string{
 			"ainotebooks-vm/deeplearning-platform-release/image-family/pytorch-1-13-cu113-notebooks",
 			"ainotebooks-vm/deeplearning-platform-release/image-family/common-cu113-notebooks",
@@ -536,16 +516,13 @@ func TestStandalone(t *testing.T) {
 		logBucket := standalone.GetStringOutput("log_bucket")
 		loggingProjectID := standalone.GetStringOutput("logging_project_id")
 		gcAlphaOpts := gcloud.WithCommonArgs([]string{"--project", loggingProjectID, "--json"})
-
 		bkt := gcloud.Run(t, fmt.Sprintf("alpha storage ls --buckets gs://%s", logBucket), gcAlphaOpts).Array()[0]
 		a.Equal(logBucket, bkt.Get("metadata.id").String(), fmt.Sprintf("Bucket %s should exist", logBucket))
 
 		// Network.
 		networkName := standalone.GetStringOutput("machine_learning_network_name")
 		expectedNetworkSelfLink := standalone.GetStringOutput("restricted_network_self_link")
-
 		projectNetwork := gcloud.Runf(t, "compute networks describe %s --project %s --impersonate-service-account %s", networkName, mlProjectID, terraformSA)
-
 		a.Equal(networkName, projectNetwork.Get("name").String(), fmt.Sprintf("network %s should exist", networkName))
 		a.Equal(expectedNetworkSelfLink, projectNetwork.Get("selfLink").String(), fmt.Sprintf("network self_link should be %s", expectedNetworkSelfLink))
 
@@ -557,25 +534,14 @@ func TestStandalone(t *testing.T) {
 		if len(parts) >= 4 {
 			subnetName := parts[len(parts)-1]
 			region := parts[len(parts)-3]
-
-			subnetDesc := gcloud.Runf(
-				t,
-				"compute networks subnets describe %s --region %s --project %s --impersonate-service-account %s",
-				subnetName,
-				region,
-				mlProjectID,
-				terraformSA,
-			)
-
+			subnetDesc := gcloud.Runf(t, "compute networks subnets describe %s --region %s --project %s --impersonate-service-account %s", subnetName, region, mlProjectID, terraformSA)
 			a.Equal(subnetName, subnetDesc.Get("name").String(), fmt.Sprintf("subnet %s should exist in region %s", subnetName, region))
 			a.Equal(subnetLink, subnetDesc.Get("selfLink").String(), fmt.Sprintf("subnet self link should be %s", subnetLink))
 		}
 
 		// Firewall egress rule.
 		allowEgressName := "fw-1000-e-a-all-all-all"
-
 		allowEgressRule := gcloud.Runf(t, "compute firewall-rules describe %s --project %s --impersonate-service-account %s", allowEgressName, mlProjectID, terraformSA)
-
 		a.Equal(allowEgressName, allowEgressRule.Get("name").String(), fmt.Sprintf("firewall rule %s should exist", allowEgressName))
 		a.Equal("EGRESS", allowEgressRule.Get("direction").String(), fmt.Sprintf("firewall rule %s direction should be EGRESS", allowEgressName))
 		a.Equal(int64(1000), allowEgressRule.Get("priority").Int(), fmt.Sprintf("firewall rule %s priority should be 1000", allowEgressName))
@@ -587,12 +553,9 @@ func TestStandalone(t *testing.T) {
 		rawIngressRanges := standalone.GetStringOutput("allow_ingress_firewall_rule_ip_range")
 		rawIngressRanges = strings.Trim(rawIngressRanges, "[]")
 		allowIngressRuleIPRanges := strings.Fields(rawIngressRanges)
-
 		allowIngressName := "fw-shared-base-1000-i-a-all"
 		fwArgs := gcloud.WithCommonArgs([]string{"--project", mlProjectID, "--impersonate-service-account", terraformSA, "--format=json"})
-
 		allowIngressRule := gcloud.Run(t, fmt.Sprintf("compute firewall-rules describe %s", allowIngressName), fwArgs)
-
 		a.Equal(allowIngressName, allowIngressRule.Get("name").String(), fmt.Sprintf("firewall rule %s should exist", allowIngressName))
 		a.Equal("INGRESS", allowIngressRule.Get("direction").String(), fmt.Sprintf("firewall rule %s direction should be INGRESS", allowIngressName))
 		a.Equal(int64(1000), allowIngressRule.Get("priority").Int(), fmt.Sprintf("firewall rule %s priority should be 1000", allowIngressName))
@@ -608,10 +571,10 @@ func TestStandalone(t *testing.T) {
 		// Service Catalog repository and Cloud Build trigger.
 		serviceCatalogProjectID := standalone.GetStringOutput("service_catalog_project_id")
 		serviceCatalogRepoID := standalone.GetStringOutput("service_catalog_repo_id")
+		serviceCatalogTriggerID := standalone.GetStringOutput("service_catalog_cloudbuild_trigger_id")
 		serviceCatalogRepoName := testutils.GetLastSplitElement(serviceCatalogRepoID, "/")
 		serviceCatalogRepo := gcloud.Runf(t, "source repos describe %s --project %s --impersonate-service-account %s", serviceCatalogRepoName, serviceCatalogProjectID, terraformSA)
 		a.Equal(serviceCatalogRepoID, serviceCatalogRepo.Get("name").String(), "Service Catalog repository should exist")
-		serviceCatalogTriggerID := standalone.GetStringOutput("service_catalog_cloudbuild_trigger_id")
 		a.NotEmpty(serviceCatalogTriggerID, "Service Catalog Cloud Build trigger ID should exist and not be empty")
 		serviceCatalogTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", serviceCatalogTriggerID, serviceCatalogProjectID, triggerRegion, terraformSA)
 		a.Equal(serviceCatalogTriggerID, serviceCatalogTrigger.Get("id").String(), "Service Catalog Cloud Build trigger should exist in GCP")
@@ -619,10 +582,10 @@ func TestStandalone(t *testing.T) {
 		// Artifact Publish repository and Cloud Build trigger.
 		artifactProjectID := standalone.GetStringOutput("artifact_publish_project_id")
 		artifactRepoID := standalone.GetStringOutput("artifacts_repo_id")
+		artifactTriggerID := standalone.GetStringOutput("artifact_publish_cloudbuild_trigger_id")
 		artifactRepoName := testutils.GetLastSplitElement(artifactRepoID, "/")
 		artifactRepo := gcloud.Runf(t, "source repos describe %s --project %s --impersonate-service-account %s", artifactRepoName, artifactProjectID, terraformSA)
 		a.Equal(artifactRepoID, artifactRepo.Get("name").String(), "Artifact Publish repository should exist")
-		artifactTriggerID := standalone.GetStringOutput("artifact_publish_cloudbuild_trigger_id")
 		a.NotEmpty(artifactTriggerID, "Artifact Publish Cloud Build trigger ID should exist and not be empty")
 		artifactTrigger := gcloud.Runf(t, "builds triggers describe %s --project %s --region %s --impersonate-service-account %s", artifactTriggerID, artifactProjectID, triggerRegion, terraformSA)
 		a.Equal(artifactTriggerID, artifactTrigger.Get("id").String(), "Artifact Publish Cloud Build trigger should exist in GCP")
