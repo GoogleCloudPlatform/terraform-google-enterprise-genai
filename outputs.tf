@@ -18,30 +18,30 @@
   Projects
 *****************************************/
 output "kms_project_id" {
-  description = "Cloud Key Management Service (KMS) Project ID."
+  description = "Cloud Key Management Service (KMS) project ID."
   value       = var.kms_project_id
 }
 
 output "logging_project_id" {
-  description = "Logging Project ID."
+  description = "Logging project ID."
   value       = var.logging_project_id
 }
 
 output "artifact_publish_project_id" {
-  description = "Artifact Publish Project ID."
+  description = "Artifact publishing project ID."
   value       = var.artifact_publish_project_id
 }
 
 output "service_catalog_project_id" {
-  description = "Service Catalog Project ID."
+  description = "Service Catalog project ID."
   value       = var.service_catalog_project_id
 }
 
 /******************************************
-  KMS keyring
+  KMS key rings
 *****************************************/
 output "key_rings" {
-  description = "Keyring Names created"
+  description = "Key ring names created."
   value       = local.keyrings
 }
 
@@ -54,28 +54,28 @@ output "kms_keys" {
 }
 
 /******************************************
-  Artifacts publish
+  Artifact Publishing
 *****************************************/
 output "cloud_source_artifacts_repo_name" {
-  description = "Cloud source repository for Artifact Publish name."
+  description = "Cloud Source repository name for artifact publishing."
   value       = var.cloud_source_artifacts_repo_name
 }
 
 output "artifacts_repo_id" {
-  description = "ID of the Artifacts repository."
+  description = "ID of the artifacts repository."
   value       = module.artifact_publish.artifacts_repo_id
 }
 
 output "artifact_publish_cloudbuild_trigger_id" {
-  description = "Cloud Build Trigger ID for Artifact Publish."
+  description = "Cloud Build trigger ID for artifact publishing."
   value       = module.artifact_publish.cloudbuild_trigger_id
 }
 
 /******************************************
-  Service catalog
+  Service Catalog
 *****************************************/
 output "cloud_source_service_catalog_repo_name" {
-  description = "Cloud source repository for Service Catalog name."
+  description = "Cloud Source repository name for Service Catalog."
   value       = var.cloud_source_service_catalog_repo_name
 }
 
@@ -85,42 +85,41 @@ output "service_catalog_repo_id" {
 }
 
 output "service_catalog_cloudbuild_trigger_id" {
-  description = "Cloud Build Trigger ID for Service Catalog."
+  description = "Cloud Build trigger ID for Service Catalog."
   value       = module.service_catalog.cloudbuild_trigger_id
 }
 
 output "storage_bucket_name" {
-  description = "Name of storage bucket created."
+  description = "Name of the storage bucket created."
   value       = module.service_catalog.storage_bucket_name
 }
 
 output "log_bucket" {
-  description = "Log bucket to be used by Service Catalog Bucket."
+  description = "Log bucket to be used by Service Catalog."
   value       = module.ml_logging.name
 }
 
 /******************************************
-  Vpc service controls
+  VPC Service Controls
 *****************************************/
 output "access_context_manager_policy_id" {
-  description = "Access Context Manager Policy ID."
+  description = "Access Context Manager policy ID."
   value       = var.access_context_manager_policy_id
 }
 
 output "service_perimeter_name" {
-  description = "Service Perimeter name."
+  description = "Service perimeter name."
   value       = length(module.service_control) > 0 ? module.service_control[0].service_perimeter_name : null
 }
 
 output "access_level_name" {
   value       = length(module.service_control) > 0 ? module.service_control[0].access_level_name : null
-  description = "Access context manager access level name"
+  description = "Access Context Manager access level name."
 }
 
 output "access_level_name_dry_run" {
-  value = length(module.service_control) > 0 ? module.service_control[0].access_level_name_dry_run : null
-
-  description = "Access context manager access level name for the dry-run perimeter"
+  value       = length(module.service_control) > 0 ? module.service_control[0].access_level_name_dry_run : null
+  description = "Access Context Manager access level name for the dry-run perimeter."
 }
 
 /******************************************
@@ -128,7 +127,7 @@ output "access_level_name_dry_run" {
 *****************************************/
 
 output "allow_ingress_firewall_rule_ip_range" {
-  description = "IP range for firewall rule - allow ingress"
+  description = "IP range for the allow ingress firewall rule."
   value = distinct(concat(
     data.google_netblock_ip_ranges.legacy_health_checkers.cidr_blocks_ipv4,
     data.google_netblock_ip_ranges.health_checkers.cidr_blocks_ipv4,

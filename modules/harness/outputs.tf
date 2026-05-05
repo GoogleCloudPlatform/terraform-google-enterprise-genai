@@ -40,7 +40,7 @@ output "logging_project_number" {
 }
 
 output "logging_project_name" {
-  description = "Logging project number."
+  description = "Logging project name."
   value       = module.logging_project.project_name
 }
 
@@ -55,22 +55,22 @@ output "machine_learning_project_number" {
 }
 
 output "machine_learning_project_name" {
-  description = "Machine Learning project Name."
+  description = "Machine Learning project name."
   value       = module.machine_learning_project.project_name
 }
 
 output "artifact_publish_project_id" {
-  description = "Artifact Publish project ID."
+  description = "Artifact publishing project ID."
   value       = module.artifact_publish_project.project_id
 }
 
 output "artifact_publish_project_name" {
-  description = "Artifact Publish project Name."
-  value       = module.artifact_publish_project.project_id
+  description = "Artifact publishing project name."
+  value       = module.artifact_publish_project.project_name
 }
 
 output "artifact_publish_project_number" {
-  description = "Artifact Publish project number."
+  description = "Artifact publishing project number."
   value       = module.artifact_publish_project.project_number
 }
 
@@ -85,39 +85,39 @@ output "service_catalog_project_number" {
 }
 
 output "service_catalog_project_name" {
-  description = "Service Catalog project number."
+  description = "Service Catalog project name."
   value       = module.service_catalog_project.project_name
 }
 
 output "machine_learning_network_name" {
-  description = "The name of the machine learning VPC being created."
+  description = "The name of the Machine Learning VPC being created."
   value       = module.network.network_name
 }
 
 output "restricted_network_self_link" {
-  description = "The URI of the machine learning VPC being created."
+  description = "The URI of the Machine Learning VPC being created."
   value       = module.network.network_self_link
 }
 
 output "machine_learning_subnets_self_link" {
-  description = "The self-links of the machine learning subnets being created."
+  description = "The self-links of the Machine Learning subnets being created."
   value       = module.network.subnets_self_links[0]
 }
 
 output "machine_learning_subnet_name" {
-  description = "The name of the machine learning subnet being created."
+  description = "The name of the Machine Learning subnet being created."
   value       = module.network.subnets_names[0]
 }
 
 output "machine_learning_subnet_id" {
-  description = "The id of the machine learning subnet being created."
+  description = "The ID of the Machine Learning subnet being created."
   value       = module.network.subnets_ids[0]
 }
 
 /******************************************
   State bucket
 *****************************************/
-output "state_bucket" {
-  description = "State bucket"
+output "remote_state_bucket" {
+  description = "State bucket."
   value       = google_storage_bucket.terraform_state.name
 }

@@ -60,7 +60,7 @@ variable "trigger_sa_id" {
   Storage
 *****************************************/
 variable "gcs_bucket_prefix" {
-  description = "Prefix of the bucket name"
+  description = "Name prefix to be used for GCS Bucket."
   default     = "bkt"
 }
 

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 variable "org_id" {
-  description = "The numeric organization id."
+  description = "The numeric organization ID."
   type        = string
 }
 
@@ -25,7 +24,7 @@ variable "parent_folder" {
 }
 
 variable "billing_account" {
-  description = "The billing account id associated with the projects, e.g. XXXXXX-YYYYYY-ZZZZZZ."
+  description = "The billing account ID associated with the projects, e.g. XXXXXX-YYYYYY-ZZZZZZ."
   type        = string
 }
 
@@ -39,88 +38,88 @@ variable "project_deletion_policy" {
   Projects
 *****************************************/
 variable "seed_project_name" {
-  description = "Custom project name for the Seed Project."
+  description = "Custom project name for the seed project."
   type        = string
   default     = ""
 
   validation {
     condition     = length(var.seed_project_name) < 26
-    error_message = "The seed_project_name must contain less than to 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
+    error_message = "The seed_project_name must contain fewer than 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
   }
 }
 
 variable "kms_project_name" {
-  description = "Custom project name for the KMS Project."
+  description = "Custom project name for the KMS project."
   type        = string
   default     = ""
 
   validation {
     condition     = length(var.kms_project_name) < 26
-    error_message = "The kms_project_name must contain less than to 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
+    error_message = "The kms_project_name must contain fewer than 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
   }
 }
 
 variable "logging_project_name" {
-  description = "Custom project name for the Logging Project."
+  description = "Custom project name for the logging project."
   type        = string
   default     = ""
 
   validation {
     condition     = length(var.logging_project_name) < 26
-    error_message = "The logging_project_name must contain less than to 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
+    error_message = "The logging_project_name must contain fewer than 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
   }
 }
 
 variable "machine_learning_project_name" {
-  description = "Custom project name for the Machine Learning Project."
+  description = "Custom project name for the Machine Learning project."
   type        = string
   default     = ""
 
   validation {
     condition     = length(var.machine_learning_project_name) < 26
-    error_message = "The machine_learning_project_name must contain less than to 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
+    error_message = "The machine_learning_project_name must contain fewer than 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
   }
 }
 
 variable "service_catalog_project_name" {
-  description = "Custom project name for the Service Catalog Project."
+  description = "Custom project name for the Service Catalog project."
   type        = string
   default     = ""
 
   validation {
     condition     = length(var.service_catalog_project_name) < 26
-    error_message = "The service_catalog_project_name must contain less than to 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
+    error_message = "The service_catalog_project_name must contain fewer than 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
   }
 }
 
 variable "artifact_publish_project_name" {
-  description = "Custom project name for the Artifact Publish Project."
+  description = "Custom project name for the artifact publishing project."
   type        = string
   default     = ""
 
   validation {
     condition     = length(var.artifact_publish_project_name) < 26
-    error_message = "The artifact_publish_project_name must contain less than to 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
+    error_message = "The artifact_publish_project_name must contain fewer than 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
   }
 }
 
 /******************************************
-  Kms
+  KMS
 *****************************************/
 variable "keyring_name" {
-  description = "Name to be used for KMS Keyring."
+  description = "Name to be used for the KMS key ring."
   type        = string
   default     = "sample-keyring"
 }
 
 variable "keyring_regions" {
-  description = "Regions to create keyrings in."
+  description = "Regions to create key rings in."
   type        = list(string)
   default     = ["us-central1", "us-east4"]
 }
 
 variable "kms_prevent_destroy" {
-  description = "If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  description = "If set to true, delete the KMS key ring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
   type        = bool
   default     = true
 }
@@ -129,19 +128,19 @@ variable "kms_prevent_destroy" {
   Storage
 *****************************************/
 variable "gcs_bucket_prefix" {
-  description = "Name prefix to be used for GCS Bucket."
+  description = "Name prefix to be used for the GCS bucket."
   type        = string
   default     = "bkt"
 }
 
 variable "gcs_logging_bucket_location" {
-  description = "Location of environment logging bucket."
+  description = "Location of the environment logging bucket."
   type        = string
   default     = "us-central1"
 }
 
 variable "bucket_force_destroy" {
-  description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
+  description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets that contain objects."
   type        = bool
   default     = false
 }
@@ -165,36 +164,36 @@ variable "default_region" {
 }
 
 /******************************************
-  Dns
+  DNS
 *****************************************/
 variable "private_service_connect_ip" {
-  description = "Internal IP to be used as the private service connect endpoint."
+  description = "Internal IP to be used as the Private Service Connect endpoint."
   type        = string
   default     = "10.10.64.5"
 }
 
 variable "restricted_network_self_link" {
-  description = "The URI of the machine learning VPC being created."
+  description = "The URI of the Machine Learning VPC being created."
   type        = list(string)
   default     = []
 }
 
 /******************************************
-  Service controls
+  Service Controls
 *****************************************/
 variable "access_context_manager_policy_id" {
-  description = "The id of the default Access Context Manager policy. Can be obtained by running `gcloud access-context-manager policies list --organization YOUR-ORGANIZATION_ID --filter=\"title='Organization access level policy'\" --format=\"value(name)\"`."
+  description = "The ID of the default Access Context Manager policy. Can be obtained by running `gcloud access-context-manager policies list --organization YOUR-ORGANIZATION_ID --filter=\"title='Organization access level policy'\" --format=\"value(name)\"`."
   type        = number
 }
 
 variable "access_level_name" {
-  description = "Access context manager access level name for the enforced perimeter."
+  description = "Access Context Manager access level name for the enforced perimeter."
   type        = string
   default     = ""
 }
 
 variable "access_level_name_dry_run" {
-  description = "Access context manager access level name for the dry-run perimeter."
+  description = "Access Context Manager access level name for the dry-run perimeter."
   type        = string
   default     = ""
 }
@@ -218,7 +217,7 @@ variable "custom_restricted_services_dry_run" {
 }
 
 variable "perimeter_additional_members" {
-  description = "The list additional members to be added on perimeter access. Prefix user: (user:email@email.com) or serviceAccount: (serviceAccount:my-service-account@email.com) is required."
+  description = "The list of additional members to be added to perimeter access. Prefix user: (user:email@email.com) or serviceAccount: (serviceAccount:my-service-account@email.com) is required."
   type        = list(string)
   default     = []
 }
@@ -262,17 +261,17 @@ variable "vpc_sc_propagation_sleep_duration" {
 }
 
 /******************************************
-  Artifact publish
+  Artifact Publishing
 *****************************************/
 variable "cloud_source_artifacts_repo_name" {
-  description = "Name to give the could source repository for Artifacts"
+  description = "Name to give the Cloud Source repository for artifacts."
   type        = string
 }
 
 /******************************************
-  Service catalog
+  Service Catalog
 *****************************************/
 variable "cloud_source_service_catalog_repo_name" {
-  description = "Name to give the cloud source repository for Service Catalog"
+  description = "Name to give the Cloud Source repository for Service Catalog."
   type        = string
 }

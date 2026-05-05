@@ -15,40 +15,40 @@
  */
 
 variable "org_id" {
-  description = "The organization id for the associated services"
+  description = "The organization ID for the associated services."
   type        = string
 }
 
 variable "folder_id" {
-  description = "The folder id where project will be created"
+  description = "The folder ID where the project will be created."
   type        = string
 }
 
 variable "billing_account" {
-  description = "The ID of the billing account to associated this project with"
+  description = "The ID of the billing account to associate this project with."
   type        = string
 }
 
 variable "activate_apis" {
-  description = "The api to activate for the GCP project"
+  description = "The APIs to activate for the Google Cloud project."
   type        = list(string)
   default     = []
 }
 
 variable "project_deletion_policy" {
-  description = "Project deletion policy. Possible values are: \"PREVENT\", \"ABANDON\", \"DELETE\""
+  description = "Project deletion policy. Possible values are: \"PREVENT\", \"ABANDON\", \"DELETE\"."
   type        = string
   default     = "PREVENT"
 }
 
 variable "seed_project_name" {
-  description = "Custom project name for seed project."
+  description = "Custom project name for the seed project."
   type        = string
   default     = ""
 }
 
 variable "kms_project_name" {
-  description = "Custom project name for kms project."
+  description = "Custom project name for the KMS project."
   type        = string
   default     = ""
 }
@@ -60,19 +60,19 @@ variable "logging_project_name" {
 }
 
 variable "machine_learning_project_name" {
-  description = "Custom project name for machine learning project."
+  description = "Custom project name for the Machine Learning project."
   type        = string
   default     = ""
 }
 
 variable "service_catalog_project_name" {
-  description = "Custom project name for the service catalog project."
+  description = "Custom project name for the Service Catalog project."
   type        = string
   default     = ""
 }
 
 variable "artifact_publish_project_name" {
-  description = "Custom project name for the artifact publish project."
+  description = "Custom project name for the artifact publishing project."
   type        = string
   default     = ""
 }
@@ -84,7 +84,7 @@ variable "project_prefix" {
 }
 
 variable "kms_prevent_destroy" {
-  description = "If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  description = "If set to true, delete the KMS key ring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
   type        = bool
   default     = true
 }
@@ -114,7 +114,7 @@ variable "bucket_force_destroy" {
 }
 
 variable "encrypt_gcs_bucket_tfstate" {
-  description = "Encrypt bucket used for storing terraform state files in seed project."
+  description = "Encrypt the bucket used for storing Terraform state files in the seed project."
   type        = bool
   default     = true
 }

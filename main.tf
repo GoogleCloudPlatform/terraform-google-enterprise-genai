@@ -24,7 +24,6 @@ locals {
 /******************************************
   Org Policies
 *****************************************/
-
 module "ml_organization_policies" {
   source = "./modules/ml_org_policies"
 

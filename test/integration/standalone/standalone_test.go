@@ -237,7 +237,7 @@ func TestStandalone(t *testing.T) {
 		//backend setup
 		tempOptions := standalone.GetTFOptions()
 		tempOptions.BackendConfig = map[string]interface{}{
-			"bucket": standalone.GetStringOutput("state_bucket"),
+			"bucket": standalone.GetStringOutput("remote_state_bucket"),
 		}
 		tempOptions.MigrateState = true
 
