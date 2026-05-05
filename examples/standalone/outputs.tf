@@ -29,6 +29,11 @@ output "state_bucket" {
   value       = module.harness.state_bucket
 }
 
+output "instance_region" {
+  description = "Instance region"
+  value       = var.instance_region
+}
+
 /******************************************
   Harness Projects
 *****************************************/

@@ -35,7 +35,7 @@ func TestServiceCatalogSource(t *testing.T) {
 		tft.WithTFDir("../../../examples/standalone"),
 	)
 
-	instanceRegion := standalone.GetTFSetupStringOutput("instance_region")
+	instanceRegion := standalone.GetStringOutput("instance_region")
 
 	serviceCatalogProject := standalone.GetStringOutput("service_catalog_project_id")
 	serviceCatalogPath := ("../../../examples/standalone/assets/service-catalog")

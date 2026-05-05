@@ -45,7 +45,7 @@ func TestArtifactRegistrySource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	instanceRegion := standalone.GetTFSetupStringOutput("instance_region")
+	instanceRegion := standalone.GetStringOutput("instance_region")
 
 	appsource := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(artifactSourcePath),
