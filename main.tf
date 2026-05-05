@@ -15,7 +15,7 @@
  */
 
 locals {
-  region_kms_keyring  = [for k, m in module.kms_keyrings : k if split("/", m.keyring)[3] == var.instance_region]
+  region_kms_keyring  = [for k, m in module.kms_keyrings : k if k == var.instance_region]
   gcs_logging_kms_key = module.kms_keyrings[var.gcs_logging_bucket_location].keys[var.logging_project_name]
 
   keyrings = { for region, mod in module.kms_keyrings : region => mod.keyring }
@@ -180,7 +180,7 @@ module "machine_learning_env" {
   machine_learning_pipeline_sa     = var.terraform_service_account
   kms_crypto_key                   = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.machine_learning_project_name]
 
-  depends_on = [time_sleep.wait_for_kms]
+  depends_on = [module.service_catalog]
 }
 
 /******************************************
@@ -214,8 +214,6 @@ module "artifact_publish" {
   }]
 
   kms_crypto_key = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.artifact_publish_project_name]
-
-  depends_on = [time_sleep.wait_for_kms]
 }
 
 module "service_catalog" {
@@ -234,6 +232,4 @@ module "service_catalog" {
 
   log_bucket     = module.ml_logging.name
   kms_crypto_key = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.service_catalog_project_name]
-
-  depends_on = [time_sleep.wait_for_kms]
 }
