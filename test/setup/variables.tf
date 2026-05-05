@@ -49,6 +49,6 @@ variable "cloud_source_service_catalog_repo_name" {
 }
 
 variable "instance_region" {
-  description = "Instance region use for testing. Should be one of the regions used to create network on step 3-networks."
+  description = "Instance region use for testing. Should be one of the regions used to create network."
   default     = "us-central1"
 }

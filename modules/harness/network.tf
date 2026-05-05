@@ -36,9 +36,9 @@ module "network" {
 
   subnets = [
     {
-      subnet_name           = "sb-restricted-${var.region}"
+      subnet_name           = "sb-restricted-${var.default_region}"
       subnet_ip             = local.subnet_ip
-      subnet_region         = var.region
+      subnet_region         = var.default_region
       subnet_private_access = "true"
       subnet_flow_logs      = "true"
       description           = "restricted subnet for machine learnig workloads."

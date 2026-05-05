@@ -228,37 +228,35 @@ If you encounter problems during the `apply` execution, please refer to the [Tro
 | access\_context\_manager\_policy\_id | The id of the default Access Context Manager policy. Can be obtained by running `gcloud access-context-manager policies list --organization YOUR-ORGANIZATION_ID --filter="title='Organization access level policy'" --format="value(name)"`. | `number` | n/a | yes |
 | access\_level\_name | Access context manager access level name for the enforced perimeter. | `string` | `""` | no |
 | access\_level\_name\_dry\_run | Access context manager access level name for the dry-run perimeter. | `string` | `""` | no |
-| artifact\_publish\_project\_name | Custom project name for the artifact publish project. | `string` | `""` | no |
+| artifact\_publish\_project\_name | Custom project name for the Artifact Publish Project. | `string` | `""` | no |
 | billing\_account | The billing account id associated with the projects, e.g. XXXXXX-YYYYYY-ZZZZZZ. | `string` | n/a | yes |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | cloud\_source\_artifacts\_repo\_name | Name to give the could source repository for Artifacts | `string` | n/a | yes |
 | cloud\_source\_service\_catalog\_repo\_name | Name to give the cloud source repository for Service Catalog | `string` | n/a | yes |
 | custom\_restricted\_services | List of services to restrict in an enforced perimeter. If empty, all supported services (https://cloud.google.com/vpc-service-controls/docs/supported-products) will be protected. | `list(string)` | `[]` | no |
 | custom\_restricted\_services\_dry\_run | List of custom services to be protected by the dry-run VPC-SC perimeter. If empty, all supported services (https://cloud.google.com/vpc-service-controls/docs/supported-products) will be protected. | `list(string)` | `[]` | no |
-| default\_region | Subnetwork region | `string` | `"us-central1"` | no |
+| default\_region | Default region to create resources where applicable. | `string` | `"us-central1"` | no |
 | egress\_policies | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
 | egress\_policies\_dry\_run | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
 | enforce\_vpcsc | Enable the enforced mode for VPC Service Controls. It is not recommended to enable VPC-SC on the first run deploying your foundation. Review [best practices for enabling VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs/enable), then only enforce the perimeter after you have analyzed the access patterns in your dry-run perimeter and created the necessary exceptions for your use cases. | `bool` | `false` | no |
-| gcs\_bucket\_prefix | Bucket Prefix | `string` | `"bkt"` | no |
-| gcs\_logging\_bucket\_location | Location of environment logging bucket | `string` | `"us-central1"` | no |
+| gcs\_bucket\_prefix | Name prefix to be used for GCS Bucket. | `string` | `"bkt"` | no |
+| gcs\_logging\_bucket\_location | Location of environment logging bucket. | `string` | `"us-central1"` | no |
 | ingress\_policies | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
 | ingress\_policies\_dry\_run | n/a | <pre>list(object({<br>    from = any<br>    to   = any<br>  }))</pre> | `[]` | no |
-| instance\_region | Compute instance region | `string` | `"us-central1"` | no |
-| keyring\_name | Name to be used for KMS Keyring | `string` | `"sample-keyring"` | no |
-| keyring\_regions | Regions to create keyrings in | `list(string)` | <pre>[<br>  "us-central1",<br>  "us-east4"<br>]</pre> | no |
+| keyring\_name | Name to be used for KMS Keyring. | `string` | `"sample-keyring"` | no |
+| keyring\_regions | Regions to create keyrings in. | `list(string)` | <pre>[<br>  "us-central1",<br>  "us-east4"<br>]</pre> | no |
 | kms\_prevent\_destroy | If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
-| kms\_project\_name | Custom project name for kms project. | `string` | `""` | no |
-| logging\_project\_name | Custom project name for the logging project. | `string` | `""` | no |
-| machine\_learning\_project\_name | Custom project name for machine learning project. | `string` | `""` | no |
+| kms\_project\_name | Custom project name for the KMS Project. | `string` | `""` | no |
+| logging\_project\_name | Custom project name for the Logging Project. | `string` | `""` | no |
+| machine\_learning\_project\_name | Custom project name for the Machine Learning Project. | `string` | `""` | no |
 | org\_id | The numeric organization id. | `string` | n/a | yes |
 | parent\_folder | The folder to deploy in. | `string` | n/a | yes |
 | perimeter\_additional\_members | The list additional members to be added on perimeter access. Prefix user: (user:email@email.com) or serviceAccount: (serviceAccount:my-service-account@email.com) is required. | `list(string)` | `[]` | no |
 | private\_service\_connect\_ip | Internal IP to be used as the private service connect endpoint. | `string` | `"10.10.64.5"` | no |
-| project\_deletion\_policy | Project deletion policy. | `string` | `"PREVENT"` | no |
-| region | The GCP region to use when deploying resources | `string` | `"us-central1"` | no |
+| project\_deletion\_policy | The deletion policy for the project created. | `string` | `"PREVENT"` | no |
 | restricted\_network\_self\_link | The URI of the machine learning VPC being created. | `list(string)` | `[]` | no |
-| seed\_project\_name | Custom project name for seed Project. | `string` | `""` | no |
-| service\_catalog\_project\_name | Custom project name for the service catalog project. | `string` | `""` | no |
+| seed\_project\_name | Custom project name for the Seed Project. | `string` | `""` | no |
+| service\_catalog\_project\_name | Custom project name for the Service Catalog Project. | `string` | `""` | no |
 | terraform\_service\_account | The email address of the service account that will run the Terraform code. | `string` | n/a | yes |
 | vpc\_sc\_propagation\_sleep\_duration | The duration to wait for VPC Service Controls propagation (e.g., 60s, 2m). | `string` | `"60s"` | no |
 
@@ -266,39 +264,39 @@ If you encounter problems during the `apply` execution, please refer to the [Tro
 
 | Name | Description |
 |------|-------------|
-| access\_level\_name | Access context manager access level name for the enforced perimeter |
-| access\_level\_name\_dry\_run | Access context manager access level name for the dry-run perimeter |
-| allow\_ingress\_firewall\_rule\_ip\_range | Firewall rules |
-| artifact\_publish\_cloudbuild\_trigger\_id | n/a |
+| access\_level\_name | Access context manager access level name for the enforced perimeter. |
+| access\_level\_name\_dry\_run | Access context manager access level name for the dry-run perimeter. |
+| allow\_ingress\_firewall\_rule\_ip\_range | Allow ingress Firewall rule IP range. |
+| artifact\_publish\_cloudbuild\_trigger\_id | Artifact Publish trigger ID. |
 | artifact\_publish\_project\_id | Artifact Publish project ID. |
-| artifact\_publish\_project\_name | Artifact Publish project Name. |
-| artifact\_publish\_project\_number | Artifact Publish project number |
-| artifacts\_repo\_id | ID of the Artifacts repository |
+| artifact\_publish\_project\_name | Artifact Publish pPoject Name. |
+| artifact\_publish\_project\_number | Artifact Publish Project number |
+| artifacts\_repo\_id | Artifacts repository ID. |
 | cloud\_source\_artifacts\_repo\_name | Artifacts cloud source repository name. |
 | cloud\_source\_service\_catalog\_repo\_name | Service Catalog cloud source repository name. |
 | keyring\_name | Key Ring name |
 | keyrings\_regions | KMS Keyring region. |
 | kms\_keyrings | KMS keyring. |
 | kms\_keys | Projects Key ID for encrytion |
-| kms\_project\_id | Project ID for Cloud Key Management Service (KMS). |
-| kms\_project\_number | Project number for Cloud Key Management Service (KMS). |
+| kms\_project\_id | Cloud Key Management Service (KMS) Project ID. |
+| kms\_project\_number | Cloud Key Management Service (KMS) Project number. |
 | log\_bucket | Log bucket to be used by Service Catalog Bucket. |
-| logging\_project\_id | Loggin project ID. |
+| logging\_project\_id | Loggin Project ID. |
 | logging\_project\_name | Logging Project name |
 | machine\_learning\_network\_name | The name of the machine learning VPC being created. |
 | machine\_learning\_project\_id | Machine Learning Project ID. |
-| machine\_learning\_project\_name | Machine Learning project Name. |
+| machine\_learning\_project\_name | Machine Learning Project name. |
 | machine\_learning\_subnets\_self\_link | The self-links of the machine learning subnets being created. |
-| parent\_resource\_id | The parent resource id |
+| parent\_resource\_id | The parent resource id. |
 | restricted\_network\_self\_link | The URI of the machine learning VPC being created. |
-| seed\_project\_id | Artifact Publish project ID. |
-| service\_catalog\_cloudbuild\_trigger\_id | n/a |
-| service\_catalog\_project\_id | Project ID for Service Catalog. |
-| service\_catalog\_project\_name | Service Catalog project number. |
-| service\_catalog\_repo\_id | ID of the Service Catalog repository |
-| service\_perimeter\_name | Perimeter name. |
-| state\_bucket | State bucket |
-| storage\_bucket\_name | Name of storage bucket created |
+| seed\_project\_id | Artifact Publish Project ID. |
+| service\_catalog\_cloudbuild\_trigger\_id | Service Catalog trigger ID. |
+| service\_catalog\_project\_id | Service Catalog Project ID. |
+| service\_catalog\_project\_name | Service Catalog Project number. |
+| service\_catalog\_repo\_id | ID of the Service Catalog repository. |
+| service\_perimeter\_name | Access context manager service perimeter name. |
+| state\_bucket | Bucket used for storing terraform state for standalone example in Seed Project. |
+| storage\_bucket\_name | Name of storage bucket created. |
 | terraform\_service\_account | The email address of the service account that will run the Terraform code. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

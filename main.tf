@@ -193,6 +193,7 @@ module "artifact_publish" {
   description                 = "Publish Artifacts for ML Projects"
   project_id                  = var.artifact_publish_project_id
   project_name                = var.artifact_publish_project_name
+  project_number              = var.artifact_publish_project_number
   name                        = var.cloud_source_artifacts_repo_name
   format                      = "DOCKER"
   region                      = var.instance_region
@@ -222,6 +223,7 @@ module "service_catalog" {
 
   project_id                      = var.service_catalog_project_id
   project_name                    = var.service_catalog_project_name
+  project_number                  = var.service_catalog_project_number
   region                          = var.instance_region
   name                            = var.cloud_source_service_catalog_repo_name
   machine_learning_project_number = var.machine_learning_project_number

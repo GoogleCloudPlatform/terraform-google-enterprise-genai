@@ -20,7 +20,6 @@ module "harness" {
   org_id                        = var.org_id
   folder_id                     = var.parent_folder
   billing_account               = var.billing_account
-  region                        = var.region
   kms_project_name              = var.kms_project_name
   logging_project_name          = var.logging_project_name
   machine_learning_project_name = var.machine_learning_project_name

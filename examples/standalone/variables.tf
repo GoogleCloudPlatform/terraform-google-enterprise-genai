@@ -30,7 +30,7 @@ variable "billing_account" {
 }
 
 variable "project_deletion_policy" {
-  description = "Project deletion policy."
+  description = "The deletion policy for the project created."
   type        = string
   default     = "PREVENT"
 }
@@ -39,13 +39,18 @@ variable "project_deletion_policy" {
   Projects
 *****************************************/
 variable "seed_project_name" {
-  description = "Custom project name for seed Project."
+  description = "Custom project name for the Seed Project."
   type        = string
   default     = ""
+
+  validation {
+    condition     = length(var.seed_project_name) < 26
+    error_message = "The seed_project_name must contain less than to 26 characters. This ensures the name can be suffixed with 4 random characters to create the project ID."
+  }
 }
 
 variable "kms_project_name" {
-  description = "Custom project name for kms project."
+  description = "Custom project name for the KMS Project."
   type        = string
   default     = ""
 
@@ -56,7 +61,7 @@ variable "kms_project_name" {
 }
 
 variable "logging_project_name" {
-  description = "Custom project name for the logging project."
+  description = "Custom project name for the Logging Project."
   type        = string
   default     = ""
 
@@ -67,7 +72,7 @@ variable "logging_project_name" {
 }
 
 variable "machine_learning_project_name" {
-  description = "Custom project name for machine learning project."
+  description = "Custom project name for the Machine Learning Project."
   type        = string
   default     = ""
 
@@ -78,7 +83,7 @@ variable "machine_learning_project_name" {
 }
 
 variable "service_catalog_project_name" {
-  description = "Custom project name for the service catalog project."
+  description = "Custom project name for the Service Catalog Project."
   type        = string
   default     = ""
 
@@ -89,7 +94,7 @@ variable "service_catalog_project_name" {
 }
 
 variable "artifact_publish_project_name" {
-  description = "Custom project name for the artifact publish project."
+  description = "Custom project name for the Artifact Publish Project."
   type        = string
   default     = ""
 
@@ -103,13 +108,13 @@ variable "artifact_publish_project_name" {
   Kms
 *****************************************/
 variable "keyring_name" {
-  description = "Name to be used for KMS Keyring"
+  description = "Name to be used for KMS Keyring."
   type        = string
   default     = "sample-keyring"
 }
 
 variable "keyring_regions" {
-  description = "Regions to create keyrings in"
+  description = "Regions to create keyrings in."
   type        = list(string)
   default     = ["us-central1", "us-east4"]
 }
@@ -124,13 +129,13 @@ variable "kms_prevent_destroy" {
   Storage
 *****************************************/
 variable "gcs_bucket_prefix" {
-  description = "Bucket Prefix"
+  description = "Name prefix to be used for GCS Bucket."
   type        = string
   default     = "bkt"
 }
 
 variable "gcs_logging_bucket_location" {
-  description = "Location of environment logging bucket"
+  description = "Location of environment logging bucket."
   type        = string
   default     = "us-central1"
 }
@@ -152,20 +157,9 @@ variable "terraform_service_account" {
 /******************************************
   Network
 *****************************************/
-variable "region" {
-  description = "The GCP region to use when deploying resources"
-  type        = string
-  default     = "us-central1"
-}
 
 variable "default_region" {
-  description = "Subnetwork region"
-  type        = string
-  default     = "us-central1"
-}
-
-variable "instance_region" {
-  description = "Compute instance region"
+  description = "Default region to create resources where applicable."
   type        = string
   default     = "us-central1"
 }

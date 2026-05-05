@@ -41,7 +41,7 @@ variable "terraform_service_account" {
 }
 
 variable "instance_region" {
-  description = "The region where compute instance will be created. A subnetwork must exists in the instance region."
+  description = "Default region to create resources where applicable."
   type        = string
   default     = "us-central1"
 }

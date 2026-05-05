@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-
-variable "default_region" {
-  description = "The region in which the subnetwork will be created."
-  type        = string
-}
-
 variable "org_id" {
   description = "The organization id for the associated services"
   type        = string
@@ -98,12 +92,10 @@ variable "kms_prevent_destroy" {
 /******************************************
   Network variables
 *****************************************/
-
-variable "region" {
+variable "default_region" {
   description = "The region in which the subnetwork will be created."
   type        = string
 }
-
 
 /******************************************
   Seed project

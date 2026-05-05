@@ -16,7 +16,7 @@
 
 output "parent_resource_id" {
   value       = var.parent_folder
-  description = "The parent resource id"
+  description = "The parent resource id."
 }
 
 output "terraform_service_account" {
@@ -25,7 +25,7 @@ output "terraform_service_account" {
 }
 
 output "state_bucket" {
-  description = "State bucket"
+  description = "Bucket used for storing terraform state for standalone example in Seed Project."
   value       = module.harness.state_bucket
 }
 
@@ -33,17 +33,17 @@ output "state_bucket" {
   Harness Projects
 *****************************************/
 output "kms_project_id" {
-  description = "Project ID for Cloud Key Management Service (KMS)."
+  description = "Cloud Key Management Service (KMS) Project ID."
   value       = module.harness.kms_project_id
 }
 
 output "kms_project_number" {
-  description = "Project number for Cloud Key Management Service (KMS)."
+  description = "Cloud Key Management Service (KMS) Project number."
   value       = module.harness.kms_project_number
 }
 
 output "logging_project_id" {
-  description = "Loggin project ID."
+  description = "Loggin Project ID."
   value       = module.harness.logging_project_id
 }
 
@@ -53,7 +53,7 @@ output "logging_project_name" {
 }
 
 output "seed_project_id" {
-  description = "Artifact Publish project ID."
+  description = "Artifact Publish Project ID."
   value       = module.harness.seed_project_id
 }
 
@@ -63,17 +63,17 @@ output "machine_learning_project_id" {
 }
 
 output "machine_learning_project_name" {
-  description = "Machine Learning project Name."
+  description = "Machine Learning Project name."
   value       = module.harness.machine_learning_project_name
 }
 
 output "service_catalog_project_id" {
-  description = "Project ID for Service Catalog."
+  description = " Service Catalog Project ID."
   value       = module.harness.service_catalog_project_id
 }
 
 output "service_catalog_project_name" {
-  description = "Service Catalog project number."
+  description = " Service Catalog Project number."
   value       = module.harness.service_catalog_project_name
 }
 
@@ -83,12 +83,12 @@ output "artifact_publish_project_id" {
 }
 
 output "artifact_publish_project_number" {
-  description = "Artifact Publish project number"
+  description = "Artifact Publish Project number"
   value       = module.harness.artifact_publish_project_number
 }
 
 output "artifact_publish_project_name" {
-  description = "Artifact Publish project Name."
+  description = "Artifact Publish pPoject Name."
   value       = module.harness.artifact_publish_project_name
 }
 
@@ -138,17 +138,17 @@ output "machine_learning_subnets_self_link" {
   VPC Service Controls
 *****************************************/
 output "access_level_name_dry_run" {
-  description = "Access context manager access level name for the dry-run perimeter"
+  description = "Access context manager access level name for the dry-run perimeter."
   value       = module.vertex_ai.access_level_name_dry_run
 }
 
 output "access_level_name" {
-  description = "Access context manager access level name for the enforced perimeter"
+  description = "Access context manager access level name for the enforced perimeter."
   value       = module.vertex_ai.access_level_name
 }
 
 output "service_perimeter_name" {
-  description = "Perimeter name."
+  description = "Access context manager service perimeter name."
   value       = module.vertex_ai.service_perimeter_name
 }
 
@@ -161,16 +161,17 @@ output "cloud_source_service_catalog_repo_name" {
 }
 
 output "service_catalog_repo_id" {
-  description = "ID of the Service Catalog repository"
+  description = "ID of the Service Catalog repository."
   value       = module.vertex_ai.service_catalog_repo_id
 }
 
 output "service_catalog_cloudbuild_trigger_id" {
-  value = module.vertex_ai.service_catalog_cloudbuild_trigger_id
+  description = "Service Catalog trigger ID."
+  value       = module.vertex_ai.service_catalog_cloudbuild_trigger_id
 }
 
 output "storage_bucket_name" {
-  description = "Name of storage bucket created"
+  description = "Name of storage bucket created."
   value       = module.vertex_ai.storage_bucket_name
 }
 
@@ -188,11 +189,12 @@ output "cloud_source_artifacts_repo_name" {
 }
 
 output "artifact_publish_cloudbuild_trigger_id" {
-  value = module.vertex_ai.artifact_publish_cloudbuild_trigger_id
+  description = "Artifact Publish trigger ID."
+  value       = module.vertex_ai.artifact_publish_cloudbuild_trigger_id
 }
 
 output "artifacts_repo_id" {
-  description = "ID of the Artifacts repository"
+  description = "Artifacts repository ID."
   value       = module.vertex_ai.artifacts_repo_id
 }
 
@@ -200,6 +202,6 @@ output "artifacts_repo_id" {
   Firewall roles
 *****************************************/
 output "allow_ingress_firewall_rule_ip_range" {
-  description = "Firewall rules"
+  description = "Allow ingress Firewall rule IP range."
   value       = module.vertex_ai.allow_ingress_firewall_rule_ip_range
 }

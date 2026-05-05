@@ -17,7 +17,6 @@
 | org\_id | The organization id for the associated services | `string` | n/a | yes |
 | project\_deletion\_policy | Project deletion policy. Possible values are: "PREVENT", "ABANDON", "DELETE" | `string` | `"PREVENT"` | no |
 | project\_prefix | Name prefix to use for projects created. Should be the same in all steps. Max size is 3 characters. | `string` | `"prj"` | no |
-| region | The region in which the subnetwork will be created. | `string` | n/a | yes |
 | seed\_project\_name | Custom project name for seed project. | `string` | `""` | no |
 | service\_catalog\_project\_name | Custom project name for the service catalog project. | `string` | `""` | no |
 | storage\_bucket\_labels | Labels to apply to the storage bucket. | `map(string)` | `{}` | no |
