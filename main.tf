@@ -155,12 +155,6 @@ module "ml_dns_vertex_ai" {
   }
 }
 
-resource "time_sleep" "wait_for_kms" {
-  create_duration = "60"
-
-  depends_on = [module.kms_keyrings]
-}
-
 /******************************************
   Machine Learning project
 *****************************************/
@@ -184,7 +178,6 @@ module "machine_learning_env" {
 /******************************************
   Artifact Publish
 *****************************************/
-
 module "artifact_publish" {
   source = "./modules/publish_artifacts"
 
@@ -214,6 +207,9 @@ module "artifact_publish" {
   kms_crypto_key = module.kms_keyrings[one(local.region_kms_keyring)].keys[var.artifact_publish_project_name]
 }
 
+/******************************************
+  Servica Catalog
+*****************************************/
 module "service_catalog" {
   source = "./modules/service_catalog"
 

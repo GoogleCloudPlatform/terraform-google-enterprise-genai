@@ -26,7 +26,7 @@ output "terraform_service_account" {
 
 output "remote_state_bucket" {
   description = "Bucket used for storing Terraform state for the standalone example in the seed project."
-  value       = module.harness.state_bucket
+  value       = module.harness.remote_state_bucket
 }
 
 output "instance_region" {
