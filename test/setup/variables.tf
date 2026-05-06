@@ -30,14 +30,6 @@ variable "group_email" {
   description = "The group that will be assigned permissions for testing."
 }
 
-variable "domain_to_allow" {
-  description = "The test domain_to_allow allow users from in IAM."
-}
-
-variable "domain" {
-  description = "The DNS name from instance for testing."
-}
-
 variable "cloud_source_artifacts_repo_name" {
   description = "Name to give the could source repository for Artifacts"
   default     = "publish-artifacts"
