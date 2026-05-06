@@ -58,7 +58,7 @@ options:
   - 'TF_VAR_org_id=$_ORG_ID'
   - 'TF_VAR_group_email=test-gcp-org-admins@test.blueprints.joonix.net'
   - 'TF_VAR_create_access_context_manager_access_policy=false'
-  - 'TF_VAR_default_region=us-central'
+  - 'TF_VAR_default_region=us-central1'
   - 'TF_VAR_instance_region=us-central1'
   - 'TF_IN_AUTOMATION=true'
 substitutions:
