@@ -92,10 +92,6 @@ variable "kms_prevent_destroy" {
 /******************************************
   Network variables
 *****************************************/
-variable "default_region" {
-  description = "The region in which the subnetwork will be created."
-  type        = string
-}
 
 variable "default_region" {
   description = "Default region to create resources where applicable."
