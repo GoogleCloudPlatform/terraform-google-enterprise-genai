@@ -97,6 +97,24 @@ variable "default_region" {
   type        = string
 }
 
+variable "default_region" {
+  description = "Default region to create resources where applicable."
+  type        = string
+  default     = "us-central1"
+}
+
+variable "nat_bgp_asn" {
+  type        = number
+  description = "BGP ASN for NAT cloud route. This is needed to allow the Jenkins Agent to download packages and updates from the internet without having an external IP address."
+  default     = 64512
+}
+
+variable "nat_num_addresses_region" {
+  type        = number
+  description = "Number of external IPs to reserve for region 1 Cloud NAT."
+  default     = 2
+}
+
 /******************************************
   Seed project
 *****************************************/

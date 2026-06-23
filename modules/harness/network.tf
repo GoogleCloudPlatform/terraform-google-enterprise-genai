@@ -61,3 +61,39 @@ module "network" {
       priority          = "1000"
   }]
 }
+
+/******************************************
+  Cloud NAT & Router
+*****************************************/
+
+resource "google_compute_router" "nat_router" {
+  name    = "router-${local.network_name}-${var.default_region}"
+  project = module.machine_learning_project.project_id
+  region  = var.default_region
+  network = module.network.network_self_link
+
+  bgp {
+    asn = var.nat_bgp_asn
+  }
+}
+
+resource "google_compute_address" "nat_external_addresses" {
+  project = module.machine_learning_project.project_id
+  name    = "ca-${local.network_name}-${var.default_region}"
+  region  = var.default_region
+}
+
+resource "google_compute_router_nat" "nat_gateway" {
+  name                               = "nat-${local.network_name}-${var.default_region}"
+  project                            = module.machine_learning_project.project_id
+  router                             = google_compute_router.nat_router.name
+  region                             = var.default_region
+  nat_ip_allocate_option             = "MANUAL_ONLY"
+  nat_ips                            = [google_compute_address.nat_external_addresses.self_link]
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    filter = "TRANSLATIONS_ONLY"
+    enable = true
+  }
+}

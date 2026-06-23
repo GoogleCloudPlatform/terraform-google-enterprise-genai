@@ -7,13 +7,15 @@
 | artifact\_publish\_project\_name | Custom project name for the artifact publishing project. | `string` | `""` | no |
 | billing\_account | The ID of the billing account to associate this project with. | `string` | n/a | yes |
 | bucket\_force\_destroy | If supplied, the state bucket will be deleted even while containing objects. | `bool` | `false` | no |
-| default\_region | The region in which the subnetwork will be created. | `string` | n/a | yes |
+| default\_region | Default region to create resources where applicable. | `string` | `"us-central1"` | no |
 | encrypt\_gcs\_bucket\_tfstate | Encrypt the bucket used for storing Terraform state files in the seed project. | `bool` | `true` | no |
 | folder\_id | The folder ID where the project will be created. | `string` | n/a | yes |
 | kms\_prevent\_destroy | If set to true, delete the KMS key ring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
 | kms\_project\_name | Custom project name for the KMS project. | `string` | `""` | no |
 | logging\_project\_name | Custom project name for the logging project. | `string` | `""` | no |
 | machine\_learning\_project\_name | Custom project name for the Machine Learning project. | `string` | `""` | no |
+| nat\_bgp\_asn | BGP ASN for NAT cloud route. This is needed to allow the Jenkins Agent to download packages and updates from the internet without having an external IP address. | `number` | `64512` | no |
+| nat\_num\_addresses\_region | Number of external IPs to reserve for region 1 Cloud NAT. | `number` | `2` | no |
 | org\_id | The organization ID for the associated services. | `string` | n/a | yes |
 | project\_deletion\_policy | Project deletion policy. Possible values are: "PREVENT", "ABANDON", "DELETE". | `string` | `"PREVENT"` | no |
 | project\_prefix | Name prefix to use for projects created. Should be the same in all steps. Max size is 3 characters. | `string` | `"prj"` | no |
