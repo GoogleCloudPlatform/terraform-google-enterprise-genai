@@ -342,6 +342,7 @@ func TestStandalone(t *testing.T) {
 					"storage-api.googleapis.com",
 					"storage-component.googleapis.com",
 					"storage.googleapis.com",
+					"dns.googleapis.com",
 				},
 				shouldBeInPerimeter: true,
 			},
