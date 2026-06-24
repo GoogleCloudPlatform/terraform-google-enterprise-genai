@@ -178,6 +178,7 @@ module "machine_learning_project" {
     "storage-api.googleapis.com",
     "storage-component.googleapis.com",
     "storage.googleapis.com",
+    "dns.googleapis.com",
   ]
 }
 
