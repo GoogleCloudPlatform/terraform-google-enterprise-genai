@@ -216,6 +216,7 @@ func TestStandalone(t *testing.T) {
 		projectID := standalone.GetTFSetupStringOutput("project_id")
 		for _, api := range []string{
 			"cloudresourcemanager.googleapis.com",
+			"compute.googleapis.com",
 			"cloudbilling.googleapis.com",
 			"iam.googleapis.com",
 			"storage-api.googleapis.com",
