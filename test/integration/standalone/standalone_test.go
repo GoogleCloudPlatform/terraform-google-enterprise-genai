@@ -207,7 +207,7 @@ func TestStandalone(t *testing.T) {
 	// Standalone deployment.
 	standalone := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir("../../../examples/standalone"),
-		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 1, 2*time.Minute),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
 		tft.WithVars(vars),
 	)
 

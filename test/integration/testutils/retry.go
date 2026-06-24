@@ -39,10 +39,10 @@ var (
 		".*Error getting operation for committing purpose for TagValue.*": "Failed creating TagValue.",
 
 		// Error 403: Compute Engine API has not been used in project {} before or it is disabled.
-		".*Error 403.*Compute Engine API has not been used in project.*": "Compute Engine API not enabled",
+		".*Error 403.*Compute Engine API has not been used in project.*": "Compute Engine API not enabled.",
 
 		// Error 403: Cloud DNS API has not been used in project {} before or it is disabled.
-		".*Error 403.*Cloud DNS API has not been used in project.*": "Cloud DNS API not enabled",
+		".*Error 403.*Cloud DNS API has not been used in project.*": "Cloud DNS API not enabled.",
 
 		// Error 400: Service account {} does not exist.
 		".*Error 400.*Service account.*does not exist*": "Error setting IAM policy",
