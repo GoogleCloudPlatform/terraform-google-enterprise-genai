@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 variable "org_id" {
   description = "The numeric organization ID."
   type        = string
@@ -32,6 +33,30 @@ variable "project_deletion_policy" {
   description = "The deletion policy for the project created."
   type        = string
   default     = "PREVENT"
+}
+
+variable "project_prefix" {
+  description = "Name prefix to use for projects created. Should be the same in all steps. Max size is 3 characters."
+  type        = string
+  default     = "prj"
+}
+
+variable "storage_bucket_labels" {
+  description = "Labels to apply to the storage bucket."
+  type        = map(string)
+  default     = {}
+}
+
+variable "encrypt_gcs_bucket_tfstate" {
+  description = "Encrypt the bucket used for storing Terraform state files in the seed project."
+  type        = bool
+  default     = true
+}
+
+variable "nat_bgp_asn" {
+  type        = number
+  description = "BGP ASN for NAT cloud route. This is needed to allow the Jenkins Agent to download packages and updates from the internet without having an external IP address."
+  default     = 64512
 }
 
 /******************************************

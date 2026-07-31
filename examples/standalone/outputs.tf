@@ -26,7 +26,7 @@ output "terraform_service_account" {
 
 output "remote_state_bucket" {
   description = "Bucket used for storing Terraform state for the standalone example in the seed project."
-  value       = module.harness.remote_state_bucket
+  value       = google_storage_bucket.terraform_state.name
 }
 
 output "instance_region" {
@@ -39,62 +39,62 @@ output "instance_region" {
 *****************************************/
 output "kms_project_id" {
   description = "Cloud Key Management Service (KMS) project ID."
-  value       = module.harness.kms_project_id
+  value       = module.kms_project.project_id
 }
 
 output "kms_project_number" {
   description = "Cloud Key Management Service (KMS) project number."
-  value       = module.harness.kms_project_number
+  value       = module.kms_project.project_number
 }
 
 output "logging_project_id" {
   description = "Logging project ID."
-  value       = module.harness.logging_project_id
+  value       = module.logging_project.project_id
 }
 
 output "logging_project_name" {
   description = "Logging project name."
-  value       = module.harness.logging_project_name
+  value       = module.logging_project.project_name
 }
 
 output "seed_project_id" {
   description = "Seed project ID."
-  value       = module.harness.seed_project_id
+  value       = module.seed_project.project_id
 }
 
 output "machine_learning_project_id" {
   description = "Machine Learning project ID."
-  value       = module.harness.machine_learning_project_id
+  value       = module.machine_learning_project.project_id
 }
 
 output "machine_learning_project_name" {
   description = "Machine Learning project name."
-  value       = module.harness.machine_learning_project_name
+  value       = module.machine_learning_project.project_name
 }
 
 output "service_catalog_project_id" {
   description = "Service Catalog project ID."
-  value       = module.harness.service_catalog_project_id
+  value       = module.service_catalog_project.project_id
 }
 
 output "service_catalog_project_name" {
   description = "Service Catalog project name."
-  value       = module.harness.service_catalog_project_name
+  value       = module.service_catalog_project.project_name
 }
 
 output "artifact_publish_project_id" {
   description = "Artifact publishing project ID."
-  value       = module.harness.artifact_publish_project_id
+  value       = module.artifact_publish_project.project_id
 }
 
 output "artifact_publish_project_number" {
   description = "Artifact publishing project number."
-  value       = module.harness.artifact_publish_project_number
+  value       = module.artifact_publish_project.project_number
 }
 
 output "artifact_publish_project_name" {
   description = "Artifact publishing project name."
-  value       = module.harness.artifact_publish_project_name
+  value       = module.artifact_publish_project.project_name
 }
 
 /******************************************
@@ -126,17 +126,17 @@ output "keyring_name" {
 
 output "machine_learning_network_name" {
   description = "The name of the Machine Learning VPC being created."
-  value       = module.harness.machine_learning_network_name
+  value       = module.network.network_name
 }
 
 output "restricted_network_self_link" {
   description = "The URI of the Machine Learning VPC being created."
-  value       = module.harness.restricted_network_self_link
+  value       = module.network.network_self_link
 }
 
 output "machine_learning_subnets_self_link" {
   description = "The self-links of the Machine Learning subnets being created."
-  value       = module.harness.machine_learning_subnets_self_link
+  value       = module.network.subnets_self_links[0]
 }
 
 /******************************************

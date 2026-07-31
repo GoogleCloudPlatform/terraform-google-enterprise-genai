@@ -28,8 +28,3 @@ output "service_catalog_repo_id" {
   description = "ID of the Service Catalog repository"
   value       = google_sourcerepo_repository.service_catalog.id
 }
-
-# output "kms_keys" {
-#   description = "KMS keys for the project."
-#   value       = module.kms_keyrings.keys
-# }
