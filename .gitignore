@@ -1,0 +1,105 @@
+# Crash log files
+crash.log
+crash.*.log
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.idea/
+.vscode/
+
+# Ignore any .tfvars files that are generated automatically for each Terraform run. Most
+# .tfvars files are managed as part of configuration and so should be included in
+# version control.
+*.tfvars
+# example.tfvars
+
+# Local .terraform directories
+*.tfvars.json
+**/.terraform/
+
+# tf state files
+*.tfstate
+*.tfstate.backup
+*.tfstate.*.backup
+
+# tf lock file
+**/.terraform.lock.hcl
+
+# Python
+__pycache__/
+*.pyc
+
+# Go
+bin/
+vendor/
+src/dlp-ext-proc/server
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.iml
+
+# Environment / secrets
+.env
+.env.*
+.envrc
+.creds.json
+docs/.temp-apigee.md
+docs/working-commands.md
+docs/notes.md
+docs/todo.md
+docs/todos.md
+
+# ADK
+.adk/
+
+# Pre-commit
+.pre-commit-cache/
+
+# Skaffold (generated from skaffold.yaml.tmpl)
+skaffold.yaml
+
+# Cloud Run manifests (generated from cloudrun/*.yaml.tmpl)
+cloudrun/*.yaml
+
+#  Plan files
+*.tfplan
+tfplan
+**/tmp_plan
+**/.tmp
+**/tmp
+
+test/fixtures/shared/terraform.tfvars
+
+test/integration/gcloud/config.sh
+test/integration/tmp
+
+credentials.json
+
+# OSX leaves these everywhere on SMB shares
+._*
+
+# Direnv
+.direnv/
+.workspaces/
+
+# Vim-related files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+
+#ignore directory pynb checkpoints
+.ipynb_checkpoints/
