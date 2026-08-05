@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
-# user_project_override + billing_project route quota/billing for every API
-# call through var.project_id. Required for DLP — the API rejects requests
-# made via Application Default Credentials when no quota project is supplied.
 provider "google" {
   project               = var.project_id
   region                = var.region
