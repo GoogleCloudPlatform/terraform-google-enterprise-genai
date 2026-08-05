@@ -92,35 +92,3 @@ variable "internal_dns_domain" {
     error_message = "internal_dns_domain must end with a dot or be null"
   }
 }
-
-# Self Managed Gateway (Phase 11)
-variable "enable_self_managed_gateway_dns" {
-  description = "Enable DNS record creation for self managed gateway"
-  type        = bool
-  default     = false
-}
-
-variable "self_managed_gateway_ip" {
-  description = "IP address for the self managed gateway"
-  type        = string
-  default     = null
-}
-
-variable "self_managed_gateway_subdomain" {
-  description = "Subdomain for the self managed gateway (e.g., 'smg' creates smg.gateway.example.com)"
-  type        = string
-  default     = "smg"
-}
-
-# Self Managed Gateway Internal DNS (Phase 11)
-variable "enable_self_managed_internal_dns" {
-  description = "Enable internal DNS record for self managed gateway"
-  type        = bool
-  default     = false
-}
-
-variable "self_managed_internal_subdomain" {
-  description = "Subdomain in the internal zone for the self managed gateway (e.g., 'diy' creates diy.internal.example.com)"
-  type        = string
-  default     = "diy"
-}

@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 # Extract domain name without trailing dot for authorization names
 locals {
   domain_name_clean = var.dns_zone_domain != null ? trimsuffix(var.dns_zone_domain, ".") : ""

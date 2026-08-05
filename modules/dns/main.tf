@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
-
-# Local variables for domain configuration
 locals {
   # Derive internal domain from dns_zone_domain if not explicitly provided
   internal_dns_domain_computed = var.internal_dns_domain != null ? var.internal_dns_domain : (
@@ -23,7 +19,6 @@ locals {
   )
 }
 
-# Data source to reference existing DNS zone
 data "google_dns_managed_zone" "dns_zone" {
   count   = var.dns_zone_domain != null ? 1 : 0
   project = var.project_id
