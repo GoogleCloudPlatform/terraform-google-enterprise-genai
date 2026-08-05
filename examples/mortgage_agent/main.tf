@@ -59,7 +59,6 @@ module "networking" {
   mcp_internal_dns_zone = var.mcp_internal_dns_zone
 
   psc_interface_subnet_cidr = var.psc_interface_subnet_cidr
-  psc_interface_dns_zone    = var.mcp_internal_dns_zone
 
   agent_gateway_subnet_cidr = var.agent_gateway_subnet_cidr
 

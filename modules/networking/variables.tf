@@ -77,19 +77,6 @@ variable "psc_interface_subnet_cidr" {
   default     = "10.11.0.0/28"
 }
 
-variable "psc_interface_dns_zone" {
-  description = "Private DNS zone for PSC Interface DNS peering. `domain` MUST end with a trailing dot."
-  type = object({
-    name   = optional(string, "psc-interface-dns-zone")
-    domain = string
-  })
-  default = null
-  validation {
-    condition     = var.mcp_internal_dns_zone == null || endswith(var.mcp_internal_dns_zone.domain, ".")
-    error_message = "psc_interface_dns_zone.domain must end with a trailing dot (e.g. \"mcp.example.com.\")."
-  }
-}
-
 variable "agent_gateway_subnet_cidr" {
   description = "CIDR for the Agent Gateway dedicated subnet. Must be within RFC1918, min /28. If inside 10.0.0.0/8, must not overlap 10.0.0.0/24, 10.0.1.0/24, or 10.0.2.0/24 (Agent Gateway egress restrictions)."
   type        = string
