@@ -123,12 +123,12 @@ output "psc_interface_subnet_self_link" {
 
 output "psc_interface_dns_zone_name" {
   description = "Name of the PSC Interface private DNS zone"
-  value       = var.psc_interface_dns_zone != null ? (var.mcp_internal_dns_zone != null && var.psc_interface_dns_zone.name == var.mcp_internal_dns_zone.name ? module.mcp_internal_dns_zone[0].name : module.psc_interface_dns_zone[0].name) : null
+  value       = var.mcp_internal_dns_zone != null ? (var.mcp_internal_dns_zone != null && var.mcp_internal_dns_zone.name == var.mcp_internal_dns_zone.name ? module.mcp_internal_dns_zone[0].name : module.psc_interface_dns_zone[0].name) : null
 }
 
 output "psc_interface_dns_domain" {
   description = "Domain name for PSC Interface DNS peering (ends with a dot)"
-  value       = var.psc_interface_dns_zone != null ? var.psc_interface_dns_zone.domain : null
+  value       = var.mcp_internal_dns_zone != null ? var.mcp_internal_dns_zone.domain : null
 }
 
 # Agent Gateway dedicated subnet outputs

@@ -52,11 +52,6 @@ variable "cloudbuild_bucket_name" {
   default     = null
 }
 
-variable "billing_account" {
-  description = "The ID of the billing account to associate this project with."
-  type        = string
-}
-
 variable "parent_folder" {
   description = "The folder ID where the project will be created."
   type        = string
@@ -359,19 +354,6 @@ variable "psc_interface_subnet_cidr" {
   description = "CIDR for the PSC Interface subnet (min /28, must not overlap with psc_subnet_cidr)"
   type        = string
   default     = "10.11.0.0/28"
-}
-
-variable "psc_interface_dns_zone" {
-  description = "Private DNS zone for PSC Interface DNS peering. `domain` MUST end with a trailing dot."
-  type = object({
-    name   = optional(string, "psc-interface-dns-zone")
-    domain = string
-  })
-  default = null
-  validation {
-    condition     = var.psc_interface_dns_zone == null || endswith(var.psc_interface_dns_zone.domain, ".")
-    error_message = "psc_interface_dns_zone.domain must end with a trailing dot (e.g. \"mcp.example.com.\")."
-  }
 }
 
 # ==============================================================================

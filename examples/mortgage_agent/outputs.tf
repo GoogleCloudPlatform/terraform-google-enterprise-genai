@@ -194,7 +194,7 @@ output "psc_interface_dns_domain" {
 
 output "psc_interface_dns_peering_domain" {
   description = "DNS domain for PSC Interface DNS peering (pass to deploy_agent.py --dns-peering-domain)"
-  value       = var.psc_interface_dns_zone != null ? var.psc_interface_dns_zone.domain : null
+  value       = var.mcp_internal_dns_zone != null ? var.mcp_internal_dns_zone.domain : null
 }
 
 # Agent Gateway Outputs

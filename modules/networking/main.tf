@@ -139,14 +139,14 @@ resource "google_compute_subnetwork" "agent_gateway" {
 
 # PSC Interface — private DNS zone for DNS peering (only if different from MCP zone)
 module "psc_interface_dns_zone" {
-  count   = var.psc_interface_dns_zone != null && (var.mcp_internal_dns_zone == null || var.psc_interface_dns_zone.name != var.mcp_internal_dns_zone.name) ? 1 : 0
+  count   = var.mcp_internal_dns_zone != null && (var.mcp_internal_dns_zone == null || var.mcp_internal_dns_zone.name != var.mcp_internal_dns_zone.name) ? 1 : 0
   source  = "terraform-google-modules/cloud-dns/google"
   version = "~> 7.0"
 
   project_id  = var.project_id
   type        = "private"
-  name        = var.psc_interface_dns_zone.name
-  domain      = var.psc_interface_dns_zone.domain
+  name        = var.mcp_internal_dns_zone.name
+  domain      = var.mcp_internal_dns_zone.domain
   description = "PSC Interface private DNS zone for peering"
 
   private_visibility_config_networks = []
