@@ -129,7 +129,7 @@ To register a domain via the Google Cloud Console:
 
 
    ```bash
-   cp terraform.tfvars.example terraform.tfvars
+   cp terraform.example.tfvars terraform.tfvars
    ```
 
 1. Initialize and apply the Terraform configuration:
