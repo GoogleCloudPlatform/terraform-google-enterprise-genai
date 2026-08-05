@@ -123,16 +123,6 @@ output "mcp_floor_setting_name" {
   value       = var.enable_model_armor && (var.enable_mcp_floor_setting || var.enable_vertex_ai_integration) ? google_model_armor_floorsetting.mcp_floor_setting[0].name : null
 }
 
-output "gemini_enterprise_template_name" {
-  description = "Full resource name of the Gemini Enterprise Model Armor template (use for Discovery Engine REST API)"
-  value       = var.enable_model_armor && var.enable_gemini_enterprise_template ? google_model_armor_template.gemini_enterprise_template[0].name : null
-}
-
-output "gemini_enterprise_template_id" {
-  description = "ID of the Gemini Enterprise Model Armor template"
-  value       = var.enable_model_armor && var.enable_gemini_enterprise_template ? google_model_armor_template.gemini_enterprise_template[0].template_id : null
-}
-
 output "vertex_ai_service_account_email" {
   description = "Email of the AI Platform service agent granted Model Armor access"
   value       = var.enable_model_armor && var.enable_vertex_ai_integration ? "service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com" : null

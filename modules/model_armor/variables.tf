@@ -241,28 +241,3 @@ variable "vertex_ai_enable_cloud_logging" {
   default     = true
 }
 
-# ==============================================================================
-# GEMINI ENTERPRISE TEMPLATE
-# ==============================================================================
-
-variable "enable_gemini_enterprise_template" {
-  description = "Enable a multi-region Model Armor template for Gemini Enterprise (Discovery Engine)"
-  type        = bool
-  default     = false
-}
-
-variable "gemini_enterprise_template_id" {
-  description = "ID for the Gemini Enterprise Model Armor template"
-  type        = string
-  default     = "gemini-enterprise-safety-template"
-}
-
-variable "gemini_enterprise_template_location" {
-  description = "Multi-region location for the Gemini Enterprise template (must be 'us' or 'eu')"
-  type        = string
-  default     = "us"
-  validation {
-    condition     = contains(["us", "eu"], var.gemini_enterprise_template_location)
-    error_message = "gemini_enterprise_template_location must be 'us' or 'eu'"
-  }
-}

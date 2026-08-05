@@ -352,28 +352,6 @@ variable "model_armor_vertex_ai_cloud_logging" {
   default     = true
 }
 
-variable "enable_model_armor_gemini_enterprise" {
-  description = "Enable a multi-region Model Armor template for Gemini Enterprise"
-  type        = bool
-  default     = false
-}
-
-variable "model_armor_gemini_enterprise_template_id" {
-  description = "ID for the Gemini Enterprise Model Armor template"
-  type        = string
-  default     = "gemini-enterprise-safety-template"
-}
-
-variable "model_armor_gemini_enterprise_location" {
-  description = "Multi-region location for the Gemini Enterprise template"
-  type        = string
-  default     = "us"
-  validation {
-    condition     = contains(["us", "eu"], var.model_armor_gemini_enterprise_location)
-    error_message = "model_armor_gemini_enterprise_location must be 'us' or 'eu'"
-  }
-}
-
 # ==============================================================================
 # PSC INTERFACE
 # ==============================================================================

@@ -172,16 +172,6 @@ output "model_armor_service_agent_email" {
   value       = var.enable_model_armor ? module.model_armor[0].model_armor_service_agent_email : null
 }
 
-output "model_armor_gemini_enterprise_template_name" {
-  description = "Full resource name of the Gemini Enterprise Model Armor template (for Discovery Engine REST API)"
-  value       = var.enable_model_armor && var.enable_model_armor_gemini_enterprise ? module.model_armor[0].gemini_enterprise_template_name : null
-}
-
-output "model_armor_vertex_ai_service_account" {
-  description = "AI Platform service agent email granted Model Armor access"
-  value       = var.enable_model_armor && var.enable_model_armor_vertex_ai ? module.model_armor[0].vertex_ai_service_account_email : null
-}
-
 # PSC Interface Outputs
 
 output "psc_interface_network_attachment_id" {
