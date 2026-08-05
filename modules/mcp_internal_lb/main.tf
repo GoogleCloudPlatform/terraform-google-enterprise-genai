@@ -40,13 +40,7 @@ resource "google_compute_address" "lb" {
 # header (e.g. legacy-dms.mcp-server.internal) and routes to the Cloud Run
 # service named <service> in this region.
 resource "google_compute_region_network_endpoint_group" "mcp" {
-  project = var.project_id
-  # Suffix the name with a short hash of the DNS domain. A url_mask change (e.g.
-  # switching the MCP domain) forces NEG replacement; the hashed name means the
-  # replacement NEG gets a NEW name, so — together with create_before_destroy —
-  # it is created and the backend service repointed to it BEFORE the old NEG is
-  # deleted. Without this, Terraform tries to delete the still-referenced old NEG
-  # and the API rejects it with resourceInUseByAnotherResource.
+  project               = var.project_id
   name                  = "${local.lb_name}-neg-${substr(sha256(local.dns_domain_no_dot), 0, 6)}"
   region                = var.region
   network_endpoint_type = "SERVERLESS"
@@ -87,7 +81,6 @@ resource "google_compute_region_url_map" "mcp" {
   default_service = google_compute_region_backend_service.mcp.id
 }
 
-# --- HTTPS front-end (default) ---
 resource "tls_private_key" "lb" {
   count     = local.is_https ? 1 : 0
   algorithm = "RSA"
@@ -138,7 +131,6 @@ resource "google_compute_region_target_https_proxy" "mcp" {
   ]
 }
 
-# --- HTTP front-end (opt-in) ---
 resource "google_compute_region_target_http_proxy" "mcp" {
   count   = local.is_https ? 0 : 1
   project = var.project_id

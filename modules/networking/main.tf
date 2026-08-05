@@ -50,7 +50,6 @@ module "vpc" {
   ]
 }
 
-# Cloud Router for NAT
 resource "google_compute_router" "nat_router" {
   name    = "${var.name_prefix}-nat-router"
   project = var.project_id
@@ -58,7 +57,6 @@ resource "google_compute_router" "nat_router" {
   region  = var.region
 }
 
-# Cloud NAT for outbound internet access from private nodes
 resource "google_compute_router_nat" "nat_gateway" {
   name                               = "${var.name_prefix}-nat-gateway"
   project                            = var.project_id

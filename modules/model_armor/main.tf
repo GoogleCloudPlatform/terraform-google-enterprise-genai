@@ -12,32 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
-
 data "google_project" "project" {
   project_id = var.project_id
 }
 
 locals {
-  # Service Extensions service account format: service-PROJECT_NUMBER@gcp-sa-dep.iam.gserviceaccount.com
-  # This account is automatically created when networkservices.googleapis.com is enabled
-  # See: https://cloud.google.com/service-extensions/docs/configure-extensions-to-google-services
   service_extensions_sa_email = "service-${data.google_project.project.number}@gcp-sa-dep.iam.gserviceaccount.com"
-
-  # Advanced SDP wiring: when enabled, the module provisions DLP templates,
-  # binds the Model Armor service agent to roles/dlp.{user,reader}, and layers
-  # sdp_settings.advanced_config onto the response Model Armor template.
-  enable_sdp_advanced = var.enable_model_armor && var.sdp_enforcement == "ENABLED"
+  enable_sdp_advanced         = var.enable_model_armor && var.sdp_enforcement == "ENABLED"
 }
-
-# =============================================================================
-# DLP Templates (advanced SDP path)
-# Custom inspect + de-identify templates referenced by the Model Armor response
-# template's sdp_settings.advanced_config. Built only when sdp_enforcement is
-# ENABLED; matches the ssn-inspect-template / ssn-redaction-template pair from
-# the codelab spec.
-# =============================================================================
 
 resource "google_data_loss_prevention_inspect_template" "ssn" {
   count        = local.enable_sdp_advanced ? 1 : 0
@@ -86,13 +68,6 @@ resource "google_data_loss_prevention_deidentify_template" "ssn" {
   }
 }
 
-# =============================================================================
-# Model Armor Service Agent + DLP IAM (advanced SDP path)
-# The Model Armor callout reads the inspect/de-identify templates at evaluation
-# time using its service agent identity. Without these grants, advanced SDP
-# fails with permission errors at request time, not at apply time.
-# =============================================================================
-
 resource "google_project_service_identity" "model_armor" {
   count    = local.enable_sdp_advanced ? 1 : 0
   provider = google-beta
@@ -113,14 +88,6 @@ resource "google_project_iam_member" "model_armor_dlp_reader" {
   role    = "roles/dlp.reader"
   member  = "serviceAccount:${google_project_service_identity.model_armor[0].email}"
 }
-
-# =============================================================================
-# Model Armor Templates — split request / response
-# Request template: RAI + PI/jailbreak + malicious URI (no SDP — request-side
-# inspection is governed by the request template alone). Response template:
-# RAI + malicious URI; sdp_settings.advanced_config layered in only when
-# advanced SDP is enabled.
-# =============================================================================
 
 resource "google_model_armor_template" "request" {
   count       = var.enable_model_armor ? 1 : 0
@@ -197,10 +164,6 @@ resource "google_model_armor_template" "response" {
       }
     }
 
-    # Required so the template conforms to the project's Model Armor floor
-    # setting, which enforces PI/jailbreak across every template. The codelab
-    # spec omits this on the response template — but a floor setting overrides
-    # template-level omissions and the API rejects non-conformant templates.
     pi_and_jailbreak_filter_settings {
       filter_enforcement = var.pi_jailbreak_enforcement
       confidence_level   = var.pi_jailbreak_confidence_level
@@ -263,12 +226,6 @@ resource "google_project_iam_member" "model_armor_floor_settings_admin" {
   role     = "roles/modelarmor.floorSettingsAdmin"
   member   = each.value
 }
-
-# =============================================================================
-# Model Armor Floor Setting for MCP Server Protection
-# Configures project-level floor setting with GOOGLE_MCP_SERVER as integrated
-# service using INSPECT_AND_BLOCK enforcement for BigQuery MCP endpoint
-# =============================================================================
 
 resource "google_model_armor_floorsetting" "mcp_floor_setting" {
   count    = var.enable_model_armor && (var.enable_mcp_floor_setting || var.enable_vertex_ai_integration) ? 1 : 0
@@ -342,12 +299,6 @@ resource "null_resource" "mcp_content_security" {
 
   depends_on = [google_model_armor_floorsetting.mcp_floor_setting]
 }
-
-# =============================================================================
-# Vertex AI Service Agent IAM Binding
-# Grants roles/modelarmor.user to the AI Platform service agent so Vertex AI
-# can invoke Model Armor sanitization
-# =============================================================================
 
 resource "google_project_iam_member" "vertex_ai_model_armor_user" {
   count   = var.enable_model_armor && var.enable_vertex_ai_integration ? 1 : 0

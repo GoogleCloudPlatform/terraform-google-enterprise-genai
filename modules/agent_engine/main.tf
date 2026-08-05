@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 # =============================================================================
 # Agent Identity IAM bindings
 # Grants permissions to all Agent Engine agents in this project.
 # See: https://docs.cloud.google.com/agent-builder/agent-engine/agent-identity
 # =============================================================================
-
 locals {
   agent_identity_principal = "principalSet://agents.global.org-${var.org_id}.system.id.goog/attribute.platformContainer/aiplatform/projects/${var.project_number}"
 }
@@ -89,8 +86,7 @@ resource "google_project_iam_member" "agent_identity_telemetry_writer" {
 # =============================================================================
 # Agent MCP invoker service account
 # Agents impersonate this SA at runtime to mint OIDC ID tokens for invoking
-# MCP Cloud Run services. The agent identity holds `roles/iam.serviceAccountTokenCreator`
-# (granted at the project level below). The SA itself is granted
+# MCP Cloud Run services. The SA itself is granted
 # `roles/run.invoker` on each MCP service in modules/mcp-cloud-run, so Cloud
 # Run sees the impersonated SA as the caller (the agent identity is not
 # propagated; Cloud Run does not accept agents.global principalSet members

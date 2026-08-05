@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 variable "project_id" {
   description = "GCP project ID"
   type        = string
@@ -42,11 +40,6 @@ variable "enable_mcp_floor_setting" {
   default     = true
 }
 
-# Template Configuration
-# Two templates are always created: a request-side template (RAI + PI/jailbreak,
-# no SDP) and a response-side template (RAI; SDP advanced_config layered in only
-# when sdp_enforcement = "ENABLED"). The Agent Gateway's CONTENT_AUTHZ extension
-# wires them in as request_template_id and response_template_id respectively.
 variable "request_template_id" {
   description = "ID for the request-side Model Armor template"
   type        = string
@@ -96,11 +89,6 @@ variable "rai_filters" {
   }
 }
 
-# Sensitive Data Protection Settings
-# When ENABLED, the response template gets sdp_settings.advanced_config that
-# references custom DLP inspect/de-identify templates created by this module.
-# When DISABLED, no DLP templates are created and the response template has no
-# sdp_settings block at all.
 variable "sdp_enforcement" {
   description = "Sensitive Data Protection filter enforcement (ENABLED builds DLP inspect/de-identify templates and wires them into the response template's sdp_settings.advanced_config; DISABLED creates no DLP/SDP resources)"
   type        = string
@@ -194,7 +182,6 @@ variable "prompt_error_message" {
   default     = "Your request was blocked by our content filter. Please rephrase your prompt and try again."
 }
 
-# Logging and Operation Settings
 variable "ignore_partial_failures" {
   description = "Whether to ignore partial invocation failures"
   type        = bool

@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 output "request_template_id" {
   description = "ID of the request-side Model Armor template"
   value       = var.enable_model_armor ? google_model_armor_template.request[0].template_id : null

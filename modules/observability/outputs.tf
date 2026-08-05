@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 output "dashboard_id" {
   description = "Resource ID of the authorization-debugging Cloud Monitoring dashboard."
   value       = google_monitoring_dashboard.authorization_debugging.id

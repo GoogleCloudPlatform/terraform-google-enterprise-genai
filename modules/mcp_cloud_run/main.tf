@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# One dedicated runtime service account per MCP service. Replaces the prior
-# Workload Identity binding per K8s service account.
 resource "google_service_account" "mcp" {
   for_each = var.services
 
@@ -23,9 +21,6 @@ resource "google_service_account" "mcp" {
   description  = "Runtime service account for the ${each.key} MCP Cloud Run service"
 }
 
-# Project-level IAM roles required by every MCP service (OTel exporters, logging,
-# Cloud Trace, telemetry writer, service usage). Flattened so for_each gets a
-# single map keyed by "<service>/<role>".
 locals {
   service_account_role_bindings = {
     for pair in flatten([
@@ -64,9 +59,7 @@ resource "google_cloud_run_v2_service" "mcp" {
   # and mints an OIDC token scoped to that origin. Cloud Run only accepts tokens
   # whose `aud` matches a *.run.app URL unless the custom host is registered here,
   # so without this the LB-fronted calls return 401.
-  custom_audiences = var.mcp_internal_dns_domain != null ? [
-    "https://${each.key}.${trimsuffix(var.mcp_internal_dns_domain, ".")}"
-  ] : null
+  custom_audiences = var.mcp_internal_dns_domain != null ? ["https://${each.key}.${trimsuffix(var.mcp_internal_dns_domain, ".")}"] : null
 
   template {
     service_account = google_service_account.mcp[each.key].email
@@ -117,11 +110,6 @@ resource "google_cloud_run_v2_service" "mcp" {
     percent = 100
   }
 
-  # Skaffold (and the underlying gcloud/Cloud Run client) owns deploy-time
-  # mutations after the initial apply: container image tags, the per-revision
-  # `run-id` label that Cloud Run auto-injects into template[0].labels, and
-  # client identity annotations (run.googleapis.com/client-name, /client-version).
-  # Ignoring these prevents Terraform from reverting Skaffold's deploys.
   lifecycle {
     ignore_changes = [
       client,

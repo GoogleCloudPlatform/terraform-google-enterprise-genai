@@ -38,14 +38,8 @@ locals {
     }
   }
 
-  # Flatten each Google API into its five endpoint variants (global, mTLS,
-  # locational, locational mTLS, and regional REP), keyed by service_id. IDs,
-  # display names, and URLs mirror the variants the old registration script
-  # produced 1:1.
   google_api_variants = merge([
     for id, name in var.google_apis : {
-      # service_id must be 4-63 chars ([a-z][a-z0-9-]{2,61}[a-z0-9]); pad API
-      # ids shorter than 4 chars (e.g. "iap") while keeping the real URL host.
       (length(id) >= 4 ? id : "${id}-endpoint") = {
         display_name = name
         url          = "https://${id}.googleapis.com"
@@ -106,8 +100,6 @@ resource "terraform_data" "mcp_input_check" {
   }
 }
 
-# Google API endpoints (global, mTLS, locational, and REP variants). These are
-# plain endpoints with no spec, exposed over JSON-RPC.
 resource "google_agent_registry_service" "google_apis" {
   for_each = local.google_api_variants
 

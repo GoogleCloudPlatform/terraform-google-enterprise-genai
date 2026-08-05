@@ -12,22 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
-/**
- * Observability Module
- *
- * Enables Log Analytics on the auto-created `_Default` log bucket so audit
- * and platform logs are queryable as `<project>.global._Default._AllLogs`,
- * and provisions the authorization-debugging Cloud Monitoring dashboard
- * whose widgets run opsAnalyticsQuery against that view.
- *
- * The provider adopts the existing `_Default` bucket — no creation, no
- * import. `terraform destroy` removes the bucket config from state but
- * leaves the bucket and its log entries intact (provider semantics for
- * `_Default` / `_Required` buckets).
- */
-
 resource "google_logging_project_bucket_config" "default_analytics" {
   project          = var.project_id
   location         = "global"
@@ -37,8 +21,7 @@ resource "google_logging_project_bucket_config" "default_analytics" {
 
 # The dashboard JSON ships with the `PROJECT_ID` placeholder in BigQuery-
 # style table refs (`<project>.global._Default._AllLogs`); rewrite it to the
-# caller's project. For a manual import via the GCP console, substitute
-# `PROJECT_ID` with a real project ID first.
+# caller's project.
 resource "google_monitoring_dashboard" "authorization_debugging" {
   project = var.project_id
   dashboard_json = replace(
