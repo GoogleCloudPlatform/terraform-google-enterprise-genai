@@ -1,5 +1,3 @@
-# NOTE: This file is intentionally duplicated across income-verification-api, corporate-email,
-# and legacy-dms rather than extracted to a shared package, to keep each demo service self-contained.
 # Copyright 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
