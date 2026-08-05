@@ -49,7 +49,14 @@ After ensuring all requirements are satisfied, you will complete the following s
 
 ## Prerequisites
 
-1. Ensure you have a Google Cloud project created.
+1. Ensure you have a Google Cloud project created with billing enabled, then authenticated:
+
+   ```bash
+   gcloud auth login
+   gcloud auth application-default login
+   gcloud config set project <your-project-id>
+   ```
+
 1. Ensure your project has the required APIs enabled. You can enable them using the following command:
 
    ```bash
