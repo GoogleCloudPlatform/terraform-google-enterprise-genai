@@ -16,8 +16,6 @@ project_id = "REPLACE_ME"
 
 org_id = "REPLACE_ME" # format "000000000000"
 
-billing_account = "REPLACE_ME" # format "000000-000000-000000"
-
 platform_admin_members = ["user:admin@example.com"]
 
 # IAP Enforcement Mode ("DRY_RUN" or null)
@@ -61,9 +59,9 @@ mcp_services = {
 # toolspec is uploaded as the MCP server spec on the Agent Registry entry so
 # clients see the full tool catalogue.
 mcp_tool_specs = {
-  legacy-dms          = "../src/legacy-dms/toolspec.json"
-  corporate-email     = "../src/corporate-email/toolspec.json"
-  income-verification = "../src/income-verification-api/toolspec.json"
+  legacy-dms          = "src/legacy-dms/toolspec.json"
+  corporate-email     = "src/corporate-email/toolspec.json"
+  income-verification = "src/income-verification-api/toolspec.json"
 }
 
 # Prompt injection / jailbreak detection confidence threshold
