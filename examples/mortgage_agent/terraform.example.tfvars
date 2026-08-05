@@ -1,0 +1,129 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+project_id = "REPLACE_ME"
+
+org_id = "REPLACE_ME" # format "000000000000"
+
+billing_account = "REPLACE_ME" # format "000000-000000-000000"
+
+platform_admin_members = ["user:admin@example.com"]
+
+# IAP Enforcement Mode ("DRY_RUN" or null)
+agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"
+
+# Public DNS zone domain (must end with a dot)
+# A Cloud DNS managed zone must already exist for this domain.
+dns_zone_domain = "demo.example.com."
+
+# `domain` MUST be a real subdomain of dns_zone_domain (e.g.
+# "mcp.${dns_zone_domain}") so Certificate Manager can issue a Google-managed
+# regional cert. Agent Gateway does not currently validate self-signed certs,
+# so values like "mcp-server.internal."
+mcp_internal_dns_zone = {
+  name   = "mcp-server-internal"
+  domain = "mcp.demo.example.com."
+}
+
+mcp_lb_protocol = "HTTP"
+
+# MCP services: key = Cloud Run service name + URL-mask token (DNS A record auto-created).
+# New service = deploy + one entry. Replace the Google `placeholder` image with your own
+# before real traffic (Skaffold overwrites the tag). min_instance_count = 1 avoids cold
+# starts (~16-19s), which blow the 5s MCP initialize() timeout and drop all tools that turn.
+mcp_services = {
+  legacy-dms = {
+    image              = "us-docker.pkg.dev/cloudrun/container/placeholder"
+    min_instance_count = 1
+  }
+  corporate-email = {
+    image              = "us-docker.pkg.dev/cloudrun/container/placeholder"
+    min_instance_count = 1
+  }
+  income-verification = {
+    image              = "us-docker.pkg.dev/cloudrun/container/placeholder"
+    min_instance_count = 1
+  }
+}
+
+# Per-service toolspec paths (relative to terraform/ or absolute). The
+# toolspec is uploaded as the MCP server spec on the Agent Registry entry so
+# clients see the full tool catalogue.
+mcp_tool_specs = {
+  legacy-dms          = "../src/legacy-dms/toolspec.json"
+  corporate-email     = "../src/corporate-email/toolspec.json"
+  income-verification = "../src/income-verification-api/toolspec.json"
+}
+
+# Prompt injection / jailbreak detection confidence threshold
+# Options: LOW_AND_ABOVE, MEDIUM_AND_ABOVE, HIGH
+model_armor_pi_jailbreak_confidence = "MEDIUM_AND_ABOVE"
+
+# Sensitive Data Protection enforcement (ENABLED or DISABLED).
+# When ENABLED, the model-armor module also creates a DLP inspect template
+# (US_SOCIAL_SECURITY_NUMBER), a DLP de-identify template (replace with
+# infoType), and binds the Model Armor service agent to roles/dlp.{user,reader}.
+# The response Model Armor template's sdp_settings.advanced_config is wired to
+# those DLP templates so SSNs in MCP responses are redacted in flight.
+model_armor_sdp_enforcement = "ENABLED"
+
+# Name of the Agent Gateway resource (also used as a prefix for the network
+# attachment, authz extensions, and authz policies).
+agent_gateway_name = "agent-gateway"
+
+# Dedicated subnet for the Agent Gateway PSC-I network attachment AND the
+# relocated MCP internal LB VIP. Min /28, RFC1918, must NOT overlap
+# 10.0.0.0/24, 10.0.1.0/24, or 10.0.2.0/24 (Agent Gateway egress restrictions).
+agent_gateway_subnet_cidr = "10.20.0.0/28"
+
+# When true, allow traffic through the Agent Gateway if an authz extension
+# fails. Set false in production to fail-closed.
+agent_gateway_authz_fail_open = true
+
+# DNS peering: lets the gateway resolve customer-VPC private DNS zones so it
+# can reach upstream MCP servers by hostname. Each domain MUST end with a trailing dot. Set the whole var
+# to null to skip entirely.
+# `target_project` defaults to var.project_id and `target_network` defaults
+# to the VPC this module creates — only set them to peer against a different
+# project/network.
+agent_gateway_dns_peering_config = {
+  domains = []
+}
+
+# Optional: Override the default list of Google APIs to register. Map key is
+# the service short name; value is the human-readable display name surfaced in
+# the Agent Registry UI.
+agent_registry_google_apis = {
+  aiplatform           = "Vertex AI Platform"
+  cloudresourcemanager = "Cloud Resource Manager"
+  discoveryengine      = "Discovery Engine"
+  logging              = "Logging"
+  monitoring           = "Monitoring"
+  oauth2               = "OAuth2"
+  telemetry            = "Telemetry"
+  trace                = "Trace"
+  agentregistry        = "Agent Registry"
+  iap                  = "Identity-Aware Proxy"
+  modelarmor           = "Model Armor"
+  iamcredentials       = "IAM Credentials"
+}
+
+# Optional: Override or add custom (non-Google) services to register
+agent_registry_custom_services = [
+  {
+    id           = "github"
+    display_name = "Github"
+    url          = "https://github.com"
+  }
+]

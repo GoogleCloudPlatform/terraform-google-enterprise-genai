@@ -49,7 +49,7 @@ After ensuring all requirements are satisfied, you will complete the following s
 
 ## Prerequisites
 
-1. Ensure you have a Google Cloud project created with billing enabled, then authenticated:
+1. Ensure you have a Google Cloud project created with billing enabled, then authenticated using the following command:
 
    ```bash
    gcloud auth login
@@ -78,16 +78,6 @@ After ensuring all requirements are satisfied, you will complete the following s
    sudo apt-get install -y gettext-base
    ```
 
-1. Export the required environment variables:
-
-   ```bash
-   export PROJECT_ID=$(gcloud config get-value project)
-   export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
-   export ORG_ID=$(gcloud projects get-ancestors $PROJECT_ID | awk '$2 == "organization" {print $1}')
-   export REGION="us-central1"
-   export DOMAIN_NAME="mortgage.example.com"
-   ```
-
 **IMPORTANT**:
 1. A public DNS domain **must exist** to run the test.
 1. Ensure that the KMS organization policy constraint is disabled.
@@ -105,7 +95,17 @@ To register a domain via the Google Cloud Console:
 1. Fill in the required DNS configuration (you can choose to have Cloud DNS automatically set up a public zone for you).
 1. Complete the checkout process.
 
-1.
+
+#### Export the required environment variables:
+
+   ```bash
+   export PROJECT_ID=$(gcloud config get-value project)
+   export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+   export ORG_ID=$(gcloud projects get-ancestors $PROJECT_ID | awk '$2 == "organization" {print $1}')
+   export REGION="us-central1"
+   export DOMAIN_NAME="mortgageexample.com"
+   ```
+
 1. Create the public Cloud DNS zone — Certificate Manager validates the regional managed certificate by writing CNAMEs into it:
 
    ```bash
@@ -122,7 +122,7 @@ To register a domain via the Google Cloud Console:
 1. Navigate to this directory:
 
    ```bash
-   cd examples/mortgage
+   cd examples/mortgage_agent
    ```
 
 1. Rename `terraform.example.tfvars` to `terraform.tfvars` and update the file with values from your environment:
