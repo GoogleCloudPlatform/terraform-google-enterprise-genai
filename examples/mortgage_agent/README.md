@@ -96,7 +96,7 @@ To register a domain via the Google Cloud Console:
 1. Complete the checkout process.
 
 
-#### Export the required environment variables:
+### Export the required environment variables:
 
    ```bash
    export PROJECT_ID=$(gcloud config get-value project)
@@ -163,7 +163,7 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
    done
    ```
 
-1.Each Cloud Run service runs as a per-service runtime SA Terraform created `(e.g. mcp-legacy-dms@${PROJECT_ID}.iam.gserviceaccount.com)`. To deploy as those SAs you need `roles/iam.serviceAccountUser` on yourself:
+1. Each Cloud Run service runs as a per-service runtime SA Terraform created `(e.g. mcp-legacy-dms@${PROJECT_ID}.iam.gserviceaccount.com)`. To deploy as those SAs you need `roles/iam.serviceAccountUser` on yourself:
 
    ```bash
    gcloud projects add-iam-policy-binding $PROJECT_ID \
