@@ -158,7 +158,7 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
 
    ```bash
    envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS}' < skaffold.yaml.tmpl > skaffold.yaml
-   for f in cloudrun/*.yaml.tmpl; do
+   for f in cloud_run/*.yaml.tmpl; do
      envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS}' < "$f" > "${f%.tmpl}"
    done
    ```
