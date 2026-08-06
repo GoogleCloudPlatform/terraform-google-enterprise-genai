@@ -213,7 +213,7 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
 1. Deploy the agent with identity:
 
    ```bash
-   cd src/mortgage-agent
+   cd src/mortgage_agent
    uv sync
 
    uv run python deploy_agent.py \
