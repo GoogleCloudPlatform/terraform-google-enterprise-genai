@@ -17,6 +17,11 @@ output "project_id" {
   value       = var.project_id
 }
 
+output "region" {
+  description = "The GCP region for resources"
+  value       = var.region
+}
+
 # Networking Module Outputs
 output "vpc_id" {
   description = "The ID of the VPC network"
