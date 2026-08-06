@@ -97,7 +97,8 @@ variable "enabled_services" {
     "dlp.googleapis.com",
     "telemetry.googleapis.com",
     "apphub.googleapis.com",
-    "agentregistry.googleapis.com"
+    "agentregistry.googleapis.com",
+    "cloudkms.googleapis.com",
   ]
 }
 

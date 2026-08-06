@@ -128,10 +128,12 @@ module "dns" {
 
   project_id      = var.project_id
   dns_zone_domain = var.dns_zone_domain
+  dns_zone_name   = var.dns_zone_name
 
   certificate_dns_authorizations_regional = module.certificates.regional_dns_authorizations
   vpc_self_links                          = [module.networking.network_self_link]
-  depends_on                              = [module.networking, module.certificates]
+
+  depends_on = [module.networking, module.certificates]
 }
 
 module "model_armor" {

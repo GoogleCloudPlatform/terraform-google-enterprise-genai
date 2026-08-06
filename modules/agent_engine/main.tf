@@ -102,7 +102,7 @@ resource "google_service_account" "agent_mcp_invoker" {
 
 resource "google_project_iam_member" "agent_identity_token_creator" {
   project = var.project_id
-  role    = "roles/iam.serviceAccountIamAdmin"
+  role    = "roles/iam.serviceAccountTokenCreator"
   member  = local.agent_identity_principal
 }
 

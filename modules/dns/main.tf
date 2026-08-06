@@ -41,10 +41,11 @@ resource "google_dns_record_set" "certificate_validation_regional" {
 
 # Private DNS Zone for internal gateways
 resource "google_dns_managed_zone" "internal_dns_zone" {
-  count       = var.dns_zone_domain != null ? 1 : 0
+  count = var.dns_zone_domain != null ? 1 : 0
+
   project     = var.project_id
   name        = var.internal_dns_zone_name
-  dns_name    = "${trimsuffix(local.internal_dns_domain_computed, ".")}.`"
+  dns_name    = local.internal_dns_domain_computed
   description = "Private DNS zone for internal gateways"
   visibility  = "private"
 

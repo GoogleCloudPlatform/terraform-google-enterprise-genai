@@ -28,6 +28,7 @@ override.tf.json
 
 # tf lock file
 **/.terraform.lock.hcl
+**/.terraform.tfstate.lock.info
 
 # Python
 __pycache__/
