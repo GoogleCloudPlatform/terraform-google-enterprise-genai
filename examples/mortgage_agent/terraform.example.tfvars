@@ -14,6 +14,8 @@
 
 project_id = "REPLACE_ME"
 
+project_number = "REPLACE_ME" # format "000000000000"
+
 org_id = "REPLACE_ME" # format "000000000000"
 
 platform_admin_members = ["user:admin@example.com"]
