@@ -45,7 +45,7 @@ After ensuring all requirements are satisfied, you will complete the following s
 - [Authenticated Google Cloud SDK](https://cloud.google.com/sdk/docs/authorizing)
 - [Docker](https://docs.docker.com/engine/install/ubuntu/) to build and push the MCP server container images
 - [Python](https://www.python.org/downloads/) 3.12 or later to develop and package the ADK agent
-- [uv](docs.astral.sh)for Python dependency management
+- [uv](docs.astral.sh) for Python dependency management
 
 ## Prerequisites
 
