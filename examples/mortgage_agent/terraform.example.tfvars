@@ -25,7 +25,7 @@ agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"
 
 # Public DNS zone domain (must end with a dot)
 # A Cloud DNS managed zone must already exist for this domain.
-dns_zone_domain = "demo.example.com."
+dns_zone_domain = "REPLACE_ME."
 
 # `domain` MUST be a real subdomain of dns_zone_domain (e.g.
 # "mcp.${dns_zone_domain}") so Certificate Manager can issue a Google-managed
@@ -33,7 +33,7 @@ dns_zone_domain = "demo.example.com."
 # so values like "mcp-server.internal."
 mcp_internal_dns_zone = {
   name   = "mcp-server-internal"
-  domain = "mcp.demo.example.com."
+  domain = "mcp.REPLACE_ME."
 }
 
 mcp_lb_protocol = "HTTP"
