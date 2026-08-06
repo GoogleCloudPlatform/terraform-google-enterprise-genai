@@ -130,7 +130,7 @@ module "dns" {
   dns_zone_domain = var.dns_zone_domain
 
   certificate_dns_authorizations_regional = module.certificates.regional_dns_authorizations
-  vpc_self_links                          = module.networking.network_self_link
+  vpc_self_links                          = [module.networking.network_self_link]
   depends_on                              = [module.networking, module.certificates]
 }
 
@@ -219,7 +219,7 @@ module "mcp_internal_lb" {
   region             = var.region
   name_prefix        = var.name_prefix
   network_self_link  = module.networking.network_self_link
-  subnet_self_link   = module.networking.subnets_self_links["${var.region}/${var.subnet_name}"]
+  subnet_self_link   = module.networking.subnet_self_link
   dns_domain         = var.mcp_internal_dns_zone.domain
   protocol           = var.mcp_lb_protocol
   ssl_certificate_id = module.certificates.internal_certificate_id

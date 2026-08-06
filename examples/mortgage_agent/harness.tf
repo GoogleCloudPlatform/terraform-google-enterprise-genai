@@ -15,7 +15,7 @@
 locals {
   bucket_name = format("%s-%s", "tfstate", random_id.project_id_suffix.hex)
 
-  terraform_state_kms_key = module.kms.keys["${var.project_id}-agent-key"]
+  terraform_state_kms_key = module.kms.keys["${var.project_id}-mortgage-key"]
 
   terraform_sa_project_roles = [
     "roles/storage.admin",

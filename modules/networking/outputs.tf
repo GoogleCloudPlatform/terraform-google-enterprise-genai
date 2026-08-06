@@ -37,12 +37,12 @@ output "subnet_name" {
 
 output "subnet_id" {
   description = "Primary subnet ID"
-  value       = module.vpc.subnets_ids["${var.region}/${var.subnet_name}"]
+  value       = module.vpc.subnets["${var.region}/${var.subnet_name}"].id
 }
 
 output "subnet_self_link" {
   description = "Primary subnet self link"
-  value       = module.vpc.subnets_self_links["${var.region}/${var.subnet_name}"]
+  value       = module.vpc.subnets["${var.region}/${var.subnet_name}"].self_link
 }
 
 output "subnets" {
@@ -74,8 +74,8 @@ output "available_zones" {
 
 # Proxy-only subnet for internal load balancers
 output "proxy_subnet_id" {
-  description = "ID of the proxy-only subnet for internal load balancers"
-  value       = lookup(module.vpc.subnets_ids, "${var.region}/${var.name_prefix}-proxy-subnet", null)
+  description = "Proxy subnet ID"
+  value       = module.vpc.subnets["${var.region}/${var.name_prefix}-proxy-subnet"].id
 }
 
 output "proxy_subnet_name" {
@@ -85,13 +85,13 @@ output "proxy_subnet_name" {
 
 # PSC subnet for Private Service Connect
 output "psc_subnet_id" {
-  description = "ID of the Private Service Connect subnet"
-  value       = lookup(module.vpc.subnets_ids, "${var.region}/${var.name_prefix}-psc-subnet", null)
+  description = "PSC subnet ID"
+  value       = module.vpc.subnets["${var.region}/${var.name_prefix}-psc-subnet"].id
 }
 
 output "psc_subnet_self_link" {
-  description = "Self link of the Private Service Connect subnet"
-  value       = lookup(module.vpc.subnets_self_links, "${var.region}/${var.name_prefix}-psc-subnet", null)
+  description = "PSC subnet self link"
+  value       = module.vpc.subnets["${var.region}/${var.name_prefix}-psc-subnet"].self_link
 }
 
 output "mcp_internal_dns_zone_name" {
