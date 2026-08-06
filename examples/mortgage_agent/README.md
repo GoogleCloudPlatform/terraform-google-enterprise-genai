@@ -260,7 +260,9 @@ The Agent Platform console ships with a Playground that lets you chat with the d
    I am reviewing the Sterling familys current application. Can you summarize their 2024 and 2025 tax returns and verify if their total household income meets our 2026 debt-to-income requirements?
    ```
 
-This should return a response from the Document Management tool and Income Verification tool, SSN's should also be redacted in this response. 5. Type a follow up prompt:
+This should return a response from the Document Management tool and Income Verification tool, SSN's should also be redacted in this response.
+
+5. Type a follow up prompt:
 
    ```text
    Can you send a summary of this to my email jane@example.com
