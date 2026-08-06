@@ -106,16 +106,18 @@ resource "google_storage_bucket" "terraform_state" {
   depends_on = [google_kms_crypto_key_iam_member.terraform_state_gcs_kms]
 }
 
-resource "google_project_iam_member" "terraform_sa_project_roles" {
+resource "google_project_iam_member" "project_roles" {
   for_each = toset(local.terraform_sa_project_roles)
 
   project = var.project_id
   role    = each.value
-  member  = "user:${var.platform_admin_members[0]}"
+  member  = var.platform_admin_members[0]
 }
 
 resource "google_project_iam_member" "mcp_sa_impersonate" {
+  for_each = toset(var.platform_admin_members)
+
   project = var.project_id
   role    = "roles/iam.serviceAccountUser"
-  member  = "user:${var.platform_admin_members[0]}"
+  member  = each.value
 }

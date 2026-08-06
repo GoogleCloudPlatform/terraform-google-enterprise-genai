@@ -150,25 +150,6 @@ To register a domain via the Google Cloud Console:
    export AGENT_GATEWAY_ID=$(terraform output -raw agent_gateway_id)
    ```
 
-1. Copy the backend and update `backend.tf` with the name of your Google Cloud Storage bucket for Terraform's state. Also update the `backend.tf` of all steps.
-
-   ```bash
-   export backend_bucket=$(terraform output -raw bucket_mortgage_terraform_state)
-   echo "backend_bucket = ${backend_bucket}"
-
-   cp backend.tf.example backend.tf
-
-   for i in `find . -name 'backend.tf'`; do sed -i'' -e "s/UPDATE_ME/${backend_bucket}/" $i; done
-   ```
-
-1. Re-run `terraform init`. When you're prompted, agree to copy Terraform state to Cloud Storage.
-
-   ```bash
-   terraform init
-   ```
-
-1. (Optional) Run `terraform plan` to verify that state is configured correctly. You should see one change regarding the obervability dashboard.
-
 ### Step 2: Build and deploy the MCP servers to Cloud Run
 
 The three MCP servers are built from source, pushed to Artifact Registry, and deployed privately to Cloud Run using Skaffold. Skaffold natively resolves the environment variables in `skaffold.yaml` at runtime, then render with `envsubst`.
@@ -229,7 +210,7 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
 When the script completes, copy the printed reasoningEngines/ into your shell (e.g. 4262292559201566720):
 
    ```bash
-   export AGENT_ID=<<numeric-id-from-output>>
+   export AGENT_ID=<NUMERIC_ID_FROM_OUTPUT>
    ```
 
 ### Step 4: Grant the agent per-MCP-server egress
@@ -249,12 +230,12 @@ The IAP REQUEST_AUTHZ extension authorizes each tool call by checking the agent'
 
    ```bash
    ./scripts/grant_agent_mcp_egress.sh \
-   --mcp \
-   --agent-id ${AGENT_ID} \
-   --mcp-filter "corporate-email" \
-   --condition-expression "api.getAttribute('iap.googleapis.com/mcp.tool.isReadOnly', false) == true || api.getAttribute('iap.googleapis.com/mcp.toolName','')==''" \
-   --condition-title "ReadOnlyToolsOnly" \
-   --condition-description "Restrict ${AGENT_ID} to read-only tools on corporate-email"
+      --mcp \
+      --agent-id ${AGENT_ID} \
+      --mcp-filter "corporate-email" \
+      --condition-expression              "api.getAttribute('iap.googleapis.com/mcp.tool.isReadOnly', false) == true || api.getAttribute('iap.googleapis.com/mcp.toolName','')==''" \
+      --condition-title "ReadOnlyToolsOnly" \
+      --condition-description "Restrict ${AGENT_ID} to read-only tools on corporate-email"
    ```
 
 ### Verify the bindings
@@ -270,9 +251,9 @@ If there are no policies against any endpoints, run the script with the followin
 
 The Agent Platform console ships with a Playground that lets you chat with the deployed agent directly. It's the fastest way to smoke-test tool calls and inspect traces before wiring the agent into Gemini Enterprise.
 
-1. Open the Agent Platform Deployments page in the Google Cloud console.
-1. Use the Filter field if you need to narrow the runtime list, then click your mortgage-agent runtime.
-1. Open the Playground tab.
+1. Open the [Agent Platform Deployments](https://console.cloud.google.com/agent-platform/runtimes) page in the Google Cloud console.
+1. Use the Filter field if you need to narrow the runtime list, then click your `mortgage-agent` runtime.
+1. Open the **Playground** tab.
 1. Type a prompt to chat with the agent:
 
    ```text
@@ -293,6 +274,61 @@ Because the agent was deployed with OpenTelemetry instrumentation, the Playgroun
 1. Event — a graph of invoked tools and event details for the current turn
 1. State — the agent's session state and tool inputs/outputs
 1. Sessions — every session you've started against this runtime
+
+## Enforce IAP Authorization
+
+Update the IAP Enforcement mode to `null` to enforce the policies. Open the `terraform.tfvars` file, and update the mode from **DRY_RUN** to `null`:
+
+   ```text
+   # IAP Enforcement Mode ("DRY_RUN" or null)
+   agent_gateway_iap_iam_enforcement_mode = null
+   ```
+
+1. Apply the change:
+
+   ```bash
+   terraform apply
+   ```
+
+1. Navigate back to the Playground and try the conversation again.
+
+1. Type this prompt to chat with the agent.
+
+   ```text
+   I am reviewing the Sterling familys current application. Can you     summarize their 2024 and 2025 tax returns and verify if their total     household income meets our 2026 debt-to-income requirements?
+   ```
+
+This should return a response from the Document Management tool and Income Verification tool, SSN's should also be redacted in this response.
+
+1. Type a follow up prompt:
+
+   ```text
+   Can you send a summary of this to my email jane@example.com
+   ```
+
+If everything has been setup correctly the agent should respond that it cannot send the email due to the authorization policy.
+
+## Migrate Terraform State to Cloud Storage
+
+1. Copy the backend and update `backend.tf` with the name of your Google Cloud Storage bucket for Terraform's state. Also update the `backend.tf` of all steps.
+
+   ```bash
+   export backend_bucket=$(terraform output -raw bucket_mortgage_terraform_state)
+   echo "backend_bucket = ${backend_bucket}"
+
+   cp backend.tf.example backend.tf
+
+   for i in `find . -name 'backend.tf'`; do sed -i'' -e "s/UPDATE_ME/${backend_bucket}/" $i; done
+   ```
+
+1. Re-run `terraform init`. When you're prompted, agree to copy Terraform state to Cloud Storage.
+
+   ```bash
+   terraform init
+   ```
+
+1. (Optional) Run `terraform plan` to verify that state is configured correctly. You should see one change regarding the obervability dashboard.
+
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
