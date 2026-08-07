@@ -61,6 +61,7 @@ After ensuring all requirements are satisfied, you will complete the following s
 
    ```bash
    gcloud services enable \
+      cloudkms.googleapis.com \
       compute.googleapis.com \
       serviceusage.googleapis.com \
       cloudresourcemanager.googleapis.com \
@@ -88,13 +89,12 @@ If you do not currently own a public DNS domain, you can register one directly w
 
 To register a domain via the Google Cloud Console:
 
-1. Navigate to Network Services > Cloud Domains (or search for "Cloud Domains").
+1. Navigate to [Cloud Domains](https://console.cloud.google.com/net-services/domains).
 1. Click Register Domain.
 1. Search for your desired domain name to check availability and pricing.
 1. Select the domain you want to purchase and click Continue.
-1. Fill in the required DNS configuration (you can choose to have Cloud DNS automatically set up a public zone for you).
+1. Fill in the required DNS configuration and choose to have Cloud DNS automatically set up a public zone.
 1. Complete the checkout process.
-
 
 ### Export the required environment variables:
 
@@ -103,21 +103,23 @@ To register a domain via the Google Cloud Console:
    export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
    export ORG_ID=$(gcloud projects get-ancestors $PROJECT_ID | awk '$2 == "organization" {print $1}')
    export REGION="us-central1"
-   export DOMAIN_NAME="mortgageexample.com"
+   export DOMAIN_NAME="YOUR_DOMAIN_NAME" #mortgage.example.com
    ```
 
-1. Create the public Cloud DNS zone — Certificate Manager validates the regional managed certificate by writing CNAMEs into it:
+### Create a public Cloud DNS zone
+
+1. Create the public Cloud DNS zone. Certificate Manager needs this zone to validate the regional managed certificate by adding CNAME records to it:
+
+**IMPORTANT**: **If your domain is already registered through Google Cloud Domains (or if you have previously set it up), this public DNS zone already existis in your project. By default, Google Cloud names the zone by replacing the dots in your domain name with dashes (e.g., the domain mortgage.example.com automatically gets a DNS zone named mortgage-example-com). ou can check your existing zones by running `gcloud dns managed-zones list`. If the zone already exists, you can skip this step.**
 
    ```bash
-   gcloud dns managed-zones create mortgage-example-com \
-   --dns-name="${DOMAIN_NAME}." \
-   --description="Public zone for ${DOMAIN_NAME}" \
-   --visibility=public
+   gcloud dns managed-zones create YOUR-DOMAIN-NAME \
+      --dns-name="${DOMAIN_NAME}." \
+      --description="Public zone for ${DOMAIN_NAME}" \
+      --visibility=public
    ```
 
-> **Note:** If your domain is already registered through Google Cloud Domains (or if you have previously set it up), this public DNS zone might already exist in your project. You can check your existing zones by running `gcloud dns managed-zones list`. If the zone already exists, you can skip this step.
-
-### Step 1: Infrastructure Deployment (Terraform)
+## Deploy Infrastructure with Terraform
 
 1. Navigate to this directory:
 
@@ -150,7 +152,7 @@ To register a domain via the Google Cloud Console:
    export AGENT_GATEWAY_ID=$(terraform output -raw agent_gateway_id)
    ```
 
-### Step 2: Build and deploy the MCP servers to Cloud Run
+## Build and deploy the MCP servers to Cloud Run
 
 The three MCP servers are built from source, pushed to Artifact Registry, and deployed privately to Cloud Run using Skaffold. Skaffold natively resolves the environment variables in `skaffold.yaml` at runtime, then render with `envsubst`.
 
@@ -183,7 +185,7 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
    gcloud run services list --region=${REGION}
    ```
 
-### Step 3: Deploy the mortgage agent to Agent Runtime
+### Deploy the mortgage agent to Agent Runtime
 
 1. Grant all Agents the IAP Egressor role on all endpoints we have registered to the registry. The agent needs access to these endpoints because, when it's being deployed, it needs to reach github.com for packages and then reach the various Google APIs needed to deploy.
 
@@ -201,23 +203,24 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
    --project=${PROJECT_ID} \
    --region=${REGION} \
    --enable-agent-identity \
-   --agent-name=$(terraform output -raw agent_name) \
-   --agent-gateway=$(terraform output -raw agent_gateway_id) \
-   --mcp-invoker-sa=$(terraform output -raw agent_mcp_invoker_email) \
+   --agent-name=mortgage-agent \
+   --agent-gateway=${AGENT_GATEWAY_ID} \
+   --mcp-invoker-sa=${MCP_INVOKER_SA} \
    --model-endpoint-location=global
    ```
 
-When the script completes, copy the printed reasoningEngines/ into your shell (e.g. 4262292559201566720):
+1. When the script completes, copy the printed reasoningEngines/ into your shell (e.g. 4262292559201566720):
 
    ```bash
    export AGENT_ID=<NUMERIC_ID_FROM_OUTPUT>
+   cd ../../
    ```
 
-### Step 4: Grant the agent per-MCP-server egress
+## Grant the agent per-MCP-server egress
 
-The IAP REQUEST_AUTHZ extension authorizes each tool call by checking the agent's roles/iap.egressor on the specific MCP server or endpoint it's calling.
+The **IAP REQUEST_AUTHZ** extension authorizes each tool call by checking the agent's `roles/iap.egressor` on the specific MCP server or endpoint it's calling.
 
-#### Use Case 1 - Unconditional grant scoped to specific MCP servers
+### Unconditional grant scoped to specific MCP servers
 
    ```bash
    ./scripts/grant_agent_mcp_egress.sh \
@@ -226,7 +229,7 @@ The IAP REQUEST_AUTHZ extension authorizes each tool call by checking the agent'
       --mcp-filter "legacy-dms income-verification"
    ```
 
-#### Use Case 2 - Conditional grant (CEL) scoped to a specific MCP server
+### Conditional grant (CEL) scoped to a specific MCP server
 
    ```bash
    ./scripts/grant_agent_mcp_egress.sh \
@@ -238,7 +241,7 @@ The IAP REQUEST_AUTHZ extension authorizes each tool call by checking the agent'
       --condition-description "Restrict ${AGENT_ID} to read-only tools on corporate-email"
    ```
 
-### Verify the bindings
+## Verify the bindings
 
 Navigate to [Policies tab](https://console.cloud.google.com/agent-platform/policies/iam) and you'll see the list of Policies created against the Endpoints and Mcp Servers.
 If there are no policies against any endpoints, run the script with the following config.
@@ -268,7 +271,7 @@ This should return a response from the Document Management tool and Income Verif
    Can you send a summary of this to my email jane@example.com
    ```
 
-1. The agent will be able to successfully send the email, as the conditional policy is not being enforced due to the IAP extension being in Dry Run mode.
+1. The agent will be able to successfully send the email, as the conditional policy is not being enforced due to the IAP extension being in `Dry Run` mode.
 
 Because the agent was deployed with OpenTelemetry instrumentation, the Playground exposes four side-panel views you can flip between as the agent responds:
 
@@ -279,17 +282,23 @@ Because the agent was deployed with OpenTelemetry instrumentation, the Playgroun
 
 ## Enforce IAP Authorization
 
-Update the IAP Enforcement mode to `null` to enforce the policies. Open the `terraform.tfvars` file, and update the mode from **DRY_RUN** to `null`:
+Update the **IAP Enforcement** mode to `null` to enforce the policies. Open the [`terraform.tfvars`](terraform.tfvars) file, and update the mode from **DRY_RUN** to `null`:
 
    ```text
    # IAP Enforcement Mode ("DRY_RUN" or null)
    agent_gateway_iap_iam_enforcement_mode = null
    ```
 
-1. Apply the change:
+1. Run `terraform plan`, review the output:
 
    ```bash
-   terraform apply
+   terraform plan -inpute=false -out iap.tfplan
+   ```
+
+1. Run `terraform apply`:
+
+   ```bash
+   terraform apply iap.tfplan
    ```
 
 1. Navigate back to the Playground and try the conversation again.
@@ -297,7 +306,7 @@ Update the IAP Enforcement mode to `null` to enforce the policies. Open the `ter
 1. Type this prompt to chat with the agent.
 
    ```text
-   I am reviewing the Sterling familys current application. Can you     summarize their 2024 and 2025 tax returns and verify if their total     household income meets our 2026 debt-to-income requirements?
+   I am reviewing the Sterling familys current application. Can you summarize their 2024 and 2025 tax returns and verify if their total household income meets our 2026 debt-to-income requirements?
    ```
 
 This should return a response from the Document Management tool and Income Verification tool, SSN's should also be redacted in this response.
@@ -310,7 +319,7 @@ This should return a response from the Document Management tool and Income Verif
 
 If everything has been setup correctly the agent should respond that it cannot send the email due to the authorization policy.
 
-## Migrate Terraform State to Cloud Storage
+## (Optional) Migrate Terraform State to Cloud Storage
 
 1. Copy the backend and update `backend.tf` with the name of your Google Cloud Storage bucket for Terraform's state. Also update the `backend.tf` of all steps.
 
@@ -331,6 +340,54 @@ If everything has been setup correctly the agent should respond that it cannot s
 
 1. (Optional) Run `terraform plan` to verify that state is configured correctly. You should see one change regarding the obervability dashboard.
 
+## (Optional) Clean UP Resources
+
+### Reasoning Engine
+
+The reasoning engine is not managed by Terraform (the ADK SDK creates it). Delete it manually:
+
+1. Run the following command:
+
+   ```bash
+   curl -X DELETE \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     "https://${REGION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${REGION}/reasoningEngines/${AGENT_ID}?force=true"
+   ```
+
+1. ### Infrastructure deployed by Terraform
+
+**Important:** If you opted to migrate your Terraform state to Cloud Storage, you must migrate it back to your local machine before running the destroy command. Otherwise, Terraform will fail when trying to delete the bucket that currently holds its active state.
+
+#### You kept the state local (Did not migrate)
+
+If you skipped the remote backend step and your state is already local, you just need to run `terraform destroy`:
+
+   ```bash
+   terraform destroy
+   ```
+
+#### You migrated the state to Cloud Storage
+
+If you followed the optional step to move your state to GCS, follow these steps to bring it back locally and destroy the environment:
+
+1. Rename `backend.tf` file:
+
+   ```bash
+   mv backend.tf backend.tf.state
+   ```
+
+1. Re-initialize Terraform and migrate the state back to your local machine. When prompted, type yes to confirm the copy.
+
+   ```bash
+   terraform init -migrate-state
+   ```
+
+1. Destroy the infrastructure.
+
+   ```bash
+   terraform destroy
+   ```
+
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
@@ -344,7 +401,6 @@ If everything has been setup correctly the agent should respond that it cannot s
 | agent\_gateway\_subnet\_cidr | CIDR for the Agent Gateway dedicated subnet. Min /28, RFC1918, must not overlap 10.0.0.0/24, 10.0.1.0/24, or 10.0.2.0/24 (Agent Gateway egress restrictions). | `string` | `"10.20.0.0/28"` | no |
 | agent\_registry\_custom\_services | List of custom services to register in Agent Registry | <pre>list(object({<br>    id           = string<br>    display_name = string<br>    url          = string<br>    description  = optional(string)<br>  }))</pre> | <pre>[<br>  {<br>    "display_name": "Github",<br>    "id": "github",<br>    "url": "https://github.com"<br>  }<br>]</pre> | no |
 | agent\_registry\_google\_apis | Map of Google API IDs to their display names to register in Agent Registry | `map(string)` | <pre>{<br>  "agentregistry": "Agent Registry",<br>  "aiplatform": "Vertex AI Platform",<br>  "cloudresourcemanager": "Cloud Resource Manager",<br>  "discoveryengine": "Discovery Engine",<br>  "global-discoveryengine": "Global Discovery Engine",<br>  "iap": "Identity-Aware Proxy",<br>  "logging": "Logging",<br>  "monitoring": "Monitoring",<br>  "oauth2": "OAuth2",<br>  "telemetry": "Telemetry",<br>  "trace": "Trace"<br>}</pre> | no |
-| billing\_account | The ID of the billing account to associate this project with. | `string` | n/a | yes |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | cloudbuild\_bucket\_name | Override the Cloud Build source bucket name. Defaults to <project\_id>\_cloudbuild, which matches the bucket gcloud/Cloud Build SDKs auto-pick when no --gcs-source-staging-dir is passed; overriding the name breaks that convenience. | `string` | `null` | no |
 | dns\_zone\_domain | The domain name for the public DNS zone (must end with a dot, e.g., 'example.com.'). Certificate Manager validates the MCP LB cert against this zone. | `string` | `null` | no |
@@ -352,7 +408,7 @@ If everything has been setup correctly the agent should respond that it cannot s
 | enable\_model\_armor | Enable Model Armor template and IAM bindings | `bool` | `false` | no |
 | enable\_model\_armor\_mcp\_floor\_setting | Enable Model Armor floor setting for MCP server protection (BigQuery MCP) | `bool` | `true` | no |
 | enable\_model\_armor\_vertex\_ai | Enable Model Armor integration with Vertex AI (floor setting + IAM) | `bool` | `false` | no |
-| enabled\_services | List of Google Cloud APIs to enable | `list(string)` | <pre>[<br>  "compute.googleapis.com",<br>  "storage.googleapis.com",<br>  "storage-api.googleapis.com",<br>  "storage-component.googleapis.com",<br>  "dns.googleapis.com",<br>  "containerregistry.googleapis.com",<br>  "artifactregistry.googleapis.com",<br>  "run.googleapis.com",<br>  "monitoring.googleapis.com",<br>  "logging.googleapis.com",<br>  "cloudtrace.googleapis.com",<br>  "cloudprofiler.googleapis.com",<br>  "servicenetworking.googleapis.com",<br>  "networkmanagement.googleapis.com",<br>  "networkservices.googleapis.com",<br>  "modelarmor.googleapis.com",<br>  "networksecurity.googleapis.com",<br>  "iam.googleapis.com",<br>  "iamcredentials.googleapis.com",<br>  "sts.googleapis.com",<br>  "cloudkms.googleapis.com",<br>  "binaryauthorization.googleapis.com",<br>  "secretmanager.googleapis.com",<br>  "iap.googleapis.com",<br>  "cloudresourcemanager.googleapis.com",<br>  "serviceusage.googleapis.com",<br>  "stackdriver.googleapis.com",<br>  "autoscaling.googleapis.com",<br>  "cloudbuild.googleapis.com",<br>  "certificatemanager.googleapis.com",<br>  "cloudquotas.googleapis.com",<br>  "aiplatform.googleapis.com",<br>  "dlp.googleapis.com",<br>  "telemetry.googleapis.com",<br>  "apphub.googleapis.com",<br>  "agentregistry.googleapis.com"<br>]</pre> | no |
+| enabled\_services | List of Google Cloud APIs to enable | `list(string)` | <pre>[<br>  "compute.googleapis.com",<br>  "storage.googleapis.com",<br>  "storage-api.googleapis.com",<br>  "storage-component.googleapis.com",<br>  "dns.googleapis.com",<br>  "containerregistry.googleapis.com",<br>  "artifactregistry.googleapis.com",<br>  "run.googleapis.com",<br>  "monitoring.googleapis.com",<br>  "logging.googleapis.com",<br>  "cloudtrace.googleapis.com",<br>  "cloudprofiler.googleapis.com",<br>  "servicenetworking.googleapis.com",<br>  "networkmanagement.googleapis.com",<br>  "networkservices.googleapis.com",<br>  "modelarmor.googleapis.com",<br>  "networksecurity.googleapis.com",<br>  "iam.googleapis.com",<br>  "iamcredentials.googleapis.com",<br>  "sts.googleapis.com",<br>  "cloudkms.googleapis.com",<br>  "binaryauthorization.googleapis.com",<br>  "secretmanager.googleapis.com",<br>  "iap.googleapis.com",<br>  "cloudresourcemanager.googleapis.com",<br>  "serviceusage.googleapis.com",<br>  "stackdriver.googleapis.com",<br>  "autoscaling.googleapis.com",<br>  "cloudbuild.googleapis.com",<br>  "certificatemanager.googleapis.com",<br>  "cloudquotas.googleapis.com",<br>  "aiplatform.googleapis.com",<br>  "dlp.googleapis.com",<br>  "telemetry.googleapis.com",<br>  "apphub.googleapis.com",<br>  "agentregistry.googleapis.com",<br>  "cloudkms.googleapis.com"<br>]</pre> | no |
 | encrypt\_gcs\_bucket\_tfstate | Encrypt the bucket used for storing Terraform state files in the seed project. | `bool` | `true` | no |
 | kms\_prevent\_destroy | If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
 | mcp\_internal\_dns\_zone | Private DNS zone hosting <service>.<domain> A records for the MCP Cloud Run<br>services. Attached to the VPC so workloads (and Agent Engine via DNS<br>peering) resolve internally.<br><br>`domain` MUST be a real subdomain (typically "mcp.<dns\_zone\_domain>") so<br>Certificate Manager can issue a Google-managed regional cert that the<br>Agent Gateway will validate. | <pre>object({<br>    name   = optional(string, "mcp-server-internal")<br>    domain = string<br>  })</pre> | `null` | no |
@@ -371,14 +427,12 @@ If everything has been setup correctly the agent should respond that it cannot s
 | model\_armor\_vertex\_ai\_inspect\_only | When true, Vertex AI uses INSPECT\_ONLY mode; when false, uses INSPECT\_AND\_BLOCK | `bool` | `false` | no |
 | name\_prefix | Prefix for resource names | `string` | `"gateway"` | no |
 | org\_id | GCP organization ID (numeric). Required for Agent Identity IAM bindings. | `string` | `null` | no |
-| parent\_folder | The folder ID where the project will be created. | `string` | n/a | yes |
 | platform\_admin\_members | List of IAM members granted roles: discoveryengine.admin always; modelarmor.admin and modelarmor.floorSettingsAdmin when enable\_model\_armor; aiplatform.user (e.g. ["user:admin@example.com"]) | `list(string)` | `[]` | no |
 | primary\_subnet\_cidr | CIDR range for the primary subnet | `string` | `"10.0.0.0/20"` | no |
 | project\_deletion\_policy | Project deletion policy. Possible values are: "PREVENT", "ABANDON", "DELETE". | `string` | `"DELETE"` | no |
 | project\_id | The GCP project ID | `string` | n/a | yes |
 | project\_number | The GCP project number | `string` | n/a | yes |
 | proxy\_subnet\_cidr | CIDR range for the proxy-only subnet | `string` | `"10.9.0.0/24"` | no |
-| psc\_interface\_dns\_zone | Private DNS zone for PSC Interface DNS peering. `domain` MUST end with a trailing dot. | <pre>object({<br>    name   = optional(string, "psc-interface-dns-zone")<br>    domain = string<br>  })</pre> | `null` | no |
 | psc\_interface\_subnet\_cidr | CIDR for the PSC Interface subnet (min /28, must not overlap with psc\_subnet\_cidr) | `string` | `"10.11.0.0/28"` | no |
 | psc\_subnet\_cidr | CIDR range for the Private Service Connect subnet | `string` | `"10.10.0.0/24"` | no |
 | region | The GCP region for resources | `string` | `"us-central1"` | no |
@@ -424,6 +478,7 @@ If everything has been setup correctly the agent should respond that it cannot s
 | psc\_interface\_network\_attachment\_name | Network attachment name for PSC Interface |
 | psc\_subnet\_id | The ID of the Private Service Connect subnet |
 | psc\_subnet\_self\_link | The self-link of the Private Service Connect subnet |
+| region | The GCP region for resources |
 | regional\_certificate\_name | Name of the regional Google-managed certificate. |
 | subnet\_id | The ID of the primary subnet |
 | subnet\_name | Name of the primary subnet |
