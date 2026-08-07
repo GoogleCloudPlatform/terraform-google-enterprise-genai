@@ -7,6 +7,7 @@ metadata:
     cloud.googleapis.com/location: ${REGION}
   annotations:
     run.googleapis.com/ingress: ${MCP_INGRESS}
+    run.googleapis.com/custom-audiences: '["https://income-verification.mcp.${DOMAIN_NAME}"]'
 spec:
   template:
     metadata:
