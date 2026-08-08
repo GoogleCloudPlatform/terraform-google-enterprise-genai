@@ -46,12 +46,6 @@ variable "platform_admin_members" {
   default     = []
 }
 
-variable "cloudbuild_bucket_name" {
-  description = "Override the Cloud Build source bucket name. Defaults to <project_id>_cloudbuild, which matches the bucket gcloud/Cloud Build SDKs auto-pick when no --gcs-source-staging-dir is passed; overriding the name breaks that convenience."
-  type        = string
-  default     = null
-}
-
 variable "project_deletion_policy" {
   description = "Project deletion policy. Possible values are: \"PREVENT\", \"ABANDON\", \"DELETE\"."
   type        = string

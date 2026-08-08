@@ -23,6 +23,7 @@ For more information about the technologies used in this example, please refer t
 
 - [Gemini Enterprise Agent Platform](https://cloud.google.com/blog/products/ai-machine-learning/introducing-gemini-enterprise-agent-platform)
 - [Agent Development Kit (ADK) Documentation](https://google.github.io/adk-docs/)
+- [Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview)
 - [Cloud Run Documentation](https://cloud.google.com/run/docs)
 - [Model Armor Overview](https://cloud.google.com/security-command-center/docs/model-armor-overview)
 - [Private Service Connect Overview](https://cloud.google.com/vpc/docs/private-service-connect)
@@ -121,11 +122,7 @@ To register a domain via the Google Cloud Console:
 
 ## Deploy Infrastructure with Terraform
 
-1. Navigate to this directory:
-
-   ```bash
-   cd examples/mortgage_agent
-   ```
+All subsequent steps assume you are running them from the `examples/mortgage_agent` directory. If you run them from another directory, adjust your copy paths accordingly.
 
 1. Rename `terraform.example.tfvars` to `terraform.tfvars` and update the file with values from your environment:
 

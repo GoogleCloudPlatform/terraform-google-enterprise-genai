@@ -35,7 +35,7 @@ locals {
   )
 }
 
-module "observability" {
+module "agent_observability" {
   source = "../../modules/observability"
 
   project_id = var.project_id
@@ -77,10 +77,10 @@ resource "google_artifact_registry_repository" "registry" {
 
 resource "google_storage_bucket" "cloudbuild" {
   project                     = var.project_id
-  name                        = coalesce(var.cloudbuild_bucket_name, "${var.project_id}_cloudbuild")
+  name                        = "${var.project_id}-cloudbuild"
   location                    = var.region
   uniform_bucket_level_access = true
-  force_destroy               = false
+  force_destroy               = var.bucket_force_destroy
 
   lifecycle_rule {
     condition {
