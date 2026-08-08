@@ -45,7 +45,7 @@ resource "google_dns_managed_zone" "internal_dns_zone" {
 
   project     = var.project_id
   name        = var.internal_dns_zone_name
-  dns_name    = local.internal_dns_domain_computed
+  dns_name    = "${trimsuffix(local.internal_dns_domain_computed, ".")}."
   description = "Private DNS zone for internal gateways"
   visibility  = "private"
 

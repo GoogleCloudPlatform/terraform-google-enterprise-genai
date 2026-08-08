@@ -100,10 +100,10 @@ resource "google_service_account" "agent_mcp_invoker" {
   description  = "OIDC token target for agents calling MCP Cloud Run services. Agent identity has project-level Token Creator allowing impersonation of this and other project SAs."
 }
 
-resource "google_project_iam_member" "agent_identity_token_creator" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-  member  = local.agent_identity_principal
+resource "google_service_account_iam_member" "agent_identity_token_creator" {
+  role               = "roles/iam.serviceAccountTokenCreator"
+  service_account_id = google_service_account.agent_mcp_invoker.name
+  member             = local.agent_identity_principal
 }
 
 # =============================================================================

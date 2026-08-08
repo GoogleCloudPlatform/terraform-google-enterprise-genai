@@ -50,12 +50,54 @@ After ensuring all requirements are satisfied, you will complete the following s
 
 ## Prerequisites
 
-1. Ensure you have a Google Cloud project created with billing enabled, then authenticated using the following command:
+Also make sure that you've done the following:
+
+1. Set up a Google Cloud organization.
+1. Set up a Google Cloud project with billing enabled, then authenticate using:
 
    ```bash
    gcloud auth login
    gcloud auth application-default login
    gcloud config set project <your-project-id>
+   ```
+
+1. For the user who will run the procedures in this document, grant the following roles:
+
+   **Roles on the Google Cloud Organization (or Folder):**
+   * `roles/resourcemanager.organizationViewer` (to retrieve the organization ID via ancestry discovery)
+   * `roles/orgpolicy.policyAdmin` (optional, if KMS or Domain Restricted Sharing constraints need adjustments)
+
+   **Roles on the Project:**
+   * `roles/resourcemanager.projectIamAdmin`
+   * `roles/serviceusage.serviceUsageAdmin`
+   * `roles/iam.serviceAccountAdmin`
+   * `roles/iam.serviceAccountUser`
+   * `roles/compute.networkAdmin`
+   * `roles/compute.loadBalancerAdmin`
+   * `roles/networkservices.admin`
+   * `roles/networksecurity.admin`
+   * `roles/dns.admin`
+   * `roles/certificatemanager.ownerEditor`
+   * `roles/run.admin`
+   * `roles/artifactregistry.admin`
+   * `roles/cloudbuild.builds.editor`
+   * `roles/storage.admin`
+   * `roles/cloudkms.admin`
+   * `roles/aiplatform.admin`
+   * `roles/agentregistry.admin`
+   * `roles/iap.admin`
+   * `roles/modelarmor.admin`
+   * `roles/modelarmor.floorSettingsAdmin`
+   * `roles/dlp.admin`
+   * `roles/logging.admin`
+   * `roles/monitoring.admin`
+
+   ```bash
+   # example:
+   gcloud organizations add-iam-policy-binding ${ORG_ID} \
+     --member="user:${USER_EMAIL}" \
+     --role="roles/resourcemanager.organizationViewer" \
+     --quiet
    ```
 
 1. Ensure your project has the required APIs enabled. You can enable them using the following command:
@@ -82,7 +124,7 @@ After ensuring all requirements are satisfied, you will complete the following s
 
 **IMPORTANT**:
 1. A public DNS domain **must exist** to run the test.
-1. Ensure that the KMS organization policy constraint is disabled.
+1. Ensure that the following organization policy constraints are disabled for the project: `constraints/gcp.restrictNonCmekServices`.
 
 ### Domain Registration (Optional)
 
@@ -399,7 +441,6 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | agent\_registry\_custom\_services | List of custom services to register in Agent Registry | <pre>list(object({<br>    id           = string<br>    display_name = string<br>    url          = string<br>    description  = optional(string)<br>  }))</pre> | <pre>[<br>  {<br>    "display_name": "Github",<br>    "id": "github",<br>    "url": "https://github.com"<br>  }<br>]</pre> | no |
 | agent\_registry\_google\_apis | Map of Google API IDs to their display names to register in Agent Registry | `map(string)` | <pre>{<br>  "agentregistry": "Agent Registry",<br>  "aiplatform": "Vertex AI Platform",<br>  "cloudresourcemanager": "Cloud Resource Manager",<br>  "discoveryengine": "Discovery Engine",<br>  "global-discoveryengine": "Global Discovery Engine",<br>  "iap": "Identity-Aware Proxy",<br>  "logging": "Logging",<br>  "monitoring": "Monitoring",<br>  "oauth2": "OAuth2",<br>  "telemetry": "Telemetry",<br>  "trace": "Trace"<br>}</pre> | no |
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
-| cloudbuild\_bucket\_name | Override the Cloud Build source bucket name. Defaults to <project\_id>\_cloudbuild, which matches the bucket gcloud/Cloud Build SDKs auto-pick when no --gcs-source-staging-dir is passed; overriding the name breaks that convenience. | `string` | `null` | no |
 | dns\_zone\_domain | The domain name for the public DNS zone (must end with a dot, e.g., 'example.com.'). Certificate Manager validates the MCP LB cert against this zone. | `string` | `null` | no |
 | dns\_zone\_name | The name of the existing Cloud DNS managed zone. If not provided, derived from dns\_zone\_domain. | `string` | `null` | no |
 | enable\_model\_armor | Enable Model Armor template and IAM bindings | `bool` | `false` | no |
@@ -428,7 +469,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | primary\_subnet\_cidr | CIDR range for the primary subnet | `string` | `"10.0.0.0/20"` | no |
 | project\_deletion\_policy | Project deletion policy. Possible values are: "PREVENT", "ABANDON", "DELETE". | `string` | `"DELETE"` | no |
 | project\_id | The GCP project ID | `string` | n/a | yes |
-| project\_number | The GCP project number | `string` | n/a | yes |
+| project\_number | The numeric identifier (e.g., 123456789012) of the Google Cloud project. | `string` | n/a | yes |
 | proxy\_subnet\_cidr | CIDR range for the proxy-only subnet | `string` | `"10.9.0.0/24"` | no |
 | psc\_interface\_subnet\_cidr | CIDR for the PSC Interface subnet (min /28, must not overlap with psc\_subnet\_cidr) | `string` | `"10.11.0.0/28"` | no |
 | psc\_subnet\_cidr | CIDR range for the Private Service Connect subnet | `string` | `"10.10.0.0/24"` | no |

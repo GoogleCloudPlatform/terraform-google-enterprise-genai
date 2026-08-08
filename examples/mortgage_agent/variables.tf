@@ -18,7 +18,7 @@ variable "project_id" {
 }
 
 variable "project_number" {
-  description = "The GCP project number"
+  description = "The numeric identifier (e.g., 123456789012) of the Google Cloud project."
   type        = string
 }
 
