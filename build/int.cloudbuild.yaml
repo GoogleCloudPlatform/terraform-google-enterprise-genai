@@ -1,0 +1,64 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+timeout: 14400s
+steps:
+
+- id: prepare
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'source /usr/local/bin/task_helper_functions.sh && prepare_environment']
+  env:
+  - 'TF_VAR_org_id=$_ORG_ID'
+  - 'TF_VAR_project_id=$_PROJECT_ID'
+  - 'TF_VAR_project_number=$_PROJECT_NUMBER'
+
+- id: sleep
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'sleep 480']
+
+- id: create-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage init --verbose --test-dir /workspace/test/integration']
+
+- id: converge-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage apply --verbose --test-dir /workspace/test/integration']
+
+- id: verify-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
+
+- id: destroy-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage destroy --verbose --test-dir /workspace/test/integration']
+
+tags:
+- 'ci'
+- 'integration'
+options:
+  env:
+  - 'TF_VAR_org_id=$_ORG_ID'
+  - 'TF_VAR_project_id=$_PROJECT_ID'
+  - 'TF_VAR_project_number=$_PROJECT_NUMBER'
+  - 'TF_VAR_dns_zone_domain=$_DNS_ZONE_DOMAIN'
+  - 'TF_VAR_dns_zone_name=$_DNS_ZONE_NAME'
+  - 'TF_VAR_mcp_ssl_certificate_id=$_MCP_SSL_CERTIFICATE_ID'
+  - 'TF_VAR_platform_admin_members=$_PLATFORM_ADMIN_MEMBERS'
+  - 'TF_IN_AUTOMATION=true'
+substitutions:
+  _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
+  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.26'
+  # Set one of: _MCP_SSL_CERTIFICATE_ID (existing cert) or _DNS_ZONE_NAME (DNS-01 issuance).
+  _MCP_SSL_CERTIFICATE_ID: ''
+  _DNS_ZONE_NAME: ''

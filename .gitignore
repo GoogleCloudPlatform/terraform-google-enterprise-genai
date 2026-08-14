@@ -1,106 +1,108 @@
 # Crash log files
 crash.log
 crash.*.log
+crash.tf.json
 
-# Ignore override files as they are usually used to override resources locally and so
-# are not checked in
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.idea/
-.vscode/
-
-# Ignore any .tfvars files that are generated automatically for each Terraform run. Most
-# .tfvars files are managed as part of configuration and so should be included in
-# version control.
-*.tfvars
-# example.tfvars
-
-# Local .terraform directories
-*.tfvars.json
+# Local Terraform
 **/.terraform/
-
-# tf state files
 *.tfstate
+*.tfstate.*
 *.tfstate.backup
-*.tfstate.*.backup
-
-# tf lock file
 **/.terraform.lock.hcl
 **/.terraform.tfstate.lock.info
-
-# Python
-__pycache__/
-*.pyc
-
-# Go
-bin/
-vendor/
-src/dlp-ext-proc/server
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Editor / IDE
-*.swp
-*.swo
-*~
-.vscode/
-.idea/
-*.iml
-
-# Environment / secrets
-.env
-.env.*
-.envrc
-.creds.json
-docs/.temp-apigee.md
-docs/working-commands.md
-docs/notes.md
-docs/todo.md
-docs/todos.md
-
-# ADK
-.adk/
-
-# Pre-commit
-.pre-commit-cache/
-
-# Skaffold (generated from skaffold.yaml.tmpl)
-skaffold.yaml
-
-# Cloud Run manifests (generated from cloudrun/*.yaml.tmpl)
-cloudrun/*.yaml
-
-#  Plan files
+errored.tfstate
 *.tfplan
 tfplan
 **/tmp_plan
 **/.tmp
 **/tmp
 
-test/fixtures/shared/terraform.tfvars
+# Local variable files (project IDs, org IDs, emails, cert IDs)
+*.tfvars
+*.tfvars.json
+!*.example.tfvars
+!terraform.example.tfvars
 
+# Local backend override (copy from backend.tf.example)
+backend.tf
+!backend.tf.example
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Environment / secrets / credentials
+.env
+.env.*
+.envrc
+.direnv/
+.creds.json
+credentials.json
+**/credentials.json
+*credentials*.json
+service-account*.json
+*-sa.json
+sa-*.json
+**/secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+!*.example.pem
+
+# GCP / gcloud local config
+.gcloud/
+adc.json
+application_default_credentials.json
+
+# Skaffold / Cloud Run (generated from *.tmpl)
+skaffold.yaml
+**/cloud_run/*.yaml
+cloudrun/*.yaml
+# Skaffold CLI binary (must not be committed; GitHub limit is 100 MB)
+/skaffold
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Go / tests
+bin/
+vendor/
+src/dlp-ext-proc/server
+test/fixtures/shared/terraform.tfvars
 test/integration/gcloud/config.sh
 test/integration/tmp
+.kitchen/
 
-credentials.json
-
-# OSX leaves these everywhere on SMB shares
+# OS / editor
+.DS_Store
+Thumbs.db
 ._*
-
-# Direnv
-.direnv/
-.workspaces/
-
-# Vim-related files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
 *.un~
 Session.vim
 .netrwhist
 
-#ignore directory pynb checkpoints
-.ipynb_checkpoints/
+# Local notes / ADK / workspaces
+.adk/
+.workspaces/
+.pre-commit-cache/
+docs/.temp-apigee.md
+docs/working-commands.md
+docs/notes.md
+docs/todo.md
+docs/todos.md

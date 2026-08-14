@@ -129,8 +129,13 @@ output "artifact_registry_url" {
 # Certificate Outputs
 
 output "regional_certificate_name" {
-  description = "Name of the regional Google-managed certificate."
+  description = "Name of the regional Google-managed certificate (null when mcp_ssl_certificate_id is provided)."
   value       = module.certificates.regional_certificate_name
+}
+
+output "mcp_ssl_certificate_id" {
+  description = "Certificate Manager certificate ID attached to the MCP internal HTTPS LB (provided or issued)."
+  value       = local.provided_mcp_ssl_certificate_id != null ? local.provided_mcp_ssl_certificate_id : module.certificates.internal_certificate_id
 }
 
 # Model Armor Outputs

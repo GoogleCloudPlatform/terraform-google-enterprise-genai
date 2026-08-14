@@ -12,20 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project_id = "REPLACE_ME"
+project_id = "YOUR_PROJECT_ID"
 
-project_number = "REPLACE_ME" # format "000000000000"
+project_number = "000000000000" # format "000000000000"
 
-org_id = "REPLACE_ME" # format "000000000000"
+org_id = "000000000000" # format "000000000000"
 
-platform_admin_members = ["user:admin@example.com"]
+platform_admin_members = ["user:YOUR_USER@example.com"]
 
 # IAP Enforcement Mode ("DRY_RUN" or null)
 agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"
 
-# Public DNS zone domain (must end with a dot)
-# A Cloud DNS managed zone must already exist for this domain.
+# Public DNS zone domain (must end with a dot). Still required when attaching
+# a Google-provided cert so MCP hostnames match the cert SANs
+# (mcp.<dns_zone_domain> / *.mcp.<dns_zone_domain>).
 dns_zone_domain = "REPLACE_ME."
+
+# Optional: skip Certificate Manager issuance and attach a cert Google already
+# created in this project/region. Format:
+# projects/PROJECT/locations/REGION/certificates/NAME
+# mcp_ssl_certificate_id = "projects/YOUR_PROJECT_ID/locations/us-central1/certificates/REPLACE_ME"
 
 # `domain` MUST be a real subdomain of dns_zone_domain (e.g.
 # "mcp.${dns_zone_domain}") so Certificate Manager can issue a Google-managed

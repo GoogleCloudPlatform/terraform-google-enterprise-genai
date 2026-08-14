@@ -13,6 +13,13 @@
 # limitations under the License.
 
 locals {
+  # Cloud Build may pass an empty substitution; treat that as "not provided".
+  provided_mcp_ssl_certificate_id = (
+    var.mcp_ssl_certificate_id != null && trimspace(var.mcp_ssl_certificate_id) != ""
+    ? trimspace(var.mcp_ssl_certificate_id)
+    : null
+  )
+
   mcp_internal_dns_domain_or_null = (
     var.mcp_internal_dns_zone != null
     ? var.mcp_internal_dns_zone.domain
@@ -115,15 +122,16 @@ resource "google_storage_bucket_iam_member" "cloudbuild_service_agent" {
 module "certificates" {
   source = "../../modules/certificates"
 
-  project_id      = var.project_id
-  region          = var.region
-  dns_zone_domain = var.dns_zone_domain
+  project_id = var.project_id
+  region     = var.region
+  # Skip issuance when an existing Certificate Manager cert is attached.
+  dns_zone_domain = local.provided_mcp_ssl_certificate_id == null ? var.dns_zone_domain : null
 
   depends_on = [time_sleep.wait_enable_apis]
 }
 
 module "dns" {
-  count  = var.dns_zone_domain != null ? 1 : 0
+  count  = local.provided_mcp_ssl_certificate_id == null && var.dns_zone_domain != null ? 1 : 0
   source = "../../modules/dns"
 
   project_id      = var.project_id
@@ -224,7 +232,7 @@ module "mcp_internal_lb" {
   subnet_self_link   = module.networking.subnet_self_link
   dns_domain         = var.mcp_internal_dns_zone.domain
   protocol           = var.mcp_lb_protocol
-  ssl_certificate_id = module.certificates.internal_certificate_id
+  ssl_certificate_id = local.provided_mcp_ssl_certificate_id != null ? local.provided_mcp_ssl_certificate_id : module.certificates.internal_certificate_id
 
   create_address                   = false
   internal_ip_address              = google_compute_address.mcp_lb_in_agent_gw_subnet.address

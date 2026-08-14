@@ -162,6 +162,26 @@ variable "dns_zone_name" {
   default     = null
 }
 
+variable "mcp_ssl_certificate_id" {
+  description = <<-EOT
+    Optional existing Certificate Manager regional certificate ID to attach to
+    the MCP internal HTTPS LB (same project and region as the LB).
+
+    Leave null/empty to issue a Google-managed cert via DNS-01 against
+    dns_zone_domain (requires a delegated public Cloud DNS zone and
+    dns_zone_name). When set, issuance and DNS-01 records are skipped.
+
+    Format:
+      projects/<project>/locations/<region>/certificates/<name>
+
+    In both modes the cert must be a public CA and cover mcp.<dns_zone_domain>
+    and *.mcp.<dns_zone_domain>. dns_zone_domain is always required so private
+    MCP hostnames match those SANs.
+  EOT
+  type        = string
+  default     = null
+}
+
 # ==============================================================================
 # MCP SERVICES (CLOUD RUN)
 # ==============================================================================
