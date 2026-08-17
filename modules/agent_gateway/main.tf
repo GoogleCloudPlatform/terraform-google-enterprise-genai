@@ -25,10 +25,33 @@ resource "google_compute_network_attachment" "agent_gateway" {
   region                = var.region
   connection_preference = "ACCEPT_AUTOMATIC"
   subnetworks           = [var.agent_gateway_subnet_self_link]
+
+
+  provisioner "local-exec" {
+    when        = destroy
+    interpreter = ["/bin/bash", "-c"]
+    command = replace(<<-EOT
+      name="${self.name}"
+      region="$(basename "${self.region}")"
+      project="${self.project}"
+      i=0
+      while [ "$i" -lt 60 ]; do
+        endpoints="$(gcloud compute network-attachments describe "$name" --region="$region" --project="$project" --format='value(connectionEndpoints)' 2>/dev/null || true)"
+        if [ -z "$endpoints" ]; then
+          echo "No PSC endpoints on $name; safe to delete."
+          exit 0
+        fi
+        echo "Waiting for PSC endpoints to detach from $name ($endpoints)"
+        sleep 10
+        i=$((i + 1))
+      done
+      echo "Timed out waiting for PSC endpoints to detach from $name" >&2
+      exit 1
+    EOT
+    , "\r", "")
+  }
 }
 
-# Allow the gateway tenant's PSC-I NIC (sourcing from the dedicated subnet) to
-# reach the MCP internal LB on its front-end port.
 resource "google_compute_firewall" "agent_gateway_psc_i" {
   project       = var.project_id
   name          = "${var.name}-allow-psc-i"
