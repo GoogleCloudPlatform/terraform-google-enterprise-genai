@@ -15,7 +15,8 @@
 locals {
   bucket_name = format("%s-%s", "tfstate", random_id.project_id_suffix.hex)
 
-  terraform_state_kms_key = module.kms.keys["${var.project_id}-mortgage-key"]
+  kms_key_name          = "${var.project_id}-mortgage-key-${random_id.project_id_suffix.hex}"
+  terraform_state_kms_key = module.kms.keys[local.kms_key_name]
 
   terraform_sa_project_roles = [
     "roles/storage.admin",
@@ -57,8 +58,8 @@ module "kms" {
 
   project_id          = var.project_id
   location            = var.region
-  keyring             = "${var.project_id}-mortgage-keyring"
-  keys                = ["${var.project_id}-mortgage-key"]
+  keyring             = "${var.project_id}-mortgage-keyring-${random_id.project_id_suffix.hex}"
+  keys                = [local.kms_key_name]
   key_rotation_period = "7776000s"
 
   prevent_destroy = var.kms_prevent_destroy

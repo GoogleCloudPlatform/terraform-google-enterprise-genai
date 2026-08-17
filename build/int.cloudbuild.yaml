@@ -14,7 +14,6 @@
 
 timeout: 14400s
 steps:
-
 - id: prepare
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'source /usr/local/bin/task_helper_functions.sh && prepare_environment']
@@ -27,25 +26,30 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'sleep 480']
 
-- id: create-mortgage-agent
+- id: init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage init --verbose --test-dir /workspace/test/integration']
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage init --verbose']
 
-- id: converge-mortgage-agent
+- id: apply
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage apply --verbose --test-dir /workspace/test/integration']
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage apply --verbose']
 
-- id: verify-mortgage-agent
+- id: verify
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage verify --verbose']
 
-- id: destroy-mortgage-agent
+- id: destroy
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage destroy --verbose --test-dir /workspace/test/integration']
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage destroy --verbose']
 
 tags:
 - 'ci'
 - 'integration'
+substitutions:
+  _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
+  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.26'
+  _MCP_SSL_CERTIFICATE_ID: ''
+  _DNS_ZONE_NAME: ''
 options:
   env:
   - 'TF_VAR_org_id=$_ORG_ID'
@@ -55,10 +59,6 @@ options:
   - 'TF_VAR_dns_zone_name=$_DNS_ZONE_NAME'
   - 'TF_VAR_mcp_ssl_certificate_id=$_MCP_SSL_CERTIFICATE_ID'
   - 'TF_VAR_platform_admin_members=$_PLATFORM_ADMIN_MEMBERS'
+  - 'TF_VAR_bucket_force_destroy=true'
+  - 'TF_VAR_kms_prevent_destroy=false'
   - 'TF_IN_AUTOMATION=true'
-substitutions:
-  _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
-  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.26'
-  # Set one of: _MCP_SSL_CERTIFICATE_ID (existing cert) or _DNS_ZONE_NAME (DNS-01 issuance).
-  _MCP_SSL_CERTIFICATE_ID: ''
-  _DNS_ZONE_NAME: ''

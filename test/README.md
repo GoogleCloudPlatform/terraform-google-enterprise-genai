@@ -43,18 +43,16 @@ export TF_VAR_dns_zone_name="YOUR_CLOUD_DNS_ZONE_NAME"
 make docker_test_prepare
 make docker_run
 # inside the container:
-cd /workspace/test/integration
-cft test list --test-dir /workspace/test/integration
-cft test run TestMortgageAgent --stage init --verbose --test-dir /workspace/test/integration
-cft test run TestMortgageAgent --stage apply --verbose --test-dir /workspace/test/integration
-cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration
-cft test run TestMortgageAgent --stage destroy --verbose --test-dir /workspace/test/integration
+cft test run TestMortgageAgent --stage init --verbose
+cft test run TestMortgageAgent --stage apply --verbose
+cft test run TestMortgageAgent --stage verify --verbose
+cft test run TestMortgageAgent --stage destroy --verbose
 ```
 
 Or all stages: `make docker_test_integration`
 
 ## Cloud Build
 
-Create a trigger on `build/int.cloudbuild.yaml` and set `_ORG_ID`, `_PROJECT_ID`, `_PROJECT_NUMBER`, `_DNS_ZONE_DOMAIN`, plus either `_MCP_SSL_CERTIFICATE_ID` (A) or `_DNS_ZONE_NAME` (B).
+Create a trigger on `build/int.cloudbuild.yaml` and set `_ORG_ID`, `_PROJECT_ID`, `_PROJECT_NUMBER`, `_DNS_ZONE_DOMAIN`, `_PLATFORM_ADMIN_MEMBERS`, plus either `_MCP_SSL_CERTIFICATE_ID` (A) or `_DNS_ZONE_NAME` (B).
 
 `verify` asserts Terraform outputs, that the VPC and Agent Gateway exist, and that the attached cert is `ACTIVE`. It does not deploy the ADK agent or send Playground prompts (that remains a manual step in the example README).

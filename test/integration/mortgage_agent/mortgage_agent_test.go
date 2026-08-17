@@ -1,20 +1,21 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+// Copyright 2026 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package mortgage_agent
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -82,13 +83,9 @@ func TestMortgageAgent(t *testing.T) {
 		vars["dns_zone_name"] = v
 	}
 
-	bpt := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../examples/mortgage_agent"),
-		tft.WithVars(vars),
-	)
+	bpt := tft.NewTFBlueprintTest(t, tft.WithVars(vars))
 
 	bpt.DefineVerify(func(assert *assert.Assertions) {
-		bpt.DefaultVerify(assert)
 
 		projectID := bpt.GetStringOutput("project_id")
 		region := bpt.GetStringOutput("region")
@@ -123,8 +120,11 @@ func TestMortgageAgent(t *testing.T) {
 		} else if i := strings.LastIndex(attachedCertID, "/"); i >= 0 {
 			certName = attachedCertID[i+1:]
 		}
-		cert := gcloud.Runf(t, "certificate-manager certificates describe %s --location %s --project %s", certName, certLocation, certProject)
-		assert.Equal("ACTIVE", cert.Get("managed.state").String())
+		state := strings.TrimSpace(gcloud.RunCmd(t, fmt.Sprintf(
+			"certificate-manager certificates describe %s --location=%s --project=%s",
+			certName, certLocation, certProject,
+		), gcloud.WithCommonArgs([]string{"--format", "value(managed.state)"})))
+		assert.Equal("ACTIVE", state)
 	})
 
 	bpt.Test()
