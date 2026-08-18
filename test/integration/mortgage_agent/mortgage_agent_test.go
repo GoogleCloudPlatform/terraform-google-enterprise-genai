@@ -62,8 +62,14 @@ func TestMortgageAgent(t *testing.T) {
 			"corporate-email":     "src/corporate-email/toolspec.json",
 			"income-verification": "src/income-verification-api/toolspec.json",
 		},
-		"mcp_lb_protocol":                        "HTTPS",
-		"agent_gateway_iap_iam_enforcement_mode": "DRY_RUN",
+		"mcp_lb_protocol":                          "HTTPS",
+		"agent_gateway_iap_iam_enforcement_mode":   "DRY_RUN",
+		"enable_model_armor":                       true,
+		"enable_model_armor_mcp_floor_setting":     false,
+		"model_armor_request_template_id":          "agw-request-template-cft",
+		"model_armor_response_template_id":         "agw-response-template-cft",
+		"model_armor_inspect_template_id":          "agw-ssn-inspect-template-cft",
+		"model_armor_deidentify_template_id":       "agw-ssn-redaction-template-cft",
 	}
 	if providedCertID != "" {
 		vars["mcp_ssl_certificate_id"] = providedCertID
@@ -125,6 +131,20 @@ func TestMortgageAgent(t *testing.T) {
 			certName, certLocation, certProject,
 		), gcloud.WithCommonArgs([]string{"--format", "value(managed.state)"})))
 		assert.Equal("ACTIVE", state)
+
+		staging := fmt.Sprintf("gs://%s-mcp-cloudbuild", projectID)
+		deployRuntimeAndChat(
+			t,
+			assert,
+			projectID,
+			projectNumber(),
+			orgID(),
+			region,
+			bpt.GetStringOutput("artifact_registry_url"),
+			bpt.GetStringOutput("agent_gateway_id"),
+			bpt.GetStringOutput("agent_mcp_invoker_email"),
+			staging,
+		)
 	})
 
 	bpt.Test()

@@ -55,4 +55,4 @@ Or all stages: `make docker_test_integration`
 
 Create a trigger on `build/int.cloudbuild.yaml` and set `_ORG_ID`, `_PROJECT_ID`, `_PROJECT_NUMBER`, `_DNS_ZONE_DOMAIN`, `_PLATFORM_ADMIN_MEMBERS`, plus either `_MCP_SSL_CERTIFICATE_ID` (A) or `_DNS_ZONE_NAME` (B).
 
-`verify` asserts Terraform outputs, that the VPC and Agent Gateway exist, and that the attached cert is `ACTIVE`. It does not deploy the ADK agent or send Playground prompts (that remains a manual step in the example README).
+`verify` asserts Terraform outputs, that the VPC and Agent Gateway exist, and that the attached cert is `ACTIVE`. It then builds the real MCP images, deploys the ADK `mortgage-agent` runtime, and sends the Playground prompts (Sterling tax/income summary, then email to `jane@example.com` with IAP in `DRY_RUN`). SSNs from the mock DMS must not appear in the replies. The reasoning engine is deleted at the end of `verify`.

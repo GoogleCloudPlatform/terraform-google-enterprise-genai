@@ -263,6 +263,18 @@ variable "model_armor_response_template_id" {
   default     = "agw-response-template"
 }
 
+variable "model_armor_inspect_template_id" {
+  description = "DLP inspect template ID used by the response Model Armor template when SDP is ENABLED."
+  type        = string
+  default     = "agw-ssn-inspect-template"
+}
+
+variable "model_armor_deidentify_template_id" {
+  description = "DLP de-identify template ID used by the response Model Armor template when SDP is ENABLED."
+  type        = string
+  default     = "agw-ssn-redaction-template"
+}
+
 variable "model_armor_rai_filters" {
   description = "RAI (Responsible AI) filter configurations. filter_type can be: SEXUALLY_EXPLICIT, HATE_SPEECH, HARASSMENT, DANGEROUS. confidence_level can be: LOW_AND_ABOVE, MEDIUM_AND_ABOVE, HIGH"
   type = list(object({
