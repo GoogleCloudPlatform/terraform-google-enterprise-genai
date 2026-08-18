@@ -113,7 +113,7 @@ This example is deployed in the `us-central1` location by default. To deploy in 
 1. Retrieve the Artifact Project ID:
 
    ```bash
-   export ARTIFACT_PROJECT_ID=$(terraform -chdir="examples/standalone/" output -raw artifact_publish_project_id)
+   export ARTIFACT_PROJECT_ID=$(terraform -chdir="terraform-google-enterprise-genai/examples/standalone/" output -raw artifact_publish_project_id)
    echo ${ARTIFACT_PROJECT_ID}
    ```
 
@@ -129,7 +129,7 @@ This example is deployed in the `us-central1` location by default. To deploy in 
    cd publish-artifacts
    git checkout -b main
    git commit -m "Initialize Repository" --allow-empty
-   cp -RT ../examples/standalone/assets/artifact-publish/ .
+   cp -RT ../terraform-google-enterprise-genai/examples/standalone/assets/artifact-publish/ .
    git add .
    git commit -m 'Build Images'
    git push --set-upstream origin main
@@ -145,7 +145,7 @@ This example is deployed in the `us-central1` location by default. To deploy in 
 1. Retrieve the Service Catalog Project ID:
 
    ```bash
-   export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="examples/standalone/" output -raw service_catalog_project_id)
+   export SERVICE_CATALOG_PROJECT_ID=$(terraform -chdir="terraform-google-enterprise-genai/examples/standalone/" output -raw service_catalog_project_id)
    echo ${SERVICE_CATALOG_PROJECT_ID}
    ```
 
@@ -160,7 +160,7 @@ This example is deployed in the `us-central1` location by default. To deploy in 
    ```bash
    cd service-catalog/
    git checkout -b main
-   cp -RT ../examples/standalone/assets/service-catalog/ .
+   cp -RT ../terraform-google-enterprise-genai/examples/standalone/assets/service-catalog/ .
    git add img
    git commit -m "Add img directory"
    git add modules
