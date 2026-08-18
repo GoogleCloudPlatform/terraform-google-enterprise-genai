@@ -30,5 +30,8 @@ resource "google_monitoring_dashboard" "authorization_debugging" {
     var.project_id,
   )
 
+  lifecycle {
+    ignore_changes = [dashboard_json]
+  }
   depends_on = [google_logging_project_bucket_config.default_analytics]
 }
