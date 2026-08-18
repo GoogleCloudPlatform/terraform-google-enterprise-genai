@@ -80,6 +80,7 @@ test/fixtures/shared/terraform.tfvars
 test/integration/gcloud/config.sh
 test/integration/tmp
 .kitchen/
+**/.cft-reasoning-engine
 
 # OS / editor
 .DS_Store

@@ -70,10 +70,14 @@ func deleteReasoningEngine(t *testing.T, projectID, region, engineName string) {
 	}
 }
 
-func deployRuntimeAndChat(t *testing.T, assert *assert.Assertions, projectID, projectNumber, orgID, region, registryURL, gatewayID, invokerEmail, stagingBucket string) {
+func reasoningEngineFile() string {
+	return filepath.Join(exampleDir(), ".cft-reasoning-engine")
+}
+
+func applyAgentRuntime(t *testing.T, projectID, projectNumber, orgID, region, registryURL, gatewayID, invokerEmail, stagingBucket string) {
 	t.Helper()
 
-	outFile := filepath.Join(t.TempDir(), "engine.txt")
+	outFile := reasoningEngineFile()
 	runBashFile(t, filepath.Join(testDir(), "deploy_runtime.sh"), []string{
 		"PROJECT_ID=" + projectID,
 		"PROJECT_NUMBER=" + projectNumber,
@@ -90,6 +94,15 @@ func deployRuntimeAndChat(t *testing.T, assert *assert.Assertions, projectID, pr
 	})
 
 	engineBytes, err := os.ReadFile(outFile)
+	require.NoError(t, err)
+	engine := strings.TrimSpace(string(engineBytes))
+	require.NotEmpty(t, engine)
+}
+
+func verifyAgentChat(t *testing.T, assert *assert.Assertions, projectID, region string) {
+	t.Helper()
+
+	engineBytes, err := os.ReadFile(reasoningEngineFile())
 	require.NoError(t, err)
 	engine := strings.TrimSpace(string(engineBytes))
 	require.NotEmpty(t, engine)

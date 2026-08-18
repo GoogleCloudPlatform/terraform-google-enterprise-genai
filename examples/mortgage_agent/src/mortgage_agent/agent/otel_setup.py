@@ -16,7 +16,11 @@
 
 from __future__ import annotations
 
+import logging
+
 from vertexai.agent_engines import AdkApp
+
+logger = logging.getLogger(__name__)
 
 
 class InstrumentedAdkApp(AdkApp):
@@ -30,3 +34,27 @@ class InstrumentedAdkApp(AdkApp):
     ADK already creates semantic spans (execute_tool, tools/call, call_llm)
     for agent operations, so no additional HTTP-level instrumentation is needed.
     """
+
+    def set_up(self):
+        # AdkApp.set_up() POSTs to https://telemetry.googleapis.com/v1/traces to
+        # warn if the Telemetry API is disabled. With Agent Gateway
+        # AGENT_TO_ANYWHERE that probe can RST during TLS; the SDK treats it as
+        # a fatal UserCodeControlPlaneError and the engine never serves traffic.
+        original = getattr(self, "_warn_if_telemetry_api_disabled", None)
+
+        def _warn_if_telemetry_api_disabled_safe(*args, **kwargs):
+            try:
+                if original is not None:
+                    return original(*args, **kwargs)
+            except Exception:
+                logger.warning(
+                    "Telemetry API probe failed; continuing Agent Engine startup",
+                    exc_info=True,
+                )
+
+        self._warn_if_telemetry_api_disabled = _warn_if_telemetry_api_disabled_safe
+        try:
+            return super().set_up()
+        finally:
+            if original is not None:
+                self._warn_if_telemetry_api_disabled = original

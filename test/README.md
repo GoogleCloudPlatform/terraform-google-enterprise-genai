@@ -1,6 +1,15 @@
 # Integration tests
 
-Blueprint Test (`cft test run`) on Cloud Build, stages `init` → `apply` → `verify` → `destroy`.
+Blueprint Test (`cft test run`) on Cloud Build, stages `init` → `apply-infra` → `verify-infra` → `apply-agent` → `verify-agent` → `destroy`.
+
+CFT still only has `init` / `apply` / `verify` / `teardown`. Cloud Build splits `verify` with `VERIFY_PHASE`:
+
+| Step | CFT stage | `VERIFY_PHASE` |
+|---|---|---|
+| apply-infra | `apply` | — |
+| verify-infra | `verify` | `infra` |
+| apply-agent | `verify` | `apply-agent` |
+| verify-agent | `verify` | `verify-agent` |
 
 `dns_zone_domain` is always required (MCP hosts are `*.mcp.<domain>`). Choose **one** certificate path:
 
@@ -45,8 +54,11 @@ make docker_run
 # inside the container:
 cft test run TestMortgageAgent --stage init --verbose
 cft test run TestMortgageAgent --stage apply --verbose
-cft test run TestMortgageAgent --stage verify --verbose
+VERIFY_PHASE=infra cft test run TestMortgageAgent --stage verify --verbose
+VERIFY_PHASE=apply-agent cft test run TestMortgageAgent --stage verify --verbose
+VERIFY_PHASE=verify-agent cft test run TestMortgageAgent --stage verify --verbose
 cft test run TestMortgageAgent --stage destroy --verbose
+# one-shot verify (infra + agent deploy + playground): omit VERIFY_PHASE
 ```
 
 Or all stages: `make docker_test_integration`
@@ -55,4 +67,4 @@ Or all stages: `make docker_test_integration`
 
 Create a trigger on `build/int.cloudbuild.yaml` and set `_ORG_ID`, `_PROJECT_ID`, `_PROJECT_NUMBER`, `_DNS_ZONE_DOMAIN`, `_PLATFORM_ADMIN_MEMBERS`, plus either `_MCP_SSL_CERTIFICATE_ID` (A) or `_DNS_ZONE_NAME` (B).
 
-`verify` asserts Terraform outputs, that the VPC and Agent Gateway exist, and that the attached cert is `ACTIVE`. It then builds the real MCP images, deploys the ADK `mortgage-agent` runtime, and sends the Playground prompts (Sterling tax/income summary, then email to `jane@example.com` with IAP in `DRY_RUN`). SSNs from the mock DMS must not appear in the replies. The reasoning engine is deleted at the end of `verify`.
+`verify-infra` asserts Terraform outputs, that the VPC and Agent Gateway exist, and that the attached cert is `ACTIVE`. `apply-agent` builds the real MCP images and deploys the ADK `mortgage-agent` runtime (engine name is written to `examples/mortgage_agent/.cft-reasoning-engine`). `verify-agent` sends the Playground prompts (Sterling tax/income summary, then email to `jane@example.com` with IAP in `DRY_RUN`). SSNs from the mock DMS must not appear in the replies. The reasoning engine is deleted at the end of `verify-agent`. Agent Registry `service_id`s stay fixed; Model Armor/DLP template IDs are unique per Cloud Build (`agw-req-<BUILD_ID>`).

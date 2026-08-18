@@ -30,13 +30,21 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage init --verbose']
 
-- id: apply
+- id: apply-infra
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage apply --verbose']
 
-- id: verify
+- id: verify-infra
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage verify --verbose']
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=infra cft test run TestMortgageAgent --stage verify --verbose']
+
+- id: apply-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=apply-agent cft test run TestMortgageAgent --stage verify --verbose']
+
+- id: verify-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=verify-agent cft test run TestMortgageAgent --stage verify --verbose']
 
 - id: destroy
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
