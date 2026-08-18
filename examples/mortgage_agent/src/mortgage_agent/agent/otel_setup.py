@@ -40,21 +40,40 @@ class InstrumentedAdkApp(AdkApp):
         # warn if the Telemetry API is disabled. With Agent Gateway
         # AGENT_TO_ANYWHERE that probe can RST during TLS; the SDK treats it as
         # a fatal UserCodeControlPlaneError and the engine never serves traffic.
-        original = getattr(self, "_warn_if_telemetry_api_disabled", None)
+        #
+        # The SDK calls a *module-level* `_warn_if_telemetry_api_disabled()`,
+        # not `self._warn_if_telemetry_api_disabled()`. Patching only `self`
+        # does nothing (confirmed in Agent Engine logs: otel_setup.py:57 ->
+        # adk.py:964 -> adk.py:606).
+        import vertexai.agent_engines.templates.adk as adk_mod
 
-        def _warn_if_telemetry_api_disabled_safe(*args, **kwargs):
-            try:
-                if original is not None:
-                    return original(*args, **kwargs)
-            except Exception:
-                logger.warning(
-                    "Telemetry API probe failed; continuing Agent Engine startup",
-                    exc_info=True,
-                )
+        def _swallow(fn):
+            def _wrapped(*args, **kwargs):
+                try:
+                    return fn(*args, **kwargs)
+                except Exception:
+                    logger.warning(
+                        "Telemetry API probe failed; continuing Agent Engine startup",
+                        exc_info=True,
+                    )
 
-        self._warn_if_telemetry_api_disabled = _warn_if_telemetry_api_disabled_safe
+            return _wrapped
+
+        orig_mod = getattr(adk_mod, "_warn_if_telemetry_api_disabled", None)
+        orig_cls = getattr(AdkApp, "_warn_if_telemetry_api_disabled", None)
+        orig_self = getattr(self, "_warn_if_telemetry_api_disabled", None)
+        if orig_mod is not None:
+            adk_mod._warn_if_telemetry_api_disabled = _swallow(orig_mod)
+        if orig_cls is not None:
+            AdkApp._warn_if_telemetry_api_disabled = _swallow(orig_cls)
+        if orig_self is not None:
+            self._warn_if_telemetry_api_disabled = _swallow(orig_self)
         try:
             return super().set_up()
         finally:
-            if original is not None:
-                self._warn_if_telemetry_api_disabled = original
+            if orig_mod is not None:
+                adk_mod._warn_if_telemetry_api_disabled = orig_mod
+            if orig_cls is not None:
+                AdkApp._warn_if_telemetry_api_disabled = orig_cls
+            if orig_self is not None:
+                self._warn_if_telemetry_api_disabled = orig_self
