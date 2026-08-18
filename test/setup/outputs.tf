@@ -52,50 +52,8 @@ output "group_org_admins" {
   value = var.group_email
 }
 
-output "group_billing_admins" {
-  value = var.group_email
-}
-
-output "audit_data_users" {
-  value = var.group_email
-}
-
-output "billing_data_users" {
-  value = var.group_email
-}
-
-output "monitoring_workspace_users" {
-  value = var.group_email
-}
-
 output "project_prefix" {
   value = local.project_prefix
-}
-
-output "domains_to_allow" {
-  value = tolist([var.domain_to_allow])
-}
-
-output "essential_contacts_domains_to_allow" {
-  value = tolist(["@${var.domain_to_allow}"])
-}
-
-output "target_name_server_addresses" {
-  value = [
-    {
-      ipv4_address    = "192.168.0.1",
-      forwarding_path = "default"
-    },
-    {
-      ipv4_address    = "192.168.0.2",
-      forwarding_path = "default"
-    }
-  ]
-
-}
-
-output "scc_notification_name" {
-  value = "test-scc-notif-${random_string.suffix.result}"
 }
 
 output "create_access_context_manager_access_policy" {
@@ -105,10 +63,6 @@ output "create_access_context_manager_access_policy" {
 output "create_unique_tag_key" {
   description = "Set to true to avoid tag key name colision during integrated tests. Tag keys are organization-wide unique names."
   value       = true
-}
-
-output "domain" {
-  value = var.domain
 }
 
 output "cloud_source_artifacts_repo_name" {
@@ -121,15 +75,4 @@ output "cloud_source_service_catalog_repo_name" {
 
 output "instance_region" {
   value = var.instance_region
-}
-
-output "project_deletion_policy" {
-  description = "The deletion policy for the project created. Set to `DELETE` during integrated tests so that projects can be destroyed."
-  value       = "DELETE"
-}
-
-variable "folder_deletion_protection" {
-  description = "Prevent Terraform from destroying or recreating the folder. Set to `false` during integrated tests so that folders can be destroyed."
-  type        = bool
-  default     = false
 }

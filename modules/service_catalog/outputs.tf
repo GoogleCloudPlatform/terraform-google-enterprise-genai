@@ -21,5 +21,10 @@ output "storage_bucket_name" {
 
 output "cloudbuild_trigger_id" {
   description = "Id of Cloud Build Trigger"
-  value       = google_cloudbuild_trigger.zip_files.id
+  value       = google_cloudbuild_trigger.zip_files.trigger_id
+}
+
+output "service_catalog_repo_id" {
+  description = "ID of the Service Catalog repository"
+  value       = google_sourcerepo_repository.service_catalog.id
 }

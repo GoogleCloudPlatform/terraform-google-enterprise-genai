@@ -1,7 +1,7 @@
 name        = "isolated-composer-env10"
 environment = "development"
 project_id  = "prj-c-composer"
-cmek_project_id  = "prj-c-bu3cmek-wo8w"
+cmek_project_id  = "CMEK-PROJECT-ID"
 region      = "us-central1"
 maintenance_window = {
   start_time = "2023-01-01T01:00:00Z"

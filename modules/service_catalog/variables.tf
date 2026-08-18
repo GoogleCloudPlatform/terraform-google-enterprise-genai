@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+/******************************************
+  Project
+*****************************************/
 variable "name" {
   description = "Name of the repository."
   type        = string
 }
-variable "region" {
-  description = "Location of the repository."
+
+variable "project_name" {
+  description = "Service Catalog project name"
   type        = string
 }
 
@@ -28,29 +32,21 @@ variable "project_id" {
   type        = string
 }
 
-variable "gcs_bucket_prefix" {
-  description = "Prefix of the bucket name"
+variable "project_number" {
+  description = "Project number"
   type        = string
-  default     = "bkt"
 }
 
-variable "tf_service_catalog_sa_email" {
+variable "region" {
+  description = "Location of the repository."
+  type        = string
+}
+
+/******************************************
+  Service Account
+*****************************************/
+variable "service_catalog_pipeline_sa" {
   description = "Full email of the terraform service account for service-catalog"
-  type        = string
-}
-
-variable "machine_learning_project_number" {
-  description = "Project Number for the Machine Learning (Vertex) Project"
-  type        = string
-}
-
-variable "kms_crypto_key" {
-  description = "KMS Key to be used"
-  type        = string
-}
-
-variable "log_bucket" {
-  description = "Bucket to store logs from service catalog bucket"
   type        = string
 }
 
@@ -60,8 +56,63 @@ variable "trigger_sa_id" {
   default     = "svc-catalog"
 }
 
+/******************************************
+  Storage
+*****************************************/
+variable "gcs_bucket_prefix" {
+  description = "Name prefix to be used for GCS Bucket."
+  default     = "bkt"
+}
+
+variable "log_bucket" {
+  description = "Bucket to store logs from service catalog bucket"
+  type        = string
+}
+
 variable "bucket_force_destroy" {
   description = "When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects."
   type        = bool
   default     = false
+}
+
+/******************************************
+  Machine Learning project
+*****************************************/
+variable "machine_learning_project_number" {
+  description = "Machine Learning (Vertex) project number"
+  type        = string
+}
+
+/******************************************
+  KMS
+*****************************************/
+variable "kms_crypto_key" {
+  description = "KMS Key to be used"
+  type        = string
+}
+
+variable "keyring_regions" {
+  description = "Regions to create keyrings in"
+  type        = list(string)
+  default = [
+    "us-central1",
+    "us-east4"
+  ]
+}
+
+variable "kms_prevent_destroy" {
+  description = "If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present."
+  type        = bool
+  default     = true
+}
+
+variable "key_rotation_period" {
+  description = "Rotation period in seconds to be used for KMS Key"
+  type        = string
+  default     = "7776000s"
+}
+
+variable "key_rings" {
+  description = "Keyrings to attach project key to."
+  type        = map(string)
 }

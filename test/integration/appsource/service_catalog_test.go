@@ -31,20 +31,20 @@ import (
 )
 
 func TestServiceCatalogSource(t *testing.T) {
-	shared := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../4-projects/ml_business_unit/shared"),
+	standalone := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../examples/standalone"),
 	)
 
-	serviceCatalogProject := shared.GetStringOutput("service_catalog_project_id")
-	serviceCatalogPath := ("../../../5-app-infra/source_repos/service-catalog")
+	instanceRegion := standalone.GetStringOutput("instance_region")
+
+	serviceCatalogProject := standalone.GetStringOutput("service_catalog_project_id")
+	serviceCatalogPath := ("../../../examples/standalone/assets/service-catalog")
 	serviceCaralogRepo := fmt.Sprintf("https://source.developers.google.com/p/%s/r/service-catalog", serviceCatalogProject)
 
 	tmpDir := t.TempDir()
 	if err := cp.Copy(serviceCatalogPath, tmpDir); err != nil {
 		t.Fatal(err)
 	}
-
-	region := "us-central1"
 
 	appsource := tft.NewTFBlueprintTest(t,
 		tft.WithTFDir(serviceCatalogPath),
@@ -86,7 +86,7 @@ func TestServiceCatalogSource(t *testing.T) {
 
 		lastCommit := gitApp.GetLatestCommit()
 		// filter builds triggered based on pushed commit sha
-		buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", region, lastCommit, serviceCatalogProject)
+		buildListCmd := fmt.Sprintf("builds list --region=%s --filter substitutions.COMMIT_SHA='%s' --project %s", instanceRegion, lastCommit, serviceCatalogProject)
 		// poll build until complete
 		pollCloudBuild := func(cmd string) func() (bool, error) {
 			return func() (bool, error) {

@@ -4,15 +4,15 @@ from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmpt
 from airflow.providers.apache.beam.operators.beam import BeamRunPythonPipelineOperator
 
 REGION                  = "us-central1"
-BUCKET_URI              = "gs://testairflowpipe"
-PROJECT_ID              = "majid-test-407120"
+BUCKET_URI              = "gs://YOUR-BUCKET-URI"
+PROJECT_ID              = "PROJECT_ID"
 DATASET_ID              = 'census_dataset_composer'
 TRAINING_TABLE_ID       = 'census_train_table_composer'
 EVAL_TABLE_ID           = 'census_eval_table_composer'
 RUNNER                  = "DataflowRunner"
 REGION                  = "us-central1"
 JOB_NAME                = "census-ingest-composer"
-default_kms_key_name="projects/prj-d-kms-cgvl/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-ml-machine-learning"
+default_kms_key_name="projects/KMS_PROJECT_ID/locations/us-central1/keyRings/sample-keyring/cryptoKeys/prj-d-ml-machine-learning"
 
 default_args = {
     'owner'           : 'airflow',

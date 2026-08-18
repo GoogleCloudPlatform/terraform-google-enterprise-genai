@@ -19,28 +19,20 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 3.61"
+      version = ">= 3.77, != 4.31.0, != 6.26.0, != 6.27.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = ">= 3.61"
+      version = ">= 3.77, != 4.31.0, != 6.26.0, != 6.27.0"
     }
     null = {
       source  = "hashicorp/null"
-      version = "~> 3.0"
+      version = ">= 3.0"
     }
 
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.1"
+      version = ">= 3.0"
     }
-  }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:publish_artifacts/v0.11.0"
-  }
-
-  provider_meta "google-beta" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:publish_artifacts/v0.11.0"
   }
 }

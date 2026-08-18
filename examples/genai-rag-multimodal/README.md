@@ -33,7 +33,13 @@ After ensuring all requirements are satisfied you can follow one of the two depl
 
 ### Terraform Variables Configuration
 
-- Update the `terraform.tfvars` file with values from your environment.
+- Rename `terraform.example.tfvars` file to `terraform.tfvars`.
+
+  ```bash
+  mv terraform.example.tfvars terraform.tfvars
+  ```
+
+- Update the file with values from your environment:
 
   ```terraform
   kms_key                   = "projects/KMS-PROJECT-ID/locations/REGION/keyRings/ML-ENV-KEYRING/cryptoKeys/ML-ENV-KEY"

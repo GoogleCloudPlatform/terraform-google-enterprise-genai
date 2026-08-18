@@ -22,8 +22,4 @@ terraform {
       version = ">= 3.61"
     }
   }
-
-  provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-enterprise-genai:ml_dns_notebooks/v0.11.0"
-  }
 }

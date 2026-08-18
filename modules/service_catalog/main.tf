@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-resource "google_project_service_identity" "storage_agent" {
-  provider = google-beta
-
-  project = var.project_id
-  service = "storage.googleapis.com"
-}
-
-resource "google_kms_crypto_key_iam_member" "storage_agent" {
-  crypto_key_id = var.kms_crypto_key
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
-
-  depends_on = [google_project_service_identity.storage_agent]
+locals {
+  service_catalog_tf_sa_roles = [
+    "roles/cloudbuild.builds.editor",
+    "roles/iam.serviceAccountAdmin",
+    "roles/cloudbuild.connectionAdmin",
+    "roles/secretmanager.admin",
+    "roles/storage.admin",
+    "roles/source.admin",
+    "roles/cloudkms.admin",
+  ]
 }
 
 resource "random_string" "bucket_name" {
@@ -37,54 +34,122 @@ resource "random_string" "bucket_name" {
   special = false
 }
 
-resource "google_storage_bucket" "bucket" {
-  location                    = var.region
-  name                        = "${var.gcs_bucket_prefix}-${var.project_id}-${lower(var.region)}-${random_string.bucket_name.result}"
-  project                     = var.project_id
-  uniform_bucket_level_access = true
-  force_destroy               = var.bucket_force_destroy
-  encryption {
-    default_kms_key_name = var.kms_crypto_key
-  }
-  versioning {
-    enabled = true
-  }
-  logging {
-    log_bucket = var.log_bucket
-  }
-
-  depends_on = [google_kms_crypto_key_iam_member.storage_agent]
+resource "random_string" "suffix" {
+  length  = 10
+  special = false
+  upper   = false
 }
 
-resource "google_storage_bucket_iam_member" "bucket_role" {
-  bucket = google_storage_bucket.bucket.name
-  role   = "roles/storage.admin"
-  member = google_service_account.trigger_sa.member
-}
-
-resource "google_sourcerepo_repository_iam_member" "read" {
-  project    = var.project_id
-  repository = var.name
-  role       = "roles/viewer"
-  member     = "serviceAccount:${var.tf_service_catalog_sa_email}"
-}
-
+/******************************************
+  Service accounts
+*****************************************/
 resource "google_service_account" "trigger_sa" {
   account_id   = var.trigger_sa_id
   display_name = "Service Catalog Pipeline Account"
   project      = var.project_id
 }
 
+/******************************************
+  Project
+*****************************************/
+resource "google_project_iam_member" "service_catalog_pipeline_sa_roles" {
+  for_each = toset(local.service_catalog_tf_sa_roles)
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${var.service_catalog_pipeline_sa}"
+}
+
+resource "google_project_iam_member" "cloudbuild_agent" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "cloudbuild_admin" {
+  project = var.project_id
+  role    = "roles/cloudbuild.admin"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
+}
+
+/******************************************
+  Service account
+*****************************************/
 resource "google_service_account_iam_member" "impersonate" {
   service_account_id = google_service_account.trigger_sa.id
   role               = "roles/iam.serviceAccountUser"
   member             = local.current_member
 }
 
-resource "random_string" "suffix" {
-  length  = 10
-  special = false
-  upper   = false
+/******************************************
+  Service agents
+*****************************************/
+resource "google_project_service_identity" "storage_agent" {
+  provider = google-beta
+
+  project = var.project_id
+  service = "storage.googleapis.com"
+}
+
+resource "google_project_service_identity" "secretmanager_agent" {
+  provider = google-beta
+
+  project = var.project_id
+  service = "secretmanager.googleapis.com"
+}
+
+/******************************************
+  Kms IAM
+*****************************************/
+resource "google_kms_crypto_key_iam_member" "secretmanager_agent" {
+  for_each = toset(var.keyring_regions)
+
+  crypto_key_id = var.kms_crypto_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_project_service_identity.secretmanager_agent.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "storage_agent" {
+  for_each = toset(var.keyring_regions)
+
+  crypto_key_id = var.kms_crypto_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${var.project_number}@gs-project-accounts.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service_identity.storage_agent]
+}
+
+resource "google_kms_crypto_key_iam_member" "storage-kms-key-binding" {
+  for_each = toset(var.keyring_regions)
+
+  crypto_key_id = var.kms_crypto_key
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${var.service_catalog_pipeline_sa}"
+}
+
+/******************************************
+  Storage
+*****************************************/
+resource "google_storage_bucket" "bucket" {
+  location                    = var.region
+  name                        = "${var.gcs_bucket_prefix}-${var.project_id}-${lower(var.region)}-${random_string.bucket_name.result}"
+  project                     = var.project_id
+  uniform_bucket_level_access = true
+  force_destroy               = var.bucket_force_destroy
+
+  encryption {
+    default_kms_key_name = var.kms_crypto_key
+  }
+
+  versioning {
+    enabled = true
+  }
+
+  logging {
+    log_bucket = var.log_bucket
+  }
+
+  depends_on = [google_kms_crypto_key_iam_member.storage_agent]
 }
 
 resource "google_storage_bucket" "cloud_build_logs" {
@@ -98,12 +163,17 @@ resource "google_storage_bucket" "cloud_build_logs" {
   encryption {
     default_kms_key_name = var.kms_crypto_key
   }
+
+  depends_on = [google_kms_crypto_key_iam_member.storage_agent]
 }
 
-resource "google_sourcerepo_repository_iam_member" "repo_reader" {
-  repository = data.google_sourcerepo_repository.artifacts_repo.id
-  role       = "roles/source.reader"
-  member     = google_service_account.trigger_sa.member
+/******************************************
+  Storage IAM
+*****************************************/
+resource "google_storage_bucket_iam_member" "bucket_role" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.admin"
+  member = google_service_account.trigger_sa.member
 }
 
 resource "google_storage_bucket_iam_member" "storage_admin" {
@@ -112,6 +182,40 @@ resource "google_storage_bucket_iam_member" "storage_admin" {
   member = google_service_account.trigger_sa.member
 }
 
+/******************************************
+  Source repository
+*****************************************/
+resource "google_sourcerepo_repository" "service_catalog" {
+  project = var.project_id
+  name    = var.name
+}
+
+resource "time_sleep" "wait_for_sourcerepo" {
+  create_duration = "60s"
+
+  depends_on = [google_sourcerepo_repository.service_catalog]
+}
+
+resource "google_sourcerepo_repository_iam_member" "read" {
+  project    = var.project_id
+  repository = var.name
+  role       = "roles/viewer"
+  member     = "serviceAccount:${var.service_catalog_pipeline_sa}"
+
+  depends_on = [time_sleep.wait_for_sourcerepo]
+}
+
+resource "google_sourcerepo_repository_iam_member" "repo_reader" {
+  repository = google_sourcerepo_repository.service_catalog.id
+  role       = "roles/source.reader"
+  member     = google_service_account.trigger_sa.member
+
+  depends_on = [time_sleep.wait_for_sourcerepo]
+}
+
+/******************************************
+  Cloud build trigger
+*****************************************/
 resource "google_cloudbuild_trigger" "zip_files" {
   name     = "zip-tf-files-trigger"
   project  = var.project_id
@@ -123,9 +227,11 @@ resource "google_cloudbuild_trigger" "zip_files" {
   }
 
   service_account = google_service_account.trigger_sa.id
+
   build {
     timeout     = "1800s"
     logs_bucket = google_storage_bucket.bucket.name
+
     step {
       id         = "unshallow"
       name       = "gcr.io/cloud-builders/git"
@@ -134,8 +240,8 @@ resource "google_cloudbuild_trigger" "zip_files" {
         "-c",
         "git fetch --unshallow"
       ]
-
     }
+
     step {
       id         = "find-folders-affected-in-push"
       name       = "gcr.io/cloud-builders/git"
@@ -155,6 +261,7 @@ resource "google_cloudbuild_trigger" "zip_files" {
       EOT
       ]
     }
+
     step {
       id   = "push-to-bucket"
       name = "gcr.io/cloud-builders/gsutil"
