@@ -21,7 +21,7 @@ locals {
   machine_learning_project_name = var.machine_learning_project_name != "" ? var.machine_learning_project_name : "${var.project_prefix}-machine-learning-${random_id.project_id_suffix.hex}"
   service_catalog_project_name  = var.service_catalog_project_name != "" ? var.service_catalog_project_name : "${var.project_prefix}-service-catalog-${random_id.project_id_suffix.hex}"
   artifact_publish_project_name = var.artifact_publish_project_name != "" ? var.artifact_publish_project_name : "${var.project_prefix}-publish-artifacts-${random_id.project_id_suffix.hex}"
-  state_bucket_name              = "${var.bucket_prefix}-${var.project_prefix}-tfstate"
+  state_bucket_name             = "${var.bucket_prefix}-${var.project_prefix}-tfstate"
 
   terraform_sa_project_roles = [
     "roles/storage.admin",
