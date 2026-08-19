@@ -147,6 +147,7 @@ func TestMortgageAgent(t *testing.T) {
 				bpt.GetStringOutput("agent_gateway_id"),
 				bpt.GetStringOutput("agent_mcp_invoker_email"),
 				staging,
+				bpt.GetStringOutput("mcp_internal_dns_domain"),
 			)
 		}
 		if runVerifyAgent {

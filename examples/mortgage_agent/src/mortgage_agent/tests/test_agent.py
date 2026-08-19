@@ -258,8 +258,11 @@ class TestConnectionTimeoutNoMutation:
     def test_discover_does_not_override_toolset_timeout(self, monkeypatch):
         monkeypatch.setenv("MCP_REGISTRY_PROJECT", "test-project")
         monkeypatch.setenv("MCP_REGISTRY_LOCATION", "us-central1")
+        monkeypatch.setenv("MCP_REGISTRY_LIST_ATTEMPTS", "1")
         monkeypatch.delenv("MCP_REGISTRY_FILTER", raising=False)
         monkeypatch.delenv("MCP_REGISTRY_ENDPOINT", raising=False)
+        monkeypatch.delenv("MCP_DISCOVERED_SERVERS_JSON", raising=False)
+        monkeypatch.delenv("MCP_INTERNAL_DNS_DOMAIN", raising=False)
 
         conn_params = MagicMock()
         conn_params.timeout = 5.0  # ADK default
@@ -298,3 +301,58 @@ class TestConnectionTimeoutNoMutation:
         # DISCOVERED_MCP_SERVERS so the instruction renderer can enumerate
         # exact names (preventing hallucination).
         assert agent_module.DISCOVERED_MCP_SERVERS[0]["tools"] == ["do_thing"]
+
+
+class TestDiscoverFallback:
+    def test_uses_snapshot_json_when_registry_list_fails(self, monkeypatch):
+        monkeypatch.setenv("MCP_REGISTRY_PROJECT", "test-project")
+        monkeypatch.setenv("MCP_REGISTRY_LOCATION", "us-central1")
+        monkeypatch.setenv("MCP_REGISTRY_LIST_ATTEMPTS", "1")
+        monkeypatch.delenv("MCP_INTERNAL_DNS_DOMAIN", raising=False)
+        monkeypatch.setenv(
+            "MCP_DISCOVERED_SERVERS_JSON",
+            '[{"name":"legacy-dms","resolved_url":"https://legacy-dms.mcp.example/mcp","tool_name_prefix":"legacy_dms","tools":["search_documents"]}]',
+        )
+
+        toolset = MagicMock()
+        toolset._connection_params = MagicMock(url="https://legacy-dms.mcp.example/mcp")
+        toolset.tool_name_prefix = "legacy_dms"
+
+        agent_module._CACHED_TOOLSETS = None
+        agent_module._CACHED_DISCOVERED = None
+
+        with (
+            patch(
+                "google.adk.integrations.agent_registry.AgentRegistry",
+                side_effect=OSError("Network is unreachable"),
+            ),
+            patch.object(agent_module, "_toolset_from_http_url", return_value=toolset) as built,
+        ):
+            result = _discover_mcp_toolsets()
+
+        assert result == [toolset]
+        built.assert_called_once()
+        assert agent_module.DISCOVERED_MCP_SERVERS[0]["name"] == "legacy-dms"
+        assert agent_module.DISCOVERED_MCP_SERVERS[0]["tools"] == ["search_documents"]
+        agent_module._CACHED_TOOLSETS = None
+        agent_module._CACHED_DISCOVERED = None
+
+    def test_empty_registry_is_not_cached(self, monkeypatch):
+        monkeypatch.setenv("MCP_REGISTRY_PROJECT", "test-project")
+        monkeypatch.setenv("MCP_REGISTRY_LOCATION", "us-central1")
+        monkeypatch.setenv("MCP_REGISTRY_LIST_ATTEMPTS", "1")
+        monkeypatch.delenv("MCP_DISCOVERED_SERVERS_JSON", raising=False)
+        monkeypatch.delenv("MCP_INTERNAL_DNS_DOMAIN", raising=False)
+
+        registry_instance = MagicMock()
+        registry_instance.list_mcp_servers.return_value = {"mcpServers": []}
+
+        agent_module._CACHED_TOOLSETS = None
+        agent_module._CACHED_DISCOVERED = None
+
+        with patch(
+            "google.adk.integrations.agent_registry.AgentRegistry",
+            return_value=registry_instance,
+        ):
+            assert _discover_mcp_toolsets() == []
+        assert agent_module._CACHED_TOOLSETS is None

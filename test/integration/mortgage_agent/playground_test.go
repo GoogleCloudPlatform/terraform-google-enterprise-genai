@@ -23,7 +23,7 @@ import (
 func TestAssertPlaygroundTurns(t *testing.T) {
 	a := assert.New(t)
 	assertPlaygroundTurns(t, a, playgroundTurns{
-		Turn1: "The Sterling household 2024 tax return shows AGI of 186700. Income meets 2026 DTI. SSN: [US_SOCIAL_SECURITY_NUMBER].",
-		Turn2: "I sent the summary email to the requested address. status=sent message_id=abc",
+		Turn1: `{"function_call": {"name": "legacy_dms_search_documents"}} The Sterling household 2024 tax return shows AGI of 186700. Income meets 2026 DTI. SSN: [US_SOCIAL_SECURITY_NUMBER].`,
+		Turn2: `{"function_call": {"name": "corporate_email_send_email"}} I sent the summary email to the requested address. status=sent message_id=abc`,
 	})
 }

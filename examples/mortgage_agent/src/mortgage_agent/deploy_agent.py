@@ -344,6 +344,16 @@ def main() -> None:
         help="Discovery Engine authorization/agent name (default: mortgage-agent)",
     )
     parser.add_argument(
+        "--mcp-dns-domain",
+        default=os.environ.get("MCP_INTERNAL_DNS_DOMAIN"),
+        help=(
+            "Internal MCP DNS zone (e.g. mcp.example.com). Passed to the engine as "
+            "MCP_INTERNAL_DNS_DOMAIN so toolsets can be built from "
+            "https://<service>.<domain>/mcp when Agent Registry listing fails "
+            "through Agent Gateway. Default: $MCP_INTERNAL_DNS_DOMAIN."
+        ),
+    )
+    parser.add_argument(
         "--mcp-invoker-sa",
         default=os.environ.get("MCP_INVOKER_SA_EMAIL"),
         help=(
@@ -445,6 +455,8 @@ def main() -> None:
         os.environ["MCP_REGISTRY_ENDPOINT"] = args.registry_endpoint
     if args.mcp_invoker_sa:
         os.environ["MCP_INVOKER_SA_EMAIL"] = args.mcp_invoker_sa
+    if args.mcp_dns_domain:
+        os.environ["MCP_INTERNAL_DNS_DOMAIN"] = args.mcp_dns_domain.strip().rstrip(".")
 
     import vertexai
 
@@ -460,10 +472,21 @@ def main() -> None:
         http_options=dict(api_version="v1beta1"),
     )
 
-    from agent.agent import root_agent
+    from agent.agent import DISCOVERED_MCP_SERVERS, root_agent
     from agent.otel_setup import InstrumentedAdkApp
 
-    app = InstrumentedAdkApp(agent=root_agent, enable_tracing=True)
+    discovered_snapshot = json.dumps(list(DISCOVERED_MCP_SERVERS))
+    if DISCOVERED_MCP_SERVERS:
+        print(f"  MCP servers discovered at deploy time: {len(DISCOVERED_MCP_SERVERS)}")
+    else:
+        print("  MCP registry listing was empty at deploy time; engine will use DNS fallback if --mcp-dns-domain is set.")
+
+    # Do not pass enable_tracing=True. AdkApp.set_up() uses that flag to POST
+    # https://telemetry.googleapis.com/v1/traces with no try/except; through
+    # Agent Gateway AGENT_TO_ANYWHERE the probe RSTs and the engine never
+    # serves traffic. Tracing still comes from
+    # GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true below (ADK >= 1.17).
+    app = InstrumentedAdkApp(agent=root_agent)
 
     # Build PSC-I and agent identity config
     config = {}
@@ -585,6 +608,8 @@ def main() -> None:
                 **({"MCP_REGISTRY_FILTER": args.registry_filter} if args.registry_filter else {}),
                 **({"MCP_REGISTRY_ENDPOINT": args.registry_endpoint} if args.registry_endpoint else {}),
                 **({"MCP_INVOKER_SA_EMAIL": args.mcp_invoker_sa} if args.mcp_invoker_sa else {}),
+                **({"MCP_INTERNAL_DNS_DOMAIN": args.mcp_dns_domain.strip().rstrip(".")} if args.mcp_dns_domain else {}),
+                **({"MCP_DISCOVERED_SERVERS_JSON": discovered_snapshot} if DISCOVERED_MCP_SERVERS else {}),
             },
             display_name=args.display_name,
             description=description,

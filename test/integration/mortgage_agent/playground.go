@@ -61,7 +61,7 @@ func deleteReasoningEngine(t *testing.T, projectID, region, engineName string) {
 	if i := strings.LastIndex(engineName, "/"); i >= 0 {
 		id = engineName[i+1:]
 	}
-	url := "https://" + region + "-aiplatform.googleapis.com/v1beta1/projects/" + projectID + "/locations/" + region + "/reasoningEngines/" + id
+	url := "https://" + region + "-aiplatform.googleapis.com/v1beta1/projects/" + projectID + "/locations/" + region + "/reasoningEngines/" + id + "?force=true"
 	cmd := exec.Command("bash", "-c", "curl -fsS -X DELETE -H \"Authorization: Bearer $(gcloud auth print-access-token)\" "+url)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -74,7 +74,7 @@ func reasoningEngineFile() string {
 	return filepath.Join(exampleDir(), ".cft-reasoning-engine")
 }
 
-func applyAgentRuntime(t *testing.T, projectID, projectNumber, orgID, region, registryURL, gatewayID, invokerEmail, stagingBucket string) {
+func applyAgentRuntime(t *testing.T, projectID, projectNumber, orgID, region, registryURL, gatewayID, invokerEmail, stagingBucket, mcpDNSDomain string) {
 	t.Helper()
 
 	outFile := reasoningEngineFile()
@@ -88,6 +88,7 @@ func applyAgentRuntime(t *testing.T, projectID, projectNumber, orgID, region, re
 		"AGENT_GATEWAY_ID=" + gatewayID,
 		"MCP_INVOKER_SA=" + invokerEmail,
 		"STAGING_BUCKET=" + stagingBucket,
+		"MCP_INTERNAL_DNS_DOMAIN=" + strings.TrimSuffix(mcpDNSDomain, "."),
 		"AGENT_ENGINE_OUT=" + outFile,
 		"HOME=" + os.Getenv("HOME"),
 		"PATH=" + os.Getenv("PATH") + ":" + filepath.Join(os.Getenv("HOME"), ".local/bin"),
@@ -148,7 +149,23 @@ func assertPlaygroundTurns(t *testing.T, assert *assert.Assertions, turns playgr
 	assert.NotEmpty(turns.Turn1)
 	assert.NotEmpty(turns.Turn2)
 
+	assert.NotContains(turn1, `"count": 0`, "list_mcp_connections must not return an empty registry")
+	assert.NotContains(turn1, `"count":0`, "list_mcp_connections must not return an empty registry")
+	assert.False(
+		strings.Contains(turn1, "no mcp services") ||
+			strings.Contains(turn1, "were discovered") ||
+			strings.Contains(turn1, "unable to perform"),
+		"turn 1 must not refuse for missing MCP discovery: %s", turns.Turn1,
+	)
 	assert.Contains(turn1, "sterling", "turn 1 should use Document Management / income tools for the Sterling family")
+	assert.True(
+		strings.Contains(turn1, "search_documents") ||
+			strings.Contains(turn1, "get_document") ||
+			strings.Contains(turn1, "verify_applicant") ||
+			strings.Contains(turn1, "legacy_dms") ||
+			strings.Contains(turn1, "income_verification"),
+		"turn 1 should call DMS or income MCP tools: %s", turns.Turn1,
+	)
 	assert.True(
 		strings.Contains(turn1, "tax") ||
 			strings.Contains(turn1, "income") ||
@@ -166,14 +183,15 @@ func assertPlaygroundTurns(t *testing.T, assert *assert.Assertions, turns playgr
 		strings.Contains(turn2, "cannot send") ||
 			strings.Contains(turn2, "not authorized") ||
 			strings.Contains(turn2, "permission denied") ||
-			strings.Contains(turn2, "403"),
+			strings.Contains(turn2, "403") ||
+			strings.Contains(turn2, "do not have access") ||
+			strings.Contains(turn2, "unable to") ||
+			strings.Contains(turn2, "no mcp"),
 		"IAP is DRY_RUN so the email tool should succeed: %s", turns.Turn2,
 	)
 	assert.True(
-		strings.Contains(turn2, "sent") ||
-			strings.Contains(turn2, "email") ||
-			strings.Contains(turn2, "jane") ||
-			strings.Contains(turn2, "example.com") ||
+		strings.Contains(turn2, "send_email") ||
+			strings.Contains(turn2, "sent") ||
 			strings.Contains(turn2, "message_id") ||
 			strings.Contains(turn2, "successfully"),
 		"turn 2 should confirm the summary email was sent: %s", turns.Turn2,

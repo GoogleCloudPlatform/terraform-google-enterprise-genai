@@ -17,10 +17,17 @@
 from __future__ import annotations
 
 import logging
+import os
+import sys
 
 from vertexai.agent_engines import AdkApp
 
 logger = logging.getLogger(__name__)
+
+
+def _noop_telemetry_probe(*args, **kwargs):
+    logger.info("Skipping AdkApp telemetry API probe (Agent Gateway RST workaround)")
+    return None
 
 
 class InstrumentedAdkApp(AdkApp):
@@ -35,45 +42,45 @@ class InstrumentedAdkApp(AdkApp):
     for agent operations, so no additional HTTP-level instrumentation is needed.
     """
 
+    def project_id(self):
+        # AdkApp.project_id() calls cloudresourcemanager.GetProject. Through
+        # Agent Gateway AGENT_TO_ANYWHERE that gRPC can fail IPv6
+        # (Network is unreachable) and retry for 60s; the SDK only fail-opens
+        # PermissionDenied/Unauthenticated, so set_up aborts the engine.
+        project = self._tmpl_attrs.get("project")
+        env_project = os.environ.get("GOOGLE_CLOUD_PROJECT")
+        if env_project and not str(env_project).isdigit():
+            return env_project
+        if project and not str(project).isdigit():
+            return str(project)
+        # Number-only (Agent Engine often stores project_number). Do not call
+        # CRM — that is the 60s IPv6 timeout that aborts boot.
+        return env_project or project
+
     def set_up(self):
-        # AdkApp.set_up() POSTs to https://telemetry.googleapis.com/v1/traces to
-        # warn if the Telemetry API is disabled. With Agent Gateway
-        # AGENT_TO_ANYWHERE that probe can RST during TLS; the SDK treats it as
-        # a fatal UserCodeControlPlaneError and the engine never serves traffic.
+        # AdkApp.set_up() POSTs to https://telemetry.googleapis.com/v1/traces when
+        # enable_tracing=True. That probe has no try/except; AGENT_TO_ANYWHERE
+        # can RST it and the control plane treats it as fatal.
         #
-        # The SDK calls a *module-level* `_warn_if_telemetry_api_disabled()`,
-        # not `self._warn_if_telemetry_api_disabled()`. Patching only `self`
-        # does nothing (confirmed in Agent Engine logs: otel_setup.py:57 ->
-        # adk.py:964 -> adk.py:606).
-        import vertexai.agent_engines.templates.adk as adk_mod
+        # Patch AdkApp.set_up.__globals__ (the dict LOAD_GLOBAL uses), not
+        # self._warn_if_telemetry_api_disabled — the SDK calls a free function.
+        restored = []
 
-        def _swallow(fn):
-            def _wrapped(*args, **kwargs):
-                try:
-                    return fn(*args, **kwargs)
-                except Exception:
-                    logger.warning(
-                        "Telemetry API probe failed; continuing Agent Engine startup",
-                        exc_info=True,
-                    )
+        def _install(mapping, key):
+            if mapping is None or key not in mapping:
+                return
+            orig = mapping[key]
+            if orig is _noop_telemetry_probe:
+                return
+            mapping[key] = _noop_telemetry_probe
+            restored.append((mapping, key, orig))
 
-            return _wrapped
+        _install(getattr(AdkApp.set_up, "__globals__", None), "_warn_if_telemetry_api_disabled")
+        for mod in list(sys.modules.values()):
+            _install(getattr(mod, "__dict__", None), "_warn_if_telemetry_api_disabled")
 
-        orig_mod = getattr(adk_mod, "_warn_if_telemetry_api_disabled", None)
-        orig_cls = getattr(AdkApp, "_warn_if_telemetry_api_disabled", None)
-        orig_self = getattr(self, "_warn_if_telemetry_api_disabled", None)
-        if orig_mod is not None:
-            adk_mod._warn_if_telemetry_api_disabled = _swallow(orig_mod)
-        if orig_cls is not None:
-            AdkApp._warn_if_telemetry_api_disabled = _swallow(orig_cls)
-        if orig_self is not None:
-            self._warn_if_telemetry_api_disabled = _swallow(orig_self)
         try:
             return super().set_up()
         finally:
-            if orig_mod is not None:
-                adk_mod._warn_if_telemetry_api_disabled = orig_mod
-            if orig_cls is not None:
-                AdkApp._warn_if_telemetry_api_disabled = orig_cls
-            if orig_self is not None:
-                self._warn_if_telemetry_api_disabled = orig_self
+            for mapping, key, orig in restored:
+                mapping[key] = orig

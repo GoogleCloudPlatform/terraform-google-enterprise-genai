@@ -28,6 +28,7 @@ AGENT_GATEWAY_ID="${AGENT_GATEWAY_ID:?}"
 MCP_INVOKER_SA="${MCP_INVOKER_SA:?}"
 STAGING_BUCKET="${STAGING_BUCKET:?}"
 AGENT_ENGINE_OUT="${AGENT_ENGINE_OUT:?}"
+MCP_INTERNAL_DNS_DOMAIN="${MCP_INTERNAL_DNS_DOMAIN:-}"
 
 export PROJECT_ID PROJECT_NUMBER ORG_ID REGION
 export MCP_INVOKER_SA_EMAIL="${MCP_INVOKER_SA}"
@@ -82,6 +83,7 @@ uv run python deploy_agent.py \
   --display-name="CFT Mortgage Assistant" \
   --agent-gateway="${AGENT_GATEWAY_ID}" \
   --mcp-invoker-sa="${MCP_INVOKER_SA}" \
+  --mcp-dns-domain="${MCP_INTERNAL_DNS_DOMAIN}" \
   --model-endpoint-location=global >"${deploy_log}" 2>&1
 deploy_status=$?
 set -e

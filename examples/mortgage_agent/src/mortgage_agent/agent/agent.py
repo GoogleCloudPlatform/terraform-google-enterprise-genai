@@ -14,8 +14,10 @@
 
 """ADK agent definition for the mortgage assistant with MCP tool connections."""
 
+import json
 import logging
 import os
+import time
 from typing import Any
 from urllib.parse import urlparse
 
@@ -311,6 +313,99 @@ def _handle_tool_error(
     }
 
 
+# Example MCP backends registered by this blueprint. Used when Agent Registry
+# listing is unreachable through Agent Gateway AGENT_TO_ANYWHERE (RST / IPv6)
+# but the internal MCP URLs are still known from deploy-time snapshot or DNS.
+_KNOWN_MCP_SERVERS: tuple[tuple[str, list[str]], ...] = (
+    ("legacy-dms", ["search_documents", "get_document"]),
+    ("corporate-email", ["send_email", "read_email"]),
+    ("income-verification", ["verify_applicant"]),
+)
+
+
+def _prefix_for(display_name: str) -> str:
+    return display_name.replace("-", "_")
+
+
+def _interface_url(server: dict[str, Any]) -> str | None:
+    for iface in server.get("interfaces") or []:
+        url = iface.get("url") if isinstance(iface, dict) else None
+        if url:
+            return url
+    return server.get("resolved_url")
+
+
+def _tool_names(server: dict[str, Any]) -> list[str]:
+    names = [t.get("name") for t in server.get("tools") or [] if isinstance(t, dict) and t.get("name")]
+    if names:
+        return names
+    return [t for t in server.get("tools") or [] if isinstance(t, str)]
+
+
+def _attach_invoker_auth(toolset, invoker_sa_email: str | None) -> None:
+    conn_params = getattr(toolset, "_connection_params", None)
+    resolved_url = getattr(conn_params, "url", None)
+    if (
+        invoker_sa_email
+        and conn_params is not None
+        and resolved_url
+        and hasattr(conn_params, "httpx_client_factory")
+    ):
+        conn_params.httpx_client_factory = _build_impersonation_factory(
+            target_url=resolved_url,
+            target_sa_email=invoker_sa_email,
+        )
+
+
+def _toolset_from_http_url(url: str, prefix: str, invoker_sa_email: str | None):
+    from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
+    from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
+
+    toolset = McpToolset(
+        connection_params=StreamableHTTPConnectionParams(url=url),
+        tool_name_prefix=prefix,
+    )
+    _attach_invoker_auth(toolset, invoker_sa_email)
+    return toolset
+
+
+def _fallback_server_descriptors() -> list[dict[str, Any]]:
+    raw = os.environ.get("MCP_DISCOVERED_SERVERS_JSON")
+    if raw:
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list) and parsed:
+                return parsed
+        except json.JSONDecodeError:
+            logger.warning("MCP_DISCOVERED_SERVERS_JSON is not valid JSON; ignoring.")
+    domain = (os.environ.get("MCP_INTERNAL_DNS_DOMAIN") or "").strip().rstrip(".")
+    if not domain:
+        return []
+    return [
+        {
+            "name": name,
+            "resolved_url": f"https://{name}.{domain}/mcp",
+            "tool_name_prefix": _prefix_for(name),
+            "tools": list(tools),
+        }
+        for name, tools in _KNOWN_MCP_SERVERS
+    ]
+
+
+def _append_discovered(server: dict[str, Any], toolset, *, resource_name: str | None, resolved_url: str | None) -> None:
+    display = server.get("displayName") or server.get("name") or resource_name or "?"
+    prefix = getattr(toolset, "tool_name_prefix", None) or server.get("tool_name_prefix") or _prefix_for(str(display))
+    DISCOVERED_MCP_SERVERS.append(
+        {
+            "name": display,
+            "resource_name": resource_name,
+            "tool_name_prefix": prefix,
+            "resolved_url": resolved_url,
+            "tools": _tool_names(server),
+        }
+    )
+
+
 def _discover_mcp_toolsets() -> list:
     """Discover MCP servers from the Agent Registry and return ADK toolsets.
 
@@ -326,19 +421,19 @@ def _discover_mcp_toolsets() -> list:
                                only endpoint actually serving mcpServers today.
                                Set this to a regional URL once those endpoints
                                exist.)
+      - MCP_DISCOVERED_SERVERS_JSON (optional snapshot from deploy time)
+      - MCP_INTERNAL_DNS_DOMAIN (optional; builds https://<svc>.<domain>/mcp)
 
-    Discovery failures are logged and produce an empty list rather than
-    aborting agent startup, so the agent still boots (with utility tools only)
-    if the registry is unreachable.
+    Empty registry results are not cached: Agent Engine import/unpickle often
+    hits AGENT_TO_ANYWHERE before agentregistry.googleapis.com is reachable,
+    and a cached [] froze the worker with utility tools only.
     """
     global _CACHED_TOOLSETS, _CACHED_DISCOVERED
-    if _CACHED_TOOLSETS is not None:
+    if _CACHED_TOOLSETS:
         logger.debug(
             "Reusing %d cached MCP toolset(s); skipping registry discovery.",
             len(_CACHED_TOOLSETS),
         )
-        # Keep DISCOVERED_MCP_SERVERS in sync with the cached toolsets so the
-        # instruction renderer always sees the same view as the toolset list.
         DISCOVERED_MCP_SERVERS.clear()
         DISCOVERED_MCP_SERVERS.extend(_CACHED_DISCOVERED or [])
         return _CACHED_TOOLSETS
@@ -349,21 +444,8 @@ def _discover_mcp_toolsets() -> list:
     location = os.environ.get("MCP_REGISTRY_LOCATION")
     if not location:
         env_location = os.environ.get("GOOGLE_CLOUD_LOCATION")
-        # GOOGLE_CLOUD_LOCATION may legitimately be "global" for the model
-        # endpoint; the registry needs a real region.
         if env_location and env_location != "global":
             location = env_location
-
-    if not project or not location:
-        logger.warning(
-            "MCP registry discovery skipped: project=%r location=%r "
-            "(set MCP_REGISTRY_PROJECT and MCP_REGISTRY_LOCATION).",
-            project,
-            location,
-        )
-        _CACHED_TOOLSETS = []
-        _CACHED_DISCOVERED = []
-        return _CACHED_TOOLSETS
 
     filter_str = os.environ.get("MCP_REGISTRY_FILTER")
     endpoint = os.environ.get("MCP_REGISTRY_ENDPOINT")
@@ -375,45 +457,59 @@ def _discover_mcp_toolsets() -> list:
             "Set MCP_INVOKER_SA_EMAIL to the SA the agent should impersonate."
         )
 
-    try:
-        # Imported lazily so the agent module loads even when ADK's optional
-        # dependency chain is not satisfied locally. The deployed image must
-        # pin a2a-sdk in deploy_agent.py's requirements list, otherwise this
-        # import fails with `No module named 'a2a'` and discovery is skipped.
-        from google.adk.integrations import agent_registry as _ar_module
-        from google.adk.integrations.agent_registry import AgentRegistry
-    except ImportError as e:
+    raw_servers: list[dict[str, Any]] = []
+    registry = None
+    _ar_module = None
+    if project and location:
+        try:
+            from google.adk.integrations import agent_registry as _ar_module
+            from google.adk.integrations.agent_registry import AgentRegistry
+        except ImportError as e:
+            logger.warning(
+                "MCP registry discovery skipped: ADK agent_registry import failed (%s). "
+                "On a deployed agent this means the requirements list in deploy_agent.py "
+                "is missing a transitive dep (typically a2a-sdk).",
+                e,
+            )
+        else:
+            attempts = max(1, int(os.environ.get("MCP_REGISTRY_LIST_ATTEMPTS", "3")))
+            last_exc: Exception | None = None
+            for attempt in range(attempts):
+                try:
+                    if endpoint:
+                        _ar_module.AGENT_REGISTRY_BASE_URL = endpoint
+                    registry = AgentRegistry(project_id=project, location=location)
+                    response = registry.list_mcp_servers(filter_str=filter_str)
+                    raw_servers = response.get("mcpServers") or []
+                    last_exc = None
+                    break
+                except Exception as exc:
+                    last_exc = exc
+                    wait = 2 * (attempt + 1)
+                    logger.warning(
+                        "list_mcp_servers failed (attempt %d/%d): %s; sleeping %ss",
+                        attempt + 1,
+                        attempts,
+                        exc,
+                        wait,
+                    )
+                    if attempt + 1 < attempts:
+                        time.sleep(wait)
+            if last_exc is not None:
+                logger.error(
+                    "Failed to list MCP servers from registry %s/%s",
+                    project,
+                    location,
+                    exc_info=last_exc,
+                )
+    else:
         logger.warning(
-            "MCP registry discovery skipped: ADK agent_registry import failed (%s). "
-            "On a deployed agent this means the requirements list in deploy_agent.py "
-            "is missing a transitive dep (typically a2a-sdk).",
-            e,
-        )
-        _CACHED_TOOLSETS = []
-        _CACHED_DISCOVERED = []
-        return _CACHED_TOOLSETS
-
-    try:
-        if endpoint:
-            # Override ADK's hardcoded module-level endpoint constant. Remove
-            # this patch if ADK starts accepting an explicit endpoint argument.
-            _ar_module.AGENT_REGISTRY_BASE_URL = endpoint
-
-        registry = AgentRegistry(project_id=project, location=location)
-        response = registry.list_mcp_servers(filter_str=filter_str)
-    except Exception:
-        effective_endpoint = endpoint or getattr(_ar_module, "AGENT_REGISTRY_BASE_URL", "<adk-default>")
-        logger.exception(
-            "Failed to list MCP servers from registry %s/%s (endpoint=%s)",
+            "MCP registry discovery skipped: project=%r location=%r "
+            "(set MCP_REGISTRY_PROJECT and MCP_REGISTRY_LOCATION).",
             project,
             location,
-            effective_endpoint,
         )
-        _CACHED_TOOLSETS = []
-        _CACHED_DISCOVERED = []
-        return _CACHED_TOOLSETS
 
-    raw_servers = response.get("mcpServers", [])
     effective_endpoint = endpoint or getattr(_ar_module, "AGENT_REGISTRY_BASE_URL", "<adk-default>")
     logger.info(
         "Registry %s/%s returned %d mcpServer(s) (endpoint=%s, filter=%r)",
@@ -432,56 +528,49 @@ def _discover_mcp_toolsets() -> list:
             [t.get("name") for t in s.get("tools", [])],
         )
 
+    if not raw_servers:
+        raw_servers = _fallback_server_descriptors()
+        if raw_servers:
+            logger.warning(
+                "Using %d MCP server(s) from deploy snapshot / MCP_INTERNAL_DNS_DOMAIN "
+                "because Agent Registry listing was empty or unreachable.",
+                len(raw_servers),
+            )
+
     toolsets = []
     for server in raw_servers:
-        name = server.get("name")
-        if not name:
+        resource_name = server.get("resource_name") or server.get("name")
+        display = server.get("displayName") or server.get("name") or resource_name
+        prefix = server.get("tool_name_prefix") or _prefix_for(str(display).split("/")[-1])
+        url = _interface_url(server)
+        toolset = None
+        if registry is not None and resource_name and "mcpServers/" in str(resource_name):
+            try:
+                toolset = registry.get_mcp_toolset(mcp_server_name=resource_name)
+                _attach_invoker_auth(toolset, invoker_sa_email)
+            except Exception:
+                logger.exception("Failed to build toolset via registry for %s", resource_name)
+                toolset = None
+        if toolset is None and url:
+            try:
+                toolset = _toolset_from_http_url(url, prefix, invoker_sa_email)
+            except Exception:
+                logger.exception("Failed to build HTTP MCP toolset for %s (%s)", display, url)
+                continue
+        if toolset is None:
+            logger.warning("Skipping MCP server with no registry name or URL: %s", server)
             continue
-        try:
-            toolset = registry.get_mcp_toolset(mcp_server_name=name)
-        except Exception:
-            logger.exception("Failed to build toolset for MCP server %s", name)
-            continue
-        # Use ADK's 5s StreamableHTTPConnectionParams default so denied calls
-        # fail fast. Cold-start tolerance is handled by keeping >=1 warm
-        # instance per MCP backend (terraform/example.tfvars), not by stretching
-        # the per-call budget.
         conn_params = getattr(toolset, "_connection_params", None)
-        resolved_url = getattr(conn_params, "url", None)
-        # Inject SA-impersonation auth so each MCP HTTP call carries an OIDC
-        # ID token for the invoker SA. Cloud Run validates the token and sees
-        # the invoker SA as the caller (the agent identity is not propagated
-        # to Cloud Run; principalSet members are not accepted as run.invoker).
-        if (
-            invoker_sa_email
-            and conn_params is not None
-            and resolved_url
-            and hasattr(conn_params, "httpx_client_factory")
-        ):
-            conn_params.httpx_client_factory = _build_impersonation_factory(
-                target_url=resolved_url,
-                target_sa_email=invoker_sa_email,
-            )
+        resolved_url = getattr(conn_params, "url", None) or url
         logger.info(
             "  built toolset: server=%s displayName=%r prefix=%s resolved_url=%s",
-            name,
-            server.get("displayName"),
+            resource_name,
+            display,
             getattr(toolset, "tool_name_prefix", None),
             resolved_url,
         )
         toolsets.append(toolset)
-        DISCOVERED_MCP_SERVERS.append(
-            {
-                "name": server.get("displayName") or name,
-                "resource_name": name,
-                "tool_name_prefix": getattr(toolset, "tool_name_prefix", None),
-                "resolved_url": resolved_url,
-                # Unprefixed tool names from the registry payload. The
-                # instruction renderer prefixes them at render time so the
-                # LLM sees the exact names ADK will accept.
-                "tools": [t.get("name") for t in server.get("tools", []) if t.get("name")],
-            }
-        )
+        _append_discovered(server, toolset, resource_name=resource_name, resolved_url=resolved_url)
 
     if not toolsets:
         logger.warning(
@@ -491,15 +580,15 @@ def _discover_mcp_toolsets() -> list:
             filter_str,
             effective_endpoint,
         )
-    else:
-        logger.info(
-            "Discovered %d MCP server(s) from registry %s/%s via %s",
-            len(toolsets),
-            project,
-            location,
-            effective_endpoint,
-        )
+        return []
 
+    logger.info(
+        "Discovered %d MCP server(s) from registry %s/%s via %s",
+        len(toolsets),
+        project,
+        location,
+        effective_endpoint,
+    )
     _CACHED_TOOLSETS = toolsets
     _CACHED_DISCOVERED = list(DISCOVERED_MCP_SERVERS)
     return _CACHED_TOOLSETS
