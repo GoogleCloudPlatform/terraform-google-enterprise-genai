@@ -50,6 +50,30 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage destroy --verbose --test-dir /workspace/test/integration']
 
+- id: create-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage init --verbose']
+
+- id: converge-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage apply --verbose']
+
+- id: verify-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=infra cft test run TestMortgageAgent --stage verify --verbose']
+
+- id: apply-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=apply-agent cft test run TestMortgageAgent --stage verify --verbose']
+
+- id: verify-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=verify-agent cft test run TestMortgageAgent --stage verify --verbose']
+
+- id: destroy-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage destroy --verbose']
+
 tags:
 - 'ci'
 - 'integration'
@@ -61,6 +85,13 @@ options:
   - 'TF_VAR_default_region=us-central1'
   - 'TF_VAR_instance_region=us-central1'
   - 'TF_IN_AUTOMATION=true'
+# Mortgage agent TFVARS
+  - 'TF_VAR_project_id=$_PROJECT_ID'
+  - 'TF_VAR_project_number=$_PROJECT_NUMBER'
+  - 'TF_VAR_dns_zone_domain=$_DNS_ZONE_DOMAIN'
+  - 'TF_VAR_dns_zone_name=$_DNS_ZONE_NAME'
+  - 'TF_VAR_mcp_ssl_certificate_id=$_MCP_SSL_CERTIFICATE_ID'
+  - 'TF_VAR_platform_admin_members=$_PLATFORM_ADMIN_MEMBERS'
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
   _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.17'
