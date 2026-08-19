@@ -151,7 +151,7 @@ module "model_armor" {
   project_id = var.project_id
   region     = var.region
 
-  enable_model_armor   = var.enable_model_armor
+  enable_model_armor     = var.enable_model_armor
   request_template_id    = var.model_armor_request_template_id
   response_template_id   = var.model_armor_response_template_id
   inspect_template_id    = var.model_armor_inspect_template_id

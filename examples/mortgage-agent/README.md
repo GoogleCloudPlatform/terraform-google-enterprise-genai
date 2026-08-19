@@ -451,9 +451,11 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | kms\_prevent\_destroy | If set to true, delete KMS keyring and keys when destroying the module; otherwise, destroying the module will fail if KMS keys are present. | `bool` | `true` | no |
 | mcp\_internal\_dns\_zone | Private DNS zone hosting <service>.<domain> A records for the MCP Cloud Run<br>services. Attached to the VPC so workloads (and Agent Engine via DNS<br>peering) resolve internally.<br><br>`domain` MUST be a real subdomain (typically "mcp.<dns\_zone\_domain>") so<br>Certificate Manager can issue a Google-managed regional cert that the<br>Agent Gateway will validate. | <pre>object({<br>    name   = optional(string, "mcp-server-internal")<br>    domain = string<br>  })</pre> | `null` | no |
 | mcp\_lb\_protocol | Front-end protocol for the MCP internal Application LB. With HTTPS, the LB<br>serves a Google-managed regional cert for *.mcp.<dns\_zone\_domain>; otherwise<br>it falls back to an auto-generated self-signed cert for *.<mcp\_internal\_dns\_zone.domain><br>(note: not validatable by Agent Gateway today). | `string` | `"HTTPS"` | no |
-| mcp\_ssl\_certificate\_id | Optional existing Certificate Manager regional certificate ID to attach to the MCP internal HTTPS LB. When set, DNS-01 issuance is skipped. When null, a Google-managed cert is issued against dns\_zone\_domain. Must cover mcp.<dns\_zone\_domain> and *.mcp.<dns\_zone\_domain>. | `string` | `null` | no |
 | mcp\_services | Map of MCP service name to deployment configuration. The map key becomes the Cloud Run service name AND the URL-mask token (e.g. legacy-dms.<mcp\_internal\_dns\_zone.domain> -> Cloud Run service 'legacy-dms'). | <pre>map(object({<br>    image              = string<br>    container_port     = optional(number, 8080)<br>    otel_service_name  = optional(string)<br>    min_instance_count = optional(number, 0)<br>    max_instance_count = optional(number, 3)<br>    cpu                = optional(string, "1")<br>    memory             = optional(string, "512Mi")<br>    env                = optional(map(string), {})<br>  }))</pre> | `{}` | no |
+| mcp\_ssl\_certificate\_id | Optional existing Certificate Manager regional certificate ID to attach to<br>the MCP internal HTTPS LB (same project and region as the LB).<br><br>Leave null/empty to issue a Google-managed cert via DNS-01 against<br>dns\_zone\_domain (requires a delegated public Cloud DNS zone and<br>dns\_zone\_name). When set, issuance and DNS-01 records are skipped.<br><br>Format:<br>  projects/<project>/locations/<region>/certificates/<name><br><br>In both modes the cert must be a public CA and cover mcp.<dns\_zone\_domain><br>and *.mcp.<dns\_zone\_domain>. dns\_zone\_domain is always required so private<br>MCP hostnames match those SANs. | `string` | `null` | no |
 | mcp\_tool\_specs | Map of MCP service name -> path to its toolspec.json (relative to the terraform/ directory or absolute). Required for every key in var.mcp\_services; the toolspec is uploaded into the Agent Registry entry as the MCP server spec. Note: the var.mcp\_services key (which becomes the Agent Registry service ID and the LB hostname) does not need to match the source directory name (e.g. income-verification -> ../src/income-verification-api/toolspec.json). | `map(string)` | `{}` | no |
+| model\_armor\_deidentify\_template\_id | DLP de-identify template ID used by the response Model Armor template when SDP is ENABLED. | `string` | `"agw-ssn-redaction-template"` | no |
+| model\_armor\_inspect\_template\_id | DLP inspect template ID used by the response Model Armor template when SDP is ENABLED. | `string` | `"agw-ssn-inspect-template"` | no |
 | model\_armor\_malicious\_uri\_enforcement | Malicious URI filter enforcement setting (ENABLED or DISABLED) | `string` | `"ENABLED"` | no |
 | model\_armor\_pi\_jailbreak\_confidence | PI and jailbreak filter confidence level (LOW\_AND\_ABOVE, MEDIUM\_AND\_ABOVE, or HIGH) | `string` | `"LOW_AND_ABOVE"` | no |
 | model\_armor\_pi\_jailbreak\_enforcement | PI and jailbreak filter enforcement setting (ENABLED or DISABLED) | `string` | `"ENABLED"` | no |
@@ -500,6 +502,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | mcp\_service\_account\_emails | Map of MCP service key to runtime service account email |
 | mcp\_service\_names | Map of MCP service key to Cloud Run service name |
 | mcp\_service\_urls | Map of MCP service key to Cloud Run *.run.app URL (only reachable via the internal LB) |
+| mcp\_ssl\_certificate\_id | Certificate Manager certificate ID attached to the MCP internal HTTPS LB (provided or issued). |
 | model\_armor\_deidentify\_template\_id | DLP de-identify template ID referenced by the response template's advanced SDP config (null when model\_armor\_sdp\_enforcement = DISABLED) |
 | model\_armor\_inspect\_template\_id | DLP inspect template ID referenced by the response template's advanced SDP config (null when model\_armor\_sdp\_enforcement = DISABLED) |
 | model\_armor\_request\_template\_id | Request-side Model Armor template ID |
@@ -518,7 +521,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | psc\_subnet\_id | The ID of the Private Service Connect subnet |
 | psc\_subnet\_self\_link | The self-link of the Private Service Connect subnet |
 | region | The GCP region for resources |
-| regional\_certificate\_name | Name of the regional Google-managed certificate. |
+| regional\_certificate\_name | Name of the regional Google-managed certificate (null when mcp\_ssl\_certificate\_id is provided). |
 | subnet\_id | The ID of the primary subnet |
 | subnet\_name | Name of the primary subnet |
 | subnet\_self\_link | The self-link of the primary subnet |
