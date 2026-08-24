@@ -21,11 +21,19 @@ locals {
   enable_sdp_advanced         = var.enable_model_armor && var.sdp_enforcement == "ENABLED"
 }
 
+resource "google_project_service" "dlp" {
+  count              = local.enable_sdp_advanced ? 1 : 0
+  project            = var.project_id
+  service            = "dlp.googleapis.com"
+  disable_on_destroy = false
+}
+
 resource "google_data_loss_prevention_inspect_template" "ssn" {
   count        = local.enable_sdp_advanced ? 1 : 0
   parent       = "projects/${var.project_id}/locations/${var.region}"
   template_id  = var.inspect_template_id
   display_name = "SSN Inspect Template"
+  depends_on   = [google_project_service.dlp]
 
   inspect_config {
     dynamic "info_types" {
@@ -43,6 +51,7 @@ resource "google_data_loss_prevention_deidentify_template" "ssn" {
   parent       = "projects/${var.project_id}/locations/${var.region}"
   template_id  = var.deidentify_template_id
   display_name = "SSN Redaction Template"
+  depends_on   = [google_project_service.dlp]
 
   deidentify_config {
     info_type_transformations {
@@ -73,6 +82,16 @@ resource "google_project_service_identity" "model_armor" {
   provider = google-beta
   project  = var.project_id
   service  = "modelarmor.googleapis.com"
+}
+
+# Enabling networkservices.googleapis.com does not always create gcp-sa-dep
+# on a brand-new project. Identity create materializes
+# service-<PROJECT_NUMBER>@gcp-sa-dep.iam.gserviceaccount.com before IAM binds.
+resource "google_project_service_identity" "networkservices" {
+  count    = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
+  provider = google-beta
+  project  = var.project_id
+  service  = "networkservices.googleapis.com"
 }
 
 resource "google_project_iam_member" "model_armor_dlp_user" {
@@ -189,28 +208,28 @@ resource "google_project_iam_member" "service_extensions_container_admin" {
   count   = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
   project = var.project_id
   role    = "roles/container.admin"
-  member  = "serviceAccount:${local.service_extensions_sa_email}"
+  member  = "serviceAccount:${google_project_service_identity.networkservices[0].email}"
 }
 
 resource "google_project_iam_member" "service_extensions_callout_user" {
   count   = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
   project = var.project_id
   role    = "roles/modelarmor.calloutUser"
-  member  = "serviceAccount:${local.service_extensions_sa_email}"
+  member  = "serviceAccount:${google_project_service_identity.networkservices[0].email}"
 }
 
 resource "google_project_iam_member" "service_extensions_service_usage" {
   count   = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
   project = var.project_id
   role    = "roles/serviceusage.serviceUsageConsumer"
-  member  = "serviceAccount:${local.service_extensions_sa_email}"
+  member  = "serviceAccount:${google_project_service_identity.networkservices[0].email}"
 }
 
 resource "google_project_iam_member" "service_extensions_model_armor_user" {
   count   = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
   project = var.project_id
   role    = "roles/modelarmor.user"
-  member  = "serviceAccount:${local.service_extensions_sa_email}"
+  member  = "serviceAccount:${google_project_service_identity.networkservices[0].email}"
 }
 
 resource "google_project_iam_member" "model_armor_admin" {

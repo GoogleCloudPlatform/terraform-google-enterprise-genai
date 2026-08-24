@@ -174,6 +174,8 @@ module "model_armor" {
   enable_vertex_ai_integration   = var.enable_model_armor_vertex_ai
   vertex_ai_inspect_only         = var.model_armor_vertex_ai_inspect_only
   vertex_ai_enable_cloud_logging = var.model_armor_vertex_ai_cloud_logging
+
+  depends_on = [time_sleep.wait_enable_apis]
 }
 
 

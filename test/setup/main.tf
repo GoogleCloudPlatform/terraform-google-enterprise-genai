@@ -21,6 +21,7 @@ resource "google_project_service" "required" {
     "cloudkms.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
+    "dlp.googleapis.com",
     "dns.googleapis.com",
     "iam.googleapis.com",
     "iap.googleapis.com",
