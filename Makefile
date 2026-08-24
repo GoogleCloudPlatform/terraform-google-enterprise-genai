@@ -15,7 +15,7 @@
 # Make will use bash instead of sh
 SHELL := /usr/bin/env bash
 
-DOCKER_TAG_VERSION_DEVELOPER_TOOLS := 1.20
+DOCKER_TAG_VERSION_DEVELOPER_TOOLS := 1.26
 DOCKER_IMAGE_DEVELOPER_TOOLS := cft/developer-tools
 REGISTRY_URL := gcr.io/cloud-foundation-cicd
 
@@ -45,6 +45,10 @@ generate_docs: docker_generate_docs
 .PHONY: docker_run
 docker_run:
 	docker run --rm -it \
+		-e CFT_DISABLE_INIT_CREDENTIALS=yes \
+		-e GIT_CONFIG_COUNT=1 \
+		-e GIT_CONFIG_KEY_0=safe.directory \
+		-e GIT_CONFIG_VALUE_0='*' \
 		-e SERVICE_ACCOUNT_JSON \
 		-e TF_VAR_org_id \
 		-e TF_VAR_folder_id \
@@ -56,9 +60,12 @@ docker_run:
 		-e TF_VAR_dns_zone_name \
 		-e TF_VAR_mcp_ssl_certificate_id \
 		-e TF_VAR_platform_admin_members \
+		-e CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=/root/.config/gcloud/application_default_credentials.json \
+		-e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
 		-v "$(CURDIR)":/workspace \
+		-v "$(HOME)/.config/gcloud:/root/.config/gcloud" \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
-		/bin/bash
+		/bin/bash -lc 'git config --global --add safe.directory "*"; exec bash'
 
 # Execute prepare tests within the docker container
 .PHONY: docker_test_prepare

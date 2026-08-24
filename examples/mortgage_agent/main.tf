@@ -239,6 +239,7 @@ module "mcp_internal_lb" {
   create_address                   = false
   internal_ip_address              = google_compute_address.mcp_lb_in_agent_gw_subnet.address
   forwarding_rule_subnet_self_link = module.networking.agent_gateway_subnet_self_link
+  proxy_subnet_self_link           = module.networking.proxy_subnet_self_link
 
   labels = {
     managed-by = "terraform"

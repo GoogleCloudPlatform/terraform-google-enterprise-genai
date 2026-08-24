@@ -15,6 +15,7 @@
 package mortgage_agent
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -65,6 +66,7 @@ func TestMortgageAgent(t *testing.T) {
 	mcpDomain := "mcp." + dnsZoneDomain
 
 	providedCertID := strings.TrimSpace(os.Getenv("TF_VAR_mcp_ssl_certificate_id"))
+	adminMembers := platformAdminMembers(t)
 
 	vars := map[string]interface{}{
 		"dns_zone_domain": dnsZoneDomain,
@@ -91,10 +93,12 @@ func TestMortgageAgent(t *testing.T) {
 			"corporate-email":     "src/corporate-email/toolspec.json",
 			"income-verification": "src/income-verification-api/toolspec.json",
 		},
-		"mcp_lb_protocol":                          "HTTPS",
-		"agent_gateway_iap_iam_enforcement_mode":   "DRY_RUN",
+		"platform_admin_members":                 adminMembers,
+		"mcp_lb_protocol":                        "HTTPS",
+		"agent_gateway_iap_iam_enforcement_mode": "DRY_RUN",
 		"enable_model_armor":                     true,
 		"enable_model_armor_mcp_floor_setting":   false,
+		"model_armor_pi_jailbreak_confidence":    "LOW_AND_ABOVE",
 		"model_armor_request_template_id":        "agw-req-" + suffix,
 		"model_armor_response_template_id":       "agw-resp-" + suffix,
 		"model_armor_inspect_template_id":        "agw-insp-" + suffix,
@@ -156,6 +160,30 @@ func TestMortgageAgent(t *testing.T) {
 	})
 
 	bpt.Test()
+}
+
+// platformAdminMembers reads TF_VAR_platform_admin_members (JSON list). The
+// example terraform.tfvars placeholder YOUR_USER@example.com must not reach apply.
+func platformAdminMembers(t *testing.T) []string {
+	t.Helper()
+	raw := strings.TrimSpace(os.Getenv("TF_VAR_platform_admin_members"))
+	if raw == "" {
+		t.Fatal(`TF_VAR_platform_admin_members is required (JSON list, e.g. ["user:you@domain.com"])`)
+	}
+	var members []string
+	if err := json.Unmarshal([]byte(raw), &members); err != nil {
+		t.Fatalf("TF_VAR_platform_admin_members must be a JSON array of strings: %v", err)
+	}
+	if len(members) == 0 {
+		t.Fatal("TF_VAR_platform_admin_members must not be empty")
+	}
+	for _, m := range members {
+		lower := strings.ToLower(m)
+		if strings.Contains(lower, "your_user@example.com") || strings.Contains(lower, "your-user@example.com") {
+			t.Fatalf("TF_VAR_platform_admin_members still has the terraform.tfvars placeholder %q; export a real user, e.g. [\"user:you@domain.com\"]", m)
+		}
+	}
+	return members
 }
 
 func verifyInfra(t *testing.T, assert *assert.Assertions, bpt *tft.TFBlueprintTest, mcpDomain, providedCertID string) {
