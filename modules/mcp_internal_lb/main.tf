@@ -20,9 +20,9 @@
 # DNS A record — no LB resource changes.
 
 locals {
-  dns_domain_no_dot = trimsuffix(var.dns_domain, ".")
-  lb_name           = "${var.name_prefix}-mcp-ilb"
-  is_https          = var.protocol == "HTTPS"
+  dns_domain_no_dot       = trimsuffix(var.dns_domain, ".")
+  lb_name                 = "${var.name_prefix}-mcp-ilb"
+  is_https                = var.protocol == "HTTPS"
   create_self_signed_cert = local.is_https && (var.ssl_certificate_id == null || trimspace(var.ssl_certificate_id) == "")
 }
 

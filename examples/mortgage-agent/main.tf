@@ -174,6 +174,8 @@ module "model_armor" {
   enable_vertex_ai_integration   = var.enable_model_armor_vertex_ai
   vertex_ai_inspect_only         = var.model_armor_vertex_ai_inspect_only
   vertex_ai_enable_cloud_logging = var.model_armor_vertex_ai_cloud_logging
+
+  depends_on = [time_sleep.wait_enable_apis]
 }
 
 
@@ -239,6 +241,7 @@ module "mcp_internal_lb" {
   create_address                   = false
   internal_ip_address              = google_compute_address.mcp_lb_in_agent_gw_subnet.address
   forwarding_rule_subnet_self_link = module.networking.agent_gateway_subnet_self_link
+  proxy_subnet_self_link           = module.networking.proxy_subnet_self_link
 
   labels = {
     managed-by = "terraform"
