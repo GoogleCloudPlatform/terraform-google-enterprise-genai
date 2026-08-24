@@ -12,12 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "project_id" {
-  description = "Project used by the mortgage agent integration test"
-  value       = var.project_id
-}
+FROM python:3.14-slim
 
-output "org_id" {
-  description = "Organization ID"
-  value       = var.org_id
-}
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+RUN groupadd -g 65532 nonroot && \
+    useradd -u 65532 -g 65532 -s /bin/false nonroot
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+
+COPY . .
+
+USER 65532:65532
+
+EXPOSE 8080
+
+CMD [".venv/bin/uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]

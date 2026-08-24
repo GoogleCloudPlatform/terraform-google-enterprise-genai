@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,84 +14,59 @@
 
 timeout: 14400s
 steps:
-
 - id: prepare
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'source /usr/local/bin/task_helper_functions.sh && prepare_environment']
   env:
-  - 'TF_VAR_folder_id=$_FOLDER_ID'
-  - 'TF_VAR_billing_account=$_BILLING_ACCOUNT'
+  - 'TF_VAR_org_id=$_ORG_ID'
+  - 'TF_VAR_project_id=$_PROJECT_ID'
+  - 'TF_VAR_project_number=$_PROJECT_NUMBER'
 
 - id: sleep
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'sleep 480']
+  args: ['/bin/bash', '-c', 'sleep 900']
 
-- id: create-standalone
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage init --verbose --test-dir /workspace/test/integration']
-
-- id: converge-standalone
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage apply --verbose --test-dir /workspace/test/integration']
-
-- id: verify-standalone
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage verify --verbose --test-dir /workspace/test/integration']
-
-- id: create-appsource-artifact-registry
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestArtifactRegistrySource --stage verify --verbose --test-dir /workspace/test/integration']
-
-- id: create-appsource-service-catalog
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestServiceCatalogSource --stage verify --verbose --test-dir /workspace/test/integration']
-
-- id: destroy-standalone
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage destroy --verbose --test-dir /workspace/test/integration']
-
-- id: create-mortgage-agent
+- id: init
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage init --verbose']
 
-- id: converge-mortgage-agent
+- id: apply-infra
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage apply --verbose']
 
-- id: verify-mortgage-agent
+- id: verify-infra
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'VERIFY_PHASE=infra cft test run TestMortgageAgent --stage verify --verbose']
 
-- id: apply-mortgage-agent
+- id: apply-agent
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'VERIFY_PHASE=apply-agent cft test run TestMortgageAgent --stage verify --verbose']
 
-- id: verify-mortgage-agent
+- id: verify-agent
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'VERIFY_PHASE=verify-agent cft test run TestMortgageAgent --stage verify --verbose']
 
-- id: destroy-mortgage-agent
+- id: destroy
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage destroy --verbose']
 
 tags:
 - 'ci'
 - 'integration'
+substitutions:
+  _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
+  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.26'
+  _MCP_SSL_CERTIFICATE_ID: ''
+  _DNS_ZONE_NAME: ''
 options:
   env:
   - 'TF_VAR_org_id=$_ORG_ID'
-  - 'TF_VAR_group_email=test-gcp-org-admins@test.blueprints.joonix.net'
-  - 'TF_VAR_create_access_context_manager_access_policy=false'
-  - 'TF_VAR_default_region=us-central1'
-  - 'TF_VAR_instance_region=us-central1'
-  - 'TF_IN_AUTOMATION=true'
-# Mortgage agent TFVARS
   - 'TF_VAR_project_id=$_PROJECT_ID'
   - 'TF_VAR_project_number=$_PROJECT_NUMBER'
   - 'TF_VAR_dns_zone_domain=$_DNS_ZONE_DOMAIN'
   - 'TF_VAR_dns_zone_name=$_DNS_ZONE_NAME'
   - 'TF_VAR_mcp_ssl_certificate_id=$_MCP_SSL_CERTIFICATE_ID'
   - 'TF_VAR_platform_admin_members=$_PLATFORM_ADMIN_MEMBERS'
-substitutions:
-  _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
-  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.17'
+  - 'TF_VAR_bucket_force_destroy=true'
+  - 'TF_VAR_kms_prevent_destroy=false'
+  - 'TF_IN_AUTOMATION=true'

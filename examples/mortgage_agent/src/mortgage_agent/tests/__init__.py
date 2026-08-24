@@ -11,13 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-output "project_id" {
-  description = "Project used by the mortgage agent integration test"
-  value       = var.project_id
-}
-
-output "org_id" {
-  description = "Organization ID"
-  value       = var.org_id
-}

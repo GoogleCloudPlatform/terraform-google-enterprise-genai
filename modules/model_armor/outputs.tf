@@ -54,7 +54,7 @@ output "model_armor_service_agent_email" {
 
 output "service_account_email" {
   description = "Email of the Service Extensions service account (gcp-sa-dep) used for Model Armor"
-  value       = local.service_extensions_sa_email
+  value       = var.enable_model_armor && var.enable_iam_bindings ? google_project_service_identity.networkservices[0].email : local.service_extensions_sa_email
 }
 
 output "rai_filters" {

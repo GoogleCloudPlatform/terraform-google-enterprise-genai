@@ -1,80 +1,109 @@
-# OSX leaves these everywhere on SMB shares
-._*
+# Crash log files
+crash.log
+crash.*.log
+crash.tf.json
 
-# OSX trash
-.DS_Store
+# Local Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+**/.terraform.lock.hcl
+**/.terraform.tfstate.lock.info
+errored.tfstate
+*.tfplan
+tfplan
+**/tmp_plan
+**/.tmp
+**/tmp
+
+# Local variable files (project IDs, org IDs, emails, cert IDs)
+*.tfvars
+*.tfvars.json
+!*.example.tfvars
+!terraform.example.tfvars
+
+# Local backend override (copy from backend.tf.example)
+backend.tf
+!backend.tf.example
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Environment / secrets / credentials
+.env
+.env.*
+.envrc
+.direnv/
+.creds.json
+credentials.json
+**/credentials.json
+*credentials*.json
+service-account*.json
+*-sa.json
+sa-*.json
+**/secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+!*.example.pem
+
+# GCP / gcloud local config
+.gcloud/
+adc.json
+application_default_credentials.json
+
+# Skaffold / Cloud Run (generated from *.tmpl)
+skaffold.yaml
+**/cloud_run/*.yaml
+cloudrun/*.yaml
+# Skaffold CLI binary (must not be committed; GitHub limit is 100 MB)
+/skaffold
 
 # Python
+__pycache__/
 *.pyc
+.venv/
+.ruff_cache/
+.ipynb_checkpoints/
 
-# Emacs save files
+# Go / tests
+bin/
+vendor/
+src/dlp-ext-proc/server
+test/fixtures/shared/terraform.tfvars
+test/integration/gcloud/config.sh
+test/integration/tmp
+.kitchen/
+**/.cft-reasoning-engine
+
+# OS / editor
+.DS_Store
+Thumbs.db
+._*
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
 *~
-\#*\#
-.\#*
-
-
-# Vim-related files
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
 *.un~
 Session.vim
 .netrwhist
 
-### https://raw.github.com/github/gitignore/90f149de451a5433aebd94d02d11b0e28843a1af/Terraform.gitignore
-
-# Local .terraform directories
-**/.terraform*
-
-# .tfstate files
-*.tfstate
-*.tfstate.*
-
-# Local tfvars terraform.tfvars
-**/*.tfvars
-
-# tf lock file
-**/.terraform.lock.hcl
-
-# Crash log files
-crash.log
-
-# Ignore any .tfvars files that are generated automatically for each Terraform run. Most
-# .tfvars files are managed as part of configuration and so should be included in
-# version control.
-#
-example.tfvars
-
-# Ignore override files as they are usually used to override resources locally and so
-# are not checked in
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.idea/
-.vscode/
-# Kitchen files
-**/inspec.lock
-**.gem
-**/.kitchen
-**/.kitchen.local.yml
-**/Gemfile.lock
-# Plan files
-**/tmp_plan
-**/.tmp
-**/tmp
-
-test/fixtures/shared/terraform.tfvars
-
-test/integration/gcloud/config.sh
-test/integration/tmp
-
-credentials.json
-
-helpers/genai-deployer/genai-deployer
-helpers/genai-deployer/.steps.json
-
-# File to populate env vars used by Docker test runs
-.envrc
-
-#ignore directory pynb checkpoints
-.ipynb_checkpoints/
+# Local notes / ADK / workspaces
+.adk/
+.workspaces/
+.pre-commit-cache/
+docs/.temp-apigee.md
+docs/working-commands.md
+docs/notes.md
+docs/todo.md
+docs/todos.md

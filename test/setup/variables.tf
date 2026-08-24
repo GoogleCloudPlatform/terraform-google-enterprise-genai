@@ -1,46 +1,29 @@
-/**
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 variable "org_id" {
-  description = "The numeric organization id"
+  description = "GCP organization ID"
+  type        = string
 }
 
-variable "folder_id" {
-  description = "The folder to deploy in"
+variable "project_id" {
+  description = "Existing project used as the integration-test target"
+  type        = string
 }
 
-variable "billing_account" {
-  description = "The billing account id associated with the project, e.g. XXXXXX-YYYYYY-ZZZZZZ"
-}
-
-variable "group_email" {
-  description = "The group that will be assigned permissions for testing."
-}
-
-variable "cloud_source_artifacts_repo_name" {
-  description = "Name to give the could source repository for Artifacts"
-  default     = "publish-artifacts"
-}
-
-variable "cloud_source_service_catalog_repo_name" {
-  description = "Name to give the cloud source repository for Service Catalog"
-  default     = "service-catalog"
-}
-
-variable "instance_region" {
-  description = "Instance region use for testing. Should be one of the regions used to create network."
-  default     = "us-central1"
+variable "project_number" {
+  description = "Numeric project number for the integration-test project"
+  type        = string
+  default     = null
 }

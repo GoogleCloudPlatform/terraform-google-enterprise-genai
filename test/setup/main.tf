@@ -1,75 +1,45 @@
-/**
- * Copyright 2021-2022 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-locals {
-  //project IDs must start with a letter.
-  //Max length for project_prefix is 3, basde in the projects create in the deployment
-  project_prefix = "${random_string.one_letter.result}${random_string.two_alphanumeric.result}"
-}
-
-resource "random_string" "suffix" {
-  length  = 6
-  special = false
-  upper   = false
-}
-
-resource "random_string" "one_letter" {
-  length  = 1
-  numeric = false
-  special = false
-  upper   = false
-}
-
-resource "random_string" "two_alphanumeric" {
-  length  = 2
-  special = false
-  upper   = false
-}
-
-resource "google_folder" "test_folder" {
-  display_name = "test_genai_folder_${random_string.suffix.result}"
-  parent       = "folders/${var.folder_id}"
-}
-
-module "project" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
-
-  name                     = "ci-genai-${random_string.suffix.result}"
-  random_project_id        = true
-  random_project_id_length = 4
-  org_id                   = var.org_id
-  folder_id                = var.folder_id
-  billing_account          = var.billing_account
-  deletion_policy          = "DELETE"
-
-  activate_apis = [
-    "cloudresourcemanager.googleapis.com",
-    "cloudbilling.googleapis.com",
-    "iam.googleapis.com",
-    "storage-api.googleapis.com",
-    "serviceusage.googleapis.com",
+resource "google_project_service" "required" {
+  for_each = toset([
+    "aiplatform.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "certificatemanager.googleapis.com",
     "cloudbuild.googleapis.com",
-    "sourcerepo.googleapis.com",
     "cloudkms.googleapis.com",
-    "bigquery.googleapis.com",
-    "accesscontextmanager.googleapis.com",
-    "securitycenter.googleapis.com",
-    "servicenetworking.googleapis.com",
-    "billingbudgets.googleapis.com",
-    "essentialcontacts.googleapis.com",
-  ]
+    "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "dlp.googleapis.com",
+    "dns.googleapis.com",
+    "iam.googleapis.com",
+    "iap.googleapis.com",
+    "logging.googleapis.com",
+    "modelarmor.googleapis.com",
+    "networksecurity.googleapis.com",
+    "networkservices.googleapis.com",
+    "run.googleapis.com",
+    "serviceusage.googleapis.com",
+    "storage.googleapis.com",
+  ])
+
+  project            = var.project_id
+  service            = each.value
+  disable_on_destroy = false
+}
+
+resource "time_sleep" "wait_apis" {
+  create_duration = "60s"
+  depends_on      = [google_project_service.required]
 }

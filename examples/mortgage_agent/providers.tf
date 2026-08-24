@@ -12,20 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-terraform {
-  required_version = ">= 1.12.2"
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = ">= 7.16.0"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = ">= 4.0"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.9"
-    }
-  }
+provider "google" {
+  project               = var.project_id
+  region                = var.region
+  user_project_override = true
+  billing_project       = var.project_id
+}
+
+provider "google-beta" {
+  project                          = var.project_id
+  region                           = var.region
+  network_services_custom_endpoint = "https://networkservices.googleapis.com/v1beta1/"
+  user_project_override            = true
+  billing_project                  = var.project_id
 }

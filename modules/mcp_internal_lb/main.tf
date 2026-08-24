@@ -22,12 +22,13 @@
 locals {
   dns_domain_no_dot = trimsuffix(var.dns_domain, ".")
   lb_name           = "${var.name_prefix}-mcp-ilb"
+  is_https          = var.protocol == "HTTPS"
+  create_self_signed_cert = local.is_https && (var.ssl_certificate_id == null || trimspace(var.ssl_certificate_id) == "")
 }
 
 # Allocate the LB VIP in the primary subnet unless the caller passed one in.
 resource "google_compute_address" "lb" {
-  count = var.create_address ? 1 : 0
-
+  count        = var.create_address ? 1 : 0
   project      = var.project_id
   name         = "${local.lb_name}-ip"
   region       = var.region
@@ -81,12 +82,73 @@ resource "google_compute_region_url_map" "mcp" {
   default_service = google_compute_region_backend_service.mcp.id
 }
 
+resource "tls_private_key" "lb" {
+  count     = local.create_self_signed_cert ? 1 : 0
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "tls_self_signed_cert" "lb" {
+  count           = local.create_self_signed_cert ? 1 : 0
+  private_key_pem = tls_private_key.lb[0].private_key_pem
+
+  subject {
+    common_name  = "*.${local.dns_domain_no_dot}"
+    organization = "agent-gateway"
+  }
+
+  dns_names = [
+    local.dns_domain_no_dot,
+    "*.${local.dns_domain_no_dot}",
+  ]
+
+  validity_period_hours = 24 * 365
+  early_renewal_hours   = 24 * 30
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+
+resource "google_compute_region_ssl_certificate" "lb" {
+  count       = local.create_self_signed_cert ? 1 : 0
+  project     = var.project_id
+  name        = "${local.lb_name}-cert"
+  region      = var.region
+  private_key = tls_private_key.lb[0].private_key_pem
+  certificate = tls_self_signed_cert.lb[0].cert_pem
+}
+
 resource "google_compute_region_target_https_proxy" "mcp" {
-  project                          = var.project_id
-  name                             = "${local.lb_name}-https-proxy"
-  region                           = var.region
-  url_map                          = google_compute_region_url_map.mcp.id
-  certificate_manager_certificates = [var.ssl_certificate_id]
+  count   = local.is_https ? 1 : 0
+  project = var.project_id
+  name    = "${local.lb_name}-https-proxy"
+  region  = var.region
+  url_map = google_compute_region_url_map.mcp.id
+  certificate_manager_certificates = [
+    var.ssl_certificate_id != null ? var.ssl_certificate_id : google_compute_region_ssl_certificate.lb[0].id
+  ]
+}
+
+resource "google_compute_region_target_http_proxy" "mcp" {
+  count   = local.is_https ? 0 : 1
+  project = var.project_id
+  name    = "${local.lb_name}-http-proxy"
+  region  = var.region
+  url_map = google_compute_region_url_map.mcp.id
+}
+
+# Subnet READY != regional Envoy ready. NEG/backend/urlmap/proxy still create
+# during this wait (only the forwarding rule is gated).
+resource "time_sleep" "wait_proxy_only_envoy" {
+  create_duration = var.proxy_only_settle_duration
+
+  triggers = {
+    network      = var.network_self_link
+    proxy_subnet = var.proxy_subnet_self_link
+  }
 }
 
 resource "google_compute_forwarding_rule" "mcp" {
@@ -98,7 +160,19 @@ resource "google_compute_forwarding_rule" "mcp" {
   subnetwork            = var.forwarding_rule_subnet_self_link != null ? var.forwarding_rule_subnet_self_link : var.subnet_self_link
   ip_address            = var.internal_ip_address != null ? var.internal_ip_address : google_compute_address.lb[0].address
   ip_protocol           = "TCP"
-  port_range            = "443"
-  target                = google_compute_region_target_https_proxy.mcp[0].id
-  labels                = var.labels
+  port_range            = local.is_https ? "443" : "80"
+  target = local.is_https ? (
+    google_compute_region_target_https_proxy.mcp[0].id
+    ) : (
+    google_compute_region_target_http_proxy.mcp[0].id
+  )
+  labels = var.labels
+
+  timeouts {
+    create = "40m"
+    update = "40m"
+    delete = "40m"
+  }
+
+  depends_on = [time_sleep.wait_proxy_only_envoy]
 }

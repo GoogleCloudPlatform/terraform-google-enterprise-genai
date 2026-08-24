@@ -85,3 +85,14 @@ variable "ssl_certificate_id" {
   type        = string
   default     = null
 }
+
+variable "proxy_subnet_self_link" {
+  description = "Self link of the REGIONAL_MANAGED_PROXY subnet. Used to gate forwarding rule creation until regional Envoy is ready after VPC/proxy-subnet (re)create."
+  type        = string
+}
+
+variable "proxy_only_settle_duration" {
+  description = "Wait after the proxy-only subnet exists before creating the INTERNAL_MANAGED forwarding rule. Subnet READY != Envoy ready; skipping this hangs or 503s the GCE insert."
+  type        = string
+  default     = "15m"
+}

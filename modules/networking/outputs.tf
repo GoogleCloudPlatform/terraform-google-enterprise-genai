@@ -83,6 +83,11 @@ output "proxy_subnet_name" {
   value       = "${var.name_prefix}-proxy-subnet"
 }
 
+output "proxy_subnet_self_link" {
+  description = "Self link of the proxy-only subnet for internal load balancers"
+  value       = module.vpc.subnets["${var.region}/${var.name_prefix}-proxy-subnet"].self_link
+}
+
 # PSC subnet for Private Service Connect
 output "psc_subnet_id" {
   description = "ID of the Private Service Connect subnet"
