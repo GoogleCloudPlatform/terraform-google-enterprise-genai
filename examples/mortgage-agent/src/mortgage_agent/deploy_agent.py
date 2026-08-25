@@ -479,7 +479,9 @@ def main() -> None:
     if DISCOVERED_MCP_SERVERS:
         print(f"  MCP servers discovered at deploy time: {len(DISCOVERED_MCP_SERVERS)}")
     else:
-        print("  MCP registry listing was empty at deploy time; engine will use DNS fallback if --mcp-dns-domain is set.")
+        print(
+            "  MCP registry listing was empty at deploy time; engine will use DNS fallback if --mcp-dns-domain is set."
+        )
 
     # Do not pass enable_tracing=True. AdkApp.set_up() uses that flag to POST
     # https://telemetry.googleapis.com/v1/traces with no try/except; through
@@ -633,7 +635,9 @@ def main() -> None:
                 import subprocess
 
                 tf_vars = {}
-                tfvars_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../terraform/terraform.tfvars")
+                tfvars_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), "../../terraform/terraform.tfvars"
+                )
                 if os.path.exists(tfvars_path):
                     with open(tfvars_path) as f:
                         for line in f:
