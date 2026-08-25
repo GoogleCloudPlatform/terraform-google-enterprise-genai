@@ -33,12 +33,12 @@ output "dns_zone_name_servers" {
 # Internal DNS Zone Outputs
 output "internal_dns_zone_name" {
   description = "Name of the internal DNS zone"
-  value       = var.dns_zone_domain != null ? google_dns_managed_zone.internal_dns_zone[0].name : null
+  value       = var.dns_zone_domain != null ? module.internal_dns_zone[0].name : null
 }
 
 output "internal_dns_zone_id" {
   description = "ID of the internal DNS zone"
-  value       = var.dns_zone_domain != null ? google_dns_managed_zone.internal_dns_zone[0].id : null
+  value       = var.dns_zone_domain != null ? "projects/${var.project_id}/managedZones/${module.internal_dns_zone[0].name}" : null
 }
 
 output "internal_dns_domain" {
@@ -64,7 +64,7 @@ output "dns_records_summary" {
       }
     } : null
     internal_zone = var.dns_zone_domain != null ? {
-      zone_name = google_dns_managed_zone.internal_dns_zone[0].name
+      zone_name = module.internal_dns_zone[0].name
       domain    = local.internal_dns_domain_computed
       records   = {}
     } : null

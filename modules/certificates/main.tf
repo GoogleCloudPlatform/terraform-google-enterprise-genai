@@ -29,6 +29,21 @@ locals {
   mcp_domain        = var.dns_zone_domain != null ? "mcp.${local.domain_name_clean}" : ""
   mcp_wildcard      = var.dns_zone_domain != null ? "*.${local.mcp_domain}" : ""
   mcp_auth_regional = "mcp-auth-regional"
+
+  # Regional certificate for internal gateways and the MCP internal LB.
+  # Covers internal.{domain}, *.internal.{domain}, mcp.{domain}, *.mcp.{domain}.
+  #
+  # The name carries an 8-char hash of the SAN list so that a SAN change creates
+  # a new cert (different name) before the old one is destroyed. Without this,
+  # the cert is force-replaced in-place and Cert Manager refuses to delete it
+  # while the target HTTPS proxy still references it (RESOURCE_STILL_IN_USE).
+  internal_regional_domains = [
+    local.internal_domain,
+    local.internal_wildcard,
+    local.mcp_domain,
+    local.mcp_wildcard,
+  ]
+  internal_regional_san_hash = substr(sha256(jsonencode(local.internal_regional_domains)), 0, 8)
 }
 
 # Regional DNS Authorizations
@@ -65,23 +80,6 @@ resource "google_certificate_manager_certificate" "regional" {
   }
 
   labels = var.labels
-}
-
-# Regional certificate for internal gateways and the MCP internal LB.
-# Covers internal.{domain}, *.internal.{domain}, mcp.{domain}, *.mcp.{domain}.
-#
-# The name carries an 8-char hash of the SAN list so that a SAN change creates
-# a new cert (different name) before the old one is destroyed. Without this,
-# the cert is force-replaced in-place and Cert Manager refuses to delete it
-# while the target HTTPS proxy still references it (RESOURCE_STILL_IN_USE).
-locals {
-  internal_regional_domains = [
-    local.internal_domain,
-    local.internal_wildcard,
-    local.mcp_domain,
-    local.mcp_wildcard,
-  ]
-  internal_regional_san_hash = substr(sha256(jsonencode(local.internal_regional_domains)), 0, 8)
 }
 
 resource "google_certificate_manager_certificate" "internal_regional" {

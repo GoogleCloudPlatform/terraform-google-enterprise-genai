@@ -200,7 +200,7 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
    ```bash
    envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS}' < skaffold.yaml.tmpl > skaffold.yaml
    for f in cloud_run/*.yaml.tmpl; do
-     envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS}' < "$f" > "${f%.tmpl}"
+     envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS} ${DOMAIN_NAME}' < "$f" > "${f%.tmpl}"
    done
    ```
 
@@ -443,6 +443,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | bucket\_force\_destroy | When deleting a bucket, this boolean option will delete all contained objects. If false, Terraform will fail to delete buckets which contain objects. | `bool` | `false` | no |
 | dns\_zone\_domain | The domain name for the public DNS zone (must end with a dot, e.g., 'example.com.'). Certificate Manager validates the MCP LB cert against this zone. | `string` | `null` | no |
 | dns\_zone\_name | The name of the existing Cloud DNS managed zone. If not provided, derived from dns\_zone\_domain. | `string` | `null` | no |
+| enable\_logs\_sink | Enable log sink resources in the observability module. | `bool` | `false` | no |
 | enable\_model\_armor | Enable Model Armor template and IAM bindings | `bool` | `false` | no |
 | enable\_model\_armor\_mcp\_floor\_setting | Enable Model Armor floor setting for MCP server protection (BigQuery MCP) | `bool` | `true` | no |
 | enable\_model\_armor\_vertex\_ai | Enable Model Armor integration with Vertex AI (floor setting + IAM) | `bool` | `false` | no |
@@ -521,7 +522,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | psc\_subnet\_id | The ID of the Private Service Connect subnet |
 | psc\_subnet\_self\_link | The self-link of the Private Service Connect subnet |
 | region | The GCP region for resources |
-| regional\_certificate\_name | Name of the regional Google-managed certificate (null when mcp\_ssl\_certificate\_id is provided). |
+| regional\_certificate\_name | Name or ID of the regional certificate used by the MCP Load Balancer. |
 | subnet\_id | The ID of the primary subnet |
 | subnet\_name | Name of the primary subnet |
 | subnet\_self\_link | The self-link of the primary subnet |

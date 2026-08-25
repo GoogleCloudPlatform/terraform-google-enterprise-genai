@@ -622,86 +622,71 @@ def main() -> None:
 
         if args.update:
             engine = client.agent_engines.update(name=args.update, agent=app, config=deploy_config)
-        elif args.enable_agent_identity:
-            # 1. Create empty agent shell
-            print("Deploying with AGENT_IDENTITY. Initiating empty bootstrap to prevent telemetry blocks...")
-            empty_config = {
-                "display_name": args.display_name,
-                "description": description,
-                "identity_type": "AGENT_IDENTITY",
-            }
-
-            print("Step 1: Creating identity-only agent shell...")
-            engine = client.agent_engines.create(config=empty_config)
+        else:
+            print("Creating and deploying Agent Engine...")
+            engine = client.agent_engines.create(agent=app, config=deploy_config)
             reasoning_engine_name = engine.api_resource.name
             agent_id = reasoning_engine_name.split("/")[-1]
-            print(f"Identity shell successfully created. ID: {agent_id}")
 
-            # 2. Grant permissions
-            print("\nStep 2: Pre-authorizing egress permissions via grant_agent_mcp_egress.sh...")
-            import subprocess
+            if args.enable_agent_identity:
+                print("\nApplying direct egress IAM permissions via grant_agent_mcp_egress.sh...")
+                import subprocess
 
-            tf_vars = {}
-            tfvars_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../terraform/terraform.tfvars")
-            if os.path.exists(tfvars_path):
-                with open(tfvars_path) as f:
-                    for line in f:
-                        if "=" in line and not line.strip().startswith("#"):
-                            k, v = line.split("=", 1)
-                            tf_vars[k.strip()] = v.strip().strip('"').strip("'")
+                tf_vars = {}
+                tfvars_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../terraform/terraform.tfvars")
+                if os.path.exists(tfvars_path):
+                    with open(tfvars_path) as f:
+                        for line in f:
+                            if "=" in line and not line.strip().startswith("#"):
+                                k, v = line.split("=", 1)
+                                tf_vars[k.strip()] = v.strip().strip('"').strip("'")
 
-            project_id = args.project
-            project_number = None
-            org_id = tf_vars.get("organization_id") or os.environ.get("ORG_ID")
-            if not org_id:
-                print(
-                    "Error: Could not resolve organization_id/ORG_ID. Please set it in "
-                    "terraform.tfvars or as ORG_ID environment variable.",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
-
-            try:
-                res = subprocess.run(
-                    ["gcloud", "projects", "describe", project_id, "--format=value(projectNumber)"],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-                project_number = res.stdout.strip()
-            except Exception as e:
-                print(f"Warning: could not resolve project number via gcloud: {e}")
-                project_number = os.environ.get("PROJECT_NUMBER")
-                if not project_number:
+                project_id = args.project
+                project_number = None
+                org_id = tf_vars.get("organization_id") or os.environ.get("ORG_ID")
+                if not org_id:
                     print(
-                        "Error: Could not resolve project number. Please set the PROJECT_NUMBER environment variable.",
+                        "Error: Could not resolve organization_id/ORG_ID. Please set it in "
+                        "terraform.tfvars or as ORG_ID environment variable.",
                         file=sys.stderr,
                     )
                     sys.exit(1)
 
-            env = os.environ.copy()
-            env["PROJECT_ID"] = project_id
-            env["PROJECT_NUMBER"] = project_number
-            env["ORG_ID"] = org_id
-            env["REGION"] = args.region
-
-            script_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), "../../scripts/grant_agent_mcp_egress.sh"
-            )
-            if os.path.exists(script_path):
                 try:
-                    subprocess.run([script_path, "--agent-id", agent_id], env=env, check=True)
-                    print("Direct egress IAM permissions successfully applied!")
+                    res = subprocess.run(
+                        ["gcloud", "projects", "describe", project_id, "--format=value(projectNumber)"],
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                    )
+                    project_number = res.stdout.strip()
                 except Exception as e:
-                    print(f"Error executing grant_agent_mcp_egress.sh: {e}")
-            else:
-                print(f"Warning: grant_agent_mcp_egress.sh not found at {script_path}")
+                    print(f"Warning: could not resolve project number via gcloud: {e}")
+                    project_number = os.environ.get("PROJECT_NUMBER")
+                    if not project_number:
+                        print(
+                            "Error: Could not resolve project number. Please set the PROJECT_NUMBER environment variable.",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
 
-            # 3. Update the agent with the actual pickled code
-            print(f"\nStep 3: Updating reasoning engine {reasoning_engine_name} with actual application code...")
-            engine = client.agent_engines.update(name=reasoning_engine_name, agent=app, config=deploy_config)
-        else:
-            engine = client.agent_engines.create(agent=app, config=deploy_config)
+                env = os.environ.copy()
+                env["PROJECT_ID"] = project_id
+                env["PROJECT_NUMBER"] = project_number
+                env["ORG_ID"] = org_id
+                env["REGION"] = args.region
+
+                script_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), "../../scripts/grant_agent_mcp_egress.sh"
+                )
+                if os.path.exists(script_path):
+                    try:
+                        subprocess.run([script_path, "--agent-id", agent_id], env=env, check=True)
+                        print("Direct egress IAM permissions successfully applied!")
+                    except Exception as e:
+                        print(f"Error executing grant_agent_mcp_egress.sh: {e}")
+                else:
+                    print(f"Warning: grant_agent_mcp_egress.sh not found at {script_path}")
     finally:
         os.chdir(original_cwd)
         shutil.rmtree(staging_dir, ignore_errors=True)

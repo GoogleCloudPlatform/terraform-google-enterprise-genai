@@ -35,3 +35,64 @@ resource "google_monitoring_dashboard" "authorization_debugging" {
   }
   depends_on = [google_logging_project_bucket_config.default_analytics]
 }
+
+# Enable Data Access audit logs (DATA_READ and DATA_WRITE) required for
+# the authorization debugging dashboard via the official IAM audit_config module.
+module "audit_config" {
+  source  = "terraform-google-modules/iam/google//modules/audit_config"
+  version = "~> 8.2"
+
+  project = var.project_id
+
+  audit_log_config = flatten([
+    for svc in var.audit_log_services : [
+      {
+        service          = svc
+        log_type         = "DATA_READ"
+        exempted_members = []
+      },
+      {
+        service          = svc
+        log_type         = "DATA_WRITE"
+        exempted_members = []
+      }
+    ]
+  ])
+}
+
+locals {
+  default_log_filter = <<-EOT
+    resource.type = ("networkservices.googleapis.com/Gateway" OR "aiplatform.googleapis.com/ReasoningEngine" OR "cloud_run_revision") OR
+    proto_payload.audit_log.service_name = ("iap.googleapis.com" OR "agentregistry.googleapis.com" OR "networksecurity.googleapis.com")
+  EOT
+}
+
+# Primary log sink for agent platform logs via the official log-export module
+module "log_export" {
+  count   = var.enable_logs_sink && var.log_sink_destination != null ? 1 : 0
+  source  = "terraform-google-modules/log-export/google"
+  version = "~> 11.0"
+
+  parent_resource_type   = "project"
+  parent_resource_id     = var.project_id
+  log_sink_name          = var.log_sink_name
+  destination_uri        = var.log_sink_destination
+  filter                 = var.log_sink_filter != null ? var.log_sink_filter : local.default_log_filter
+  unique_writer_identity = true
+}
+
+# Optional additional custom log sinks via the official log-export module
+module "custom_log_exports" {
+  for_each = var.enable_logs_sink ? var.log_sinks : {}
+  source   = "terraform-google-modules/log-export/google"
+  version  = "~> 11.0"
+
+  parent_resource_type   = "project"
+  parent_resource_id     = var.project_id
+  log_sink_name          = each.key
+  destination_uri        = each.value.destination
+  filter                 = each.value.filter
+  disabled               = each.value.disabled
+  exclusions             = each.value.exclusions
+  unique_writer_identity = true
+}

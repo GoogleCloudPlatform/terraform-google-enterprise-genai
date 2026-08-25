@@ -45,7 +45,8 @@ locals {
 module "agent_observability" {
   source = "../../modules/observability"
 
-  project_id = var.project_id
+  project_id       = var.project_id
+  enable_logs_sink = var.enable_logs_sink
 
   depends_on = [time_sleep.wait_enable_apis]
 }
@@ -151,11 +152,9 @@ module "model_armor" {
   project_id = var.project_id
   region     = var.region
 
-  enable_model_armor     = var.enable_model_armor
-  request_template_id    = var.model_armor_request_template_id
-  response_template_id   = var.model_armor_response_template_id
-  inspect_template_id    = var.model_armor_inspect_template_id
-  deidentify_template_id = var.model_armor_deidentify_template_id
+  enable_model_armor   = var.enable_model_armor
+  request_template_id  = var.model_armor_request_template_id
+  response_template_id = var.model_armor_response_template_id
 
   platform_admin_members = var.platform_admin_members
 
@@ -177,7 +176,6 @@ module "model_armor" {
 
   depends_on = [time_sleep.wait_enable_apis]
 }
-
 
 module "agent_engine" {
   source = "../../modules/agent_engine"

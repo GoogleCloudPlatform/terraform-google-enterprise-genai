@@ -40,21 +40,16 @@ resource "google_dns_record_set" "certificate_validation_regional" {
 }
 
 # Private DNS Zone for internal gateways
-resource "google_dns_managed_zone" "internal_dns_zone" {
-  count = var.dns_zone_domain != null ? 1 : 0
+module "internal_dns_zone" {
+  count   = var.dns_zone_domain != null ? 1 : 0
+  source  = "terraform-google-modules/cloud-dns/google"
+  version = "~> 7.0"
 
-  project     = var.project_id
+  project_id  = var.project_id
+  type        = "private"
   name        = var.internal_dns_zone_name
-  dns_name    = "${trimsuffix(local.internal_dns_domain_computed, ".")}."
+  domain      = "${trimsuffix(local.internal_dns_domain_computed, ".")}."
   description = "Private DNS zone for internal gateways"
-  visibility  = "private"
 
-  private_visibility_config {
-    dynamic "networks" {
-      for_each = var.vpc_self_links
-      content {
-        network_url = networks.value
-      }
-    }
-  }
+  private_visibility_config_networks = var.vpc_self_links
 }

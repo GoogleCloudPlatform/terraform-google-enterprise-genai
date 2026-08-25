@@ -129,8 +129,8 @@ output "artifact_registry_url" {
 # Certificate Outputs
 
 output "regional_certificate_name" {
-  description = "Name of the regional Google-managed certificate (null when mcp_ssl_certificate_id is provided)."
-  value       = module.certificates.regional_certificate_name
+  description = "Name or ID of the regional certificate used by the MCP Load Balancer."
+  value       = local.provided_mcp_ssl_certificate_id != null ? local.provided_mcp_ssl_certificate_id : module.certificates.regional_certificate_name
 }
 
 output "mcp_ssl_certificate_id" {

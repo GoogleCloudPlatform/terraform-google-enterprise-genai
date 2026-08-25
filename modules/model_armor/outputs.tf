@@ -14,27 +14,27 @@
 
 output "request_template_id" {
   description = "ID of the request-side Model Armor template"
-  value       = var.enable_model_armor ? google_model_armor_template.request[0].template_id : null
+  value       = var.enable_model_armor ? try(module.request_template[0].template_id, module.request_template[0].template.template_id, var.request_template_id) : null
 }
 
 output "request_template_name" {
   description = "Full resource name of the request-side Model Armor template"
-  value       = var.enable_model_armor ? google_model_armor_template.request[0].name : null
+  value       = var.enable_model_armor ? try(module.request_template[0].name, module.request_template[0].template_name, module.request_template[0].template.name, null) : null
 }
 
 output "response_template_id" {
   description = "ID of the response-side Model Armor template"
-  value       = var.enable_model_armor ? google_model_armor_template.response[0].template_id : null
+  value       = var.enable_model_armor ? try(module.response_template[0].template_id, module.response_template[0].template.template_id, var.response_template_id) : null
 }
 
 output "response_template_name" {
   description = "Full resource name of the response-side Model Armor template"
-  value       = var.enable_model_armor ? google_model_armor_template.response[0].name : null
+  value       = var.enable_model_armor ? try(module.response_template[0].name, module.response_template[0].template_name, module.response_template[0].template.name, null) : null
 }
 
 output "template_location" {
   description = "Location of the Model Armor templates"
-  value       = var.enable_model_armor ? google_model_armor_template.request[0].location : null
+  value       = var.enable_model_armor ? try(module.request_template[0].location, module.request_template[0].template.location, var.region) : null
 }
 
 output "inspect_template_id" {
@@ -118,7 +118,7 @@ output "iam_roles_granted" {
 
 output "mcp_floor_setting_name" {
   description = "Name of the MCP floor setting"
-  value       = var.enable_model_armor && (var.enable_mcp_floor_setting || var.enable_vertex_ai_integration) ? google_model_armor_floorsetting.mcp_floor_setting[0].name : null
+  value       = var.enable_model_armor && (var.enable_mcp_floor_setting || var.enable_vertex_ai_integration) ? try(module.mcp_floor_setting[0].name, module.mcp_floor_setting[0].floor_setting_name, module.mcp_floor_setting[0].floor_setting.name, null) : null
 }
 
 output "vertex_ai_service_account_email" {

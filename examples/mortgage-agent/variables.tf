@@ -114,6 +114,12 @@ variable "encrypt_gcs_bucket_tfstate" {
   default     = true
 }
 
+variable "enable_logs_sink" {
+  description = "Enable log sink resources in the observability module."
+  type        = bool
+  default     = false
+}
+
 # ==============================================================================
 # NETWORKING
 # ==============================================================================

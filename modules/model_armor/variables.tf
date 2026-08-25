@@ -227,4 +227,3 @@ variable "vertex_ai_enable_cloud_logging" {
   type        = bool
   default     = true
 }
-

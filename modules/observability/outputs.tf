@@ -21,3 +21,18 @@ output "log_bucket_id" {
   description = "Resource ID of the _Default log bucket with Log Analytics enabled."
   value       = google_logging_project_bucket_config.default_analytics.id
 }
+
+output "log_sink_writer_identity" {
+  description = "The identity associated with the primary log sink (service account)."
+  value       = length(module.log_export) > 0 ? module.log_export[0].writer_identity : null
+}
+
+output "log_sink_name" {
+  description = "The name of the primary log sink created."
+  value       = length(module.log_export) > 0 ? module.log_export[0].log_sink_resource_name : null
+}
+
+output "custom_log_sinks_writer_identities" {
+  description = "Map of writer identities for additional custom log sinks."
+  value       = { for k, v in module.custom_log_exports : k => v.writer_identity }
+}
