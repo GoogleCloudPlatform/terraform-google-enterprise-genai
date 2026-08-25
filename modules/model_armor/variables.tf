@@ -17,11 +17,6 @@ variable "project_id" {
   type        = string
 }
 
-variable "project_number" {
-  description = "The numeric identifier (e.g., 123456789012) of the Google Cloud project."
-  type        = string
-}
-
 variable "region" {
   description = "GCP region for Model Armor template"
   type        = string

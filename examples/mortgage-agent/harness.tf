@@ -30,8 +30,28 @@ resource "random_id" "project_id_suffix" {
 
 #Enable Vertex AI API explicitly to control order and avoid race conditions
 #in the project module's IAM bindings
+locals {
+  enabled_services = toset(var.enabled_services)
+
+  need_api_wait = anytrue([
+    for svc, d in data.http.enabled_service :
+    try(jsondecode(d.response_body).state, "UNKNOWN") != "ENABLED"
+  ])
+}
+
+data "google_client_config" "default" {}
+
+data "http" "enabled_service" {
+  for_each = local.enabled_services
+
+  url = "https://serviceusage.googleapis.com/v1/projects/${var.project_id}/services/${each.value}"
+  request_headers = {
+    Authorization = "Bearer ${data.google_client_config.default.access_token}"
+  }
+}
+
 resource "google_project_service" "enable_apis" {
-  for_each = toset(var.enabled_services)
+  for_each = local.enabled_services
 
   project            = var.project_id
   service            = each.value
@@ -39,6 +59,7 @@ resource "google_project_service" "enable_apis" {
 }
 
 resource "time_sleep" "wait_enable_apis" {
+  count           = local.need_api_wait ? 1 : 0
   create_duration = "60s"
 
   depends_on = [google_project_service.enable_apis]
@@ -47,6 +68,66 @@ resource "time_sleep" "wait_enable_apis" {
 data "google_storage_project_service_account" "gcs_sa" {
   project = var.project_id
 }
+
+resource "google_project_service_identity" "network_services" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "networkservices.googleapis.com"
+}
+
+# Enable Vertex AI API explicitly to control order and avoid race conditions
+# in the project module's IAM bindings
+resource "google_project_service" "aiplatform" {
+  project            = var.project_id
+  service            = "aiplatform.googleapis.com"
+  disable_on_destroy = false
+}
+
+# Ensure Vertex AI service identity exists
+# This must happen after the API is enabled
+resource "google_project_service_identity" "aiplatform" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "aiplatform.googleapis.com"
+
+  depends_on = [google_project_service.aiplatform]
+}
+
+resource "google_project_iam_member" "aiplatform_network_admin" {
+  project = var.project_id
+  role    = "roles/compute.networkAdmin"
+  member  = "serviceAccount:${google_project_service_identity.aiplatform.email}"
+}
+
+resource "google_project_iam_member" "aiplatform_dns_peer" {
+  project = var.project_id
+  role    = "roles/dns.peer"
+  member  = "serviceAccount:${google_project_service_identity.aiplatform.email}"
+}
+
+# Allow time for the AI Platform service identity to propagate before
+# binding IAM roles to the Reasoning Engine service agent.
+resource "time_sleep" "aiplatform_identity_propagation" {
+  depends_on      = [google_project_service_identity.aiplatform]
+  create_duration = "30s"
+}
+
+# The Reasoning Engine service agent (gcp-sa-aiplatform-re) also needs
+# network and DNS permissions to create PSC Interface NICs and DNS peering zones.
+resource "google_project_iam_member" "aiplatform_re_network_admin" {
+  project    = var.project_id
+  role       = "roles/compute.networkAdmin"
+  member     = "serviceAccount:service-${var.project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+  depends_on = [time_sleep.aiplatform_identity_propagation]
+}
+
+resource "google_project_iam_member" "aiplatform_re_dns_peer" {
+  project    = var.project_id
+  role       = "roles/dns.peer"
+  member     = "serviceAccount:service-${var.project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+  depends_on = [time_sleep.aiplatform_identity_propagation]
+}
+
 
 # ==============================================================================
 # STORAGE CONFIGURATION
