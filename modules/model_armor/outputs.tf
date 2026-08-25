@@ -47,16 +47,6 @@ output "deidentify_template_id" {
   value       = local.enable_sdp_advanced ? google_data_loss_prevention_deidentify_template.ssn[0].template_id : null
 }
 
-output "model_armor_service_agent_email" {
-  description = "Email of the Model Armor service agent (gcp-sa-modelarmor) granted DLP read access (null when advanced SDP is DISABLED)"
-  value       = local.enable_sdp_advanced ? google_project_service_identity.model_armor[0].email : null
-}
-
-output "service_account_email" {
-  description = "Email of the Service Extensions service account (gcp-sa-dep) used for Model Armor"
-  value       = var.enable_model_armor && var.enable_iam_bindings ? google_project_service_identity.networkservices[0].email : local.service_extensions_sa_email
-}
-
 output "rai_filters" {
   description = "Configured RAI filters"
   value       = var.rai_filters

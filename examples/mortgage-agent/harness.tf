@@ -128,7 +128,6 @@ resource "google_project_iam_member" "aiplatform_re_dns_peer" {
   depends_on = [time_sleep.aiplatform_identity_propagation]
 }
 
-
 # ==============================================================================
 # STORAGE CONFIGURATION
 # ==============================================================================

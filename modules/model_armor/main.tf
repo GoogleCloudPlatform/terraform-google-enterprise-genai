@@ -44,7 +44,7 @@ resource "google_data_loss_prevention_inspect_template" "ssn" {
     min_likelihood = "POSSIBLE"
   }
 
-  depends_on = [google_project_service.dlp]
+  depends_on = [ google_project_service.dlp ]
 }
 
 resource "google_data_loss_prevention_deidentify_template" "ssn" {
@@ -102,21 +102,21 @@ resource "google_project_iam_member" "service_extensions_container_admin" {
   count   = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
   project = var.project_id
   role    = "roles/container.admin"
-  member  = "serviceAccount:${google_project_service_identity.networkservices[0].email}"
+  member  = "serviceAccount:${local.service_extensions_sa_email}"
 }
 
 resource "google_project_iam_member" "service_extensions_callout_user" {
   count   = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
   project = var.project_id
   role    = "roles/modelarmor.calloutUser"
-  member  = "serviceAccount:${google_project_service_identity.networkservices[0].email}"
+  member  = "serviceAccount:${local.service_extensions_sa_email}"
 }
 
 resource "google_project_iam_member" "service_extensions_service_usage" {
   count   = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
   project = var.project_id
   role    = "roles/serviceusage.serviceUsageConsumer"
-  member  = "serviceAccount:${google_project_service_identity.networkservices[0].email}"
+  member  = "serviceAccount:${local.service_extensions_sa_email}"
 }
 
 resource "google_project_iam_member" "service_extensions_model_armor_user" {
