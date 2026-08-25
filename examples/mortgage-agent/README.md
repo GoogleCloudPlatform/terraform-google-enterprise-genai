@@ -189,6 +189,7 @@ All subsequent steps assume you are running them from the `examples/mortgage_age
    export MCP_INGRESS=$(terraform output -raw mcp_cloud_run_ingress_annotation)
    export MCP_INVOKER_SA=$(terraform output -raw agent_mcp_invoker_email)
    export AGENT_GATEWAY_ID=$(terraform output -raw agent_gateway_id)
+   export BUCKET_NAME=$(terraform output -raw cloudbuild_bucket)
    ```
 
 ## Build and deploy the MCP servers to Cloud Run
@@ -198,7 +199,7 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
 1. Substitute the template values:
 
    ```bash
-   envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS}' < skaffold.yaml.tmpl > skaffold.yaml
+   envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS} ${BUCKET_NAME}' < skaffold.yaml.tmpl > skaffold.yaml
    for f in cloud_run/*.yaml.tmpl; do
      envsubst '${PROJECT_ID} ${REGION} ${MCP_INGRESS} ${DOMAIN_NAME}' < "$f" > "${f%.tmpl}"
    done
@@ -495,6 +496,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | agent\_registry\_service\_ids | Map of registered Agent Registry service resource IDs, keyed by service\_id |
 | artifact\_registry\_id | The Artifact Registry repository ID |
 | artifact\_registry\_url | The Artifact Registry repository URL for docker push/pull |
+| cloudbuild\_bucket | Cloud Build MCPs bucket name. |
 | mcp\_cloud\_run\_ingress\_annotation | Cloud Run v1 ingress annotation value to use when rendering cloudrun/*.yaml.tmpl. |
 | mcp\_internal\_dns\_domain | Domain name (with trailing dot) of the MCP servers private DNS zone |
 | mcp\_internal\_dns\_names | Map of MCP service key to its private DNS name (<service>.<domain>). |

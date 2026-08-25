@@ -22,6 +22,11 @@ output "region" {
   value       = var.region
 }
 
+output "cloudbuild_bucket" {
+  description = "Cloud Build MCPs bucket name."
+  value       = google_storage_bucket.cloudbuild.name
+}
+
 # Networking Module Outputs
 output "vpc_id" {
   description = "The ID of the VPC network"
