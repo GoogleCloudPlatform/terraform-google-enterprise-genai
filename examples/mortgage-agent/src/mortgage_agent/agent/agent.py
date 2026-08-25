@@ -345,12 +345,7 @@ def _tool_names(server: dict[str, Any]) -> list[str]:
 def _attach_invoker_auth(toolset, invoker_sa_email: str | None) -> None:
     conn_params = getattr(toolset, "_connection_params", None)
     resolved_url = getattr(conn_params, "url", None)
-    if (
-        invoker_sa_email
-        and conn_params is not None
-        and resolved_url
-        and hasattr(conn_params, "httpx_client_factory")
-    ):
+    if invoker_sa_email and conn_params is not None and resolved_url and hasattr(conn_params, "httpx_client_factory"):
         conn_params.httpx_client_factory = _build_impersonation_factory(
             target_url=resolved_url,
             target_sa_email=invoker_sa_email,
