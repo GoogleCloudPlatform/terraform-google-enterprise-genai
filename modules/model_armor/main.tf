@@ -44,7 +44,7 @@ resource "google_data_loss_prevention_inspect_template" "ssn" {
     min_likelihood = "POSSIBLE"
   }
 
-  depends_on = [ google_project_service.dlp ]
+  depends_on = [google_project_service.dlp]
 }
 
 resource "google_data_loss_prevention_deidentify_template" "ssn" {

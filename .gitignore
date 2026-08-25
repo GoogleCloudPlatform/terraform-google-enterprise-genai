@@ -1,51 +1,63 @@
-# Crash log files
+# Terraform files
+# Local execution & cache directories
+**/.terraform/
+**/.terraform*
+
+# State files & locks
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+errored.tfstate
+**/.terraform.tfstate.lock.info
+
+# Dependency lock files (descomente se sua equipe optar por não versionar o lockfile)
+# **/.terraform.lock.hcl
+
+# Plan files & temp runs
+*.tfplan
+tfplan
+**/tmp_plan
+**/.tmp/
+**/tmp/
+
+# Crash logs
 crash.log
 crash.*.log
 crash.tf.json
 
-# Local Terraform
-**/.terraform/
-*.tfstate
-*.tfstate.*
-*.tfstate.backup
-**/.terraform.lock.hcl
-**/.terraform.tfstate.lock.info
-errored.tfstate
-*.tfplan
-tfplan
-**/tmp_plan
-**/.tmp
-**/tmp
-
-# Local variable files (project IDs, org IDs, emails, cert IDs)
-*.tfvars
-*.tfvars.json
-!*.example.tfvars
-!terraform.example.tfvars
-
-# Local backend override (copy from backend.tf.example)
-backend.tf
-!backend.tf.example
-
-# Override files
+# Local overrides
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+backend.tf
+!backend.tf.example
 
-# Environment / secrets / credentials
+# Variables & Secrets (.tfvars)
+*.tfvars
+**/*.tfvars
+*.tfvars.json
+!*.example.tfvars
+!terraform.example.tfvars
+!example.tfvars
+
+# ==============================================================================
+# Credentials, Keys & Secrets
+# ==============================================================================
 .env
 .env.*
 .envrc
 .direnv/
 .creds.json
+*credentials*.json
 credentials.json
 **/credentials.json
-*credentials*.json
 service-account*.json
 *-sa.json
 sa-*.json
 **/secrets/
+
+# Certificates & Private Keys
 *.pem
 *.key
 *.p12
@@ -53,42 +65,70 @@ sa-*.json
 *.crt
 !*.example.pem
 
-# GCP / gcloud local config
+# GCP / Cloud CLI Credentials
 .gcloud/
 adc.json
 application_default_credentials.json
 
-# Skaffold / Cloud Run (generated from *.tmpl)
+# ==============================================================================
+# Build Artifacts, Containers & Deployments
+# ==============================================================================
+# Skaffold & Cloud Run
 skaffold.yaml
+/skaffold
 **/cloud_run/*.yaml
 cloudrun/*.yaml
-# Skaffold CLI binary (must not be committed; GitHub limit is 100 MB)
-/skaffold
 
-# Python
+# Go Binaries & Dependencies
+bin/
+vendor/
+src/dlp-ext-proc/server
+
+# Python & Notebooks
 __pycache__/
-*.pyc
+*.py[cod]
 .venv/
 .ruff_cache/
 .ipynb_checkpoints/
 
-# Go / tests
-bin/
-vendor/
-src/dlp-ext-proc/server
+# Ruby / Kitchen
+**.gem
+**/Gemfile.lock
+**/inspec.lock
+.kitchen/
+**/.kitchen/
+**/.kitchen.local.yml
+
+# ==============================================================================
+# Tests, Tooling & Local Docs
+# ==============================================================================
 test/fixtures/shared/terraform.tfvars
 test/integration/gcloud/config.sh
-test/integration/tmp
-.kitchen/
+test/integration/tmp/
 **/.cft-reasoning-engine
+.pre-commit-cache/
+.adk/
+.workspaces/
 
-# OS / editor
+# Scratchpads & Personal Notes
+docs/.temp-apigee.md
+docs/working-commands.md
+docs/notes.md
+docs/todo.md
+docs/todos.md
+
+# Operating System
+# macOS & Windows
 .DS_Store
 Thumbs.db
 ._*
+
+# JetBrains (IntelliJ, PyCharm, etc.) & VS Code
 .idea/
 .vscode/
 *.iml
+
+# Vim & Other Editors
 *.swp
 *.swo
 *~
@@ -97,13 +137,3 @@ Thumbs.db
 *.un~
 Session.vim
 .netrwhist
-
-# Local notes / ADK / workspaces
-.adk/
-.workspaces/
-.pre-commit-cache/
-docs/.temp-apigee.md
-docs/working-commands.md
-docs/notes.md
-docs/todo.md
-docs/todos.md
