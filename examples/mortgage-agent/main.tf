@@ -265,7 +265,7 @@ module "agent_gateway" {
   agent_gateway_subnet_self_link = module.networking.agent_gateway_subnet_self_link
   agent_gateway_subnet_cidr      = var.agent_gateway_subnet_cidr
 
-  mcp_lb_target_port = var.mcp_lb_protocol == "HTTPS" ? 443 : 80
+  mcp_lb_target_port = 443
 
   enable_model_armor               = var.enable_model_armor
   model_armor_request_template_id  = var.enable_model_armor ? module.model_armor[0].request_template_id : null

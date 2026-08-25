@@ -243,8 +243,8 @@ variable "mcp_lb_protocol" {
   type        = string
   default     = "HTTPS"
   validation {
-    condition     = contains(["HTTP", "HTTPS"], var.mcp_lb_protocol)
-    error_message = "mcp_lb_protocol must be HTTP or HTTPS."
+    condition     = contains(["HTTPS"], var.mcp_lb_protocol)
+    error_message = "mcp_lb_protocol must be HTTPS."
   }
 }
 

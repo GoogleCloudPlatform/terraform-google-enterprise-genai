@@ -42,8 +42,6 @@ mcp_internal_dns_zone = {
   domain = "mcp.REPLACE_ME."
 }
 
-mcp_lb_protocol = "HTTPS"
-
 # MCP services: key = Cloud Run service name + URL-mask token (DNS A record auto-created).
 # New service = deploy + one entry. Replace the Google `placeholder` image with your own
 # before real traffic (Skaffold overwrites the tag). min_instance_count = 1 avoids cold
