@@ -94,6 +94,14 @@ resource "google_project_service_identity" "networkservices" {
   service  = "networkservices.googleapis.com"
 }
 
+resource "google_project_iam_member" "vertex_ai_agent_gateway_viewer" {
+  count    = var.enable_model_armor && var.enable_iam_bindings ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/networkservices.viewer"
+  member  = "serviceAccount:service-${var.project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
 resource "google_project_iam_member" "model_armor_dlp_user" {
   count   = local.enable_sdp_advanced ? 1 : 0
   project = var.project_id

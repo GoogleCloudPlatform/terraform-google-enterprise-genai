@@ -149,8 +149,9 @@ module "model_armor" {
   count  = var.enable_model_armor ? 1 : 0
   source = "../../modules/model_armor"
 
-  project_id = var.project_id
-  region     = var.region
+  project_id     = var.project_id
+  project_number = var.project_number
+  region         = var.region
 
   enable_model_armor   = var.enable_model_armor
   request_template_id  = var.model_armor_request_template_id

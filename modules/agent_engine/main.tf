@@ -83,12 +83,6 @@ resource "google_project_iam_member" "agent_identity_telemetry_writer" {
   member  = local.agent_identity_principal
 }
 
-resource "google_project_iam_member" "vertex_ai_agent_gateway_viewer" {
-  project = var.project_id
-  role    = "roles/networkservices.viewer"
-  member  = "serviceAccount:service-${var.project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-}
-
 # =============================================================================
 # Agent MCP invoker service account
 # Agents impersonate this SA at runtime to mint OIDC ID tokens for invoking
