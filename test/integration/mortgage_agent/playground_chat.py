@@ -79,7 +79,9 @@ def _session_id_from(session: object) -> str | None:
     return None
 
 
-def _create_session(remote: object, client: object, engine: str, user_id: str) -> str | None:
+def _create_session(
+    remote: object, client: object, engine: str, user_id: str
+) -> str | None:
     if hasattr(remote, "create_session"):
         try:
             session = remote.create_session(user_id=user_id)
@@ -108,11 +110,22 @@ def _create_session(remote: object, client: object, engine: str, user_id: str) -
                 print(f"client.sessions.create failed: {exc}", file=sys.stderr)
         except Exception as exc:  # noqa: BLE001
             print(f"client.sessions.create failed: {exc}", file=sys.stderr)
-    print("no session created; stream_query will omit session_id on first turn", file=sys.stderr)
+    print(
+        "no session created; stream_query will omit session_id on first turn",
+        file=sys.stderr,
+    )
     return None
 
 
-def _iter_events(remote: object, client: object, engine: str, *, user_id: str, message: str, session_id: str | None):
+def _iter_events(
+    remote: object,
+    client: object,
+    engine: str,
+    *,
+    user_id: str,
+    message: str,
+    session_id: str | None,
+):
     kwargs = {"user_id": user_id, "message": message}
     if session_id:
         kwargs["session_id"] = session_id
@@ -139,17 +152,25 @@ def _stream(
 ) -> str:
     chunks: list[str] = []
     n_events = 0
-    events = _iter_events(remote, client, engine, user_id=user_id, message=message, session_id=session_id)
+    events = _iter_events(
+        remote, client, engine, user_id=user_id, message=message, session_id=session_id
+    )
     for event in events:
         n_events += 1
         if n_events <= 3:
             preview = repr(event)
             if len(preview) > 500:
                 preview = preview[:500] + "..."
-            print(f"event[{n_events}] type={type(event).__name__} {preview}", file=sys.stderr)
+            print(
+                f"event[{n_events}] type={type(event).__name__} {preview}",
+                file=sys.stderr,
+            )
         chunks.append(_collect_text(event))
     text = "\n".join(c for c in chunks if c).strip()
-    print(f"stream_query events={n_events} chars={len(text)} session_id={session_id!r}", file=sys.stderr)
+    print(
+        f"stream_query events={n_events} chars={len(text)} session_id={session_id!r}",
+        file=sys.stderr,
+    )
     return text
 
 
@@ -166,14 +187,24 @@ def _stream_with_retry(
     last: Exception | None = None
     for i in range(attempts):
         try:
-            text = _stream(remote, client, engine, user_id=user_id, message=message, session_id=session_id)
+            text = _stream(
+                remote,
+                client,
+                engine,
+                user_id=user_id,
+                message=message,
+                session_id=session_id,
+            )
             if text:
                 return text
             last = RuntimeError("stream_query returned no text")
         except Exception as exc:  # noqa: BLE001 — engine often returns generic FAILED_PRECONDITION
             last = exc
         wait = 15 * (i + 1)
-        print(f"stream_query failed (attempt {i + 1}/{attempts}): {last}; sleeping {wait}s", file=sys.stderr)
+        print(
+            f"stream_query failed (attempt {i + 1}/{attempts}): {last}; sleeping {wait}s",
+            file=sys.stderr,
+        )
         time.sleep(wait)
     assert last is not None
     raise last
@@ -193,7 +224,7 @@ def main() -> None:
     client = vertexai.Client(
         project=args.project,
         location=args.region,
-        http_options=dict(api_version="v1beta1"),
+        http_options={"api_version": "v1beta1"},
     )
     remote = agent_engines.get(args.engine)
     user_id = "cft-playground"
@@ -208,7 +239,12 @@ def main() -> None:
 
     try:
         turn1 = _stream_with_retry(
-            remote, client, args.engine, user_id=user_id, message=TURN1, session_id=session_id
+            remote,
+            client,
+            args.engine,
+            user_id=user_id,
+            message=TURN1,
+            session_id=session_id,
         )
         print("turn1 complete", file=sys.stderr)
         time.sleep(10)
@@ -223,7 +259,10 @@ def main() -> None:
                 attempts=2,
             )
         except Exception as exc:  # noqa: BLE001
-            print(f"follow-up turn2 failed ({exc}); retrying standalone prompt", file=sys.stderr)
+            print(
+                f"follow-up turn2 failed ({exc}); retrying standalone prompt",
+                file=sys.stderr,
+            )
             turn2 = _stream_with_retry(
                 remote,
                 client,
