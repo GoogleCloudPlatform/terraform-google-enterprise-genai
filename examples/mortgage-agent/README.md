@@ -164,7 +164,7 @@ To register a domain via the Google Cloud Console:
 
 ## Deploy Infrastructure with Terraform
 
-All subsequent steps assume you are running them from the `examples/mortgage_agent` directory. If you run them from another directory, adjust your copy paths accordingly.
+All subsequent steps assume you are running them from the `examples/mortgage-agent` directory. If you run them from another directory, adjust your copy paths accordingly.
 
 1. Rename `terraform.example.tfvars` to `terraform.tfvars` and update the file with values from your environment:
 
