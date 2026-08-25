@@ -115,3 +115,13 @@ output "vertex_ai_service_account_email" {
   description = "Email of the AI Platform service agent granted Model Armor access"
   value       = var.enable_model_armor && var.enable_vertex_ai_integration ? "service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com" : null
 }
+
+output "model_armor_service_agent_email" {
+  description = "Email of the Model Armor service agent (gcp-sa-modelarmor) granted DLP read access (null when advanced SDP is DISABLED)"
+  value       = local.enable_sdp_advanced ? google_project_service_identity.model_armor[0].email : null
+}
+
+output "service_account_email" {
+  description = "Email of the Service Extensions service account (gcp-sa-dep) used for Model Armor"
+  value       = local.service_extensions_sa_email
+}
