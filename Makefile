@@ -66,7 +66,7 @@ docker_run:
 		-v "$(CURDIR)":/workspace \
 		-v "$(HOME)/.config/gcloud:/root/.config/gcloud" \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
-		/bin/bash -lc 'git config --global --add safe.directory "*"; exec bash'
+		/bin/bash
 
 # Execute prepare tests within the docker container
 .PHONY: docker_test_prepare

@@ -25,6 +25,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
+	"github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/test/integration/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,8 +53,6 @@ func uniqueTemplateSuffix() string {
 	return s
 }
 
-const mortgageExampleDir = "../../../examples/mortgage-agent"
-
 func TestMortgageAgent(t *testing.T) {
 	suffix := uniqueTemplateSuffix()
 	dnsZoneDomain := os.Getenv("TF_VAR_dns_zone_domain")
@@ -68,7 +67,9 @@ func TestMortgageAgent(t *testing.T) {
 	providedCertID := strings.TrimSpace(os.Getenv("TF_VAR_mcp_ssl_certificate_id"))
 	adminMembers := platformAdminMembers(t)
 
-	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir(mortgageExampleDir))
+	temp := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../examples/mortgage-agent"),
+	)
 
 	vars := map[string]interface{}{
 		"kms_prevent_destroy":  false,
@@ -98,11 +99,9 @@ func TestMortgageAgent(t *testing.T) {
 			"income-verification": "src/income-verification-api/toolspec.json",
 		},
 		"platform_admin_members":                 adminMembers,
-		"mcp_lb_protocol":                        "HTTPS",
 		"agent_gateway_iap_iam_enforcement_mode": "DRY_RUN",
 		"enable_model_armor":                     true,
 		"enable_model_armor_mcp_floor_setting":   false,
-		"model_armor_pi_jailbreak_confidence":    "LOW_AND_ABOVE",
 		"model_armor_request_template_id":        "agw-req-" + suffix,
 		"model_armor_response_template_id":       "agw-resp-" + suffix,
 		"model_armor_inspect_template_id":        "agw-insp-" + suffix,
@@ -115,12 +114,12 @@ func TestMortgageAgent(t *testing.T) {
 	}
 	if v := os.Getenv("TF_VAR_project_id"); v != "" {
 		vars["project_id"] = v
-	} else if pid := setup.GetTFSetupStringOutput("project_id"); pid != "" {
+	} else if pid := temp.GetTFSetupStringOutput("project_id"); pid != "" {
 		vars["project_id"] = pid
 	}
 	projectNum := os.Getenv("TF_VAR_project_number")
 	if projectNum == "" {
-		projectNum = setup.GetTFSetupStringOutput("project_number")
+		projectNum = temp.GetTFSetupStringOutput("project_number")
 	}
 	if projectNum == "" {
 		t.Fatal("project_number is required (TF_VAR_project_number or test/setup output)")
@@ -134,12 +133,16 @@ func TestMortgageAgent(t *testing.T) {
 		vars["dns_zone_name"] = v
 	}
 
-	bpt := tft.NewTFBlueprintTest(t, tft.WithTFDir(mortgageExampleDir), tft.WithVars(vars))
+	mortgage := tft.NewTFBlueprintTest(t,
+		tft.WithTFDir("../../../examples/mortgage-agent"),
+		tft.WithRetryableTerraformErrors(testutils.RetryableTransientErrors, 3, 2*time.Minute),
+		tft.WithVars(vars),
+	)
 
-	bpt.DefineVerify(func(assert *assert.Assertions) {
+	mortgage.DefineVerify(func(assert *assert.Assertions) {
 		phase := strings.ToLower(strings.TrimSpace(os.Getenv("VERIFY_PHASE")))
-		projectID := bpt.GetStringOutput("project_id")
-		region := bpt.GetStringOutput("region")
+		projectID := mortgage.GetStringOutput("project_id")
+		region := mortgage.GetStringOutput("region")
 		staging := fmt.Sprintf("gs://%s-mcp-cloudbuild", projectID)
 
 		runInfra := phase == "" || phase == "all" || phase == "infra"
@@ -150,7 +153,7 @@ func TestMortgageAgent(t *testing.T) {
 		}
 
 		if runInfra {
-			verifyInfra(t, assert, bpt, mcpDomain, providedCertID)
+			verifyInfra(t, assert, mortgage, mcpDomain, providedCertID)
 		}
 		if runApplyAgent {
 			applyAgentRuntime(
@@ -159,11 +162,11 @@ func TestMortgageAgent(t *testing.T) {
 				projectNum,
 				orgID(),
 				region,
-				bpt.GetStringOutput("artifact_registry_url"),
-				bpt.GetStringOutput("agent_gateway_id"),
-				bpt.GetStringOutput("agent_mcp_invoker_email"),
+				mortgage.GetStringOutput("artifact_registry_url"),
+				mortgage.GetStringOutput("agent_gateway_id"),
+				mortgage.GetStringOutput("agent_mcp_invoker_email"),
 				staging,
-				bpt.GetStringOutput("mcp_internal_dns_domain"),
+				mortgage.GetStringOutput("mcp_internal_dns_domain"),
 			)
 		}
 		if runVerifyAgent {
@@ -171,7 +174,7 @@ func TestMortgageAgent(t *testing.T) {
 		}
 	})
 
-	bpt.Test()
+	mortgage.Test()
 }
 
 func platformAdminMembers(t *testing.T) []string {
@@ -196,28 +199,28 @@ func platformAdminMembers(t *testing.T) []string {
 	return members
 }
 
-func verifyInfra(t *testing.T, assert *assert.Assertions, bpt *tft.TFBlueprintTest, mcpDomain, providedCertID string) {
+func verifyInfra(t *testing.T, assert *assert.Assertions, mortgage *tft.TFBlueprintTest, mcpDomain, providedCertID string) {
 	t.Helper()
 
-	projectID := bpt.GetStringOutput("project_id")
-	region := bpt.GetStringOutput("region")
+	projectID := mortgage.GetStringOutput("project_id")
+	region := mortgage.GetStringOutput("region")
 	assert.NotEmpty(projectID)
 	assert.NotEmpty(region)
-	assert.NotEmpty(bpt.GetStringOutput("vpc_id"))
-	assert.NotEmpty(bpt.GetStringOutput("agent_gateway_id"))
-	assert.NotEmpty(bpt.GetStringOutput("mcp_internal_lb_ip"))
-	assert.NotEmpty(bpt.GetStringOutput("agent_mcp_invoker_email"))
-	assert.Equal(strings.TrimSuffix(mcpDomain, ".")+".", bpt.GetStringOutput("mcp_internal_dns_domain"))
+	assert.NotEmpty(mortgage.GetStringOutput("vpc_id"))
+	assert.NotEmpty(mortgage.GetStringOutput("agent_gateway_id"))
+	assert.NotEmpty(mortgage.GetStringOutput("mcp_internal_lb_ip"))
+	assert.NotEmpty(mortgage.GetStringOutput("agent_mcp_invoker_email"))
+	assert.Equal(strings.TrimSuffix(mcpDomain, ".")+".", mortgage.GetStringOutput("mcp_internal_dns_domain"))
 
-	attachedCertID := bpt.GetStringOutput("mcp_ssl_certificate_id")
+	attachedCertID := mortgage.GetStringOutput("mcp_ssl_certificate_id")
 	assert.NotEmpty(attachedCertID)
 	if providedCertID != "" {
 		assert.Equal(providedCertID, attachedCertID)
 	}
 
-	op := gcloud.Runf(t, "compute networks describe %s --project %s", bpt.GetStringOutput("vpc_name"), projectID)
+	op := gcloud.Runf(t, "compute networks describe %s --project %s", mortgage.GetStringOutput("vpc_name"), projectID)
 	assert.Equal("REGIONAL", op.Get("routingConfig.routingMode").String())
-	assert.Contains(bpt.GetStringOutput("agent_gateway_id"), "agent-gateway")
+	assert.Contains(mortgage.GetStringOutput("agent_gateway_id"), "agent-gateway")
 
 	certProject := projectID
 	certLocation := region
