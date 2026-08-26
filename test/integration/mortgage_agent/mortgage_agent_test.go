@@ -71,7 +71,9 @@ func TestMortgageAgent(t *testing.T) {
 	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir(mortgageExampleDir))
 
 	vars := map[string]interface{}{
-		"dns_zone_domain": dnsZoneDomain,
+		"kms_prevent_destroy":  false,
+		"bucket_force_destroy": true,
+		"dns_zone_domain":      dnsZoneDomain,
 		"mcp_internal_dns_zone": map[string]interface{}{
 			"name":   "mcp-server-internal",
 			"domain": mcpDomain,
