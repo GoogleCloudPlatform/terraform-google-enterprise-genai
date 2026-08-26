@@ -50,6 +50,46 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage destroy --verbose --test-dir /workspace/test/integration']
 
+# Mortgage example (reuses prepare/sleep/org from this pipeline)
+- id: create-mortgage
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage init --verbose --test-dir /workspace/test/integration']
+
+- id: converge-mortgage
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage apply --verbose --test-dir /workspace/test/integration']
+
+- id: verify-mortgage-infra
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=infra cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
+
+- id: apply-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=apply-agent cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
+
+- id: verify-mortgage-agent
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'VERIFY_PHASE=verify-agent cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
+
+- id: destroy-mortgage
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args:
+  - '/bin/bash'
+  - '-c'
+  - |
+    echo "=== Cleaning up Reasoning Engine deployed during apply-agent ==="
+    if [ -f /workspace/examples/mortgage-agent/.cft-reasoning-engine ]; then
+      ENGINE=$$(cat /workspace/examples/mortgage-agent/.cft-reasoning-engine)
+      if [ -n "$$ENGINE" ]; then
+        echo "Deleting Reasoning Engine: $$ENGINE"
+        TOKEN=$$(gcloud auth print-access-token)
+        curl -sS -X DELETE -H "Authorization: Bearer $${TOKEN}" "https://us-central1-aiplatform.googleapis.com/v1beta1/$${ENGINE}?force=true" || true
+      fi
+    fi
+
+    echo "=== Running CFT Blueprint Test teardown and Terraform destroy ==="
+    cft test run TestMortgageAgent --stage destroy --verbose --test-dir /workspace/test/integration
+
 tags:
 - 'ci'
 - 'integration'
@@ -60,7 +100,15 @@ options:
   - 'TF_VAR_create_access_context_manager_access_policy=false'
   - 'TF_VAR_default_region=us-central1'
   - 'TF_VAR_instance_region=us-central1'
+  - 'TF_VAR_dns_zone_domain=$_DNS_ZONE_DOMAIN'
+  - 'TF_VAR_dns_zone_name=$_DNS_ZONE_NAME'
+  - 'TF_VAR_mcp_ssl_certificate_id=$_MCP_SSL_CERTIFICATE_ID'
+  - 'TF_VAR_platform_admin_members=$_PLATFORM_ADMIN_MEMBERS'
   - 'TF_IN_AUTOMATION=true'
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
   _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.17'
+  _DNS_ZONE_DOMAIN: ''
+  _DNS_ZONE_NAME: ''
+  _MCP_SSL_CERTIFICATE_ID: ''
+  _PLATFORM_ADMIN_MEMBERS: '[]'

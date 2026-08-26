@@ -34,7 +34,7 @@ type playgroundTurns struct {
 
 func exampleDir() string {
 	_, thisFile, _, _ := runtime.Caller(0)
-	return filepath.Clean(filepath.Join(filepath.Dir(thisFile), "../../../examples/mortgage_agent"))
+	return filepath.Clean(filepath.Join(filepath.Dir(thisFile), "../../../examples/mortgage-agent"))
 }
 
 func testDir() string {

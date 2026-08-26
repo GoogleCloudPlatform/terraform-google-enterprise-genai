@@ -52,6 +52,8 @@ func uniqueTemplateSuffix() string {
 	return s
 }
 
+const mortgageExampleDir = "../../../examples/mortgage-agent"
+
 func TestMortgageAgent(t *testing.T) {
 	suffix := uniqueTemplateSuffix()
 	dnsZoneDomain := os.Getenv("TF_VAR_dns_zone_domain")
@@ -66,10 +68,10 @@ func TestMortgageAgent(t *testing.T) {
 	providedCertID := strings.TrimSpace(os.Getenv("TF_VAR_mcp_ssl_certificate_id"))
 	adminMembers := platformAdminMembers(t)
 
+	setup := tft.NewTFBlueprintTest(t, tft.WithTFDir(mortgageExampleDir))
+
 	vars := map[string]interface{}{
-		"kms_prevent_destroy":  false,
-		"bucket_force_destroy": true,
-		"dns_zone_domain":      dnsZoneDomain,
+		"dns_zone_domain": dnsZoneDomain,
 		"mcp_internal_dns_zone": map[string]interface{}{
 			"name":   "mcp-server-internal",
 			"domain": mcpDomain,
@@ -111,10 +113,18 @@ func TestMortgageAgent(t *testing.T) {
 	}
 	if v := os.Getenv("TF_VAR_project_id"); v != "" {
 		vars["project_id"] = v
+	} else if pid := setup.GetTFSetupStringOutput("project_id"); pid != "" {
+		vars["project_id"] = pid
 	}
-	if v := os.Getenv("TF_VAR_project_number"); v != "" {
-		vars["project_number"] = v
+	projectNum := os.Getenv("TF_VAR_project_number")
+	if projectNum == "" {
+		projectNum = setup.GetTFSetupStringOutput("project_number")
 	}
+	if projectNum == "" {
+		t.Fatal("project_number is required (TF_VAR_project_number or test/setup output)")
+	}
+	vars["project_number"] = projectNum
+	_ = os.Setenv("TF_VAR_project_number", projectNum)
 	if v := os.Getenv("TF_VAR_org_id"); v != "" {
 		vars["org_id"] = v
 	}
@@ -122,7 +132,7 @@ func TestMortgageAgent(t *testing.T) {
 		vars["dns_zone_name"] = v
 	}
 
-	bpt := tft.NewTFBlueprintTest(t, tft.WithVars(vars))
+	bpt := tft.NewTFBlueprintTest(t, tft.WithTFDir(mortgageExampleDir), tft.WithVars(vars))
 
 	bpt.DefineVerify(func(assert *assert.Assertions) {
 		phase := strings.ToLower(strings.TrimSpace(os.Getenv("VERIFY_PHASE")))
@@ -144,7 +154,7 @@ func TestMortgageAgent(t *testing.T) {
 			applyAgentRuntime(
 				t,
 				projectID,
-				projectNumber(),
+				projectNum,
 				orgID(),
 				region,
 				bpt.GetStringOutput("artifact_registry_url"),

@@ -18,6 +18,10 @@ output "project_id" {
   value = module.project.project_id
 }
 
+output "project_number" {
+  value = module.project.project_number
+}
+
 output "parent_folder" {
   description = "Parent folder id"
   value       = split("/", google_folder.test_folder.id)[1]
