@@ -470,7 +470,6 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | model\_armor\_vertex\_ai\_inspect\_only | When true, Vertex AI uses INSPECT\_ONLY mode; when false, uses INSPECT\_AND\_BLOCK | `bool` | `false` | no |
 | name\_prefix | Prefix for resource names | `string` | `"gateway"` | no |
 | org\_id | GCP organization ID (numeric). Required for Agent Identity IAM bindings. | `string` | `null` | no |
-| platform\_admin\_members | List of IAM members granted roles: discoveryengine.admin always; modelarmor.admin and modelarmor.floorSettingsAdmin when enable\_model\_armor; aiplatform.user (e.g. ["user:admin@example.com"]) | `list(string)` | `[]` | no |
 | primary\_subnet\_cidr | CIDR range for the primary subnet | `string` | `"10.0.0.0/20"` | no |
 | project\_deletion\_policy | Project deletion policy. Possible values are: "PREVENT", "ABANDON", "DELETE". | `string` | `"DELETE"` | no |
 | project\_id | The GCP project ID | `string` | n/a | yes |
@@ -480,6 +479,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | psc\_subnet\_cidr | CIDR range for the Private Service Connect subnet | `string` | `"10.10.0.0/24"` | no |
 | region | The GCP region for resources | `string` | `"us-central1"` | no |
 | subnet\_name | Name of the primary subnet | `string` | `"mcp-subnet-us-central1"` | no |
+| terraform\_service\_account | The email address of the service account that will run the Terraform code granted roles: discoveryengine.admin always; modelarmor.admin and modelarmor.floorSettingsAdmin when enable\_model\_armor; aiplatform.user (e.g. ["serviceAccount:your\_user@example.com"]) | `string` | n/a | yes |
 | vpc\_name | Name of the VPC network | `string` | `"gateway-vpc"` | no |
 
 ## Outputs

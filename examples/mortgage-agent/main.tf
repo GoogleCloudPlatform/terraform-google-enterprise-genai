@@ -156,7 +156,7 @@ module "model_armor" {
   request_template_id  = var.model_armor_request_template_id
   response_template_id = var.model_armor_response_template_id
 
-  platform_admin_members = var.platform_admin_members
+  terraform_service_account = var.terraform_service_account
 
   rai_filters = var.model_armor_rai_filters
 
@@ -183,8 +183,8 @@ module "agent_engine" {
   project_id     = var.project_id
   project_number = var.project_number
 
-  org_id                 = var.org_id
-  platform_admin_members = var.platform_admin_members
+  org_id                    = var.org_id
+  terraform_service_account = var.terraform_service_account
 
   depends_on = [time_sleep.wait_enable_apis]
 }
@@ -296,17 +296,15 @@ resource "google_dns_record_set" "mcp_service" {
 }
 
 resource "google_project_iam_member" "discoveryengine_admin" {
-  for_each = toset(var.platform_admin_members)
-  project  = var.project_id
-  role     = "roles/discoveryengine.admin"
-  member   = each.key
+  project = var.project_id
+  role    = "roles/discoveryengine.admin"
+  member  = "serviceAccount:${var.terraform_service_account}"
 }
 
 resource "google_project_iam_member" "run_admin" {
-  for_each = toset(var.platform_admin_members)
-  project  = var.project_id
-  role     = "roles/run.admin"
-  member   = each.key
+  project = var.project_id
+  role    = "roles/run.admin"
+  member  = "serviceAccount:${var.terraform_service_account}"
 }
 
 module "agent_registry_endpoints" {

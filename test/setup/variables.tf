@@ -47,5 +47,5 @@ variable "instance_region" {
 
 variable "dns_zone_domain" {
   description = "Publiz Zone for DNS Domain."
-  default = null
+  default     = null
 }

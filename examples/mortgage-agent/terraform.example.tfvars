@@ -18,7 +18,7 @@ project_number = "000000000000" # format "000000000000"
 
 org_id = "000000000000" # format "000000000000"
 
-platform_admin_members = ["user:YOUR_USER@example.com"]
+terraform_service_account = "REPLACE_ME"
 
 # IAP Enforcement Mode ("DRY_RUN" or null)
 agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"

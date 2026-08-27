@@ -113,5 +113,5 @@ resource "google_service_account_iam_member" "agent_identity_token_creator" {
 resource "google_project_iam_member" "aiplatform_admin" {
   project = var.project_id
   role    = "roles/aiplatform.user"
-  member   = "serviceAccount:${var.terraform_service_account}"
+  member  = "serviceAccount:${var.terraform_service_account}"
 }

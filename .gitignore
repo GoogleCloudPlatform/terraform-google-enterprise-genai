@@ -37,9 +37,7 @@ backend.tf
 *.tfvars
 **/*.tfvars
 *.tfvars.json
-!*.example.tfvars
-!terraform.example.tfvars
-!example.tfvars
+*.example.tfvars
 
 # ==============================================================================
 # Credentials, Keys & Secrets
