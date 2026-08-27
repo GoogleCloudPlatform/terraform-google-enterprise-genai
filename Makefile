@@ -46,10 +46,6 @@ generate_docs: docker_generate_docs
 .PHONY: docker_run
 docker_run:
 	docker run --rm -it \
-		-e CFT_DISABLE_INIT_CREDENTIALS=yes \
-		-e GIT_CONFIG_COUNT=1 \
-		-e GIT_CONFIG_KEY_0=safe.directory \
-		-e GIT_CONFIG_VALUE_0='*' \
 		-e SERVICE_ACCOUNT_JSON \
 		-e TF_VAR_org_id \
 		-e TF_VAR_folder_id \
