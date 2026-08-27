@@ -55,16 +55,7 @@ docker_run:
 		-e TF_VAR_folder_id \
 		-e TF_VAR_billing_account \
 		-e TF_VAR_group_email \
-		-e TF_VAR_project_id \
-		-e TF_VAR_project_number \
-		-e TF_VAR_dns_zone_domain \
-		-e TF_VAR_dns_zone_name \
-		-e TF_VAR_mcp_ssl_certificate_id \
-		-e TF_VAR_platform_admin_members \
-		-e CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE=/root/.config/gcloud/application_default_credentials.json \
-		-e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
 		-v "$(CURDIR)":/workspace \
-		-v "$(HOME)/.config/gcloud:/root/.config/gcloud" \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
 		/bin/bash
 
@@ -107,7 +98,7 @@ docker_test_integration:
 		-e TF_VAR_dns_zone_domain \
 		-e TF_VAR_dns_zone_name \
 		-e TF_VAR_mcp_ssl_certificate_id \
-		-e TF_VAR_platform_admin_members \
+		-e TF_VAR_terraform_service_account \
 		-v "$(CURDIR)":/workspace \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
 		/usr/local/bin/test_integration.sh
