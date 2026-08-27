@@ -32,11 +32,6 @@ resource "random_id" "project_id_suffix" {
 #in the project module's IAM bindings
 locals {
   enabled_services = toset(var.enabled_services)
-
-  need_api_wait = anytrue([
-    for svc, d in data.http.enabled_service :
-    try(jsondecode(d.response_body).state, "UNKNOWN") != "ENABLED"
-  ])
 }
 
 data "google_client_config" "default" {}
@@ -59,7 +54,6 @@ resource "google_project_service" "enable_apis" {
 }
 
 resource "time_sleep" "wait_enable_apis" {
-  count           = local.need_api_wait ? 1 : 0
   create_duration = "60s"
 
   depends_on = [google_project_service.enable_apis]
