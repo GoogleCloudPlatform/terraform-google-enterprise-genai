@@ -52,5 +52,8 @@ var (
 
 		// Error 400: The eTag provided {} does not match the eTag of the current version of the Access Policy, which is {}.
 		".*Error 400: The eTag provided.*does not match the eTag of the current version of the Access Policy, which is.*": "Conflict during Access Policy configuration.",
+
+		// Error code 10, message: There is another ongoing operation for the same AgentGateway
+		".*There is another ongoing operation for the same AgentGateway.*": "Concurrent operation in progress for AgentGateway.",
 	}
 )

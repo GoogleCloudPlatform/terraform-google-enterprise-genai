@@ -51,6 +51,8 @@ docker_run:
 		-e TF_VAR_folder_id \
 		-e TF_VAR_billing_account \
 		-e TF_VAR_group_email \
+		-e TF_VAR_dns_zone_domain \
+		-e TF_VAR_mcp_ssl_certificate_id \
 		-v "$(CURDIR)":/workspace \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
 		/bin/bash

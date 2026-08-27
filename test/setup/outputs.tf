@@ -80,3 +80,11 @@ output "cloud_source_service_catalog_repo_name" {
 output "instance_region" {
   value = var.instance_region
 }
+
+output "random" {
+  value = random_string.suffix.result
+}
+
+output "dns_zone_domain" {
+  value = length(google_dns_managed_zone.public_zone) > 0 ? google_dns_managed_zone.public_zone[0].dns_name : var.dns_zone_domain
+}
