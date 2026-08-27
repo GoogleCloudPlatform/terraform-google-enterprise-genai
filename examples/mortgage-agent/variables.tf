@@ -40,10 +40,9 @@ variable "org_id" {
   default     = null
 }
 
-variable "platform_admin_members" {
-  description = "List of IAM members granted roles: discoveryengine.admin always; modelarmor.admin and modelarmor.floorSettingsAdmin when enable_model_armor; aiplatform.user (e.g. [\"user:admin@example.com\"])"
-  type        = list(string)
-  default     = []
+variable "terraform_service_account" {
+  description = "The email address of the service account that will run the Terraform code granted roles: discoveryengine.admin always; modelarmor.admin and modelarmor.floorSettingsAdmin when enable_model_armor; aiplatform.user (e.g. [\"serviceAccount:your_user@example.com\"])"
+  type        = string
 }
 
 variable "project_deletion_policy" {

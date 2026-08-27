@@ -29,8 +29,7 @@ variable "org_id" {
   type        = string
 }
 
-variable "platform_admin_members" {
+variable "terraform_service_account" {
   description = "List of IAM members granted roles/aiplatform.user for Agent Engine access"
-  type        = list(string)
-  default     = []
+  type        = string
 }

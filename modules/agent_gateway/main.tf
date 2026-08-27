@@ -97,7 +97,7 @@ resource "google_network_services_agent_gateway" "this" {
 
 resource "time_sleep" "wait_for_gateway" {
   depends_on      = [google_network_services_agent_gateway.this]
-  create_duration = "30s"
+  create_duration = "120s"
 }
 
 resource "google_network_services_authz_extension" "iap" {

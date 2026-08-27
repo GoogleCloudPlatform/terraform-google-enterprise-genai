@@ -200,10 +200,9 @@ variable "log_sanitize_operations" {
   default     = true
 }
 
-variable "platform_admin_members" {
+variable "terraform_service_account" {
   description = "List of IAM members to grant modelarmor.admin and modelarmor.floorSettingsAdmin roles (e.g. [\"user:admin@example.com\"])"
-  type        = list(string)
-  default     = []
+  type        = string
 }
 
 # ==============================================================================

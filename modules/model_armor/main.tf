@@ -127,17 +127,17 @@ resource "google_project_iam_member" "service_extensions_model_armor_user" {
 }
 
 resource "google_project_iam_member" "model_armor_admin" {
-  for_each = var.enable_model_armor ? toset(var.platform_admin_members) : toset([])
+  count = var.enable_model_armor ? 1 : 0
   project  = var.project_id
   role     = "roles/modelarmor.admin"
-  member   = each.value
+  member  = "serviceAccount:${local.service_extensions_sa_email}"
 }
 
 resource "google_project_iam_member" "model_armor_floor_settings_admin" {
-  for_each = var.enable_model_armor ? toset(var.platform_admin_members) : toset([])
+  count = var.enable_model_armor ? 1 : 0
   project  = var.project_id
   role     = "roles/modelarmor.floorSettingsAdmin"
-  member   = each.value
+  member  = "serviceAccount:${local.service_extensions_sa_email}"
 }
 
 resource "google_project_iam_member" "vertex_ai_model_armor_user" {

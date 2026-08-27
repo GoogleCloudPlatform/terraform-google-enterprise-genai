@@ -192,13 +192,11 @@ resource "google_project_iam_member" "project_roles" {
 
   project = var.project_id
   role    = each.value
-  member  = var.platform_admin_members[0]
+  member   = "serviceAccount:${var.terraform_service_account}"
 }
 
 resource "google_project_iam_member" "mcp_sa_impersonate" {
-  for_each = toset(var.platform_admin_members)
-
   project = var.project_id
   role    = "roles/iam.serviceAccountUser"
-  member  = each.value
+  member   = "serviceAccount:${var.terraform_service_account}"
 }

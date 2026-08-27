@@ -111,9 +111,7 @@ resource "google_service_account_iam_member" "agent_identity_token_creator" {
 # =============================================================================
 
 resource "google_project_iam_member" "aiplatform_admin" {
-  for_each = toset(var.platform_admin_members)
-
   project = var.project_id
   role    = "roles/aiplatform.user"
-  member  = each.value
+  member   = "serviceAccount:${var.terraform_service_account}"
 }
