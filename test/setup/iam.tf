@@ -18,7 +18,6 @@ locals {
   int_required_roles = [
     "roles/owner"
   ]
-
   int_org_required_roles = [
     "roles/billing.user",
     "roles/resourcemanager.organizationAdmin",
@@ -35,28 +34,6 @@ locals {
     "roles/resourcemanager.organizationViewer",
     "roles/viewer",
     "roles/source.writer",
-    "roles/modelarmor.floorSettingsAdmin",
-    "roles/iap.admin",
-    "roles/aiplatform.admin",
-    "roles/certificatemanager.ownerEditor",
-    "roles/resourcemanager.projectIamAdmin",
-    "roles/serviceusage.serviceUsageAdmin",
-    "roles/iam.serviceAccountAdmin",
-    "roles/iam.serviceAccountUser",
-    "roles/compute.networkAdmin",
-    "roles/compute.loadBalancerAdmin",
-    "roles/networkservices.admin",
-    "roles/networksecurity.admin",
-    "roles/dns.admin",
-    "roles/run.admin",
-    "roles/artifactregistry.admin",
-    "roles/cloudbuild.builds.editor",
-    "roles/storage.admin",
-    "roles/cloudkms.admin",
-    "roles/agentregistry.admin",
-    "roles/modelarmor.admin",
-    "roles/dlp.admin",
-    "roles/monitoring.admin",
   ]
 }
 
