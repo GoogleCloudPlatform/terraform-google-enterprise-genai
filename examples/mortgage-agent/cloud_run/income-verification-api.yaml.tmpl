@@ -15,8 +15,8 @@ spec:
         run.googleapis.com/startupProbeType: Default
       annotations:
         run.googleapis.com/sessionAffinity: "false"
-        autoscaling.knative.dev/minScale: 1
-        autoscaling.knative.dev/maxScale: 3
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "3"
         run.googleapis.com/cpu-throttling: "true"
         run.googleapis.com/startup-cpu-boost: "true"
     spec:
@@ -35,7 +35,7 @@ spec:
           value: income-verification
         resources:
           limits:
-            cpu: 1
+            cpu: "1"
             memory: 512Mi
         startupProbe:
           timeoutSeconds: 240

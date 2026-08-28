@@ -1,0 +1,6 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/ci-genai-muwzor-nvxf/gateway-docker/legacy-dms:cft', '.']
+images:
+  - 'us-central1-docker.pkg.dev/ci-genai-muwzor-nvxf/gateway-docker/legacy-dms:cft'
+serviceAccount: 'projects/ci-genai-muwzor-nvxf/serviceAccounts/ci-account@ci-genai-muwzor-nvxf.iam.gserviceaccount.com'

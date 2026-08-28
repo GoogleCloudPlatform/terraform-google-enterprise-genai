@@ -18,13 +18,13 @@ output "org_id" {
 }
 
 output "project_id" {
-  description = "Project Number"
-  value       = var.project_number
+  description = "Project ID"
+  value       = var.project_id
 }
 
 output "project_number" {
-  description = "Project ID"
-  value       = var.project_id
+  description = "Project Number"
+  value       = var.project_number
 }
 
 output "region" {

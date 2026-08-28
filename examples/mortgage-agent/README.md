@@ -517,8 +517,8 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | model\_armor\_service\_agent\_email | Model Armor service agent (gcp-sa-modelarmor) granted DLP read access (null when model\_armor\_sdp\_enforcement = DISABLED) |
 | network\_self\_link | The self-link of the VPC network |
 | org\_id | Org ID |
-| project\_id | Project Number |
-| project\_number | Project ID |
+| project\_id | Project ID |
+| project\_number | Project Number |
 | psc\_interface\_dns\_domain | Domain name for PSC Interface DNS peering (ends with a dot) |
 | psc\_interface\_dns\_peering\_domain | DNS domain for PSC Interface DNS peering (pass to deploy\_agent.py --dns-peering-domain) |
 | psc\_interface\_dns\_zone\_name | DNS zone name for PSC Interface DNS peering |
