@@ -14,7 +14,7 @@
 
 output "org_id" {
   description = "Org ID"
-  value = var.org_id
+  value       = var.org_id
 }
 
 output "project_id" {
