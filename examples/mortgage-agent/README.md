@@ -488,6 +488,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 |------|-------------|
 | agent\_gateway\_id | Full resource ID of the Agent Gateway |
 | agent\_gateway\_mtls\_endpoint | mTLS endpoint clients use to reach the Agent Gateway |
+| agent\_gateway\_name | Agent Gateway name |
 | agent\_gateway\_registry\_uri | URI of the project-local agent registry the gateway is bound to |
 | agent\_gateway\_root\_certificates | Root certificates clients use to validate the Agent Gateway mTLS endpoint |
 | agent\_gateway\_service\_extensions\_service\_account | Service account the Agent Gateway uses to call out to authz extensions |
@@ -528,6 +529,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | subnet\_id | The ID of the primary subnet |
 | subnet\_name | Name of the primary subnet |
 | subnet\_self\_link | The self-link of the primary subnet |
+| terraform\_service\_account | The email address of the service account that will run the Terraform code. |
 | vpc\_id | The ID of the VPC network |
 | vpc\_name | The name of the VPC network |
 

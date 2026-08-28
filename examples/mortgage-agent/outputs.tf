@@ -68,6 +68,11 @@ output "psc_subnet_self_link" {
   value       = module.networking.psc_subnet_self_link
 }
 
+output "terraform_service_account" {
+  description = "The email address of the service account that will run the Terraform code."
+  value       = var.terraform_service_account
+}
+
 # MCP Services (Cloud Run) Outputs
 
 output "mcp_service_names" {
@@ -213,6 +218,11 @@ output "psc_interface_dns_peering_domain" {
 }
 
 # Agent Gateway Outputs
+
+output "agent_gateway_name" {
+  description = "Agent Gateway name"
+  value       = var.agent_gateway_name
+}
 
 output "agent_gateway_id" {
   description = "Full resource ID of the Agent Gateway"
