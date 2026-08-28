@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+//	https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,7 @@
 package integration
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,6 +23,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
@@ -43,6 +45,120 @@ func runExecCmd(t *testing.T, dir string, env []string, name string, args ...str
 		t.Fatalf("Command '%s %s' failed: %v\nOutput:\n%s", name, strings.Join(args, " "), err, outputStr)
 	}
 	return outputStr
+}
+
+type playgroundTurns struct {
+	Turn1 string `json:"turn1"`
+	Turn2 string `json:"turn2"`
+}
+
+const (
+	turn1Prompt = "I am reviewing the Sterling familys current application. Can you summarize their 2024 and 2025 tax returns and verify if their total household income meets our 2026 debt-to-income requirements?"
+	turn2Prompt = "Can you send a summary of this to my email jane@example.com"
+)
+
+func curlReasoningEngineQuery(t *testing.T, region, engineResourceName, userMessage string) (string, error) {
+	t.Helper()
+
+	endpoint := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/%s:query", region, engineResourceName)
+
+	reqBodyMap := map[string]interface{}{
+		"class_method": "query",
+		"input": map[string]interface{}{
+			"message": userMessage,
+			"user_id": "cft-playground",
+		},
+	}
+
+	reqBodyBytes, err := json.Marshal(reqBodyMap)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request payload: %w", err)
+	}
+
+	cmdStr := fmt.Sprintf(
+		`curl -sS -X POST "%s" `+
+			`-H "Authorization: Bearer $(gcloud auth print-access-token)" `+
+			`-H "Content-Type: application/json" `+
+			`-d '%s'`,
+		endpoint,
+		string(reqBodyBytes),
+	)
+
+	var outputStr string
+	maxAttempts := 5
+	for i := 1; i <= maxAttempts; i++ {
+		cmd := exec.Command("bash", "-c", cmdStr)
+		out, runErr := cmd.CombinedOutput()
+		outputStr = string(out)
+
+		if runErr == nil && !strings.Contains(outputStr, `"error"`) && len(outputStr) > 0 {
+			return outputStr, nil
+		}
+
+		t.Logf("Attempt %d/%d failed: %v | Response: %s", i, maxAttempts, runErr, outputStr)
+		time.Sleep(time.Duration(15*i) * time.Second)
+	}
+
+	return outputStr, fmt.Errorf("reasoning engine query failed after %d attempts: %s", maxAttempts, outputStr)
+}
+
+func assertPlaygroundTurns(t *testing.T, assert *assert.Assertions, turns playgroundTurns) {
+	t.Helper()
+	t.Logf("Playground turn 1:\n%s", turns.Turn1)
+	t.Logf("Playground turn 2:\n%s", turns.Turn2)
+
+	turn1 := strings.ToLower(turns.Turn1)
+	turn2 := strings.ToLower(turns.Turn2)
+	assert.NotEmpty(turns.Turn1)
+	assert.NotEmpty(turns.Turn2)
+
+	assert.NotContains(turn1, `"count": 0`, "list_mcp_connections must not return an empty registry")
+	assert.NotContains(turn1, `"count":0`, "list_mcp_connections must not return an empty registry")
+	assert.False(
+		strings.Contains(turn1, "no mcp services") ||
+			strings.Contains(turn1, "were discovered") ||
+			strings.Contains(turn1, "unable to perform"),
+		"turn 1 must not refuse for missing MCP discovery: %s", turns.Turn1,
+	)
+	assert.Contains(turn1, "sterling", "turn 1 should use Document Management / income tools for the Sterling family")
+	assert.True(
+		strings.Contains(turn1, "search_documents") ||
+			strings.Contains(turn1, "get_document") ||
+			strings.Contains(turn1, "verify_applicant") ||
+			strings.Contains(turn1, "legacy_dms") ||
+			strings.Contains(turn1, "income_verification"),
+		"turn 1 should call DMS or income MCP tools: %s", turns.Turn1,
+	)
+	assert.True(
+		strings.Contains(turn1, "tax") ||
+			strings.Contains(turn1, "income") ||
+			strings.Contains(turn1, "dti") ||
+			strings.Contains(turn1, "agi"),
+		"turn 1 should summarize tax returns or income/DTI: %s", turns.Turn1,
+	)
+
+	for _, ssn := range []string{"323-45-6789", "321-54-9876", "323456789", "321549876"} {
+		assert.NotContains(turns.Turn1, ssn, "SSNs must be redacted in the Playground response")
+		assert.NotContains(turns.Turn2, ssn, "SSNs must be redacted in the Playground response")
+	}
+
+	assert.False(
+		strings.Contains(turn2, "cannot send") ||
+			strings.Contains(turn2, "not authorized") ||
+			strings.Contains(turn2, "permission denied") ||
+			strings.Contains(turn2, "403") ||
+			strings.Contains(turn2, "do not have access") ||
+			strings.Contains(turn2, "unable to") ||
+			strings.Contains(turn2, "no mcp"),
+		"IAP is DRY_RUN so the email tool should succeed: %s", turns.Turn2,
+	)
+	assert.True(
+		strings.Contains(turn2, "send_email") ||
+			strings.Contains(turn2, "sent") ||
+			strings.Contains(turn2, "message_id") ||
+			strings.Contains(turn2, "successfully"),
+		"turn 2 should confirm the summary email was sent: %s", turns.Turn2,
+	)
 }
 
 func TestMortgageAgent(t *testing.T) {
@@ -258,7 +374,35 @@ serviceAccount: 'projects/%s/serviceAccounts/%s'
 				err = os.WriteFile(outPath, []byte(reasoningEngineName+"\n"), 0644)
 				assert.NoError(err, "Failed to write AGENT_ENGINE_OUT file")
 			}
+
+			certSSLID := os.Getenv("TF_VAR_certificate_ssl_id")
+			dnsZone := os.Getenv("TF_VAR_dns_zone_domain")
+			if certSSLID == "" || dnsZone == "" {
+				t.Log("Skipping agent chat test: TF_VAR_certificate_ssl_id or TF_VAR_dns_zone_domain is empty.")
+				return
+			}
+
+			t.Log("Waiting 30s for the Reasoning Engine revision to stabilize...")
+			time.Sleep(30 * time.Second)
+
+			t.Log("Sending Turn 1 to Reasoning Engine via CURL...")
+			turn1Resp, err := curlReasoningEngineQuery(t, region, reasoningEngineName, turn1Prompt)
+			assert.NoError(err, "Turn 1 request failed")
+
+			time.Sleep(10 * time.Second)
+
+			t.Log("Sending Turn 2 (Email) to Reasoning Engine via CURL...")
+			turn2Resp, err := curlReasoningEngineQuery(t, region, reasoningEngineName, turn2Prompt)
+			assert.NoError(err, "Turn 2 request failed")
+
+			turns := playgroundTurns{
+				Turn1: turn1Resp,
+				Turn2: turn2Resp,
+			}
+
+			assertPlaygroundTurns(t, assert, turns)
 		})
 	})
+
 	mortgageAgent.Test()
 }
