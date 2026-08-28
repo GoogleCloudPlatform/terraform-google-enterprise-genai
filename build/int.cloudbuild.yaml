@@ -60,7 +60,7 @@ steps:
 
 - id: apply-mortgage-agent
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'VERIFY_PHASE=apply-agent cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
 
 - id: verify-mortgage-agent
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'

@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+output "org_id" {
+  description = "Org ID"
+  value = var.org_id
+}
+
 output "project_id" {
+  description = "Project Number"
+  value       = var.project_number
+}
+
+output "project_number" {
   description = "Project ID"
   value       = var.project_id
 }
