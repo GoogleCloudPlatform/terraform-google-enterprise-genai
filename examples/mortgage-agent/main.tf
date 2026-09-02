@@ -118,6 +118,8 @@ resource "google_storage_bucket_iam_member" "cloudbuild_service_agent" {
   bucket = google_storage_bucket.cloudbuild.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:service-${var.project_number}@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+
+  depends_on = [time_sleep.wait_enable_apis]
 }
 
 module "certificates" {
