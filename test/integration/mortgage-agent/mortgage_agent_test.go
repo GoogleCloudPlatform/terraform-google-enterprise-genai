@@ -102,6 +102,53 @@ func curlReasoningEngineQuery(t *testing.T, region, engineResourceName, userMess
 	return outputStr, fmt.Errorf("reasoning engine query failed after %d attempts: %s", maxAttempts, outputStr)
 }
 
+const reasoningEngineOutFile = ".cft-reasoning-engine"
+
+func reasoningEngineOutPath(exampleDir string) string {
+	return filepath.Join(exampleDir, reasoningEngineOutFile)
+}
+
+func resolveReasoningEngineForTeardown(exampleDir string) string {
+	if outPath := os.Getenv("AGENT_ENGINE_OUT"); outPath != "" {
+		if data, err := os.ReadFile(outPath); err == nil {
+			if name := strings.TrimSpace(string(data)); name != "" {
+				return name
+			}
+		}
+	}
+	if data, err := os.ReadFile(reasoningEngineOutPath(exampleDir)); err == nil {
+		return strings.TrimSpace(string(data))
+	}
+	return ""
+}
+
+func deleteReasoningEngine(t *testing.T, region, engineResourceName, impersonateSA string) {
+	t.Helper()
+	if engineResourceName == "" {
+		return
+	}
+
+	impersonateFlag := ""
+	if impersonateSA != "" {
+		impersonateFlag = fmt.Sprintf(" --impersonate-service-account=%s", impersonateSA)
+	}
+	url := fmt.Sprintf("https://%s-aiplatform.googleapis.com/v1beta1/%s?force=true", region, engineResourceName)
+	cmdStr := fmt.Sprintf(
+		`curl -sS -X DELETE -H "Authorization: Bearer $(gcloud auth print-access-token%s)" "%s"`,
+		impersonateFlag,
+		url,
+	)
+
+	t.Logf("Deleting Reasoning Engine: %s", engineResourceName)
+	cmd := exec.Command("bash", "-c", cmdStr)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Logf("Reasoning Engine delete failed (continuing teardown): %v\nOutput:\n%s", err, string(out))
+		return
+	}
+	t.Logf("Reasoning Engine deleted: %s", engineResourceName)
+}
+
 func assertPlaygroundTurns(t *testing.T, assert *assert.Assertions, turns playgroundTurns) {
 	t.Helper()
 	t.Logf("Playground turn 1:\n%s", turns.Turn1)
@@ -255,7 +302,7 @@ func TestMortgageAgent(t *testing.T) {
 				"REGION":      region,
 				"MCP_INGRESS": mortgageAgent.GetStringOutput("mcp_cloud_run_ingress_annotation"),
 				"BUCKET_NAME": gcsStaging,
-				"DOMAIN_NAME": mcpInternalDNSDomain,
+				"DOMAIN_NAME": strings.TrimSuffix(mcpInternalDNSDomain, "."),
 			}
 			mapper := func(placeholderName string) string {
 				return envMap[placeholderName]
@@ -360,7 +407,7 @@ serviceAccount: 'projects/%s/serviceAccounts/%s'
 				"--model-endpoint-location=global",
 			}
 
-			t.Log("Running deploy_agent.py...")
+			t.Log("Running deploy_agent.py (Agent Engine create typically takes 15–45 minutes; monitor Cloud Build in the GCP console)...")
 			deployLog := runExecCmd(t, agentDir, pythonEnv, uvBin, deployArgs...)
 
 			re := regexp.MustCompile(`projects/[^[:space:]]+/locations/[^[:space:]]+/reasoningEngines/[0-9]+`)
@@ -369,6 +416,9 @@ serviceAccount: 'projects/%s/serviceAccounts/%s'
 
 			reasoningEngineName := matches[len(matches)-1]
 			t.Logf("Reasoning Engine deployed successfully: %s", reasoningEngineName)
+
+			err = os.WriteFile(reasoningEngineOutPath(exampleDir), []byte(reasoningEngineName+"\n"), 0644)
+			assert.NoError(err, "Failed to write reasoning engine resource name for teardown")
 
 			if outPath := os.Getenv("AGENT_ENGINE_OUT"); outPath != "" {
 				err = os.WriteFile(outPath, []byte(reasoningEngineName+"\n"), 0644)
@@ -402,6 +452,21 @@ serviceAccount: 'projects/%s/serviceAccounts/%s'
 
 			assertPlaygroundTurns(t, assert, turns)
 		})
+	})
+
+	mortgageAgent.DefineTeardown(func(a *assert.Assertions) {
+		exampleDir, err := filepath.Abs("../../../examples/mortgage-agent")
+		a.NoError(err, "Failed to resolve blueprint root directory")
+
+		region := mortgageAgent.GetStringOutput("region")
+		terraformSA := mortgageAgent.GetStringOutput("terraform_service_account")
+		if engineName := resolveReasoningEngineForTeardown(exampleDir); engineName != "" {
+			deleteReasoningEngine(t, region, engineName, terraformSA)
+		} else {
+			t.Log("No Reasoning Engine resource name found for teardown; skipping delete")
+		}
+
+		mortgageAgent.DefaultTeardown(a)
 	})
 
 	mortgageAgent.Test()

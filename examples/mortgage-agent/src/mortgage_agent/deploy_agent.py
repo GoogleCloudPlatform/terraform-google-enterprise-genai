@@ -625,13 +625,22 @@ def main() -> None:
         if args.update:
             engine = client.agent_engines.update(name=args.update, agent=app, config=deploy_config)
         else:
-            print("Creating and deploying Agent Engine...")
+            print(
+                "Creating and deploying Agent Engine "
+                "(upload + Cloud Build + provisioning)...",
+                flush=True,
+            )
             engine = client.agent_engines.create(agent=app, config=deploy_config)
             reasoning_engine_name = engine.api_resource.name
             agent_id = reasoning_engine_name.split("/")[-1]
+            print(f"Agent Engine created: {reasoning_engine_name}", flush=True)
 
             if args.enable_agent_identity:
-                print("\nApplying direct egress IAM permissions via grant_agent_mcp_egress.sh...")
+                print(
+                    "\nApplying per-agent MCP egress IAM via grant_agent_mcp_egress.sh "
+                    "(MCP servers only — endpoint grants were applied before deploy)...",
+                    flush=True,
+                )
                 import subprocess
 
                 tf_vars = {}
@@ -685,8 +694,19 @@ def main() -> None:
                 )
                 if os.path.exists(script_path):
                     try:
-                        subprocess.run([script_path, "--agent-id", agent_id], env=env, check=True)
-                        print("Direct egress IAM permissions successfully applied!")
+                        subprocess.run(
+                            [
+                                script_path,
+                                "--agent-id",
+                                agent_id,
+                                "--mcp",
+                                "--mcp-filter",
+                                "legacy-dms corporate-email income-verification",
+                            ],
+                            env=env,
+                            check=True,
+                        )
+                        print("Direct egress IAM permissions successfully applied!", flush=True)
                     except Exception as e:
                         print(f"Error executing grant_agent_mcp_egress.sh: {e}")
                 else:

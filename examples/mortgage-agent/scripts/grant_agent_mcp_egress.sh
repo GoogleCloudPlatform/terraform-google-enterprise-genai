@@ -206,19 +206,33 @@ echo
 
 # http_request <output_file> <curl args…>
 # Wraps curl so the response body is always written to <output_file> and the
-# HTTP status is checked explicitly. On 4xx/5xx, prints "FAILED (HTTP <code>):"
-# and the body to stderr, then returns non-zero. On success, returns 0.
+# HTTP status is checked explicitly. On 4xx/5xx or connection errors, retries
+# with backoff (refreshing the access token between attempts) before printing
+# "FAILED (HTTP <code>):" and returning non-zero.
 http_request() {
 	local out="$1"
 	shift
+	local max_attempts=5
+	local attempt=1
 	local code
-	code="$(curl -sS -o "${out}" -w '%{http_code}' "$@")"
-	if [ "${code}" -lt 200 ] || [ "${code}" -ge 300 ]; then
-		echo "FAILED (HTTP ${code}):" >&2
-		cat "${out}" >&2
-		echo >&2
-		return 1
-	fi
+
+	while [ "${attempt}" -le "${max_attempts}" ]; do
+		code="$(curl -sS --connect-timeout 30 --max-time 120 -o "${out}" -w '%{http_code}' "$@" 2>/dev/null)" || code="000"
+		if [ "${code}" -ge 200 ] && [ "${code}" -lt 300 ]; then
+			return 0
+		fi
+		if [ "${attempt}" -lt "${max_attempts}" ]; then
+			TOKEN="$(gcloud auth print-access-token)"
+			echo "Attempt ${attempt}/${max_attempts} failed (HTTP ${code}); retrying in $((15 * attempt))s..." >&2
+			sleep $((15 * attempt))
+		fi
+		attempt=$((attempt + 1))
+	done
+
+	echo "FAILED (HTTP ${code}):" >&2
+	cat "${out}" >&2 2>/dev/null || true
+	echo >&2
+	return 1
 }
 
 # apply_policy <iam_url_base> <label>
@@ -230,14 +244,40 @@ http_request() {
 # round-trip intact, and the SET writes version 3 unconditionally.
 apply_policy() {
 	local iam_url="$1" label="$2"
-	local resp="/tmp/iam_resp.$$"
-	local body
+	local resp
+	resp="$(mktemp /tmp/iam_resp.XXXXXX)"
+	local body already_bound
 
 	if ! http_request "${resp}" -X POST \
 		-H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" \
 		-d '{"options":{"requestedPolicyVersion":3}}' "${iam_url}:getIamPolicy"; then
 		rm -f "${resp}"
 		exit 1
+	fi
+
+	already_bound="$(jq -r \
+		--arg role "${ROLE}" \
+		--arg member "${AGENT_PRINCIPAL}" \
+		--arg expr "${CONDITION_EXPRESSION}" \
+		--arg title "${CONDITION_TITLE}" \
+		--arg desc "${CONDITION_DESCRIPTION}" '
+    (if $expr == "" then null
+     else {expression: $expr, title: $title}
+          + (if $desc == "" then {} else {description: $desc} end)
+     end) as $cond
+    | (.bindings // [])
+    | any(.role == $role
+          and ((.condition // null) == ($cond // null))
+          and ((.members // []) | any(. == $member)))
+  ' <"${resp}")"
+
+	echo "==>   ${label}"
+	if [ "${already_bound}" = "true" ]; then
+		echo "skip (already bound)"
+		jq -c '.bindings' "${resp}"
+		rm -f "${resp}"
+		sleep 1
+		return 0
 	fi
 
 	body="$(jq \
@@ -269,7 +309,6 @@ apply_policy() {
                 + (if ($cur.etag // "") == "" then {} else {etag: $cur.etag} end))}
   ' <"${resp}")"
 
-	echo "==>   ${label}"
 	if ! http_request "${resp}" -X POST \
 		-H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" \
 		-d "${body}" "${iam_url}:setIamPolicy"; then
@@ -278,6 +317,7 @@ apply_policy() {
 	fi
 	jq -c '.bindings' "${resp}"
 	rm -f "${resp}"
+	sleep 1
 }
 
 # matches_filter <display> <service> <filter>
@@ -300,7 +340,8 @@ matches_filter() {
 # a final count line, and returns non-zero when no resources match.
 process_resource_type() {
 	local collection="$1" filter="$2"
-	local list_resp="/tmp/iam_resp.$$"
+	local list_resp
+	list_resp="$(mktemp /tmp/iam_resp.XXXXXX)"
 
 	echo "--- ${collection} ---"
 	if ! http_request "${list_resp}" -H "Authorization: Bearer ${TOKEN}" \

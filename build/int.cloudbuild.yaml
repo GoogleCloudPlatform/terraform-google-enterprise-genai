@@ -68,22 +68,7 @@ steps:
 
 - id: destroy-mortgage
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args:
-  - '/bin/bash'
-  - '-c'
-  - |
-    echo "=== Cleaning up Reasoning Engine deployed during apply-agent ==="
-    if [ -f /workspace/examples/mortgage-agent/.cft-reasoning-engine ]; then
-      ENGINE=$$(cat /workspace/examples/mortgage-agent/.cft-reasoning-engine)
-      if [ -n "$$ENGINE" ]; then
-        echo "Deleting Reasoning Engine: $$ENGINE"
-        TOKEN=$$(gcloud auth print-access-token)
-        curl -sS -X DELETE -H "Authorization: Bearer $${TOKEN}" "https://us-central1-aiplatform.googleapis.com/v1beta1/$${ENGINE}?force=true" || true
-      fi
-    fi
-
-    echo "=== Running CFT Blueprint Test teardown and Terraform destroy ==="
-    cft test run TestMortgageAgent --stage destroy --verbose --test-dir /workspace/test/integration
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage destroy --verbose --test-dir /workspace/test/integration']
 
 tags:
 - 'ci'
