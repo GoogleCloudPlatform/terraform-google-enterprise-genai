@@ -78,7 +78,7 @@ module "project" {
     {
       api = "cloudbuild.googleapis.com",
       roles = [
-        "roles/roles/storage.objectAdmin",
+        "roles/storage.objectAdmin",
       ]
     },
   ]
