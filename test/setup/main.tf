@@ -46,7 +46,7 @@ resource "google_folder" "test_folder" {
 
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 18.0"
 
   name                     = "ci-genai-${random_string.suffix.result}"
   random_project_id        = true
@@ -72,6 +72,15 @@ module "project" {
     "billingbudgets.googleapis.com",
     "essentialcontacts.googleapis.com",
     "dns.googleapis.com",
+  ]
+
+  activate_api_identities = [
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/roles/storage.objectAdmin",
+      ]
+    },
   ]
 }
 
