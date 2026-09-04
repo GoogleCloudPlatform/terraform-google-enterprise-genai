@@ -17,9 +17,6 @@ package integration
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -31,8 +28,6 @@ import (
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/tft"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/tidwall/gjson"
 )
 
 func runExecCmd(t *testing.T, dir string, env []string, name string, args ...string) string {
@@ -50,27 +45,6 @@ func runExecCmd(t *testing.T, dir string, env []string, name string, args ...str
 		t.Fatalf("Command '%s %s' failed: %v\nOutput:\n%s", name, strings.Join(args, " "), err, outputStr)
 	}
 	return outputStr
-}
-
-func getSAToken(t *testing.T, sa string) string {
-	cmd := gcloud.Runf(t, "auth print-access-token --impersonate-service-account=%s", sa)
-	return strings.TrimSpace(gjson.Get(cmd.String(), "token").String())
-}
-
-func getHttpResponse(t *testing.T, method, url, token string, body io.Reader) []byte {
-	req, err := http.NewRequest(method, url, body)
-	require.NoError(t, err)
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Add("Content-Type", "application/json")
-
-	c := &http.Client{}
-	resp, err := c.Do(req)
-	require.NoError(t, err)
-	defer resp.Body.Close()
-
-	b, err := ioutil.ReadAll(resp.Body)
-	require.NoError(t, err)
-	return b
 }
 
 type playgroundTurns struct {
