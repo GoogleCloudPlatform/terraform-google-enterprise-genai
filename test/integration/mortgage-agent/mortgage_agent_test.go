@@ -242,7 +242,7 @@ func TestMortgageAgent(t *testing.T) {
 			"income-verification": "src/income-verification-api/toolspec.json",
 		},
 		"agent_gateway_iap_iam_enforcement_mode": "DRY_RUN",
-		"enable_model_armor":                     true,
+		"enable_model_armor":                     false,
 		"enable_model_armor_mcp_floor_setting":   false,
 		"model_armor_request_template_id":        "agw-req-" + random,
 		"model_armor_response_template_id":       "agw-resp-" + random,
