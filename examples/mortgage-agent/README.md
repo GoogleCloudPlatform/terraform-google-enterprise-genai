@@ -205,14 +205,6 @@ The three MCP servers are built from source, pushed to Artifact Registry, and de
    done
    ```
 
-1. Each Cloud Run service runs as a per-service runtime SA Terraform created `(e.g. mcp-legacy-dms@${PROJECT_ID}.iam.gserviceaccount.com)`. To deploy as those SAs you need `roles/iam.serviceAccountUser` on yourself:
-
-   ```bash
-   gcloud projects add-iam-policy-binding $PROJECT_ID \
-   --member="user:$(gcloud config get-value account)" \
-   --role="roles/iam.serviceAccountUser"
-   ```
-
 1. Build with Cloud Build and deploy with Skaffold. `MCP_INGRESS` comes from a Terraform output, so the rendered Cloud Run YAML stays in sync with Terraform state.:
 
    ```bash
