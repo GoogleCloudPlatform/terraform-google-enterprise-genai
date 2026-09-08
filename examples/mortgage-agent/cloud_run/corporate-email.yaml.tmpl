@@ -21,7 +21,7 @@ metadata:
     cloud.googleapis.com/location: ${REGION}
   annotations:
     run.googleapis.com/ingress: ${MCP_INGRESS}
-    run.googleapis.com/custom-audiences: '["https://corporate-email.${DOMAIN_NAME}"]'
+    run.googleapis.com/custom-audiences: '["https://corporate-email.mcp.${DOMAIN_NAME}"]'
 spec:
   template:
     metadata:
