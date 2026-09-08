@@ -201,5 +201,9 @@ func TestMortgageAgentInfra(t *testing.T) {
 		}
 	})
 
+	mortgage.DefineTeardown(func(a *assert.Assertions) {
+		mortgage.DefaultTeardown(a)
+	})
+
 	mortgage.Test()
 }

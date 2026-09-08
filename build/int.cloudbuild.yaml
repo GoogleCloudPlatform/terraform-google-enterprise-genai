@@ -58,17 +58,13 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestMortgageAgentInfra --stage verify --verbose --test-dir /workspace/test/integration']
 
-- id: apply-mortgage-agent
-  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage verify --verbose --test-dir /workspace/test/integration']
-
 - id: destroy-standalone
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage destroy --verbose --test-dir /workspace/test/integration']
 
-- id: destroy-mortgage
+- id: destroy-mortgage-infra
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
-  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgent --stage destroy --verbose --test-dir /workspace/test/integration']
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgentInfra --stage destroy --verbose --test-dir /workspace/test/integration']
 
 tags:
 - 'ci'
@@ -80,8 +76,6 @@ options:
   - 'TF_VAR_create_access_context_manager_access_policy=false'
   - 'TF_VAR_default_region=us-central1'
   - 'TF_VAR_instance_region=us-central1'
-  - 'TF_VAR_dns_zone_domain=$_DNS_ZONE_DOMAIN'
-  - 'TF_VAR_mcp_ssl_certificate_id=$_MCP_SSL_CERTIFICATE_ID'
   - 'TF_IN_AUTOMATION=true'
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
