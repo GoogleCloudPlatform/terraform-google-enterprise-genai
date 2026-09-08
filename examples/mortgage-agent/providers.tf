@@ -13,16 +13,18 @@
 # limitations under the License.
 
 provider "google" {
-  project               = var.project_id
-  region                = var.region
-  user_project_override = true
-  billing_project       = var.project_id
+  project                     = var.project_id
+  region                      = var.default_region
+  user_project_override       = true
+  billing_project             = var.project_id
+  impersonate_service_account = var.terraform_service_account
 }
 
 provider "google-beta" {
   project                          = var.project_id
-  region                           = var.region
+  region                           = var.default_region
   network_services_custom_endpoint = "https://networkservices.googleapis.com/v1beta1/"
   user_project_override            = true
   billing_project                  = var.project_id
+  impersonate_service_account      = var.terraform_service_account
 }

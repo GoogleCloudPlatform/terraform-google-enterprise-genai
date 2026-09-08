@@ -55,7 +55,7 @@ module "networking" {
   source = "../../modules/networking"
 
   project_id  = var.project_id
-  region      = var.region
+  region      = var.default_region
   name_prefix = var.name_prefix
   vpc_name    = var.vpc_name
   subnet_name = var.subnet_name
@@ -75,7 +75,7 @@ module "networking" {
 
 resource "google_artifact_registry_repository" "registry" {
   project       = var.project_id
-  location      = var.region
+  location      = var.default_region
   repository_id = "${var.name_prefix}-docker"
   format        = "DOCKER"
   description   = "Regional Docker repository for container images"
@@ -86,7 +86,7 @@ resource "google_artifact_registry_repository" "registry" {
 resource "google_storage_bucket" "cloudbuild" {
   project                     = var.project_id
   name                        = "${var.project_id}-mcp-cloudbuild"
-  location                    = var.region
+  location                    = var.default_region
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
 
@@ -126,7 +126,7 @@ module "certificates" {
   source = "../../modules/certificates"
 
   project_id = var.project_id
-  region     = var.region
+  region     = var.default_region
   # Skip issuance when an existing Certificate Manager cert is attached.
   dns_zone_domain = local.provided_mcp_ssl_certificate_id == null ? var.dns_zone_domain : null
 
@@ -152,7 +152,7 @@ module "model_armor" {
   source = "../../modules/model_armor"
 
   project_id = var.project_id
-  region     = var.region
+  region     = var.default_region
 
   enable_model_armor   = var.enable_model_armor
   request_template_id  = var.model_armor_request_template_id
@@ -195,7 +195,7 @@ module "mcp_services" {
   source = "../../modules/mcp_cloud_run"
 
   project_id              = var.project_id
-  region                  = var.region
+  region                  = var.default_region
   services                = var.mcp_services
   mcp_internal_dns_domain = local.mcp_internal_dns_domain_or_null
   invoker_sa_email        = module.agent_engine.agent_mcp_invoker_email
@@ -206,7 +206,7 @@ module "mcp_services" {
 resource "google_compute_address" "mcp_lb_in_agent_gw_subnet" {
   project      = var.project_id
   name         = "${var.name_prefix}-mcp-ilb-ip-agw"
-  region       = var.region
+  region       = var.default_region
   subnetwork   = module.networking.agent_gateway_subnet_self_link
   address_type = "INTERNAL"
   description  = "MCP internal LB VIP relocated to the Agent Gateway co-location subnet"
@@ -230,7 +230,7 @@ module "mcp_internal_lb" {
   source = "../../modules/mcp_internal_lb"
 
   project_id         = var.project_id
-  region             = var.region
+  region             = var.default_region
   name_prefix        = var.name_prefix
   network_self_link  = module.networking.network_self_link
   subnet_self_link   = module.networking.subnet_self_link
@@ -260,7 +260,7 @@ module "agent_gateway" {
   }
 
   project_id = var.project_id
-  region     = var.region
+  region     = var.default_region
 
   name                           = var.agent_gateway_name
   network_self_link              = module.networking.network_self_link
@@ -313,7 +313,7 @@ module "agent_registry_endpoints" {
   source = "../../modules/agent_registry"
 
   project_id = var.project_id
-  location   = var.region
+  location   = var.default_region
 
   google_apis     = var.agent_registry_google_apis
   custom_services = var.agent_registry_custom_services

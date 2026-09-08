@@ -22,7 +22,7 @@ variable "project_number" {
   type        = string
 }
 
-variable "region" {
+variable "default_region" {
   description = "The GCP region for resources"
   type        = string
   default     = "us-central1"

@@ -131,7 +131,7 @@ module "kms" {
   version = "~> 4.0"
 
   project_id          = var.project_id
-  location            = var.region
+  location            = var.default_region
   keyring             = "${var.project_id}-mortgage-keyring-${random_id.project_id_suffix.hex}"
   keys                = [local.kms_key_name]
   key_rotation_period = "7776000s"
@@ -164,7 +164,7 @@ resource "google_kms_crypto_key_iam_member" "terraform_state_gcs_kms" {
 resource "google_storage_bucket" "terraform_state" {
   project                     = var.project_id
   name                        = local.bucket_name
-  location                    = var.region
+  location                    = var.default_region
   force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
   versioning {

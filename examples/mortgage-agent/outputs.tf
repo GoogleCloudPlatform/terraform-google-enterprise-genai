@@ -29,7 +29,7 @@ output "project_number" {
 
 output "region" {
   description = "The GCP region for resources"
-  value       = var.region
+  value       = var.default_region
 }
 
 output "cloudbuild_bucket" {
@@ -143,7 +143,7 @@ output "artifact_registry_id" {
 
 output "artifact_registry_url" {
   description = "The Artifact Registry repository URL for docker push/pull"
-  value       = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.registry.repository_id}"
+  value       = "${var.default_region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.registry.repository_id}"
 }
 
 # Certificate Outputs
