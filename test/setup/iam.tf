@@ -17,7 +17,6 @@
 locals {
   int_required_roles = [
     "roles/owner",
-    "roles/serviceusage.serviceUsageConsumer",
   ]
 
   int_org_required_roles = [
