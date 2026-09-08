@@ -16,8 +16,9 @@
 
 locals {
   int_required_roles = [
-    "roles/owner"
+    "roles/owner",
   ]
+
   int_org_required_roles = [
     "roles/billing.user",
     "roles/resourcemanager.organizationAdmin",

@@ -46,9 +46,25 @@ steps:
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestServiceCatalogSource --stage verify --verbose --test-dir /workspace/test/integration']
 
+- id: create-mortgage-infra
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgentInfra --stage init --verbose --test-dir /workspace/test/integration']
+
+- id: converge-mortgage-infra
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgentInfra --stage apply --verbose --test-dir /workspace/test/integration']
+
+- id: verify-mortgage-infra
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgentInfra --stage verify --verbose --test-dir /workspace/test/integration']
+
 - id: destroy-standalone
   name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
   args: ['/bin/bash', '-c', 'cft test run TestStandalone --stage destroy --verbose --test-dir /workspace/test/integration']
+
+- id: destroy-mortgage-infra
+  name: 'gcr.io/cloud-foundation-cicd/$_DOCKER_IMAGE_DEVELOPER_TOOLS:$_DOCKER_TAG_VERSION_DEVELOPER_TOOLS'
+  args: ['/bin/bash', '-c', 'cft test run TestMortgageAgentInfra --stage destroy --verbose --test-dir /workspace/test/integration']
 
 tags:
 - 'ci'
@@ -63,4 +79,4 @@ options:
   - 'TF_IN_AUTOMATION=true'
 substitutions:
   _DOCKER_IMAGE_DEVELOPER_TOOLS: 'cft/developer-tools'
-  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.17'
+  _DOCKER_TAG_VERSION_DEVELOPER_TOOLS: '1.26'

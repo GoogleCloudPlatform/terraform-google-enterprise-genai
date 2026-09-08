@@ -1,0 +1,38 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+output "dashboard_id" {
+  description = "Resource ID of the authorization-debugging Cloud Monitoring dashboard."
+  value       = google_monitoring_dashboard.authorization_debugging.id
+}
+
+output "log_bucket_id" {
+  description = "Resource ID of the _Default log bucket with Log Analytics enabled."
+  value       = google_logging_project_bucket_config.default_analytics.id
+}
+
+output "log_sink_writer_identity" {
+  description = "The identity associated with the primary log sink (service account)."
+  value       = length(module.log_export) > 0 ? module.log_export[0].writer_identity : null
+}
+
+output "log_sink_name" {
+  description = "The name of the primary log sink created."
+  value       = length(module.log_export) > 0 ? module.log_export[0].log_sink_resource_name : null
+}
+
+output "custom_log_sinks_writer_identities" {
+  description = "Map of writer identities for additional custom log sinks."
+  value       = { for k, v in module.custom_log_exports : k => v.writer_identity }
+}

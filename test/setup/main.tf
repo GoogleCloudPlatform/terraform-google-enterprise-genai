@@ -46,7 +46,7 @@ resource "google_folder" "test_folder" {
 
 module "project" {
   source  = "terraform-google-modules/project-factory/google"
-  version = "~> 17.0"
+  version = "~> 18.0"
 
   name                     = "ci-genai-${random_string.suffix.result}"
   random_project_id        = true
@@ -71,5 +71,25 @@ module "project" {
     "servicenetworking.googleapis.com",
     "billingbudgets.googleapis.com",
     "essentialcontacts.googleapis.com",
+    "dns.googleapis.com",
   ]
+
+  activate_api_identities = [
+    {
+      api = "cloudbuild.googleapis.com",
+      roles = [
+        "roles/storage.objectAdmin",
+      ]
+    },
+  ]
+}
+
+resource "google_dns_managed_zone" "public_zone" {
+  count = try(length(var.dns_zone_domain), 0) == 0 ? 1 : 0
+
+  project     = module.project.project_id
+  name        = "dns-zone-${random_string.suffix.result}-com"
+  dns_name    = "dns-zone-${random_string.suffix.result}.com."
+  description = "Public Zone for domain."
+  visibility  = "public"
 }
