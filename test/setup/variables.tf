@@ -44,3 +44,8 @@ variable "instance_region" {
   description = "Instance region use for testing. Should be one of the regions used to create network."
   default     = "us-central1"
 }
+
+variable "dns_zone_domain" {
+  description = "Publiz Zone for DNS Domain."
+  default     = null
+}

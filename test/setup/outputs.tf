@@ -18,6 +18,10 @@ output "project_id" {
   value = module.project.project_id
 }
 
+output "project_number" {
+  value = module.project.project_number
+}
+
 output "parent_folder" {
   description = "Parent folder id"
   value       = split("/", google_folder.test_folder.id)[1]
@@ -75,4 +79,12 @@ output "cloud_source_service_catalog_repo_name" {
 
 output "instance_region" {
   value = var.instance_region
+}
+
+output "random" {
+  value = random_string.suffix.result
+}
+
+output "dns_zone_domain" {
+  value = length(google_dns_managed_zone.public_zone) > 0 ? google_dns_managed_zone.public_zone[0].dns_name : var.dns_zone_domain
 }

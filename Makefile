@@ -12,13 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Please note that this file was generated from [terraform-google-module-template](https://github.com/terraform-google-modules/terraform-google-module-template).
-# Please make sure to contribute relevant changes upstream!
-
 # Make will use bash instead of sh
 SHELL := /usr/bin/env bash
 
-DOCKER_TAG_VERSION_DEVELOPER_TOOLS := 1.20
+DOCKER_TAG_VERSION_DEVELOPER_TOOLS := 1.26
 DOCKER_IMAGE_DEVELOPER_TOOLS := cft/developer-tools
 REGISTRY_URL := gcr.io/cloud-foundation-cicd
 
@@ -28,7 +25,7 @@ docker_test_lint:
 	docker run --rm -it \
 		-e ENABLE_PARALLEL=0 \
 		-e DISABLE_TFLINT=1 \
-		-e EXCLUDE_LINT_DIRS="\./examples/machine-learning-pipeline|\./docs/assets/terraform" \
+		-e EXCLUDE_LINT_DIRS='\./examples/machine-learning-pipeline|\./examples/mortgage-agent/src' \
 		-v $(CURDIR):/workspace \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
 		/usr/local/bin/test_lint.sh
@@ -54,6 +51,8 @@ docker_run:
 		-e TF_VAR_folder_id \
 		-e TF_VAR_billing_account \
 		-e TF_VAR_group_email \
+		-e TF_VAR_dns_zone_domain \
+		-e TF_VAR_mcp_ssl_certificate_id \
 		-v "$(CURDIR)":/workspace \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
 		/bin/bash
@@ -64,6 +63,8 @@ docker_test_prepare:
 	docker run --rm -it \
 		-e SERVICE_ACCOUNT_JSON \
 		-e TF_VAR_org_id \
+		-e TF_VAR_project_id \
+		-e TF_VAR_project_number \
 		-e TF_VAR_folder_id \
 		-e TF_VAR_billing_account \
 		-e TF_VAR_group_email \
@@ -89,6 +90,13 @@ docker_test_cleanup:
 docker_test_integration:
 	docker run --rm -it \
 		-e SERVICE_ACCOUNT_JSON \
+		-e TF_VAR_org_id \
+		-e TF_VAR_project_id \
+		-e TF_VAR_project_number \
+		-e TF_VAR_dns_zone_domain \
+		-e TF_VAR_dns_zone_name \
+		-e TF_VAR_mcp_ssl_certificate_id \
+		-e TF_VAR_terraform_service_account \
 		-v "$(CURDIR)":/workspace \
 		$(REGISTRY_URL)/${DOCKER_IMAGE_DEVELOPER_TOOLS}:${DOCKER_TAG_VERSION_DEVELOPER_TOOLS} \
 		/usr/local/bin/test_integration.sh
