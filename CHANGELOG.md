@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.0](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/compare/v0.11.0...v0.12.0) (2026-09-11)
+
+
+### Features
+
+* add mortgage example ([#142](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/issues/142)) ([c7457f8](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/commit/c7457f85c949110ffc638e86c444119b8cbe521a))
+* add standalone example ([#130](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/issues/130)) ([726eb12](https://github.com/GoogleCloudPlatform/terraform-google-enterprise-genai/commit/726eb122bf6b68e73caee4228cfee3d4334a8453))
+
 ## 0.11.0 (2026-03-02)
 
 
