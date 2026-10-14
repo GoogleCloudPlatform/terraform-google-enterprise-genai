@@ -48,7 +48,7 @@ terraform-google-enterprise-genai/
 │   ├── ml_org_policies/            # AI Organization Policies (restricting public IPs, non-CMEK services, TLS versions, and root access)
 │   ├── model_armor/                # AI security guardrails against prompt injection, jailbreaks, RAI violations, and DLP/PII leakage
 │   ├── networking/                 # Dedicated VPC network, subnets (primary, proxy-only Envoy, PSC interface, gateway), and firewall rules
-│   ├── observability/              # Log Analytics-enabled _Default log bucket, Log Analytics queries, and Monitoring dashboards for agent traffic and tracing
+│   ├── observability/              # Cloud Logging sinks, Log Analytics queries, and Monitoring dashboards for agent traffic and tracing
 │   ├── publish_artifacts/          # Artifact Registry repository and automated Cloud Build container image build pipelines
 │   ├── service_catalog/            # Service Catalog repository and Cloud Build CI/CD pipeline distributing reusable Terraform modules
 │   └── service_controls/           # VPC Service Controls security perimeters (supporting enforced and dry-run modes)
