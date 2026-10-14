@@ -48,7 +48,7 @@ terraform-google-enterprise-genai/
 │   ├── ml_org_policies/            # AI Organization Policies (restricting public IPs, non-CMEK services, TLS versions, and root access)
 │   ├── model_armor/                # AI security guardrails against prompt injection, jailbreaks, RAI violations, and DLP/PII leakage
 │   ├── networking/                 # Dedicated VPC network, subnets (primary, proxy-only Envoy, PSC interface, gateway), and firewall rules
-│   ├── observability/              # Cloud Logging sinks, Log Analytics queries, and Monitoring dashboards for agent traffic and tracing
+│   ├── observability/              # Log Analytics-enabled _Default log bucket, Log Analytics queries, and Monitoring dashboards for agent traffic and tracing
 │   ├── publish_artifacts/          # Artifact Registry repository and automated Cloud Build container image build pipelines
 │   ├── service_catalog/            # Service Catalog repository and Cloud Build CI/CD pipeline distributing reusable Terraform modules
 │   └── service_controls/           # VPC Service Controls security perimeters (supporting enforced and dry-run modes)
@@ -203,9 +203,9 @@ cd examples/mortgage-agent/src/mortgage_agent
 uv run pytest
 
 # Run individual MCP service unit tests
-cd examples/mortgage-agent/src/corporate-email && uv run pytest
-cd examples/mortgage-agent/src/income-verification-api && uv run pytest
-cd examples/mortgage-agent/src/legacy-dms && uv run pytest
+cd ../corporate-email && uv run pytest
+cd ../income-verification-api && uv run pytest
+cd ../legacy-dms && uv run pytest
 ```
 
 ### 5. Interactive Container Development
@@ -226,7 +226,7 @@ Before completing any task or proposing changes, verify that:
 - [ ] Any modified module has its documentation updated (`README.md` inputs/outputs tables).
 - [ ] Go test files follow `gofmt` style and compile without errors (`cd test/integration && go vet ./...`).
 - [ ] Python agent and MCP tool code pass tests (`uv run pytest`).
-- [ ] Commit descriptions follow the Google Engineering Practices standard (clear summary line + explanatory "Why" body).
+- [ ] Commit descriptions follow the Conventional Commits standard (`feat:`, `fix:`, or `feat!:` summary line + explanatory "Why" body).
 - [ ] Documentation updates comply with the [Google Developer Documentation Style Guide](https://developers.google.com/style).
 
 ---
