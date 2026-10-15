@@ -15,8 +15,6 @@
 package testutils
 
 import (
-	"fmt"
-
 	"github.com/mitchellh/go-testing-interface"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
@@ -24,10 +22,14 @@ import (
 
 // GetOrgACMPolicyID gets the Organization Access Context Manager Policy ID
 func GetOrgACMPolicyID(t testing.TB, orgID string) string {
-	filter := fmt.Sprintf("parent:organizations/%s", orgID)
-	id := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter %s --quiet", orgID, filter).Array()
-	if len(id) == 0 {
-		return ""
+	policies := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter parent:organizations/%s --quiet", orgID, orgID).Array()
+	for _, p := range policies {
+		if len(p.Get("scopes").Array()) == 0 {
+			return GetLastSplitElement(p.Get("name").String(), "/")
+		}
 	}
-	return GetLastSplitElement(id[0].Get("name").String(), "/")
+	if len(policies) > 0 {
+		return GetLastSplitElement(policies[0].Get("name").String(), "/")
+	}
+	return ""
 }
