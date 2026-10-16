@@ -183,15 +183,17 @@ func TestStandalone(t *testing.T) {
 
 	// Create Access Context Manager Policy ID if needed
 	orgID := temp.GetTFSetupStringOutput("org_id")
-	policyID := testutils.GetOrgACMPolicyID(t, orgID)
+	testFolder := temp.GetTFSetupStringOutput("parent_folder")
+	policyID := testutils.GetOrgACMPolicyID(t, orgID, testFolder)
 	terraformSA := temp.GetTFSetupStringOutput("terraform_service_account")
 
 	if policyID == "" {
-		_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --title %s --impersonate-service-account %s", orgID, "defaultpolicy", terraformSA))
+		_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --scopes folders/%s --title %s --impersonate-service-account %s", orgID, testFolder, "defaultpolicy", terraformSA))
 		// ignore creation error and proceed with the test
 		if err != nil {
 			fmt.Printf("Ignore error in creation of access-context-manager policy ID for organization %s. Error: [%s]", orgID, err.Error())
 		}
+		policyID = testutils.GetOrgACMPolicyID(t, orgID, testFolder)
 	}
 
 	vars := map[string]interface{}{
@@ -617,6 +619,9 @@ func TestStandalone(t *testing.T) {
 
 		terraform.Init(t, tempOptions)
 		standalone.DefaultTeardown(a)
+		if gcloud.Runf(t, "access-context-manager policies describe %s", policyID).Get("scopes.0").String() == "folders/"+testFolder {
+			gcloud.Runf(t, "access-context-manager policies delete %s --impersonate-service-account %s --quiet", policyID, terraformSA)
+		}
 	})
 
 	standalone.Test()

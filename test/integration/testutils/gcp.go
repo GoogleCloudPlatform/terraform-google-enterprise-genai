@@ -21,15 +21,12 @@ import (
 )
 
 // GetOrgACMPolicyID gets the Organization Access Context Manager Policy ID
-func GetOrgACMPolicyID(t testing.TB, orgID string) string {
+func GetOrgACMPolicyID(t testing.TB, orgID, folderID string) string {
 	policies := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter parent:organizations/%s --quiet", orgID, orgID).Array()
 	for _, p := range policies {
-		if len(p.Get("scopes").Array()) == 0 {
+		if scope := p.Get("scopes.0").String(); scope == "" || scope == "folders/"+folderID {
 			return GetLastSplitElement(p.Get("name").String(), "/")
 		}
-	}
-	if len(policies) > 0 {
-		return GetLastSplitElement(policies[0].Get("name").String(), "/")
 	}
 	return ""
 }
