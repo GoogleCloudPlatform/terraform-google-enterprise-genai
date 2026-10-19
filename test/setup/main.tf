@@ -40,8 +40,8 @@ resource "random_string" "two_alphanumeric" {
 }
 
 resource "google_folder" "test_folder" {
-  display_name        = "test_genai_folder_${random_string.suffix.result}"
-  parent              = "folders/${var.folder_id}"
+  display_name = "test_genai_folder_${random_string.suffix.result}"
+  parent       = "folders/${var.folder_id}"
 }
 
 module "project" {
