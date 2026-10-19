@@ -184,8 +184,10 @@ func TestStandalone(t *testing.T) {
 	// Create Access Context Manager Policy ID if needed
 	orgID := temp.GetTFSetupStringOutput("org_id")
 	testFolder := temp.GetTFSetupStringOutput("parent_folder")
-	policyID := testutils.GetOrgACMPolicyID(t, orgID, testFolder)
 	terraformSA := temp.GetTFSetupStringOutput("terraform_service_account")
+
+	testutils.CleanOrgACMPolicyID(t, orgID, testFolder, terraformSA)
+	policyID := testutils.GetOrgACMPolicyID(t, orgID, testFolder)
 
 	if policyID == "" {
 		_, err := gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies create --organization %s --scopes folders/%s --title %s --impersonate-service-account %s", orgID, testFolder, "defaultpolicy", terraformSA))
