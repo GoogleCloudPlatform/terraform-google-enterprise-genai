@@ -57,9 +57,6 @@ terraform-google-enterprise-genai/
 │   ├── standalone/                 # 6-project baseline harness (Seed, KMS, Logging, ML, Artifacts, Service Catalog) with KMS CMEK & VPC-SC
 │   ├── genai-rag-multimodal/       # Multimodal RAG with Vertex AI Workbench and Vector Search over Private Service Connect (PSC)
 │   └── machine-learning-pipeline/  # End-to-end ML training, deployment, and A/B testing pipeline (pinned to legacy foundation v0.11)
-├── policy-library/                 # Config Validator & OPA Gatekeeper policy library
-│   ├── lib/                        # Rego policy helper constraints and utility definitions
-│   └── policies/                   # Constraint templates and enforcement rules for security validation
 ├── scripts/                        # Automation and utility scripts
 │   ├── set-tfc-backend-and-remote.sh # Script to configure Terraform Cloud backend and remote execution
 │   └── validate-requirements.sh    # Script to validate local tool versions and prerequisites
@@ -71,7 +68,7 @@ terraform-google-enterprise-genai/
 │   └── int.cloudbuild.yaml         # Cloud Build integration test execution pipeline
 ├── test/                           # Quality assurance and testing harness
 │   ├── setup/                      # Terraform harness provisioning CI test environment and IAM permissions
-│   ├── integration/                # Terratest integration tests written in Go (mortgage-agent, standalone)
+│   ├── integration/                # Blueprint-test integration tests written in Go (mortgage-agent, standalone)
 │   └── clean_org.sh                # Cleanup script for test organization resources
 ├── docs/                           # Documentation guides
 │   ├── FAQ.md                      # Frequently asked questions and named branch definitions
@@ -123,7 +120,7 @@ When generating or updating code, AI agents MUST strictly adhere to the followin
 *   **No Plaintext Secrets**: Store all API tokens, credentials, and OAuth secrets in Secret Manager.
 
 ### 4.3. Go & Integration Test Conventions (`test/integration/`)
-*   **Framework**: Integration tests are written in Go using [Terratest](https://terratest.gruntwork.io/).
+*   **Framework**: Integration tests are written in Go using CFT [blueprint-test](https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/tree/main/infra/blueprint-test).
 *   **Formatting**: Format all Go files with `gofmt -s -w <file.go>`.
 *   **Test Isolation**: Tests must create unique resource names or utilize random prefixes/suffixes to prevent collision during concurrent CI test runs.
 
@@ -143,7 +140,7 @@ When generating or updating code, AI agents MUST strictly adhere to the followin
 2. **Format Code**: Run `terraform fmt -recursive` on the modified module directory.
 3. **Generate Documentation**: Run `make docker_generate_docs` to automatically populate input/output markdown tables inside `modules/<module-name>/README.md`.
 4. **Run Lint Checks**: Execute `make docker_test_lint` to validate Terraform syntax, Shell scripts (`shellcheck`), and YAML manifests.
-5. **Update Integration Tests**: Add or update the corresponding Go Terratest suite under `test/integration/`.
+5. **Update Integration Tests**: Add or update the corresponding Go integration test suite under `test/integration/`.
 
 ### Workflow B: Adding or Updating an Example Scenario (`examples/`)
 1. **Define Infrastructure Stack**: Implement the Terraform configuration (`main.tf`, `variables.tf`, `outputs.tf`, `providers.tf`, `versions.tf`) referencing platform modules.
@@ -153,11 +150,10 @@ When generating or updating code, AI agents MUST strictly adhere to the followin
 5. **Support Remote State Backend**: Provide a `backend.tf.example` file and migration procedures (`terraform init -migrate-state`) for Google Cloud Storage backends.
 6. **Document the Scenario**: Author a detailed `README.md` explaining prerequisites, architecture overview, step-by-step deployment, verification procedures, and resource cleanup instructions.
 
-### Workflow C: Updating IAM Permissions, Guardrails & Security Policies
-1. **Identify Least-Privilege Scopes**: Determine minimal required IAM permissions for platform service accounts (e.g., `roles/run.invoker`, `roles/modelarmor.calloutUser`, `roles/aiplatform.user`) without broad administrative roles.
-2. **Configure Service Extensions & Guardrails**: Define or update `REQUEST_AUTHZ` (IAP with CEL conditions) or `CONTENT_AUTHZ` (Model Armor templates & DLP de-identification) on Agent Gateway.
-3. **Enforce AI Organization Policies**: Apply or update constraints in `modules/ml_org_policies` (e.g., `ainotebooks.restrictPublicIp`, `gcp.restrictNonCmekServices`).
-4. **Validate in Dry-Run Mode**: Test access and content filtering in dry-run mode (`agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"` or dry-run VPC-SC) before enabling blocking enforcement in production.
+### Workflow C: Code Linting & Plan Validation
+1. **Lint Code**: Execute `make docker_test_lint` to validate Terraform, Shell, YAML, and Go formatting and syntax.
+2. **Validate Agent & MCP Code**: Run Python unit test suites via `uv run pytest` across agent and MCP tool services.
+3. **Validate Plans & Test Integration**: Run scenario integration tests (`test/integration/`) to verify generated Terraform plans and ensure deployments pass without execution errors.
 
 ---
 
@@ -184,16 +180,34 @@ make docker_generate_docs
 ```
 
 ### 3. Running Integration Tests Locally
+
+Integration tests require a test harness provisioned via `test/setup/`.
+
+#### Step 1: Configure Test Variables (`test/setup/terraform.tfvars`)
+Create a `terraform.tfvars` file inside `test/setup/` with the required parameters:
+```hcl
+org_id          = "012345678901"
+folder_id       = "123456789012"
+billing_account = "XXXXXX-YYYYYY-ZZZZZZ"
+group_email     = "gcp-admins@example.com"
+```
+
+#### Step 2: Provision Harness & Run Tests
 ```bash
-# Run specific Terratest integration test suites
-cd test/integration
+# 1. Provision test harness environment
+cd test/setup
+terraform init && terraform apply -auto-approve
+
+# 2. Run specific blueprint-test integration test suites
+cd ../integration
 go test -v -run TestMortgageAgentInfra ./mortgage-agent -timeout 60m
 go test -v -run TestStandalone ./standalone -timeout 60m
 go test -v -run TestArtifactRegistrySource ./appsource -timeout 60m
 go test -v -run TestServiceCatalogSource ./appsource -timeout 60m
 
-# Or run integration tests using the developer-tools container
-make docker_test_integration
+# 3. Clean up test harness environment
+cd ../setup
+terraform destroy -auto-approve
 ```
 
 ### 4. Running Agent & MCP Unit Tests (Python / pytest)
@@ -221,12 +235,12 @@ Before completing any task or proposing changes, verify that:
 
 - [ ] `terraform fmt -recursive` runs cleanly without formatting errors.
 - [ ] All new variables and outputs have explicit `type` definitions and meaningful `description` strings.
-- [ ] No hardcoded GCP project IDs, credentials, or sensitive secrets exist in `.tf`, `.yaml`, `.json`, or `.py` files.
+- [ ] No hardcoded GCP project IDs, credentials, or sensitive secrets exist in `.tf`, `.tfvars`, `.yaml`, `.json`, or `.py` files.
 - [ ] IAM roles strictly follow the Principle of Least Privilege.
 - [ ] Any modified module has its documentation updated (`README.md` inputs/outputs tables).
 - [ ] Go test files follow `gofmt` style and compile without errors (`cd test/integration && go vet ./...`).
 - [ ] Python agent and MCP tool code pass tests (`uv run pytest`).
-- [ ] Commit descriptions follow the Conventional Commits standard (`feat:`, `fix:`, or `feat!:` summary line + explanatory "Why" body).
+- [ ] Commit descriptions follow the Conventional Commits standard (`feat:`, `fix:`, `feat!:`, or `fix!:` summary line + explanatory "Why" body).
 - [ ] Documentation updates comply with the [Google Developer Documentation Style Guide](https://developers.google.com/style).
 
 ---
@@ -236,6 +250,7 @@ Before completing any task or proposing changes, verify that:
 *   **CL / Commit Guidelines**: [Google Engineering Practices on Writing Good CL Descriptions](https://google.github.io/eng-practices/review/developer/cl-descriptions.html)
 *   **Code Review Speed**: [Google Engineering Practices on Code Review Speed](https://google.github.io/eng-practices/review/reviewer/speed.html)
 *   **Cloud Foundation Toolkit (CFT)**: [CFT Overview](https://cloud.google.com/foundation-toolkit)
+*   **CFT Blueprint Test Framework**: [CFT blueprint-test](https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit/tree/main/infra/blueprint-test) (and [Go package documentation](https://pkg.go.dev/github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test))
 *   **Model Context Protocol (MCP)**: [MCP Specification](https://modelcontextprotocol.io)
 *   **Troubleshooting Guide**: Consult [`docs/TROUBLESHOOTING.md`](./docs/TROUBLESHOOTING.md) for known edge cases and resolutions.
 *   **Errata & Known Issues**: Consult [`ERRATA.md`](./ERRATA.md) for provider workarounds and platform notes.
