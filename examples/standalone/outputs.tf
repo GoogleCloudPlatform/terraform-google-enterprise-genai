@@ -36,7 +36,7 @@ output "instance_region" {
 
 /******************************************
   Harness Projects
-*****************************************/
+ *****************************************/
 output "kms_project_id" {
   description = "Cloud Key Management Service (KMS) project ID."
   value       = module.kms_project.project_id
@@ -99,15 +99,18 @@ output "artifact_publish_project_name" {
 
 /******************************************
   KMS key rings and crypto keys
-*****************************************/
+ *****************************************/
 output "kms_keyrings" {
   description = "KMS key rings."
-  value       = module.vertex_ai.key_rings
+  value       = local.keyrings
 }
 
 output "kms_keys" {
   description = "KMS key IDs for encryption."
-  value       = module.vertex_ai.kms_keys
+  value = {
+    for region, kms in module.kms_keyrings :
+    region => kms.keys
+  }
 }
 
 output "keyrings_regions" {
@@ -122,7 +125,7 @@ output "keyring_name" {
 
 /******************************************
   Network
-*****************************************/
+ *****************************************/
 
 output "machine_learning_network_name" {
   description = "The name of the Machine Learning VPC being created."
@@ -141,25 +144,25 @@ output "machine_learning_subnets_self_link" {
 
 /******************************************
   VPC Service Controls
-*****************************************/
+ *****************************************/
 output "access_level_name_dry_run" {
   description = "Access Context Manager access level name for the dry-run perimeter."
-  value       = module.vertex_ai.access_level_name_dry_run
+  value       = length(module.service_control) > 0 ? module.service_control[0].access_level_name_dry_run : null
 }
 
 output "access_level_name" {
   description = "Access Context Manager access level name for the enforced perimeter."
-  value       = module.vertex_ai.access_level_name
+  value       = length(module.service_control) > 0 ? module.service_control[0].access_level_name : null
 }
 
 output "service_perimeter_name" {
   description = "Access Context Manager service perimeter name."
-  value       = module.vertex_ai.service_perimeter_name
+  value       = length(module.service_control) > 0 ? module.service_control[0].service_perimeter_name : null
 }
 
 /******************************************
   Service Catalog
-*****************************************/
+ *****************************************/
 output "cloud_source_service_catalog_repo_name" {
   description = "Service Catalog Cloud Source repository name."
   value       = var.cloud_source_service_catalog_repo_name
@@ -167,27 +170,27 @@ output "cloud_source_service_catalog_repo_name" {
 
 output "service_catalog_repo_id" {
   description = "ID of the Service Catalog repository."
-  value       = module.vertex_ai.service_catalog_repo_id
+  value       = module.service_catalog.service_catalog_repo_id
 }
 
 output "service_catalog_cloudbuild_trigger_id" {
   description = "Service Catalog Cloud Build trigger ID."
-  value       = module.vertex_ai.service_catalog_cloudbuild_trigger_id
+  value       = module.service_catalog.cloudbuild_trigger_id
 }
 
 output "storage_bucket_name" {
   description = "Name of the storage bucket created."
-  value       = module.vertex_ai.storage_bucket_name
+  value       = module.service_catalog.storage_bucket_name
 }
 
 output "log_bucket" {
   description = "Log bucket to be used by Service Catalog."
-  value       = module.vertex_ai.log_bucket
+  value       = module.ml_logging.name
 }
 
 /******************************************
   Artifact Publishing
-*****************************************/
+ *****************************************/
 output "cloud_source_artifacts_repo_name" {
   description = "Artifacts Cloud Source repository name."
   value       = var.cloud_source_artifacts_repo_name
@@ -195,18 +198,22 @@ output "cloud_source_artifacts_repo_name" {
 
 output "artifact_publish_cloudbuild_trigger_id" {
   description = "Artifact publishing Cloud Build trigger ID."
-  value       = module.vertex_ai.artifact_publish_cloudbuild_trigger_id
+  value       = module.artifact_publish.cloudbuild_trigger_id
 }
 
 output "artifacts_repo_id" {
   description = "Artifacts repository ID."
-  value       = module.vertex_ai.artifacts_repo_id
+  value       = module.artifact_publish.artifacts_repo_id
 }
 
 /******************************************
   Firewall rules
-*****************************************/
+ *****************************************/
 output "allow_ingress_firewall_rule_ip_range" {
-  description = "Allow ingress firewall rule IP range."
-  value       = module.vertex_ai.allow_ingress_firewall_rule_ip_range
+  description = "IP range for the allow ingress firewall rule."
+  value = distinct(concat(
+    data.google_netblock_ip_ranges.legacy_health_checkers.cidr_blocks_ipv4,
+    data.google_netblock_ip_ranges.health_checkers.cidr_blocks_ipv4,
+    data.google_netblock_ip_ranges.iap_forwarders.cidr_blocks_ipv4,
+  ))
 }
