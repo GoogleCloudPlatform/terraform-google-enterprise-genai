@@ -1,5 +1,8 @@
 # Machine Learning Pipeline Overview
 
+> [!IMPORTANT]
+> **Compatibility Note:** This example is only compatible with release `v0.11.0` and is not supported in the current version of this repository. It depends on legacy multi-stage foundation assets (`0-bootstrap` through `5-app-infra`) that have been removed from this codebase. To view or run this example with its supporting foundation code, please checkout the `v0.11.0` tag (`git checkout v0.11.0`).
+
 This example demonstrates the process of interactive coding and experimentation using the Google Vertex AI Workbench for data scientists. The guide outlines the creation of a machine learning (ML) pipeline within a notebook on a Google Vertex AI Workbench Instance.
 
 This environment is set up for interactive coding and experimentations. After the project is up, the vertex workbench will be deployed from the base environment module on `/modules/base_env/main.tf` and the data scientists can use it to write their data processing code and pipeline components. In addition, a cloud storage bucket should be deployed to use as the storage for our operations. Optionally, a composer environment can be setup to schedule the pipeline run on intervals.
@@ -26,12 +29,24 @@ The production environment will provide an endpoint in the project which you can
 
 ## Prerequisites
 
-1. 0-bootstrap executed successfully.
-1. 1-org executed successfully.
-1. 2-environments executed successfully.
-1. 3-networks executed successfully.
-1. 4-projects executed successfully.
-1. 5-app-infra executed successfully.
+1. `0-bootstrap` executed successfully.
+1. `1-org` executed successfully.
+1. `2-environments` executed successfully.
+1. `3-networks` executed successfully.
+1. `4-projects` executed successfully.
+1. `5-app-infra` executed successfully.
+1. Ensure your local workspace directory is structured with all foundation repositories and the blueprint cloned side by side at the same level:
+
+```text
+.
+├── terraform-google-enterprise-genai/
+├── gcp-bootstrap/
+├── gcp-org/
+├── gcp-environments/
+├── gcp-networks/
+└── gcp-projects/
+```
+
 1. The step below named `VPC-SC` executed successfully, configuring the VPC-SC rules that allows running the example.
 
 **IMPORTANT**: The steps below are specific if you are deploying via `Cloud Build`. If you are deploying using Local Terraform, skip directly to the `VPC-SC - Infrastructure Deployment with Local Terraform` section.
@@ -604,7 +619,7 @@ The `GITHUB_REMOTE_URI` value can be retrieved by creating a new github reposito
    sed -i "s/REPLACE_WITH_DEV_VPC_PROJECT/${vpc_project}/g" ./modules/base_env/main.tf
    ```
 
-1. Update `intance_owners` variable with you GCP user account email. Replace `INSERT_YOUR_USER_EMAIL_HERE` with your email.
+1. Update `instance_owners` variable with your GCP user account email. Replace `INSERT_YOUR_USER_EMAIL_HERE` with your email.
 
    ```bash
    export user_email="INSERT_YOUR_USER_EMAIL_HERE"
@@ -1245,7 +1260,7 @@ Under `modules/base_env/main.tf` you will notice all module calls are using `git
    sed -i "s/REPLACE_WITH_DEV_VPC_PROJECT/${vpc_project}/g" ./modules/base_env/main.tf
    ```
 
-1. Update `intance_owners` variable with you GCP user account email. Replace `INSERT_YOUR_USER_EMAIL_HERE` with your email.
+1. Update `instance_owners` variable with your GCP user account email. Replace `INSERT_YOUR_USER_EMAIL_HERE` with your email.
 
    ```bash
    export user_email="INSERT_YOUR_USER_EMAIL_HERE"
@@ -1483,7 +1498,7 @@ For the next step, we need to update the nonproduction and production VPC-SC per
     git push origin production
     ```
 
-### VPS-SC with Local Terraform - Only proceed with these if you have not used Cloud Build
+### VPC-SC with Local Terraform - Only proceed with these if you have not used Cloud Build
 
 For the next step, we need to update the nonproduction and production VPC-SC perimeters by adding the service accounts listed below.
 

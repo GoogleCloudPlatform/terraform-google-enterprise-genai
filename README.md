@@ -147,8 +147,9 @@ The repository contains modular components organized under [`modules/`](./module
   - Multimodal RAG by performing Q&A over a financial document filled with both text and images.
   - Use RAGAS for RAG chain evaluation.
 
-- [machine-learning-pipeline](./examples/machine-learning-pipeline)
-  - This example, adds an interactive coding and experimentation, deploying the Vertex Workbench for data scientists.
+- [machine-learning-pipeline](./examples/machine-learning-pipeline) *(Legacy - v0.11.0 only)*
+  - **Note:** This example is only compatible with release `v0.11.0` and depends on legacy foundation assets.
+  - This example adds interactive coding and experimentation, deploying the Vertex Workbench for data scientists.
   - The step will guide you through creating a ML pipeline using a notebook on Google Vertex AI Workbench Instance.
   - After promoting the ML pipeline, it is triggered by Cloud Build upon staging branch merges, trains and deploys a model using the census income dataset.
   - Model deployment and monitoring occur in the `prod` environment.
