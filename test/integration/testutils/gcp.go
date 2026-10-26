@@ -16,18 +16,37 @@ package testutils
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mitchellh/go-testing-interface"
 
 	"github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test/pkg/gcloud"
 )
 
-// GetOrgACMPolicyID gets the Organization Access Context Manager Policy ID
-func GetOrgACMPolicyID(t testing.TB, orgID string) string {
-	filter := fmt.Sprintf("parent:organizations/%s", orgID)
-	id := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter %s --quiet", orgID, filter).Array()
-	if len(id) == 0 {
-		return ""
+// CleanOrgACMPolicyID deletes orphan scoped policies if approaching org quota limit (>= 40)
+func CleanOrgACMPolicyID(t testing.TB, orgID, currentFolder, terraformSA string) {
+	policies := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter=scopes:folders/* --impersonate-service-account %s --quiet", orgID, terraformSA).Array()
+	if len(policies) < 40 {
+		return
 	}
-	return GetLastSplitElement(id[0].Get("name").String(), "/")
+	for _, p := range policies {
+		fID := strings.TrimPrefix(p.Get("scopes.0").String(), "folders/")
+		if fID != currentFolder && fID != "" {
+			_, err := gcloud.RunCmdE(t, fmt.Sprintf("resource-manager folders describe %s --impersonate-service-account %s", fID, terraformSA))
+			if err != nil && (strings.Contains(err.Error(), "NOT_FOUND") || strings.Contains(err.Error(), "404") || strings.Contains(err.Error(), "not found")) {
+				gcloud.RunCmdE(t, fmt.Sprintf("access-context-manager policies delete %s --impersonate-service-account %s --quiet", p.Get("name").String(), terraformSA))
+			}
+		}
+	}
+}
+
+// GetOrgACMPolicyID gets the Organization Access Context Manager Policy ID
+func GetOrgACMPolicyID(t testing.TB, orgID, folderID string) string {
+	policies := gcloud.Runf(t, "access-context-manager policies list --organization %s --filter parent:organizations/%s --quiet", orgID, orgID).Array()
+	for _, p := range policies {
+		if scope := p.Get("scopes.0").String(); scope == "" || scope == "folders/"+folderID {
+			return GetLastSplitElement(p.Get("name").String(), "/")
+		}
+	}
+	return ""
 }

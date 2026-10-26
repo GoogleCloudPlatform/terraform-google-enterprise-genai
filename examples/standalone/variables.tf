@@ -289,6 +289,36 @@ variable "ingress_policies_dry_run" {
   default = []
 }
 
+variable "machine_learning_perimeter" {
+  description = "Existing Machine Learning perimeter to be used instead of the auto-created perimeter. The service account provided in the variable `terraform_service_account` must be in an access level member list for this perimeter **before** this perimeter can be used in this module."
+  type        = string
+  default     = ""
+}
+
+variable "ingress_policies_keys" {
+  description = "A list of keys to use for the Terraform state. The order should correspond to var.ingress_policies and the keys must not be dynamically computed. If `null`, var.ingress_policies will be used as keys."
+  type        = list(string)
+  default     = []
+}
+
+variable "egress_policies_keys" {
+  description = "A list of keys to use for the Terraform state. The order should correspond to var.egress_policies and the keys must not be dynamically computed. If `null`, var.egress_policies will be used as keys."
+  type        = list(string)
+  default     = []
+}
+
+variable "ingress_policies_keys_dry_run" {
+  description = "(Dry-run) A list of keys to use for the Terraform state. The order should correspond to var.ingress_policies_dry_run and the keys must not be dynamically computed. If `null`, var.ingress_policies_dry_run will be used as keys."
+  type        = list(string)
+  default     = []
+}
+
+variable "egress_policies_keys_dry_run" {
+  description = "(Dry-run) A list of keys to use for the Terraform state. The order should correspond to var.egress_policies_dry_run and the keys must not be dynamically computed. If `null`, var.egress_policies_dry_run will be used as keys."
+  type        = list(string)
+  default     = []
+}
+
 variable "vpc_sc_propagation_sleep_duration" {
   description = "The duration to wait for VPC Service Controls propagation (e.g., 60s, 2m)."
   type        = string
