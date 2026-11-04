@@ -34,6 +34,7 @@ dependencies = [
     "opentelemetry-instrumentation-google-genai",
     "opentelemetry-instrumentation-grpc",
     "opentelemetry-instrumentation-fastapi",
+    "tzdata>=2024.1",
 ]
 
 [project.optional-dependencies]
