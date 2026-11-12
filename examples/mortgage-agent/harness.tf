@@ -122,6 +122,22 @@ resource "google_project_iam_member" "aiplatform_re_dns_peer" {
   depends_on = [time_sleep.aiplatform_identity_propagation]
 }
 
+# The Agent Gateway service agent (gcp-sa-agentgateway) needs compute.networkViewer
+# and dns.reader to validate target networks and DNS zones configured for DNS peering.
+resource "google_project_iam_member" "agentgateway_network_viewer" {
+  project    = var.project_id
+  role       = "roles/compute.networkViewer"
+  member     = "serviceAccount:service-${var.project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com"
+  depends_on = [time_sleep.wait_enable_apis]
+}
+
+resource "google_project_iam_member" "agentgateway_dns_reader" {
+  project    = var.project_id
+  role       = "roles/dns.reader"
+  member     = "serviceAccount:service-${var.project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com"
+  depends_on = [time_sleep.wait_enable_apis]
+}
+
 # ==============================================================================
 # STORAGE CONFIGURATION
 # ==============================================================================

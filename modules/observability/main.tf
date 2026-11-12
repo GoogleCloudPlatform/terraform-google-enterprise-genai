@@ -40,7 +40,7 @@ resource "google_monitoring_dashboard" "authorization_debugging" {
 # the authorization debugging dashboard via the official IAM audit_config module.
 module "audit_config" {
   source  = "terraform-google-modules/iam/google//modules/audit_config"
-  version = "~> 8.2"
+  version = "~> 8.3"
 
   project = var.project_id
 
@@ -71,7 +71,7 @@ locals {
 module "log_export" {
   count   = var.enable_logs_sink && var.log_sink_destination != null ? 1 : 0
   source  = "terraform-google-modules/log-export/google"
-  version = "~> 11.0"
+  version = "~> 12.0"
 
   parent_resource_type   = "project"
   parent_resource_id     = var.project_id
@@ -85,7 +85,7 @@ module "log_export" {
 module "custom_log_exports" {
   for_each = var.enable_logs_sink ? var.log_sinks : {}
   source   = "terraform-google-modules/log-export/google"
-  version  = "~> 11.0"
+  version  = "~> 12.0"
 
   parent_resource_type   = "project"
   parent_resource_id     = var.project_id
