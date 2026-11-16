@@ -17,6 +17,7 @@ package mortgage_agent
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -106,6 +107,25 @@ func TestMortgageAgentMCPs(t *testing.T) {
 			deployCmd := fmt.Sprintf("run services replace %s --region %s --project %s --impersonate-service-account %s", outPath, region, projectID, serviceAccount)
 			gcloud.RunCmd(t, deployCmd)
 		}
+
+		// Grant all agents the IAP Egressor role on registered endpoints
+		t.Log("Granting IAP Egressor role to all agents on registered endpoints...")
+		scriptPath := filepath.Join(exampleDir, "scripts", "grant_agent_mcp_egress.sh")
+		projectNumber := standalone.GetStringOutput("project_number")
+		orgID := setupOutput.GetStringOutput("org_id")
+
+		grantCmd := exec.Command(scriptPath, "--bind-all-agents", "--endpoints")
+		grantCmd.Env = append(os.Environ(),
+			fmt.Sprintf("PROJECT_ID=%s", projectID),
+			fmt.Sprintf("PROJECT_NUMBER=%s", projectNumber),
+			fmt.Sprintf("REGION=%s", region),
+			fmt.Sprintf("ORG_ID=%s", orgID),
+			fmt.Sprintf("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=%s", serviceAccount),
+		)
+
+		out, err := grantCmd.CombinedOutput()
+		t.Logf("grant_agent_mcp_egress output:\n%s", string(out))
+		a.NoError(err, fmt.Sprintf("failed to run grant_agent_mcp_egress.sh: %s", string(out)))
 
 		// Validation Phase
 		t.Log("Validating deployed MCP servers...")
