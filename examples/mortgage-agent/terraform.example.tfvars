@@ -20,15 +20,24 @@ org_id = "000000000000" # format "000000000000"
 
 terraform_service_account = "REPLACE_ME"
 
-# IAP Enforcement Mode ("DRY_RUN" or null)
-agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"
+# ==============================================================================
+# Certificate: self-signed (default, no configuration required)
+# ==============================================================================
+# The default uses a private CA generated via Terraform (self-signed) and does
+# not require a public domain.
+# tls_mode = "self_signed"
 
-# TLS mode: "self_signed" (default, uses private CA + Certificate Manager TrustConfig)
-# or "public_ca" (uses Certificate Manager Google-managed cert with DNS-01 validation).
-tls_mode = "self_signed"
-
+# ==============================================================================
+# Certificate: Google public CA with public domain (optional)
+# ==============================================================================
+# Uncomment and fill out the variables below if you want to use a public
+# domain validated via Certificate Manager (DNS-01). Requires a public DNS zone in the project.
+# tls_mode = "public_ca"
 # Public DNS zone domain (must end with a dot). Required only when tls_mode = "public_ca".
 # dns_zone_domain = "REPLACE_ME."
+
+# IAP Enforcement Mode ("DRY_RUN", "ENFORCED" or null)
+agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"
 
 # Optional: skip certificate generation and attach an existing Certificate Manager
 # regional certificate ID in this project/region. Format:
