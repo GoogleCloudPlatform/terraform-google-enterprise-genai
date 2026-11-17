@@ -100,7 +100,7 @@ Grant the following roles to the service account:
 - Certificate Manager Owner/Editor: `roles/certificatemanager.ownerEditor`
 - Cloud Run Admin: `roles/run.admin`
 - Artifact Registry Admin: `roles/artifactregistry.admin`
-- Cloud Build Editor: roles/`cloudbuild.builds.editor`
+- Cloud Build Editor: `roles/cloudbuild.builds.editor`
 - Storage Admin: `roles/storage.admin`
 - Cloud KMS Admin: `roles/cloudkms.admin`
 - Vertex AI Administrator: `roles/aiplatform.admin`
