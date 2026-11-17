@@ -277,9 +277,7 @@ module "agent_gateway" {
 
   dns_peering_config = local.agent_gateway_dns_peering_config_effective
 
-  trust_config_id = local.provided_mcp_ssl_certificate_id != null ? null : try(module.certificates[0].trust_config_id, null)
-
-  depends_on = [time_sleep.wait_enable_apis, module.networking, module.mcp_internal_lb]
+  depends_on = [time_sleep.wait_enable_apis, module.networking, module.mcp_internal_lb, module.networking.mcp_internal_dns_zone, google_project_iam_member.agentgateway_network_viewer, google_project_iam_member.agentgateway_dns_reader]
 }
 
 resource "google_dns_record_set" "mcp_service" {
