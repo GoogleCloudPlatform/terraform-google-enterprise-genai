@@ -72,19 +72,6 @@ resource "google_compute_firewall" "agent_gateway_psc_i" {
   }
 }
 
-
-resource "google_project_iam_member" "agent_gateway_network_viewer" {
-  for_each = toset([
-    "roles/compute.networkViewer",
-    "roles/compute.networkUser",
-    "roles/dns.admin",
-  ])
-
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:service-${var.project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com"
-}
-
 resource "google_network_services_agent_connectivity_template" "this" {
   project                        = var.project_id
   agent_connectivity_template_id = "${var.name}-conn-template"
@@ -114,7 +101,6 @@ resource "google_network_services_agent_connectivity_template" "this" {
 
   depends_on = [
     google_compute_network_attachment.agent_gateway,
-    google_project_iam_member.agent_gateway_network_viewer
   ]
 }
 
