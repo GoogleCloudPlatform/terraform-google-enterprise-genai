@@ -63,12 +63,6 @@ func TestMortgageAgentInfra(t *testing.T) {
 			"income-verification": "src/income-verification-api/toolspec.json",
 		},
 		"agent_gateway_iap_iam_enforcement_mode": "DRY_RUN",
-		"enable_model_armor":                     false, // Set to true only when using a real domain with certificate
-		"enable_model_armor_mcp_floor_setting":   false,
-		"model_armor_request_template_id":        "agw-req-" + random,
-		"model_armor_response_template_id":       "agw-resp-" + random,
-		"model_armor_inspect_template_id":        "agw-insp-" + random,
-		"model_armor_deidentify_template_id":     "agw-deid-" + random,
 	}
 
 	mortgage := tft.NewTFBlueprintTest(t,
