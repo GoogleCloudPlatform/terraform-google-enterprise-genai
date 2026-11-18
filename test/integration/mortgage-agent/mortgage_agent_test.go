@@ -29,13 +29,6 @@ import (
 )
 
 func TestMortgageAgentInfra(t *testing.T) {
-
-	temp := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../examples/mortgage-agent"),
-	)
-
-	random := temp.GetTFSetupStringOutput("random")
-
 	vars := map[string]interface{}{
 		"kms_prevent_destroy":  false,
 		"bucket_force_destroy": true,
