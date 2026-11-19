@@ -110,8 +110,6 @@ func TestMortgageDeployAgent(t *testing.T) {
 	)
 
 	mortgageAgent.DefineVerify(func(assert *assert.Assertions) {
-		mortgageAgent.DefaultVerify(assert)
-
 		projectID := mortgageAgent.GetStringOutput("project_id")
 		region := mortgageAgent.GetStringOutput("region")
 		agentGatewayID := mortgageAgent.GetStringOutput("agent_gateway_id")

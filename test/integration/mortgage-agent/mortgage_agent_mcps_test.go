@@ -64,7 +64,8 @@ func TestMortgageAgentMCPs(t *testing.T) {
 		region := standalone.GetStringOutput("region")
 		cloudbuildBucket := standalone.GetStringOutput("cloudbuild_bucket")
 		mcpIngress := standalone.GetStringOutput("mcp_cloud_run_ingress_annotation")
-		domainName := standalone.GetStringOutput("mcp_internal_dns_domain")
+		rawDomain := standalone.GetStringOutput("mcp_internal_dns_domain")
+		domainName := strings.TrimPrefix(strings.TrimSuffix(rawDomain, "."), "mcp.")
 
 		tmpDir := t.TempDir()
 
