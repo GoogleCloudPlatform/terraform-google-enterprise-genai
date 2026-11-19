@@ -130,11 +130,12 @@ resource "google_compute_firewall" "psc_interface_allow" {
 # Agent Gateway — dedicated regular subnet that hosts both the Agent Gateway
 # PSC-Interface network attachment and the relocated MCP internal LB VIP.
 resource "google_compute_subnetwork" "agent_gateway" {
-  project       = var.project_id
-  name          = "${var.name_prefix}-agent-gateway-subnet"
-  region        = var.region
-  network       = module.vpc.network_self_link
-  ip_cidr_range = var.agent_gateway_subnet_cidr
+  project                  = var.project_id
+  name                     = "${var.name_prefix}-agent-gateway-subnet"
+  region                   = var.region
+  network                  = module.vpc.network_self_link
+  ip_cidr_range            = var.agent_gateway_subnet_cidr
+  private_ip_google_access = true
 }
 
 # PSC Interface — private DNS zone for DNS peering (only if different from MCP zone)

@@ -20,26 +20,36 @@ org_id = "000000000000" # format "000000000000"
 
 terraform_service_account = "REPLACE_ME"
 
-# IAP Enforcement Mode ("DRY_RUN" or null)
+# ==============================================================================
+# Certificate: self-signed (default, no configuration required)
+# ==============================================================================
+# The default uses a private CA generated via Terraform (self-signed) and does
+# not require a public domain.
+# tls_mode = "self_signed"
+
+# ==============================================================================
+# Certificate: Google public CA with public domain (optional)
+# ==============================================================================
+# Uncomment and fill out the variables below if you want to use a public
+# domain validated via Certificate Manager (DNS-01). Requires a public DNS zone in the project.
+# tls_mode = "public_ca"
+# Public DNS zone domain (must end with a dot). Required only when tls_mode = "public_ca".
+# dns_zone_domain = "REPLACE_ME."
+
+# IAP Enforcement Mode ("DRY_RUN", "ENFORCED" or null)
 agent_gateway_iap_iam_enforcement_mode = "DRY_RUN"
 
-# Public DNS zone domain (must end with a dot). Still required when attaching
-# a Google-provided cert so MCP hostnames match the cert SANs
-# (mcp.<dns_zone_domain> / *.mcp.<dns_zone_domain>).
-dns_zone_domain = "REPLACE_ME."
-
-# Optional: skip Certificate Manager issuance and attach a cert Google already
-# created in this project/region. Format:
+# Optional: skip certificate generation and attach an existing Certificate Manager
+# regional certificate ID in this project/region. Format:
 # projects/PROJECT/locations/REGION/certificates/NAME
 # mcp_ssl_certificate_id = "projects/YOUR_PROJECT_ID/locations/us-central1/certificates/REPLACE_ME"
 
-# `domain` MUST be a real subdomain of dns_zone_domain (e.g.
-# "mcp.${dns_zone_domain}") so Certificate Manager can issue a Google-managed
-# regional cert. Agent Gateway does not currently validate self-signed certs,
-# so values like "mcp-server.internal."
+# Private DNS zone hosting <service>.<domain> A records for the MCP Cloud Run services.
+# When tls_mode = "self_signed", use an internal domain (e.g., "mcp.mortgage.internal.").
+# When tls_mode = "public_ca", domain MUST be a subdomain of dns_zone_domain (e.g. "mcp.${dns_zone_domain}").
 mcp_internal_dns_zone = {
   name   = "mcp-server-internal"
-  domain = "mcp.REPLACE_ME."
+  domain = "mcp.mortgage.internal."
 }
 
 # MCP services: key = Cloud Run service name + URL-mask token (DNS A record auto-created).

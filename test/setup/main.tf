@@ -83,13 +83,3 @@ module "project" {
     },
   ]
 }
-
-resource "google_dns_managed_zone" "public_zone" {
-  count = try(length(var.dns_zone_domain), 0) == 0 ? 1 : 0
-
-  project     = module.project.project_id
-  name        = "dns-zone-${random_string.suffix.result}-com"
-  dns_name    = "dns-zone-${random_string.suffix.result}.com."
-  description = "Public Zone for domain."
-  visibility  = "public"
-}

@@ -45,12 +45,6 @@ variable "terraform_service_account" {
   type        = string
 }
 
-variable "project_deletion_policy" {
-  description = "Project deletion policy. Possible values are: \"PREVENT\", \"ABANDON\", \"DELETE\"."
-  type        = string
-  default     = "DELETE"
-}
-
 variable "enabled_services" {
   description = "List of Google Cloud APIs to enable"
   type        = list(string)
@@ -91,7 +85,6 @@ variable "enabled_services" {
     "telemetry.googleapis.com",
     "apphub.googleapis.com",
     "agentregistry.googleapis.com",
-    "cloudkms.googleapis.com",
   ]
 }
 
@@ -153,10 +146,30 @@ variable "psc_subnet_cidr" {
 }
 
 # ==============================================================================
-# DNS
+# CERTIFICATES & TLS
 # ==============================================================================
+variable "tls_mode" {
+  description = "TLS certificate provisioning mode: 'self_signed' (default, uses private CA + TrustConfig) or 'public_ca' (uses Certificate Manager + DNS-01 authorizations with public domain)."
+  type        = string
+  default     = "self_signed"
+  validation {
+    condition     = contains(["self_signed", "public_ca"], var.tls_mode)
+    error_message = "tls_mode must be either 'self_signed' or 'public_ca'."
+  }
+}
+
+variable "mcp_dns_names" {
+  description = "List of domains (SAN) for the TLS certificate of the MCP servers when tls_mode = 'self_signed'"
+  type        = list(string)
+  default = [
+    "mcp.mortgage.internal",
+    "*.mcp.mortgage.internal",
+    "*.mortgage.internal"
+  ]
+}
+
 variable "dns_zone_domain" {
-  description = "The domain name for the public DNS zone (must end with a dot, e.g., 'example.com.'). Certificate Manager validates the MCP LB cert against this zone."
+  description = "The domain name for the public DNS zone (must end with a dot, e.g., 'example.com.'). Required when tls_mode = 'public_ca'."
   type        = string
   default     = null
 }
@@ -170,18 +183,8 @@ variable "dns_zone_name" {
 variable "mcp_ssl_certificate_id" {
   description = <<-EOT
     Optional existing Certificate Manager regional certificate ID to attach to
-    the MCP internal HTTPS LB (same project and region as the LB).
-
-    Leave null/empty to issue a Google-managed cert via DNS-01 against
-    dns_zone_domain (requires a delegated public Cloud DNS zone and
-    dns_zone_name). When set, issuance and DNS-01 records are skipped.
-
-    Format:
-      projects/<project>/locations/<region>/certificates/<name>
-
-    In both modes the cert must be a public CA and cover mcp.<dns_zone_domain>
-    and *.mcp.<dns_zone_domain>. dns_zone_domain is always required so private
-    MCP hostnames match those SANs.
+    the MCP internal HTTPS LB (same project and region as the LB). When set, certificate
+    generation in module.certificates is bypassed.
   EOT
   type        = string
   default     = null
@@ -204,10 +207,9 @@ variable "mcp_internal_dns_zone" {
     name   = optional(string, "mcp-server-internal")
     domain = string
   })
-  default = null
-  validation {
-    condition     = var.mcp_internal_dns_zone == null || endswith(var.mcp_internal_dns_zone.domain, ".")
-    error_message = "mcp_internal_dns_zone.domain must end with a trailing dot (e.g. \"mcp.example.com.\")."
+  default = {
+    name   = "mcp-server-internal"
+    domain = "mcp.mortgage.internal."
   }
 }
 
@@ -253,7 +255,7 @@ variable "mcp_lb_protocol" {
 variable "enable_model_armor" {
   description = "Enable Model Armor template and IAM bindings"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "model_armor_request_template_id" {

@@ -29,20 +29,12 @@ import (
 )
 
 func TestMortgageAgentInfra(t *testing.T) {
-
-	temp := tft.NewTFBlueprintTest(t,
-		tft.WithTFDir("../../../examples/mortgage-agent"),
-	)
-
-	random := temp.GetTFSetupStringOutput("random")
-	dns_zone_domain := temp.GetTFSetupStringOutput("dns_zone_domain")
-
 	vars := map[string]interface{}{
 		"kms_prevent_destroy":  false,
 		"bucket_force_destroy": true,
 		"mcp_internal_dns_zone": map[string]interface{}{
 			"name":   "mcp-server-internal",
-			"domain": "mcp." + dns_zone_domain,
+			"domain": "mcp.mortgage.internal.",
 		},
 		"mcp_services": map[string]interface{}{
 			"legacy-dms": map[string]interface{}{
@@ -64,12 +56,6 @@ func TestMortgageAgentInfra(t *testing.T) {
 			"income-verification": "src/income-verification-api/toolspec.json",
 		},
 		"agent_gateway_iap_iam_enforcement_mode": "DRY_RUN",
-		"enable_model_armor":                     false, // Set to true only when using a real domain with certificate
-		"enable_model_armor_mcp_floor_setting":   false,
-		"model_armor_request_template_id":        "agw-req-" + random,
-		"model_armor_response_template_id":       "agw-resp-" + random,
-		"model_armor_inspect_template_id":        "agw-insp-" + random,
-		"model_armor_deidentify_template_id":     "agw-deid-" + random,
 	}
 
 	mortgage := tft.NewTFBlueprintTest(t,
@@ -168,10 +154,11 @@ func TestMortgageAgentInfra(t *testing.T) {
 		a.Equal("DOCKER", repo.Get("format").String(), "Artifact Registry format should be DOCKER")
 
 		// Certificates
-		certName := mortgage.GetStringOutput("regional_certificate_name")
-		cleanCertName := testutils.GetLastSplitElement(certName, "/")
-		cert := gcloud.Runf(t, "certificate-manager certificates describe %s --location %s --project %s --impersonate-service-account %s", cleanCertName, region, projectID, terraformSA)
-		a.Equal(cleanCertName, testutils.GetLastSplitElement(cert.Get("name").String(), "/"), "Certificate should exist")
+		certID := mortgage.GetStringOutput("mcp_ssl_certificate_id")
+		a.NotEmpty(certID, "SSL Certificate ID should not be empty")
+
+		trustConfigID := mortgage.GetStringOutput("agent_gateway_trust_config_id")
+		a.NotEmpty(trustConfigID, "Trust Config ID should not be empty")
 
 		// Agent Gateway & Registry Endpoints
 		agentGatewayID := mortgage.GetStringOutput("agent_gateway_id")

@@ -148,14 +148,19 @@ output "artifact_registry_url" {
 
 # Certificate Outputs
 
-output "regional_certificate_name" {
-  description = "Name or ID of the regional certificate used by the MCP Load Balancer."
-  value       = local.provided_mcp_ssl_certificate_id != null ? local.provided_mcp_ssl_certificate_id : module.certificates.regional_certificate_name
+output "mcp_ssl_certificate_id" {
+  description = "Certificate ID attached to the MCP internal HTTPS LB."
+  value       = local.provided_mcp_ssl_certificate_id != null ? local.provided_mcp_ssl_certificate_id : try(module.certificates[0].ssl_certificate_id, null)
 }
 
-output "mcp_ssl_certificate_id" {
-  description = "Certificate Manager certificate ID attached to the MCP internal HTTPS LB (provided or issued)."
-  value       = local.provided_mcp_ssl_certificate_id != null ? local.provided_mcp_ssl_certificate_id : module.certificates.internal_certificate_id
+output "agent_gateway_trust_config_id" {
+  description = "Certificate Manager TrustConfig ID used by Agent Gateway (null if public_ca mode or custom cert)."
+  value       = try(module.certificates[0].trust_config_id, null)
+}
+
+output "regional_certificate_name" {
+  description = "Name or ID of the regional certificate used by the MCP Load Balancer."
+  value       = local.provided_mcp_ssl_certificate_id != null ? local.provided_mcp_ssl_certificate_id : try(module.certificates[0].regional_certificate_name, null)
 }
 
 # Model Armor Outputs
