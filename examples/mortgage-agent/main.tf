@@ -101,10 +101,24 @@ resource "google_storage_bucket_iam_member" "cloudbuild_compute_sa" {
   depends_on = [time_sleep.wait_enable_apis]
 }
 
+resource "google_storage_bucket_iam_member" "cloudbuild_sa" {
+  bucket = google_storage_bucket.cloudbuild.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
+
+  depends_on = [time_sleep.wait_enable_apis]
+}
+
 resource "google_project_iam_member" "cloudbuild_registry" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
   member  = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "cloudbuild_sa_registry" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
 }
 
 resource "google_storage_bucket_iam_member" "cloudbuild_service_agent" {
