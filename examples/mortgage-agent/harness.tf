@@ -21,6 +21,10 @@ locals {
   terraform_sa_project_roles = [
     "roles/storage.admin",
     "roles/cloudkms.admin",
+    "roles/serviceusage.serviceUsageConsumer",
+    "roles/cloudbuild.builds.editor",
+    "roles/run.admin",
+    "roles/artifactregistry.writer",
   ]
 }
 

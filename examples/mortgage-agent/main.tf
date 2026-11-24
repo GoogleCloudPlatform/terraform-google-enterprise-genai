@@ -97,6 +97,8 @@ resource "google_storage_bucket_iam_member" "cloudbuild_compute_sa" {
   bucket = google_storage_bucket.cloudbuild.name
   role   = "roles/storage.admin"
   member = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+
+  depends_on = [time_sleep.wait_enable_apis]
 }
 
 resource "google_project_iam_member" "cloudbuild_registry" {

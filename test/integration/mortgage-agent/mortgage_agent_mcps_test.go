@@ -82,7 +82,7 @@ func TestMortgageAgentMCPs(t *testing.T) {
 			image := fmt.Sprintf("%s-docker.pkg.dev/%s/gateway-docker/%s:latest", region, projectID, svc.fileName)
 			t.Logf("Building image %s from %s...", image, srcPath)
 
-			buildCmd := fmt.Sprintf("builds submit %s --tag %s --gcs-source-staging-dir gs://%s/source --gcs-log-dir=gs://%s/logs --project %s", srcPath, image, cloudbuildBucket, cloudbuildBucket, projectID)
+			buildCmd := fmt.Sprintf("builds submit %s --tag %s --gcs-source-staging-dir gs://%s/source --gcs-log-dir=gs://%s/logs --project %s --impersonate-service-account %s", srcPath, image, cloudbuildBucket, cloudbuildBucket, projectID, serviceAccount)
 			gcloud.RunCmd(t, buildCmd)
 
 			// Render YAML
