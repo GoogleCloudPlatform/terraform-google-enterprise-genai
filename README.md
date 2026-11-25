@@ -138,6 +138,7 @@ The repository contains modular components organized under [`modules/`](./module
   - Configures Agent Gateway in egress mode to enforce identity-based access control (IAM/IAP) and policy routing.
   - Integrates Model Armor AI security guardrails via Service Extensions to screen interactions against prompt injection and sensitive data leakage.
   - Includes centralized Agent Observability dashboards backed by Log Analytics for tracing and auditing agent traffic.
+  - For deployment on top of the enterprise baseline, see the [Deploying Mortgage Agent on Foundation (v8.0.0)](./docs/deploying-mortgage-agent-on-foundation-v8.md) guide and the [Foundation Integration & Segregation of Responsibilities Analysis](./docs/foundation-integration-and-segregation-analysis.md).
 
 - [standalone](./examples/standalone)
   - Creates all required projects and resources through the `harness` configuration.
