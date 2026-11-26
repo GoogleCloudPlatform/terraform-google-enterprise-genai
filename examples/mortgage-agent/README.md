@@ -452,7 +452,7 @@ If you followed the optional step to move your state to GCS, follow these steps 
 | model\_armor\_vertex\_ai\_cloud\_logging | Enable Cloud Logging for Vertex AI Model Armor sanitization | `bool` | `true` | no |
 | model\_armor\_vertex\_ai\_inspect\_only | When true, Vertex AI uses INSPECT\_ONLY mode; when false, uses INSPECT\_AND\_BLOCK | `bool` | `false` | no |
 | name\_prefix | Prefix for resource names | `string` | `"gateway"` | no |
-| org\_id | GCP organization ID (numeric). Required for Agent Identity IAM bindings. | `string` | `null` | no |
+| org\_id | GCP organization ID (numeric). Required for Agent Identity IAM bindings. | `string` | n/a | yes |
 | primary\_subnet\_cidr | CIDR range for the primary subnet | `string` | `"10.0.0.0/20"` | no |
 | project\_id | The GCP project ID | `string` | n/a | yes |
 | project\_number | The numeric identifier (e.g., 123456789012) of the Google Cloud project. | `string` | n/a | yes |

@@ -37,7 +37,6 @@ variable "name_prefix" {
 variable "org_id" {
   description = "GCP organization ID (numeric). Required for Agent Identity IAM bindings."
   type        = string
-  default     = null
 }
 
 variable "terraform_service_account" {
