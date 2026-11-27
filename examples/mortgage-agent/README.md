@@ -2,6 +2,9 @@
 
 ## Overview
 
+> [!NOTE]
+> If you are deploying this example on top of the **Terraform Example Foundation (v8.0.0 / v7.0.0+)** with **Network Connectivity Center (NCC)**, **VPC Service Controls (VPC-SC)**, and Foundation CI/CD pipelines, follow the step-by-step [Deploying Mortgage Agent on Foundation (v8.0.0)](../../docs/deploying-mortgage-agent-on-foundation-v8.md) guide.
+
 Gemini Enterprise Agent Platform is an open platform for building, scaling, governing, and optimizing enterprise-grade AI agents grounded in your data.
 
 Agent Runtime provides the managed execution environment for running agents, such as those built with the open-source [Agent Development Kit (ADK)](https://google.github.io/adk-docs/) securely within Google Cloud.
@@ -93,7 +96,7 @@ Grant the following roles to the service account:
 - Network Services Admin: `roles/networkservices.admin`
 - Network Security Admin: `roles/networksecurity.admin`
 - DNS Administrator: `roles/dns.admin`
-- Certificate Manager Owner/Editor: `roles/certificatemanager.ownerEditor`
+- Certificate Manager Owner: `roles/certificatemanager.owner`
 - Cloud Run Admin: `roles/run.admin`
 - Artifact Registry Admin: `roles/artifactregistry.admin`
 - Cloud Build Editor: roles/`cloudbuild.builds.editor`
