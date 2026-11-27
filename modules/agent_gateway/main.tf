@@ -13,7 +13,13 @@
 # limitations under the License.
 
 locals {
-  registry_uri = "//agentregistry.googleapis.com/projects/${var.project_id}/locations/${var.region}"
+  registry_uri                 = "//agentregistry.googleapis.com/projects/${var.project_id}/locations/${var.region}"
+  service_extensions_sa_member = "serviceAccount:${google_network_services_agent_gateway.this.agent_gateway_card[0].service_extensions_service_account}"
+  model_armor_sa_roles = var.enable_model_armor ? [
+    "roles/modelarmor.calloutUser",
+    "roles/serviceusage.serviceUsageConsumer",
+    "roles/modelarmor.user",
+  ] : []
 }
 
 # PSC-Interface network attachment in the dedicated co-location subnet. This is
@@ -66,6 +72,38 @@ resource "google_compute_firewall" "agent_gateway_psc_i" {
   }
 }
 
+resource "google_network_services_agent_connectivity_template" "this" {
+  project                        = var.project_id
+  agent_connectivity_template_id = "${var.name}-conn-template"
+  location                       = var.region
+  access_path                    = "AGENT_TO_ANYWHERE"
+
+  egress_network_config {
+    network_attachment = google_compute_network_attachment.agent_gateway.id
+    vpc_egress         = "PRIVATE_RANGES_ONLY"
+
+    dynamic "dns_peering_config" {
+      for_each = var.dns_peering_config != null ? [var.dns_peering_config] : []
+      content {
+        domain         = dns_peering_config.value.domains[0]
+        target_network = dns_peering_config.value.target_network
+      }
+    }
+
+    dynamic "tls_config" {
+      for_each = var.trust_config_id != null ? [var.trust_config_id] : []
+      content {
+        trust_config     = tls_config.value
+        additional_roots = "PUBLICLY_TRUSTED_ROOTS"
+      }
+    }
+  }
+
+  depends_on = [
+    google_compute_network_attachment.agent_gateway,
+  ]
+}
+
 # The Agent Gateway itself. Google-managed, AGENT_TO_ANYWHERE.
 resource "google_network_services_agent_gateway" "this" {
   project  = var.project_id
@@ -78,21 +116,7 @@ resource "google_network_services_agent_gateway" "this" {
 
   registries = [local.registry_uri]
 
-  network_config {
-    egress {
-      network_attachment = google_compute_network_attachment.agent_gateway.id
-    }
-
-    dynamic "dns_peering_config" {
-      for_each = try(length(var.dns_peering_config.domains), 0) > 0 ? [var.dns_peering_config] : []
-      content {
-        domains        = dns_peering_config.value.domains
-        target_project = dns_peering_config.value.target_project
-        target_network = trimprefix(dns_peering_config.value.target_network, "https://www.googleapis.com/compute/v1/"
-        )
-      }
-    }
-  }
+  agent_connectivity_template = "projects/${var.project_number}/locations/${var.region}/agentConnectivityTemplates/${google_network_services_agent_connectivity_template.this.agent_connectivity_template_id}"
 }
 
 resource "time_sleep" "wait_for_gateway" {
@@ -132,8 +156,8 @@ resource "google_network_services_authz_extension" "model_armor" {
 
   metadata = {
     "model_armor_settings" = jsonencode([{
-      request_template_id  = "projects/${var.project_id}/locations/${var.region}/templates/${var.model_armor_request_template_id}"
-      response_template_id = "projects/${var.project_id}/locations/${var.region}/templates/${var.model_armor_response_template_id}"
+      request_template_id  = "projects/${var.project_number}/locations/${var.region}/templates/${var.model_armor_request_template_id}"
+      response_template_id = "projects/${var.project_number}/locations/${var.region}/templates/${var.model_armor_response_template_id}"
     }])
   }
 
@@ -145,6 +169,15 @@ resource "google_network_services_authz_extension" "model_armor" {
       error_message = "Both model_armor_request_template_id and model_armor_response_template_id are required when enable_model_armor is true."
     }
   }
+}
+
+resource "time_sleep" "wait_model_armor_iam" {
+  count           = var.enable_model_armor ? 1 : 0
+  create_duration = "30s"
+
+  depends_on = [
+    google_project_iam_member.service_extensions_sa
+  ]
 }
 
 resource "google_network_security_authz_policy" "iap" {
@@ -205,17 +238,11 @@ resource "google_network_security_authz_policy" "model_armor" {
     }
   }
 
-  depends_on = [time_sleep.wait_for_gateway, google_network_security_authz_policy.iap]
-}
-
-locals {
-  service_extensions_sa_member = "serviceAccount:${google_network_services_agent_gateway.this.agent_gateway_card[0].service_extensions_service_account}"
-
-  model_armor_sa_roles = var.enable_model_armor ? [
-    "roles/modelarmor.calloutUser",
-    "roles/serviceusage.serviceUsageConsumer",
-    "roles/modelarmor.user",
-  ] : []
+  depends_on = [
+    time_sleep.wait_for_gateway,
+    google_network_security_authz_policy.iap,
+    time_sleep.wait_model_armor_iam
+  ]
 }
 
 resource "google_project_iam_member" "service_extensions_sa" {

@@ -22,8 +22,54 @@ variable "region" {
   type        = string
 }
 
+variable "name_prefix" {
+  description = "Prefix for certificate resource names"
+  type        = string
+  default     = "mcp"
+}
+
+variable "tls_mode" {
+  description = "TLS certificate provisioning mode: 'self_signed' (default, uses private CA + TrustConfig) or 'public_ca' (uses Certificate Manager + DNS-01 authorizations with public domain)."
+  type        = string
+  default     = "self_signed"
+  validation {
+    condition     = contains(["self_signed", "public_ca"], var.tls_mode)
+    error_message = "tls_mode must be either 'self_signed' or 'public_ca'."
+  }
+}
+
+# ------------------------------------------------------------------------------
+# Self-Signed Mode Configurations
+# ------------------------------------------------------------------------------
+variable "ca_common_name" {
+  description = "Common Name (CN) for the self-signed Root CA"
+  type        = string
+  default     = "Enterprise MCP Root CA"
+}
+
+variable "mcp_dns_names" {
+  description = "List of DNS Subject Alternative Names (SANs) for the self-signed MCP server certificate"
+  type        = list(string)
+  default     = []
+}
+
+variable "ca_validity_period_hours" {
+  description = "Validity period in hours for the self-signed Root CA (default 10 years)"
+  type        = number
+  default     = 87600
+}
+
+variable "validity_period_hours" {
+  description = "Validity period in hours for the MCP server certificate (default ~397 days)"
+  type        = number
+  default     = 9528
+}
+
+# ------------------------------------------------------------------------------
+# Public CA (Certificate Manager) Configurations
+# ------------------------------------------------------------------------------
 variable "dns_zone_domain" {
-  description = "DNS zone domain (must end with dot, e.g., 'example.com.'). Set to null to skip certificate creation."
+  description = "DNS zone domain (must end with dot, e.g., 'example.com.'). Required when tls_mode = 'public_ca'."
   type        = string
   default     = null
   validation {
@@ -38,7 +84,6 @@ variable "labels" {
   default     = {}
 }
 
-# Regional Certificate Configuration
 variable "regional_certificate_name" {
   description = "Name for the regional certificate (public domain)"
   type        = string

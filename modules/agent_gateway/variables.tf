@@ -17,6 +17,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "project_number" {
+  description = "GCP project number hosting the Agent Gateway, registry IAM, and authz extensions"
+  type        = string
+}
+
 variable "region" {
   description = "Region for the Agent Gateway, agent registry, network attachment, authz extensions, and authz policies. The regional Model Armor endpoint is derived from this."
   type        = string
@@ -109,4 +114,10 @@ variable "dns_peering_config" {
     condition     = var.dns_peering_config == null || alltrue([for d in coalesce(var.dns_peering_config.domains, []) : endswith(d, ".")])
     error_message = "Every entry in dns_peering_config.domains must end with a trailing dot (e.g. \"mcp.agent-gateway.sc-ccn.xyz.\")."
   }
+}
+
+variable "trust_config_id" {
+  description = "ID do Certificate Manager TrustConfig para ancoragem de CAs privadas no handshake TLS do gateway"
+  type        = string
+  default     = null
 }

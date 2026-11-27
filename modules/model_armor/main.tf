@@ -150,7 +150,7 @@ resource "google_project_iam_member" "vertex_ai_model_armor_user" {
 module "request_template" {
   count   = var.enable_model_armor ? 1 : 0
   source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 7.3"
+  version = "~> 9.0"
 
   project_id  = var.project_id
   location    = var.region
@@ -180,7 +180,7 @@ module "request_template" {
 module "response_template" {
   count   = var.enable_model_armor ? 1 : 0
   source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-template"
-  version = "~> 7.3"
+  version = "~> 9.0"
 
   project_id  = var.project_id
   location    = var.region
@@ -223,7 +223,7 @@ module "response_template" {
 module "mcp_floor_setting" {
   count   = var.enable_model_armor && (var.enable_mcp_floor_setting || var.enable_vertex_ai_integration) ? 1 : 0
   source  = "GoogleCloudPlatform/vertex-ai/google//modules/model-armor-floorsetting"
-  version = "~> 7.3"
+  version = "~> 9.0"
 
   project_id = var.project_id
 
@@ -257,14 +257,4 @@ module "mcp_floor_setting" {
     google_project_iam_member.model_armor_admin,
     google_project_iam_member.model_armor_floor_settings_admin,
   ]
-}
-
-resource "null_resource" "mcp_content_security" {
-  count = var.enable_model_armor && var.enable_mcp_floor_setting ? 1 : 0
-
-  provisioner "local-exec" {
-    command = "gcloud beta services mcp content-security add modelarmor.googleapis.com --project=${var.project_id}"
-  }
-
-  depends_on = [module.mcp_floor_setting]
 }

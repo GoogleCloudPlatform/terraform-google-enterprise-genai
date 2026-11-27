@@ -86,7 +86,8 @@ resource "google_compute_region_target_https_proxy" "mcp" {
   name                             = "${local.lb_name}-https-proxy"
   region                           = var.region
   url_map                          = google_compute_region_url_map.mcp.id
-  certificate_manager_certificates = [var.ssl_certificate_id]
+  ssl_certificates                 = (can(regex("locations/", var.ssl_certificate_id)) || can(regex("certificatemanager", var.ssl_certificate_id)) ? null : [var.ssl_certificate_id])
+  certificate_manager_certificates = (can(regex("locations/", var.ssl_certificate_id)) || can(regex("certificatemanager", var.ssl_certificate_id)) ? [var.ssl_certificate_id] : null)
 }
 
 # Subnet READY != regional Envoy ready. NEG/backend/urlmap/proxy still create

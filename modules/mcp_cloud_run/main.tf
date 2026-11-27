@@ -142,3 +142,10 @@ resource "google_cloud_run_v2_service_iam_member" "agent_invoker" {
   role     = "roles/run.invoker"
   member   = "serviceAccount:${var.invoker_sa_email}"
 }
+
+# resource "google_service_account_iam_member" "cloud_run_sa_token_creator" {
+#   for_each           = var.services
+#   service_account_id = google_service_account.mcp[each.key].name
+#   role               = "roles/iam.serviceAccountTokenCreator"
+#   member             = "serviceAccount:service-${var.project_number}@serverless-robot-prod.iam.gserviceaccount.com"
+# }
